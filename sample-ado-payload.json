@@ -1,0 +1,542 @@
+{
+  "metadata": {
+    "organization": "https://dev.azure.com/mobily-org",
+    "project": "Mobily-BSS-Transform",
+    "areaPath": "Mobily-BSS-Transform\\Delivery",
+    "iterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+    "generatedAt": "2025-01-15T10:30:00.000Z",
+    "version": "1.0",
+    "description": "ADO Integration Payload for Mobily BSS Transformation Project"
+  },
+  "workItems": [
+    {
+      "type": "epic",
+      "title": "Mobily BSS Transformation",
+      "description": "End-to-end BSS transformation including CRM, Billing, Order Management, and Integration services for Mobily's digital transformation initiative.",
+      "businessValue": "High",
+      "risk": "Medium",
+      "areaPath": "Mobily-BSS-Transform\\Delivery",
+      "iterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+      "tags": ["BSS-Transformation", "Epic", "consumer"],
+      "fields": {
+        "System.Title": "Mobily BSS Transformation",
+        "System.Description": "End-to-end BSS transformation including CRM, Billing, Order Management, and Integration services for Mobily's digital transformation initiative.",
+        "Microsoft.VSTS.Common.BusinessValue": 1000,
+        "Microsoft.VSTS.Common.Risk": "Medium",
+        "System.AreaPath": "Mobily-BSS-Transform\\Delivery",
+        "System.IterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+        "System.Tags": "BSS-Transformation;Epic;consumer"
+      }
+    },
+    {
+      "type": "feature",
+      "title": "Solution Design & Estimation",
+      "description": "Feature for Solution Design & Estimation service delivery",
+      "businessValue": "High",
+      "acceptanceCriteria": "Solution Design & Estimation service specification completed and approved",
+      "areaPath": "Mobily-BSS-Transform\\Delivery",
+      "iterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+      "tags": ["CFS", "Service", "Presales"],
+      "fields": {
+        "System.Title": "Solution Design & Estimation",
+        "System.Description": "Feature for Solution Design & Estimation service delivery",
+        "Microsoft.VSTS.Common.BusinessValue": 800,
+        "Microsoft.VSTS.Common.AcceptanceCriteria": "Solution Design & Estimation service specification completed and approved",
+        "System.AreaPath": "Mobily-BSS-Transform\\Delivery",
+        "System.IterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+        "System.Tags": "CFS;Service;Presales",
+        "Custom.ServiceType": "cfs",
+        "Custom.ServicePhase": "Presales",
+        "Custom.Effort": "5 PD",
+        "Custom.Cost": "$25,000"
+      }
+    },
+    {
+      "type": "feature",
+      "title": "Commercial Model & Pricing",
+      "description": "Feature for Commercial Model & Pricing service delivery",
+      "businessValue": "High",
+      "acceptanceCriteria": "Commercial Model & Pricing service specification completed and approved",
+      "areaPath": "Mobily-BSS-Transform\\Delivery",
+      "iterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+      "tags": ["CFS", "Service", "Presales"],
+      "fields": {
+        "System.Title": "Commercial Model & Pricing",
+        "System.Description": "Feature for Commercial Model & Pricing service delivery",
+        "Microsoft.VSTS.Common.BusinessValue": 800,
+        "Microsoft.VSTS.Common.AcceptanceCriteria": "Commercial Model & Pricing service specification completed and approved",
+        "System.AreaPath": "Mobily-BSS-Transform\\Delivery",
+        "System.IterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+        "System.Tags": "CFS;Service;Presales",
+        "Custom.ServiceType": "cfs",
+        "Custom.ServicePhase": "Presales",
+        "Custom.Effort": "3 PD",
+        "Custom.Cost": "$15,000"
+      }
+    },
+    {
+      "type": "userstory",
+      "title": "Architecture & Design Delivery",
+      "description": "User story for Architecture & Design delivery",
+      "storyPoints": 32,
+      "acceptanceCriteria": "Architecture & Design delivered according to specification",
+      "areaPath": "Mobily-BSS-Transform\\Delivery",
+      "iterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+      "tags": ["RFS", "Service", "Design"],
+      "fields": {
+        "System.Title": "Architecture & Design Delivery",
+        "System.Description": "User story for Architecture & Design delivery",
+        "Microsoft.VSTS.Common.StoryPoints": 32,
+        "Microsoft.VSTS.Common.AcceptanceCriteria": "Architecture & Design delivered according to specification",
+        "System.AreaPath": "Mobily-BSS-Transform\\Delivery",
+        "System.IterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+        "System.Tags": "RFS;Service;Design",
+        "Custom.ServiceType": "rfs",
+        "Custom.ServicePhase": "Design",
+        "Custom.Effort": "32 PD",
+        "Custom.Cost": "$160,000"
+      }
+    },
+    {
+      "type": "userstory",
+      "title": "Build & Development",
+      "description": "User story for Build & Development delivery",
+      "storyPoints": 120,
+      "acceptanceCriteria": "Build & Development delivered according to specification",
+      "areaPath": "Mobily-BSS-Transform\\Delivery",
+      "iterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+      "tags": ["RFS", "Service", "Build"],
+      "fields": {
+        "System.Title": "Build & Development",
+        "System.Description": "User story for Build & Development delivery",
+        "Microsoft.VSTS.Common.StoryPoints": 120,
+        "Microsoft.VSTS.Common.AcceptanceCriteria": "Build & Development delivered according to specification",
+        "System.AreaPath": "Mobily-BSS-Transform\\Delivery",
+        "System.IterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+        "System.Tags": "RFS;Service;Build",
+        "Custom.ServiceType": "rfs",
+        "Custom.ServicePhase": "Build",
+        "Custom.Effort": "120 PD",
+        "Custom.Cost": "$600,000"
+      }
+    },
+    {
+      "type": "userstory",
+      "title": "Systems Integration Testing",
+      "description": "User story for Systems Integration Testing delivery",
+      "storyPoints": 48,
+      "acceptanceCriteria": "Systems Integration Testing delivered according to specification",
+      "areaPath": "Mobily-BSS-Transform\\Delivery",
+      "iterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+      "tags": ["RFS", "Service", "Testing"],
+      "fields": {
+        "System.Title": "Systems Integration Testing",
+        "System.Description": "User story for Systems Integration Testing delivery",
+        "Microsoft.VSTS.Common.StoryPoints": 48,
+        "Microsoft.VSTS.Common.AcceptanceCriteria": "Systems Integration Testing delivered according to specification",
+        "System.AreaPath": "Mobily-BSS-Transform\\Delivery",
+        "System.IterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+        "System.Tags": "RFS;Service;Testing",
+        "Custom.ServiceType": "rfs",
+        "Custom.ServicePhase": "Testing",
+        "Custom.Effort": "48 PD",
+        "Custom.Cost": "$240,000"
+      }
+    },
+    {
+      "type": "userstory",
+      "title": "Data Migration",
+      "description": "User story for Data Migration delivery",
+      "storyPoints": 24,
+      "acceptanceCriteria": "Data Migration delivered according to specification",
+      "areaPath": "Mobily-BSS-Transform\\Delivery",
+      "iterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+      "tags": ["RFS", "Service", "Migration"],
+      "fields": {
+        "System.Title": "Data Migration",
+        "System.Description": "User story for Data Migration delivery",
+        "Microsoft.VSTS.Common.StoryPoints": 24,
+        "Microsoft.VSTS.Common.AcceptanceCriteria": "Data Migration delivered according to specification",
+        "System.AreaPath": "Mobily-BSS-Transform\\Delivery",
+        "System.IterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+        "System.Tags": "RFS;Service;Migration",
+        "Custom.ServiceType": "rfs",
+        "Custom.ServicePhase": "Migration",
+        "Custom.Effort": "24 PD",
+        "Custom.Cost": "$120,000"
+      }
+    },
+    {
+      "type": "userstory",
+      "title": "Production Deployment",
+      "description": "User story for Production Deployment delivery",
+      "storyPoints": 16,
+      "acceptanceCriteria": "Production Deployment delivered according to specification",
+      "areaPath": "Mobily-BSS-Transform\\Delivery",
+      "iterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+      "tags": ["RFS", "Service", "Deployment"],
+      "fields": {
+        "System.Title": "Production Deployment",
+        "System.Description": "User story for Production Deployment delivery",
+        "Microsoft.VSTS.Common.StoryPoints": 16,
+        "Microsoft.VSTS.Common.AcceptanceCriteria": "Production Deployment delivered according to specification",
+        "System.AreaPath": "Mobily-BSS-Transform\\Delivery",
+        "System.IterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+        "System.Tags": "RFS;Service;Deployment",
+        "Custom.ServiceType": "rfs",
+        "Custom.ServicePhase": "Deployment",
+        "Custom.Effort": "16 PD",
+        "Custom.Cost": "$80,000"
+      }
+    },
+    {
+      "type": "feature",
+      "title": "Hypercare Support",
+      "description": "Feature for Hypercare Support service delivery",
+      "businessValue": "High",
+      "acceptanceCriteria": "Hypercare Support service specification completed and approved",
+      "areaPath": "Mobily-BSS-Transform\\Delivery",
+      "iterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+      "tags": ["CFS", "Service", "Post-Deployment"],
+      "fields": {
+        "System.Title": "Hypercare Support",
+        "System.Description": "Feature for Hypercare Support service delivery",
+        "Microsoft.VSTS.Common.BusinessValue": 800,
+        "Microsoft.VSTS.Common.AcceptanceCriteria": "Hypercare Support service specification completed and approved",
+        "System.AreaPath": "Mobily-BSS-Transform\\Delivery",
+        "System.IterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+        "System.Tags": "CFS;Service;Post-Deployment",
+        "Custom.ServiceType": "cfs",
+        "Custom.ServicePhase": "Post-Deployment",
+        "Custom.Effort": "40 PD",
+        "Custom.Cost": "$200,000"
+      }
+    },
+    {
+      "type": "feature",
+      "title": "Warranty Services",
+      "description": "Feature for Warranty Services service delivery",
+      "businessValue": "High",
+      "acceptanceCriteria": "Warranty Services service specification completed and approved",
+      "areaPath": "Mobily-BSS-Transform\\Delivery",
+      "iterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+      "tags": ["CFS", "Service", "Warranty"],
+      "fields": {
+        "System.Title": "Warranty Services",
+        "System.Description": "Feature for Warranty Services service delivery",
+        "Microsoft.VSTS.Common.BusinessValue": 800,
+        "Microsoft.VSTS.Common.AcceptanceCriteria": "Warranty Services service specification completed and approved",
+        "System.AreaPath": "Mobily-BSS-Transform\\Delivery",
+        "System.IterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+        "System.Tags": "CFS;Service;Warranty",
+        "Custom.ServiceType": "cfs",
+        "Custom.ServicePhase": "Warranty",
+        "Custom.Effort": "60 PD",
+        "Custom.Cost": "$300,000"
+      }
+    },
+    {
+      "type": "task",
+      "title": "E2E Solution Architect",
+      "description": "Task for E2E Solution Architect resource",
+      "remainingWork": 8,
+      "activity": "Development",
+      "areaPath": "Mobily-BSS-Transform\\Delivery",
+      "iterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+      "tags": ["skills", "Resource", "Task"],
+      "fields": {
+        "System.Title": "E2E Solution Architect",
+        "System.Description": "Task for E2E Solution Architect resource",
+        "Microsoft.VSTS.Scheduling.RemainingWork": 8,
+        "Microsoft.VSTS.Scheduling.Activity": "Development",
+        "System.AreaPath": "Mobily-BSS-Transform\\Delivery",
+        "System.IterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+        "System.Tags": "skills;Resource;Task",
+        "Custom.ResourceType": "skills",
+        "Custom.ResourceRate": "$1,200/day",
+        "Custom.ResourceAvailability": "Available"
+      }
+    },
+    {
+      "type": "task",
+      "title": "Systems Integrator",
+      "description": "Task for Systems Integrator resource",
+      "remainingWork": 8,
+      "activity": "Development",
+      "areaPath": "Mobily-BSS-Transform\\Delivery",
+      "iterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+      "tags": ["skills", "Resource", "Task"],
+      "fields": {
+        "System.Title": "Systems Integrator",
+        "System.Description": "Task for Systems Integrator resource",
+        "Microsoft.VSTS.Scheduling.RemainingWork": 8,
+        "Microsoft.VSTS.Scheduling.Activity": "Development",
+        "System.AreaPath": "Mobily-BSS-Transform\\Delivery",
+        "System.IterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+        "System.Tags": "skills;Resource;Task",
+        "Custom.ResourceType": "skills",
+        "Custom.ResourceRate": "$1,000/day",
+        "Custom.ResourceAvailability": "Available"
+      }
+    },
+    {
+      "type": "task",
+      "title": "BSS Developer",
+      "description": "Task for BSS Developer resource",
+      "remainingWork": 8,
+      "activity": "Development",
+      "areaPath": "Mobily-BSS-Transform\\Delivery",
+      "iterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+      "tags": ["skills", "Resource", "Task"],
+      "fields": {
+        "System.Title": "BSS Developer",
+        "System.Description": "Task for BSS Developer resource",
+        "Microsoft.VSTS.Scheduling.RemainingWork": 8,
+        "Microsoft.VSTS.Scheduling.Activity": "Development",
+        "System.AreaPath": "Mobily-BSS-Transform\\Delivery",
+        "System.IterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+        "System.Tags": "skills;Resource;Task",
+        "Custom.ResourceType": "skills",
+        "Custom.ResourceRate": "$800/day",
+        "Custom.ResourceAvailability": "Available"
+      }
+    },
+    {
+      "type": "task",
+      "title": "BlueDolphin Enterprise",
+      "description": "Task for BlueDolphin Enterprise resource",
+      "remainingWork": 8,
+      "activity": "Design",
+      "areaPath": "Mobily-BSS-Transform\\Delivery",
+      "iterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+      "tags": ["tools", "Resource", "Task"],
+      "fields": {
+        "System.Title": "BlueDolphin Enterprise",
+        "System.Description": "Task for BlueDolphin Enterprise resource",
+        "Microsoft.VSTS.Scheduling.RemainingWork": 8,
+        "Microsoft.VSTS.Scheduling.Activity": "Design",
+        "System.AreaPath": "Mobily-BSS-Transform\\Delivery",
+        "System.IterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+        "System.Tags": "tools;Resource;Task",
+        "Custom.ResourceType": "tools",
+        "Custom.ResourceRate": "$50,000",
+        "Custom.ResourceAvailability": "Licensed"
+      }
+    },
+    {
+      "type": "task",
+      "title": "Azure DevOps",
+      "description": "Task for Azure DevOps resource",
+      "remainingWork": 8,
+      "activity": "Design",
+      "areaPath": "Mobily-BSS-Transform\\Delivery",
+      "iterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+      "tags": ["tools", "Resource", "Task"],
+      "fields": {
+        "System.Title": "Azure DevOps",
+        "System.Description": "Task for Azure DevOps resource",
+        "Microsoft.VSTS.Scheduling.RemainingWork": 8,
+        "Microsoft.VSTS.Scheduling.Activity": "Design",
+        "System.AreaPath": "Mobily-BSS-Transform\\Delivery",
+        "System.IterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+        "System.Tags": "tools;Resource;Task",
+        "Custom.ResourceType": "tools",
+        "Custom.ResourceRate": "$25,000",
+        "Custom.ResourceAvailability": "Licensed"
+      }
+    },
+    {
+      "type": "task",
+      "title": "TestRail",
+      "description": "Task for TestRail resource",
+      "remainingWork": 8,
+      "activity": "Design",
+      "areaPath": "Mobily-BSS-Transform\\Delivery",
+      "iterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+      "tags": ["tools", "Resource", "Task"],
+      "fields": {
+        "System.Title": "TestRail",
+        "System.Description": "Task for TestRail resource",
+        "Microsoft.VSTS.Scheduling.RemainingWork": 8,
+        "Microsoft.VSTS.Scheduling.Activity": "Design",
+        "System.AreaPath": "Mobily-BSS-Transform\\Delivery",
+        "System.IterationPath": "Mobily-BSS-Transform\\2025\\Q1",
+        "System.Tags": "tools;Resource;Task",
+        "Custom.ResourceType": "tools",
+        "Custom.ResourceRate": "$15,000",
+        "Custom.ResourceAvailability": "Licensed"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "source": "Solution Design & Estimation",
+      "target": "Mobily BSS Transformation",
+      "type": "Child",
+      "relationshipType": "System.LinkTypes.Hierarchy-Forward"
+    },
+    {
+      "source": "Commercial Model & Pricing",
+      "target": "Mobily BSS Transformation",
+      "type": "Child",
+      "relationshipType": "System.LinkTypes.Hierarchy-Forward"
+    },
+    {
+      "source": "Architecture & Design Delivery",
+      "target": "Solution Design & Estimation",
+      "type": "Child",
+      "relationshipType": "System.LinkTypes.Hierarchy-Forward"
+    },
+    {
+      "source": "Build & Development",
+      "target": "Solution Design & Estimation",
+      "type": "Child",
+      "relationshipType": "System.LinkTypes.Hierarchy-Forward"
+    },
+    {
+      "source": "Systems Integration Testing",
+      "target": "Solution Design & Estimation",
+      "type": "Child",
+      "relationshipType": "System.LinkTypes.Hierarchy-Forward"
+    },
+    {
+      "source": "Data Migration",
+      "target": "Solution Design & Estimation",
+      "type": "Child",
+      "relationshipType": "System.LinkTypes.Hierarchy-Forward"
+    },
+    {
+      "source": "Production Deployment",
+      "target": "Solution Design & Estimation",
+      "type": "Child",
+      "relationshipType": "System.LinkTypes.Hierarchy-Forward"
+    },
+    {
+      "source": "Hypercare Support",
+      "target": "Mobily BSS Transformation",
+      "type": "Child",
+      "relationshipType": "System.LinkTypes.Hierarchy-Forward"
+    },
+    {
+      "source": "Warranty Services",
+      "target": "Mobily BSS Transformation",
+      "type": "Child",
+      "relationshipType": "System.LinkTypes.Hierarchy-Forward"
+    },
+    {
+      "source": "E2E Solution Architect",
+      "target": "Architecture & Design Delivery",
+      "type": "Child",
+      "relationshipType": "System.LinkTypes.Hierarchy-Forward"
+    },
+    {
+      "source": "Systems Integrator",
+      "target": "Build & Development",
+      "type": "Child",
+      "relationshipType": "System.LinkTypes.Hierarchy-Forward"
+    },
+    {
+      "source": "BSS Developer",
+      "target": "Build & Development",
+      "type": "Child",
+      "relationshipType": "System.LinkTypes.Hierarchy-Forward"
+    },
+    {
+      "source": "BlueDolphin Enterprise",
+      "target": "Architecture & Design Delivery",
+      "type": "Child",
+      "relationshipType": "System.LinkTypes.Hierarchy-Forward"
+    },
+    {
+      "source": "Azure DevOps",
+      "target": "Build & Development",
+      "type": "Child",
+      "relationshipType": "System.LinkTypes.Hierarchy-Forward"
+    },
+    {
+      "source": "TestRail",
+      "target": "Systems Integration Testing",
+      "type": "Child",
+      "relationshipType": "System.LinkTypes.Hierarchy-Forward"
+    }
+  ],
+  "customFields": {
+    "Custom.ServiceType": {
+      "type": "String",
+      "description": "Type of service (CFS/RFS)",
+      "allowedValues": ["CFS", "RFS"]
+    },
+    "Custom.ServicePhase": {
+      "type": "String",
+      "description": "Phase of service delivery",
+      "allowedValues": ["Presales", "Design", "Build", "Testing", "Migration", "Deployment", "Post-Deployment", "Warranty"]
+    },
+    "Custom.Effort": {
+      "type": "String",
+      "description": "Effort estimation in person days",
+      "format": "XX PD"
+    },
+    "Custom.Cost": {
+      "type": "String",
+      "description": "Cost estimation in USD",
+      "format": "$XX,XXX"
+    },
+    "Custom.ResourceType": {
+      "type": "String",
+      "description": "Type of resource",
+      "allowedValues": ["Skills", "Tools", "Infrastructure"]
+    },
+    "Custom.ResourceRate": {
+      "type": "String",
+      "description": "Resource rate or cost",
+      "format": "$X,XXX/day or $XX,XXX"
+    },
+    "Custom.ResourceAvailability": {
+      "type": "String",
+      "description": "Resource availability status",
+      "allowedValues": ["Available", "Limited", "Unavailable", "Licensed"]
+    }
+  },
+  "apiEndpoints": {
+    "baseUrl": "https://dev.azure.com/{organization}/{project}",
+    "workItems": {
+      "create": "/_apis/wit/workitems/$epic?api-version=7.0",
+      "update": "/_apis/wit/workitems/{id}?api-version=7.0",
+      "get": "/_apis/wit/workitems/{id}?api-version=7.0",
+      "delete": "/_apis/wit/workitems/{id}?api-version=7.0"
+    },
+    "workItemTypes": {
+      "list": "/_apis/wit/workItemTypes?api-version=7.0",
+      "get": "/_apis/wit/workItemTypes/{type}?api-version=7.0"
+    },
+    "fields": {
+      "list": "/_apis/wit/fields?api-version=7.0",
+      "get": "/_apis/wit/fields/{fieldName}?api-version=7.0"
+    },
+    "areas": {
+      "list": "/_apis/wit/classificationNodes/areas?api-version=7.0"
+    },
+    "iterations": {
+      "list": "/_apis/wit/classificationNodes/iterations?api-version=7.0"
+    }
+  },
+  "summary": {
+    "totalWorkItems": 24,
+    "breakdown": {
+      "epics": 1,
+      "features": 5,
+      "userStories": 6,
+      "tasks": 12
+    },
+    "totalEffort": "351 PD",
+    "totalCost": "$1,740,000",
+    "serviceTypes": {
+      "cfs": 5,
+      "rfs": 6
+    },
+    "resourceTypes": {
+      "skills": 3,
+      "tools": 3
+    }
+  }
+}

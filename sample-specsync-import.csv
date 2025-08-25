@@ -1,0 +1,6 @@
+Rephrased Requirement ID,Source Requirement ID,Rephrased Domain,Rephrased Vertical,Rephrased Function Name,Rephrased AF Lev.2,Reference Capability
+REQ-001,SRC-001,Market & Sales Domain,Retail,Sales Territory Management,Sales Management,Sales Territory Management
+REQ-002,SRC-002,Product Domain,Telecom,Product Specification & Offering Strategy Management,Product Management,Product Specification & Offering Strategy Management
+REQ-003,SRC-003,Customer Domain,Finance,Customer Interaction Management,Customer Management,Customer Interaction Management
+REQ-004,SRC-004,Service Domain,Healthcare,Service Inventory Management,Service Management,Service Inventory Management
+REQ-005,SRC-005,Resource Domain,Technology,Resource Inventory Management,Resource Management,Resource Inventory Management

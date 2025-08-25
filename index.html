@@ -1,0 +1,1621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TMF Scoping → Architecture → ADO Orchestrator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.19.3/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-left">
+                <h1><i class="fas fa-project-diagram" aria-hidden="true"></i> CSG Delivery Orchestrator</h1>
+                <div class="version">v1.0 - ODA 2025 Compliant</div>
+            </div>
+            <div class="header-right">
+                <div class="user-info" aria-hidden="false">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Bid Lead</span>
+                </div>
+                <div class="project-info">
+                    <div class="project-name">Telco X</div>
+                    <div class="project-status">Pre-CR</div>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <aside class="sidebar-nav" aria-label="Primary">
+                <div class="sidebar-header">
+                    <i class="fas fa-compass" aria-hidden="true"></i>
+                    <span>Navigation</span>
+                </div>
+                <nav class="sidebar-menu">
+                    <!-- Workflow Section -->
+                    <div class="menu-section">
+                        <button class="menu-parent" data-section="workflow">
+                            <i class="fas fa-route"></i>
+                            <span>Workflow</span>
+                            <i class="fas fa-chevron-down expand-icon"></i>
+                        </button>
+                        <div class="menu-children" id="workflow-children">
+                            <button class="sidebar-link child-link" data-scroll="dashboard-section">
+                                <i class="fas fa-tachometer-alt"></i>
+                                <span>Project Dashboard</span>
+                            </button>
+                            <button class="sidebar-link child-link" data-tab="dependencies">
+                                <i class="fas fa-link"></i>
+                                <span>Dependencies</span>
+                            </button>
+                            <button class="sidebar-link child-link" data-tab="milestones">
+                                <i class="fas fa-flag-checkered"></i>
+                                <span>Milestones</span>
+                            </button>
+                            <button class="sidebar-link child-link" data-scroll="documents-panel">
+                                <i class="fas fa-file-alt"></i>
+                                <span>Documents</span>
+                            </button>
+                            <button class="sidebar-link child-link" data-tab="risks">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span>Risks</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Presales Section -->
+                    <div class="menu-section">
+                        <button class="menu-parent expanded" data-section="presales" style="cursor: pointer;">
+                            <i class="fas fa-lightbulb"></i>
+                            <span>Presales</span>
+                            <i class="fas fa-chevron-down expand-icon"></i>
+                        </button>
+                        <div class="menu-children expanded" id="presales-children">
+                            <button class="sidebar-link child-link" data-tab="workflow-status">
+                                <i class="fas fa-pencil-ruler"></i>
+                                <span>Solution Design</span>
+                            </button>
+                            <button class="sidebar-link child-link" data-tab="workflow-status">
+                                <i class="fas fa-cogs"></i>
+                                <span>Service Design</span>
+                            </button>
+                            <button class="sidebar-link child-link" data-tab="estimates">
+                                <i class="fas fa-calculator"></i>
+                                <span>Estimation</span>
+                            </button>
+                            <button class="sidebar-link child-link" data-tab="workflow-status">
+                                <i class="fas fa-sitemap"></i>
+                                <span>Work Breakdown</span>
+                            </button>
+                            <button class="sidebar-link child-link" data-tab="workflow-status">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>Scheduling</span>
+                            </button>
+                            <button class="sidebar-link child-link" data-tab="workflow-status">
+                                <i class="fas fa-dollar-sign"></i>
+                                <span>Commercial Model</span>
+                            </button>
+                            <button class="sidebar-link child-link" data-tab="workflow-status">
+                                <i class="fas fa-file-contract"></i>
+                                <span>Contracting</span>
+                            </button>
+                            <button class="sidebar-link child-link" data-tab="workflow-status">
+                                <i class="fas fa-handshake"></i>
+                                <span>Handover</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Delivery Section -->
+                    <div class="menu-section">
+                        <button class="menu-parent" data-section="delivery">
+                            <i class="fas fa-rocket"></i>
+                            <span>Delivery</span>
+                            <i class="fas fa-chevron-down expand-icon"></i>
+                        </button>
+                        <div class="menu-children" id="delivery-children">
+                            <button class="sidebar-link child-link" data-tab="workflow-status">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Governance</span>
+                            </button>
+                            <button class="sidebar-link child-link" data-tab="workflow-status">
+                                <i class="fas fa-clipboard-list"></i>
+                                <span>Definition</span>
+                            </button>
+                            <button class="sidebar-link child-link" data-tab="workflow-status">
+                                <i class="fas fa-drafting-compass"></i>
+                                <span>Architecture & Design</span>
+                            </button>
+                            <button class="sidebar-link child-link" data-tab="workflow-status">
+                                <i class="fas fa-hammer"></i>
+                                <span>Build</span>
+                            </button>
+                            <button class="sidebar-link child-link" data-tab="workflow-status">
+                                <i class="fas fa-plug"></i>
+                                <span>Integration Testing</span>
+                            </button>
+                            <button class="sidebar-link child-link" data-tab="workflow-status">
+                                <i class="fas fa-exchange-alt"></i>
+                                <span>Migration</span>
+                            </button>
+                            <button class="sidebar-link child-link" data-tab="workflow-status">
+                                <i class="fas fa-toggle-on"></i>
+                                <span>Cutover</span>
+                            </button>
+                            <button class="sidebar-link child-link" data-tab="workflow-status">
+                                <i class="fas fa-paper-plane"></i>
+                                <span>Release</span>
+                            </button>
+                            <button class="sidebar-link child-link" data-tab="workflow-status">
+                                <i class="fas fa-server"></i>
+                                <span>Production Cutover</span>
+                            </button>
+                            <button class="sidebar-link child-link" data-tab="workflow-status">
+                                <i class="fas fa-chart-line"></i>
+                                <span>Post Production</span>
+                            </button>
+                            <button class="sidebar-link child-link" data-tab="workflow-status">
+                                <i class="fas fa-headset"></i>
+                                <span>Hypercare</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Managed Services Section -->
+                    <div class="menu-section">
+                        <button class="menu-parent" data-section="managed-services">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Managed Services</span>
+                            <i class="fas fa-chevron-down expand-icon"></i>
+                        </button>
+                        <div class="menu-children" id="managed-services-children">
+                            <button class="sidebar-link child-link" data-tab="workflow-status">
+                                <i class="fas fa-exchange-alt"></i>
+                                <span>Transitioning</span>
+                            </button>
+                            <button class="sidebar-link child-link" data-tab="workflow-status">
+                                <i class="fas fa-certificate"></i>
+                                <span>Warranty</span>
+                            </button>
+                            <button class="sidebar-link child-link" data-tab="workflow-status">
+                                <i class="fas fa-handshake"></i>
+                                <span>Operations Handover</span>
+                            </button>
+                        </div>
+                    </div>
+                </nav>
+
+                    <!-- Managed Services Section -->
+                    <div class="menu-section">
+                        <button class="menu-parent" data-section="managed-services">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Managed Services</span>
+                            <i class="fas fa-chevron-down expand-icon"></i>
+                        </button>
+                        <div class="menu-children" id="managed-services-children">
+                            <button class="sidebar-link child-link" data-tab="workflow-status">
+                                <i class="fas fa-exchange-alt"></i>
+                                <span>Transitioning</span>
+                            </button>
+                            <button class="sidebar-link child-link" data-tab="workflow-status">
+                                <i class="fas fa-certificate"></i>
+                                <span>Warranty</span>
+                            </button>
+                            <button class="sidebar-link child-link" data-tab="workflow-status">
+                                <i class="fas fa-handshake"></i>
+                                <span>Operations Handover</span>
+                            </button>
+                        </div>
+                    </div>
+                </nav>
+            </aside>
+            <!-- Top Tabs -->
+            <section class="top-tabs-section">
+                <div class="tools-tabs">
+                    <button class="tab-btn active" data-tab="workflow-status"><i class="fas fa-route"></i> Workflow</button>
+                    <button class="tab-btn" data-tab="capabilities"><i class="fas fa-layer-group"></i> Scoping</button>
+                    <button class="tab-btn" data-tab="inventory"><i class="fas fa-boxes-stacked"></i> BOM</button>
+                    <button class="tab-btn" data-tab="estimates"><i class="fas fa-chart-line"></i> Estimates & Outputs</button>
+                    <button class="tab-btn" data-tab="ado-integration"><i class="fab fa-azure"></i> ADO</button>
+                </div>
+            </section>
+
+            <!-- Tab Content Area -->
+            <section class="tab-content-area">
+                <div class="tools-content">
+                    <div class="tab-content active" id="workflow-status">
+                        <h3><i class="fas fa-route"></i> Current Workflow Status</h3>
+                        <p class="muted">Summary and quick actions are available in the panels below.</p>
+                        <section class="dashboard-section" style="margin:0;">
+                            <div class="dashboard-header">
+                                <h2><i class="fas fa-tachometer-alt"></i> E2E Delivery Dashboard</h2>
+                                <div class="dashboard-filters">
+                                    <select>
+                                        <option>All Workstreams</option>
+                                        <option>Business Requirements</option>
+                                        <option>E2E Architecture</option>
+                                        <option>Integration</option>
+                                        <option>Development</option>
+                                        <option>Testing</option>
+                                        <option>Release</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="dashboard-metrics">
+                                <div class="metric-card">
+                                    <div class="metric-icon"><i class="fas fa-clock"></i></div>
+                                    <div class="metric-content"><span class="metric-value">3</span><span class="metric-label">Pending Approvals</span></div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                                    <div class="metric-content"><span class="metric-value">2</span><span class="metric-label">Overdue Items</span></div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-icon"><i class="fas fa-chart-line"></i></div>
+                                    <div class="metric-content"><span class="metric-value">85%</span><span class="metric-label">E2E Coverage</span></div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-icon"><i class="fas fa-tasks"></i></div>
+                                    <div class="metric-content"><span class="metric-value">95%</span><span class="metric-label">ADO Readiness</span></div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+
+                    <div class="tab-content" id="capabilities">
+                        <h3>TMF Scoping Capabilities</h3>
+                        <div class="scoping-import-toolbar">
+                            <div class="form-inline">
+                                <label for="specSyncFile"><i class="fas fa-file-upload"></i> Import SpecSync</label>
+                                <input type="file" id="specSyncFile" accept=".csv,.json,.xlsx,.xls">
+                                <button class="btn-small" id="importSpecSync"><i class="fas fa-upload"></i> Import</button>
+                                <button class="btn-small" id="clearSpecSync"><i class="fas fa-trash"></i> Clear</button>
+                                <span class="small-muted" id="specSyncSummary"></span>
+                            </div>
+                        </div>
+                        <div class="capability-header">
+                            <div class="capability-filters">
+                                <select class="domain-select" id="domainFilter">
+                                    <option value="all">All Domains</option>
+                                    <option value="resource">Resource</option>
+                                    <option value="partner">Business Partner</option>
+                                    <option value="enterprise">Enterprise</option>
+                                    <option value="integration">Integration</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Resource Domain -->
+                        <div class="domain-group" data-domain="resource">
+                            <div class="domain-header" data-domain="resource">
+                                <i class="fas fa-server"></i>
+                                <h4>Resource Domain</h4>
+                                <span class="domain-count">0 selected</span>
+                                <i class="fas fa-chevron-down expand-icon"></i>
+                            </div>
+                            <div class="domain-capabilities">
+                                <div class="capability-item">
+                                    <input type="checkbox" id="resource-lifecycle-mgmt">
+                                    <label for="resource-lifecycle-mgmt">Resource Lifecycle Management</label>
+                                    <div class="segment-tags">
+                                        <span class="tag segment-tag" data-capability="resource-lifecycle-mgmt" data-segment="Infrastructure">Infrastructure</span>
+                                        <span class="tag segment-tag" data-capability="resource-lifecycle-mgmt" data-segment="Network">Network</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="capability-item">
+                                    <input type="checkbox" id="fault-mgmt">
+                                    <label for="fault-mgmt">Fault Management</label>
+                                    <div class="segment-tags">
+                                        <span class="tag segment-tag" data-capability="fault-mgmt" data-segment="Detection">Detection</span>
+                                        <span class="tag segment-tag" data-capability="fault-mgmt" data-segment="Resolution">Resolution</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="capability-item">
+                                    <input type="checkbox" id="usage-mgmt">
+                                    <label for="usage-mgmt">Usage Management</label>
+                                    <div class="segment-tags">
+                                        <span class="tag segment-tag" data-capability="usage-mgmt" data-segment="Data">Data</span>
+                                        <span class="tag segment-tag" data-capability="usage-mgmt" data-segment="Voice">Voice</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Business Partner Domain -->
+                        <div class="domain-group" data-domain="partner">
+                            <div class="domain-header" data-domain="partner">
+                                <i class="fas fa-handshake"></i>
+                                <h4>Business Partner Domain</h4>
+                                <span class="domain-count">0 selected</span>
+                                <i class="fas fa-chevron-down expand-icon"></i>
+                            </div>
+                            <div class="domain-capabilities">
+                                <div class="capability-item">
+                                    <input type="checkbox" id="partner-relationship-mgmt">
+                                    <label for="partner-relationship-mgmt">Partner Relationship Management</label>
+                                    <div class="segment-tags">
+                                        <span class="tag segment-tag" data-capability="partner-relationship-mgmt" data-segment="Wholesale">Wholesale</span>
+                                        <span class="tag segment-tag" data-capability="partner-relationship-mgmt" data-segment="Interconnect">Interconnect</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="capability-item">
+                                    <input type="checkbox" id="wholesale-billing">
+                                    <label for="wholesale-billing">Wholesale / Interconnect Billing</label>
+                                    <div class="segment-tags">
+                                        <span class="tag segment-tag" data-capability="wholesale-billing" data-segment="Voice">Voice</span>
+                                        <span class="tag segment-tag" data-capability="wholesale-billing" data-segment="Data">Data</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Enterprise Domain -->
+                        <div class="domain-group" data-domain="enterprise">
+                            <div class="domain-header" data-domain="enterprise">
+                                <i class="fas fa-building"></i>
+                                <h4>Enterprise Domain</h4>
+                                <span class="domain-count">0 selected</span>
+                                <i class="fas fa-chevron-down expand-icon"></i>
+                            </div>
+                            <div class="domain-capabilities">
+                                <div class="capability-item">
+                                    <input type="checkbox" id="revenue-assurance-mgmt">
+                                    <label for="revenue-assurance-mgmt">Revenue Assurance Management</label>
+                                    <div class="segment-tags">
+                                        <span class="tag segment-tag" data-capability="revenue-assurance-mgmt" data-segment="Monitoring">Monitoring</span>
+                                        <span class="tag segment-tag" data-capability="revenue-assurance-mgmt" data-segment="Prevention">Prevention</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="capability-item">
+                                    <input type="checkbox" id="fraud-mgmt">
+                                    <label for="fraud-mgmt">Fraud Management</label>
+                                    <div class="segment-tags">
+                                        <span class="tag segment-tag" data-capability="fraud-mgmt" data-segment="Detection">Detection</span>
+                                        <span class="tag segment-tag" data-capability="fraud-mgmt" data-segment="Prevention">Prevention</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="capability-item">
+                                    <input type="checkbox" id="compliance-mgmt">
+                                    <label for="compliance-mgmt">Regulatory & Compliance Management</label>
+                                    <div class="segment-tags">
+                                        <span class="tag segment-tag" data-capability="compliance-mgmt" data-segment="GDPR">GDPR</span>
+                                        <span class="tag segment-tag" data-capability="compliance-mgmt" data-segment="SOX">SOX</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Integration Domain -->
+                        <div class="domain-group" data-domain="integration">
+                            <div class="domain-header" data-domain="integration">
+                                <i class="fas fa-plug"></i>
+                                <h4>Integration Domain</h4>
+                                <span class="domain-count">0 selected</span>
+                                <i class="fas fa-chevron-down expand-icon"></i>
+                            </div>
+                            <div class="domain-capabilities">
+                                <div class="capability-item">
+                                    <input type="checkbox" id="api-mgmt">
+                                    <label for="api-mgmt">API Management</label>
+                                    <div class="segment-tags">
+                                        <span class="tag segment-tag" data-capability="api-mgmt" data-segment="REST">REST</span>
+                                        <span class="tag segment-tag" data-capability="api-mgmt" data-segment="SOAP">SOAP</span>
+                                        <span class="tag segment-tag" data-capability="api-mgmt" data-segment="GraphQL">GraphQL</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="capability-item">
+                                    <input type="checkbox" id="bpm-workflow">
+                                    <label for="bpm-workflow">Business Process Management & Workflow Integration</label>
+                                    <div class="segment-tags">
+                                        <span class="tag segment-tag" data-capability="bpm-workflow" data-segment="Automation">Automation</span>
+                                        <span class="tag segment-tag" data-capability="bpm-workflow" data-segment="Orchestration">Orchestration</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            
+
+            <!-- Middle Panel: Workflow Tools (REMOVED - migrated to top tab panel) -->
+            <!-- Legacy workflow-tools-panel fully deleted below -->
+
+            <!-- BEGIN LEGACY BLOCK: remove entirely -->
+            <div class="legacy-workflow-tools" style="display:none">
+                <!-- Workflow Status Tab -->
+                <div class="tab-content active" id="workflow-status-legacy">
+                        <h3><i class="fas fa-route"></i> Current Workflow Status</h3>
+                        <div class="workflow-details">
+                            <div class="workflow-metrics">
+                                <div class="metric-item">
+                                    <span class="metric-label">Phase Progress</span>
+                                    <div class="phase-progress">
+                                        <div class="progress-item">
+                                            <span>Presales</span>
+                                            <div class="progress-bar small">
+                                                <div class="progress-fill completed" style="width: 100%"></div>
+                        </div>
+                                            <span>100%</span>
+                    </div>
+                                        <div class="progress-item">
+                                            <span>Contract</span>
+                                            <div class="progress-bar small">
+                                                <div class="progress-fill in-progress" style="width: 65%"></div>
+                </div>
+                                            <span>65%</span>
+                                        </div>
+                                        <div class="progress-item">
+                                            <span>Delivery</span>
+                                            <div class="progress-bar small">
+                                                <div class="progress-fill pending" style="width: 0%"></div>
+                                            </div>
+                                            <span>0%</span>
+                                        </div>
+                                        <div class="progress-item">
+                                            <span>Post-Deployment</span>
+                                            <div class="progress-bar small">
+                                                <div class="progress-fill pending" style="width: 0%"></div>
+                                            </div>
+                                            <span>0%</span>
+                                        </div>
+                                    </div>
+                    </div>
+                    
+                                <div class="metric-item">
+                                    <span class="metric-label">Key Milestones</span>
+                                    <div class="milestone-list">
+                                        <div class="milestone completed">
+                                            <i class="fas fa-check-circle"></i>
+                                            <span>Solution Design Approved</span>
+                                            <span class="milestone-date">Dec 15, 2024</span>
+                    </div>
+                                        <div class="milestone in-progress">
+                                            <i class="fas fa-clock"></i>
+                                            <span>Contract Finalization</span>
+                                            <span class="milestone-date">Jan 31, 2025</span>
+                </div>
+                                        <div class="milestone pending">
+                                            <i class="fas fa-hourglass-start"></i>
+                                            <span>Delivery Team Setup</span>
+                                            <span class="milestone-date">Feb 15, 2025</span>
+                                        </div>
+                                        <div class="milestone pending">
+                                            <i class="fas fa-hourglass-start"></i>
+                                            <span>Go-Live</span>
+                                            <span class="milestone-date">Q3 2025</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="workflow-actions-panel">
+                                <h4>Quick Actions</h4>
+                                <div class="action-buttons">
+                                    <button class="btn-small">
+                                        <i class="fas fa-plus"></i> Add Milestone
+                    </button>
+                                    <button class="btn-small">
+                                        <i class="fas fa-edit"></i> Update Progress
+                    </button>
+                                    <button class="btn-small">
+                                        <i class="fas fa-flag"></i> Flag Issue
+                    </button>
+                                    <button class="btn-small">
+                                        <i class="fas fa-calendar"></i> Schedule Review
+                    </button>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+                
+                    <!-- Dependencies Tab -->
+                    <div class="tab-content" id="dependencies-legacy">
+                        <h3>System Dependencies</h3>
+                        <div class="dependency-list">
+                            <div class="dependency-item">
+                                <span class="dependency-type">System</span>
+                                <span class="dependency-name">Legacy CRM</span>
+                                <span class="dependency-status pending">Pending</span>
+                                <span class="dependency-owner">IT Team</span>
+                            </div>
+                            <div class="dependency-item">
+                                <span class="dependency-type">Data</span>
+                                <span class="dependency-name">Customer Master Data</span>
+                                <span class="dependency-status resolved">Resolved</span>
+                                <span class="dependency-owner">Data Team</span>
+                            </div>
+                            <div class="dependency-item">
+                                <span class="dependency-type">Infra</span>
+                                <span class="dependency-name">Cloud Environment</span>
+                                <span class="dependency-status in-progress">In Progress</span>
+                                <span class="dependency-owner">Infra Team</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Milestones Tab -->
+                    <div class="tab-content" id="milestones-legacy">
+                        <h3><i class="fas fa-flag-checkered"></i> Project Milestones</h3>
+                        <div class="milestones-timeline">
+                            <div class="timeline-item completed">
+                                <div class="timeline-marker completed">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <h4>Solution Design Approval</h4>
+                                    <p>Stakeholder approval of technical solution and architecture</p>
+                                    <div class="timeline-meta">
+                                        <span class="date">Dec 15, 2024</span>
+                                        <span class="owner">Solution Architect</span>
+                                        <span class="status completed">Completed</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="timeline-item in-progress">
+                                <div class="timeline-marker in-progress">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <h4>Contract Finalization</h4>
+                                    <p>Finalizing commercial terms, pricing, and legal agreements</p>
+                                    <div class="timeline-meta">
+                                        <span class="date">Jan 31, 2025</span>
+                                        <span class="owner">Commercial Lead</span>
+                                        <span class="status in-progress">In Progress</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="timeline-item pending">
+                                <div class="timeline-marker pending">
+                                    <i class="fas fa-circle"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <h4>Delivery Team Setup</h4>
+                                    <p>Assembling delivery team and setting up project infrastructure</p>
+                                    <div class="timeline-meta">
+                                        <span class="date">Feb 15, 2025</span>
+                                        <span class="owner">Delivery Manager</span>
+                                        <span class="status pending">Pending</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="timeline-item pending">
+                                <div class="timeline-marker pending">
+                                    <i class="fas fa-circle"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <h4>Go-Live</h4>
+                                    <p>Production deployment and customer cutover</p>
+                                    <div class="timeline-meta">
+                                        <span class="date">Q3 2025</span>
+                                        <span class="owner">Program Director</span>
+                                        <span class="status pending">Pending</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Integrations Tab -->
+                    <div class="tab-content" id="integrations-legacy">
+                        <h3>API & Data Contracts</h3>
+                        <div class="integration-list">
+                            <div class="integration-item">
+                                <span class="integration-name">CRM API</span>
+                                <span class="integration-type">REST</span>
+                                <span class="integration-status">Designed</span>
+                                <button class="btn-small">View Contract</button>
+                            </div>
+                            <div class="integration-item">
+                                <span class="integration-name">Billing Gateway</span>
+                                <span class="integration-type">SOAP</span>
+                                <span class="integration-status">Pending</span>
+                                <button class="btn-small">Design</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Inventory/BOM Tab -->
+                    <div class="tab-content" id="inventory-legacy">
+                        <div class="bom-header">
+                            <h3><i class="fas fa-boxes-stacked"></i> SID-Compliant BOM Builder</h3>
+                            <div class="bom-actions">
+                                <button class="btn-primary" id="generateBOM">
+                                    <i class="fas fa-magic"></i> Generate BOM
+                                </button>
+                                <button class="btn-secondary" id="exportBOM">
+                                    <i class="fas fa-download"></i> Export BOM
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Product Specification (Top-level Container) -->
+                        <div class="bom-section">
+                            <div class="bom-section-header">
+                                <h4><i class="fas fa-cube"></i> Product Specification</h4>
+                                <span class="bom-type">BSS Transformation Container</span>
+                            </div>
+                            <div class="product-spec">
+                                <div class="form-group">
+                                    <label>Product Name</label>
+                                    <input type="text" id="productName" value="Mobily BSS Transformation" placeholder="Enter BSS transformation name">
+                                </div>
+                                <div class="form-group">
+                                    <label>Product Description</label>
+                                    <textarea id="productDescription" placeholder="Describe the BSS transformation scope...">End-to-end BSS transformation including CRM, Billing, Order Management, and Integration services for Mobily's digital transformation initiative.</textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Business Unit</label>
+                                    <select id="businessUnit">
+                                        <option value="consumer">Consumer</option>
+                                        <option value="business">Business</option>
+                                        <option value="enterprise">Enterprise</option>
+                                        <option value="wholesale">Wholesale</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Service Specifications -->
+                        <div class="bom-section">
+                            <div class="bom-section-header">
+                                <h4><i class="fas fa-cogs"></i> Service Specifications</h4>
+                                <button class="btn-small" id="addServiceSpec">
+                                    <i class="fas fa-plus"></i> Add Service
+                                </button>
+                            </div>
+                            
+                            <div class="service-specs">
+                                <!-- Presales Services -->
+                                <div class="service-category">
+                                    <h5>Presales Services</h5>
+                                    <div class="service-spec-item" data-type="cfs">
+                                        <div class="service-header">
+                                            <span class="service-type cfs">CFS</span>
+                                            <span class="service-name">Solution Design & Estimation</span>
+                                            <div class="service-actions">
+                                                <button class="btn-small"><i class="fas fa-edit"></i></button>
+                                                <button class="btn-small"><i class="fas fa-trash"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="service-details">
+                                            <span class="service-phase">Presales</span>
+                                            <span class="service-effort">5 PD</span>
+                                            <span class="service-cost">$25,000</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="service-spec-item" data-type="cfs">
+                                        <div class="service-header">
+                                            <span class="service-type cfs">CFS</span>
+                                            <span class="service-name">Commercial Model & Pricing</span>
+                                            <div class="service-actions">
+                                                <button class="btn-small"><i class="fas fa-edit"></i></button>
+                                                <button class="btn-small"><i class="fas fa-trash"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="service-details">
+                                            <span class="service-phase">Presales</span>
+                                            <span class="service-effort">3 PD</span>
+                                            <span class="service-cost">$15,000</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Delivery Services -->
+                                <div class="service-category">
+                                    <h5>Delivery Services</h5>
+                                    <div class="service-spec-item" data-type="rfs">
+                                        <div class="service-header">
+                                            <span class="service-type rfs">RFS</span>
+                                            <span class="service-name">Architecture & Design</span>
+                                            <div class="service-actions">
+                                                <button class="btn-small"><i class="fas fa-edit"></i></button>
+                                                <button class="btn-small"><i class="fas fa-trash"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="service-details">
+                                            <span class="service-phase">Design</span>
+                                            <span class="service-effort">32 PD</span>
+                                            <span class="service-cost">$160,000</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="service-spec-item" data-type="rfs">
+                                        <div class="service-header">
+                                            <span class="service-type rfs">RFS</span>
+                                            <span class="service-name">Build & Development</span>
+                                            <div class="service-actions">
+                                                <button class="btn-small"><i class="fas fa-edit"></i></button>
+                                                <button class="btn-small"><i class="fas fa-trash"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="service-details">
+                                            <span class="service-phase">Build</span>
+                                            <span class="service-effort">120 PD</span>
+                                            <span class="service-cost">$600,000</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="service-spec-item" data-type="rfs">
+                                        <div class="service-header">
+                                            <span class="service-type rfs">RFS</span>
+                                            <span class="service-name">Systems Integration Testing</span>
+                                            <div class="service-actions">
+                                                <button class="btn-small"><i class="fas fa-edit"></i></button>
+                                                <button class="btn-small"><i class="fas fa-trash"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="service-details">
+                                            <span class="service-phase">Testing</span>
+                                            <span class="service-effort">48 PD</span>
+                                            <span class="service-cost">$240,000</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="service-spec-item" data-type="rfs">
+                                        <div class="service-header">
+                                            <span class="service-type rfs">RFS</span>
+                                            <span class="service-name">Data Migration</span>
+                                            <div class="service-actions">
+                                                <button class="btn-small"><i class="fas fa-edit"></i></button>
+                                                <button class="btn-small"><i class="fas fa-trash"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="service-details">
+                                            <span class="service-phase">Migration</span>
+                                            <span class="service-effort">24 PD</span>
+                                            <span class="service-cost">$120,000</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="service-spec-item" data-type="rfs">
+                                        <div class="service-header">
+                                            <span class="service-type rfs">RFS</span>
+                                            <span class="service-name">Production Deployment</span>
+                                            <div class="service-actions">
+                                                <button class="btn-small"><i class="fas fa-edit"></i></button>
+                                                <button class="btn-small"><i class="fas fa-trash"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="service-details">
+                                            <span class="service-phase">Deployment</span>
+                                            <span class="service-effort">16 PD</span>
+                                            <span class="service-cost">$80,000</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Managed Services -->
+                                <div class="service-category">
+                                    <h5>Managed Services</h5>
+                                    <div class="service-spec-item" data-type="cfs">
+                                        <div class="service-header">
+                                            <span class="service-type cfs">CFS</span>
+                                            <span class="service-name">Hypercare Support</span>
+                                            <div class="service-actions">
+                                                <button class="btn-small"><i class="fas fa-edit"></i></button>
+                                                <button class="btn-small"><i class="fas fa-trash"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="service-details">
+                                            <span class="service-phase">Post-Deployment</span>
+                                            <span class="service-effort">40 PD</span>
+                                            <span class="service-cost">$200,000</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="service-spec-item" data-type="cfs">
+                                        <div class="service-header">
+                                            <span class="service-type cfs">CFS</span>
+                                            <span class="service-name">Warranty Services</span>
+                                            <div class="service-actions">
+                                                <button class="btn-small"><i class="fas fa-edit"></i></button>
+                                                <button class="btn-small"><i class="fas fa-trash"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="service-details">
+                                            <span class="service-phase">Warranty</span>
+                                            <span class="service-effort">60 PD</span>
+                                            <span class="service-cost">$300,000</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Resource Specifications -->
+                        <div class="bom-section">
+                            <div class="bom-section-header">
+                                <h4><i class="fas fa-users"></i> Resource Specifications</h4>
+                                <button class="btn-small" id="addResourceSpec">
+                                    <i class="fas fa-plus"></i> Add Resource
+                                </button>
+                            </div>
+                            
+                            <div class="resource-specs">
+                                <!-- Skills Profiles -->
+                                <div class="resource-category">
+                                    <h5>Skills Profiles</h5>
+                                    <div class="resource-spec-item" data-type="skills">
+                                        <div class="resource-header">
+                                            <span class="resource-type skills">Skills</span>
+                                            <span class="resource-name">E2E Solution Architect</span>
+                                            <div class="resource-actions">
+                                                <button class="btn-small"><i class="fas fa-edit"></i></button>
+                                                <button class="btn-small"><i class="fas fa-trash"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="resource-details">
+                                            <span class="resource-rate">$1,200/day</span>
+                                            <span class="resource-availability">Available</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="resource-spec-item" data-type="skills">
+                                        <div class="resource-header">
+                                            <span class="resource-type skills">Skills</span>
+                                            <span class="resource-name">Systems Integrator</span>
+                                            <div class="resource-actions">
+                                                <button class="btn-small"><i class="fas fa-edit"></i></button>
+                                                <button class="btn-small"><i class="fas fa-trash"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="resource-details">
+                                            <span class="resource-rate">$1,000/day</span>
+                                            <span class="resource-availability">Available</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="resource-spec-item" data-type="skills">
+                                        <div class="resource-header">
+                                            <span class="resource-type skills">Skills</span>
+                                            <span class="resource-name">BSS Developer</span>
+                                            <div class="resource-actions">
+                                                <button class="btn-small"><i class="fas fa-edit"></i></button>
+                                                <button class="btn-small"><i class="fas fa-trash"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="resource-details">
+                                            <span class="resource-rate">$800/day</span>
+                                            <span class="resource-availability">Available</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Tooling -->
+                                <div class="resource-category">
+                                    <h5>Tooling & Infrastructure</h5>
+                                    <div class="resource-spec-item" data-type="tools">
+                                        <div class="resource-header">
+                                            <span class="resource-type tools">Tools</span>
+                                            <span class="resource-name">BlueDolphin Enterprise</span>
+                                            <div class="resource-actions">
+                                                <button class="btn-small"><i class="fas fa-edit"></i></button>
+                                                <button class="btn-small"><i class="fas fa-trash"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="resource-details">
+                                            <span class="resource-rate">$50,000</span>
+                                            <span class="resource-availability">Licensed</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="resource-spec-item" data-type="tools">
+                                        <div class="resource-header">
+                                            <span class="resource-type tools">Tools</span>
+                                            <span class="resource-name">Azure DevOps</span>
+                                            <div class="resource-actions">
+                                                <button class="btn-small"><i class="fas fa-edit"></i></button>
+                                                <button class="btn-small"><i class="fas fa-trash"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="resource-details">
+                                            <span class="resource-rate">$25,000</span>
+                                            <span class="resource-availability">Licensed</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="resource-spec-item" data-type="tools">
+                                        <div class="resource-header">
+                                            <span class="resource-type tools">Tools</span>
+                                            <span class="resource-name">TestRail</span>
+                                            <div class="resource-actions">
+                                                <button class="btn-small"><i class="fas fa-edit"></i></button>
+                                                <button class="btn-small"><i class="fas fa-trash"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="resource-details">
+                                            <span class="resource-rate">$15,000</span>
+                                            <span class="resource-availability">Licensed</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- BOM Summary -->
+                        <div class="bom-summary">
+                            <div class="summary-header">
+                                <h4><i class="fas fa-calculator"></i> BOM Summary</h4>
+                            </div>
+                            <div class="summary-stats">
+                                <div class="summary-item">
+                                    <span class="summary-label">Total Services:</span>
+                                    <span class="summary-value">9</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">Total Resources:</span>
+                                    <span class="summary-value">6</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">Total Effort:</span>
+                                    <span class="summary-value">351 PD</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">Total Cost:</span>
+                                    <span class="summary-value">$1,740,000</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+            <!-- END LEGACY BLOCK -->
+
+                    <!-- NFRs Tab -->
+                    <div class="tab-content" id="nfrs">
+                        <h3>Non-Functional Requirements</h3>
+                        <div class="nfr-grid">
+                            <div class="nfr-item">
+                                <label>Performance</label>
+                                <input type="text" placeholder="Response time < 2s" value="Response time < 2s">
+                            </div>
+                            <div class="nfr-item">
+                                <label>Availability</label>
+                                <input type="text" placeholder="99.9% uptime" value="99.9% uptime">
+                            </div>
+                            <div class="nfr-item">
+                                <label>Security</label>
+                                <input type="text" placeholder="OAuth 2.0, PII masking" value="OAuth 2.0, PII masking">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CR Simulator Tab -->
+                    <div class="tab-content" id="cr-simulator">
+                        <h3>Change Request Simulator</h3>
+                        <div class="cr-simulator">
+                            <div class="cr-input">
+                                <label>Additional Scope</label>
+                                <textarea placeholder="Describe additional requirements..."></textarea>
+                            </div>
+                            <div class="cr-impact">
+                                <div class="impact-item">
+                                    <span>Timeline Impact:</span>
+                                    <span class="impact-value">+2 weeks</span>
+                                </div>
+                                <div class="impact-item">
+                                    <span>Cost Impact:</span>
+                                    <span class="impact-value">+$150K</span>
+                                </div>
+                                <div class="impact-item">
+                                    <span>Risk Level:</span>
+                                    <span class="impact-value high">High</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Risks Tab -->
+                    <div class="tab-content" id="risks">
+                        <h3>Risks & Assumptions</h3>
+                        <div class="risks-grid">
+                            <div class="risk-category">
+                                <h4>High Risk Items</h4>
+                                <div class="risk-item high">
+                                    <span class="risk-description">Data migration complexity</span>
+                                    <span class="risk-probability">High</span>
+                                    <span class="risk-impact">High</span>
+                                </div>
+                            </div>
+                            <div class="risk-category">
+                                <h4>Medium Risk Items</h4>
+                                <div class="risk-item medium">
+                                    <span class="risk-description">Integration testing delays</span>
+                                    <span class="risk-probability">Medium</span>
+                                    <span class="risk-impact">Medium</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ADO Integration Tab -->
+                    <div class="tab-content" id="ado-integration">
+                        <div class="ado-header">
+                            <h3><i class="fas fa-azure"></i> Azure DevOps Integration</h3>
+                            <div class="ado-actions">
+                                <button class="btn-primary" id="generateADOItems">
+                                    <i class="fas fa-magic"></i> Generate ADO Work Items
+                                </button>
+                                <button class="btn-secondary" id="exportADOPayload">
+                                    <i class="fas fa-download"></i> Export JSON Payload
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- ADO Configuration -->
+                        <div class="ado-section">
+                            <div class="ado-section-header">
+                                <h4><i class="fas fa-cog"></i> ADO Configuration</h4>
+                            </div>
+                            <div class="ado-config">
+                                <div class="form-group">
+                                    <label>Organization URL</label>
+                                    <input type="text" id="adoOrgUrl" value="https://dev.azure.com/your-org" placeholder="https://dev.azure.com/your-organization">
+                                </div>
+                                <div class="form-group">
+                                    <label>Project Name</label>
+                                    <input type="text" id="adoProject" value="Mobily-BSS-Transform" placeholder="Enter ADO project name">
+                                </div>
+                                <div class="form-group">
+                                    <label>Area Path</label>
+                                    <input type="text" id="adoAreaPath" value="Mobily-BSS-Transform\\Delivery" placeholder="Enter area path">
+                                </div>
+                                <div class="form-group">
+                                    <label>Iteration Path</label>
+                                    <input type="text" id="adoIterationPath" value="Mobily-BSS-Transform\\2025\\Q1" placeholder="Enter iteration path">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Work Item Templates -->
+                        <div class="ado-section">
+                            <div class="ado-section-header">
+                                <h4><i class="fas fa-file-alt"></i> Work Item Templates</h4>
+                                <button class="btn-small" id="addWorkItemTemplate">
+                                    <i class="fas fa-plus"></i> Add Template
+                                </button>
+                            </div>
+                            
+                            <div class="work-item-templates">
+                                <!-- Epic Template -->
+                                <div class="work-item-template" data-type="epic">
+                                    <div class="template-header">
+                                        <span class="template-type epic">Epic</span>
+                                        <span class="template-name">BSS Transformation Epic</span>
+                                        <div class="template-actions">
+                                            <button class="btn-small"><i class="fas fa-edit"></i></button>
+                                            <button class="btn-small"><i class="fas fa-trash"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="template-details">
+                                        <span class="template-description">High-level epic for BSS transformation initiative</span>
+                                        <span class="template-fields">Title, Description, Business Value, Risk</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Feature Template -->
+                                <div class="work-item-template" data-type="feature">
+                                    <div class="template-header">
+                                        <span class="template-type feature">Feature</span>
+                                        <span class="template-name">TMF Capability Feature</span>
+                                        <div class="template-actions">
+                                            <button class="btn-small"><i class="fas fa-edit"></i></button>
+                                            <button class="btn-small"><i class="fas fa-trash"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="template-details">
+                                        <span class="template-description">Feature for TMF capability implementation</span>
+                                        <span class="template-fields">Title, Description, Acceptance Criteria, Business Value</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- User Story Template -->
+                                <div class="work-item-template" data-type="userstory">
+                                    <div class="template-header">
+                                        <span class="template-type userstory">User Story</span>
+                                        <span class="template-name">Service Specification Story</span>
+                                        <div class="template-actions">
+                                            <button class="btn-small"><i class="fas fa-edit"></i></button>
+                                            <button class="btn-small"><i class="fas fa-trash"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="template-details">
+                                        <span class="template-description">User story for service specification delivery</span>
+                                        <span class="template-fields">Title, Description, Acceptance Criteria, Story Points</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Task Template -->
+                                <div class="work-item-template" data-type="task">
+                                    <div class="template-header">
+                                        <span class="template-type task">Task</span>
+                                        <span class="template-name">Development Task</span>
+                                        <div class="template-actions">
+                                            <button class="btn-small"><i class="fas fa-edit"></i></button>
+                                            <button class="btn-small"><i class="fas fa-trash"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="template-details">
+                                        <span class="template-description">Development task with effort estimation</span>
+                                        <span class="template-fields">Title, Description, Remaining Work, Activity</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Work Item Mapping -->
+                        <div class="ado-section">
+                            <div class="ado-section-header">
+                                <h4><i class="fas fa-sitemap"></i> BOM to ADO Mapping</h4>
+                            </div>
+                            
+                            <div class="work-item-mapping">
+                                <!-- Product Specification Mapping -->
+                                <div class="mapping-category">
+                                    <h5>Product Specification → Epic</h5>
+                                    <div class="mapping-item">
+                                        <span class="mapping-source">Product Specification</span>
+                                        <i class="fas fa-arrow-right"></i>
+                                        <span class="mapping-target">ADO Epic</span>
+                                        <span class="mapping-status mapped">Mapped</span>
+                                    </div>
+                                </div>
+
+                                <!-- Service Specifications Mapping -->
+                                <div class="mapping-category">
+                                    <h5>Service Specifications → Features & Stories</h5>
+                                    <div class="mapping-item">
+                                        <span class="mapping-source">CFS Services</span>
+                                        <i class="fas fa-arrow-right"></i>
+                                        <span class="mapping-target">ADO Features</span>
+                                        <span class="mapping-status mapped">Mapped</span>
+                                    </div>
+                                    <div class="mapping-item">
+                                        <span class="mapping-source">RFS Services</span>
+                                        <i class="fas fa-arrow-right"></i>
+                                        <span class="mapping-target">ADO User Stories</span>
+                                        <span class="mapping-status mapped">Mapped</span>
+                                    </div>
+                                </div>
+
+                                <!-- Resource Specifications Mapping -->
+                                <div class="mapping-category">
+                                    <h5>Resource Specifications → Tasks</h5>
+                                    <div class="mapping-item">
+                                        <span class="mapping-source">Skills Profiles</span>
+                                        <i class="fas fa-arrow-right"></i>
+                                        <span class="mapping-target">ADO Tasks</span>
+                                        <span class="mapping-status mapped">Mapped</span>
+                                    </div>
+                                    <div class="mapping-item">
+                                        <span class="mapping-source">Tooling & Infrastructure</span>
+                                        <i class="fas fa-arrow-right"></i>
+                                        <span class="mapping-target">ADO Tasks</span>
+                                        <span class="mapping-status mapped">Mapped</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Generated Work Items Preview -->
+                        <div class="ado-section">
+                            <div class="ado-section-header">
+                                <h4><i class="fas fa-eye"></i> Generated Work Items Preview</h4>
+                                <button class="btn-small" id="refreshPreview">
+                                    <i class="fas fa-sync"></i> Refresh
+                                </button>
+                            </div>
+                            
+                            <div class="work-items-preview">
+                                <div class="preview-tabs">
+                                    <button class="preview-tab active" data-preview="epics">Epics</button>
+                                    <button class="preview-tab" data-preview="features">Features</button>
+                                    <button class="preview-tab" data-preview="stories">User Stories</button>
+                                    <button class="preview-tab" data-preview="tasks">Tasks</button>
+                                </div>
+                                
+                                <div class="preview-content">
+                                    <div class="preview-pane active" id="epics-preview">
+                                        <div class="work-item-preview-item">
+                                            <div class="preview-header">
+                                                <span class="preview-type epic">Epic</span>
+                                                <span class="preview-title">Mobily BSS Transformation</span>
+                                            </div>
+                                            <div class="preview-details">
+                                                <span class="preview-field">Business Value: High</span>
+                                                <span class="preview-field">Risk: Medium</span>
+                                                <span class="preview-field">Area Path: Mobily-BSS-Transform\Delivery</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="preview-pane" id="features-preview">
+                                        <div class="work-item-preview-item">
+                                            <div class="preview-header">
+                                                <span class="preview-type feature">Feature</span>
+                                                <span class="preview-title">Solution Design & Estimation</span>
+                                            </div>
+                                            <div class="preview-details">
+                                                <span class="preview-field">Business Value: High</span>
+                                                <span class="preview-field">Acceptance Criteria: Design approved by stakeholders</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="preview-pane" id="stories-preview">
+                                        <div class="work-item-preview-item">
+                                            <div class="preview-header">
+                                                <span class="preview-type userstory">User Story</span>
+                                                <span class="preview-title">Architecture & Design Delivery</span>
+                                            </div>
+                                            <div class="preview-details">
+                                                <span class="preview-field">Story Points: 8</span>
+                                                <span class="preview-field">Acceptance Criteria: Architecture document completed</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="preview-pane" id="tasks-preview">
+                                        <div class="work-item-preview-item">
+                                            <div class="preview-header">
+                                                <span class="preview-type task">Task</span>
+                                                <span class="preview-title">Solution Architecture Design</span>
+                                            </div>
+                                            <div class="preview-details">
+                                                <span class="preview-field">Remaining Work: 32h</span>
+                                                <span class="preview-field">Activity: Design</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ADO Integration Status -->
+                        <div class="ado-section">
+                            <div class="ado-section-header">
+                                <h4><i class="fas fa-info-circle"></i> Integration Status</h4>
+                            </div>
+                            
+                            <div class="integration-status">
+                                <div class="status-item">
+                                    <span class="status-label">Connection Status:</span>
+                                    <span class="status-value connected">Connected</span>
+                                </div>
+                                <div class="status-item">
+                                    <span class="status-label">Last Sync:</span>
+                                    <span class="status-value">2025-01-15 10:30 AM</span>
+                                </div>
+                                <div class="status-item">
+                                    <span class="status-label">Work Items Created:</span>
+                                    <span class="status-value">24</span>
+                                </div>
+                                <div class="status-item">
+                                    <span class="status-label">Sync Status:</span>
+                                    <span class="status-value synced">Synced</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Estimates & Outputs Tab Content -->
+            <section class="tab-content" id="estimates">
+                <div class="panel-header">
+                    <h2><i class="fas fa-chart-line"></i> Estimates & Outputs</h2>
+                    <button class="btn-primary" id="generateEstimate">
+                        <i class="fas fa-magic"></i> Load Estimates
+                    </button>
+                </div>
+
+                <!-- Effort Estimates -->
+                <div class="estimate-section">
+                    <h3>Effort Estimates (Person Days)</h3>
+                    <div class="effort-breakdown">
+                        <div class="effort-item">
+                            <span class="role">Business Analyst</span>
+                            <span class="days">45</span>
+                        </div>
+                        <div class="effort-item">
+                            <span class="role">Solution Architect</span>
+                            <span class="days">32</span>
+                        </div>
+                        <div class="effort-item">
+                            <span class="role">Developer</span>
+                            <span class="days">120</span>
+                        </div>
+                        <div class="effort-item">
+                            <span class="role">QA Engineer</span>
+                            <span class="days">48</span>
+                        </div>
+                        <div class="effort-item total">
+                            <span class="role">Total</span>
+                            <span class="days">245</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cost Estimates -->
+                <div class="cost-section">
+                    <h3>Cost Estimates (USD)</h3>
+                    <div class="cost-breakdown">
+                        <div class="cost-item">
+                            <span class="cost-type">Professional Services</span>
+                            <span class="cost-amount">$735,000</span>
+                        </div>
+                        <div class="cost-item">
+                            <span class="cost-type">Licenses</span>
+                            <span class="cost-amount">$125,000</span>
+                        </div>
+                        <div class="cost-item">
+                            <span class="cost-type">Infrastructure</span>
+                            <span class="cost-amount">$85,000</span>
+                        </div>
+                        <div class="cost-item total">
+                            <span class="cost-type">Total Cost</span>
+                            <span class="cost-amount">$945,000</span>
+                        </div>
+                        <div class="margin-info">
+                            <span>Gross Margin: 35%</span>
+                            <span>ACV: $945,000</span>
+                            <span>TCV: $1,200,000</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timeline -->
+                <div class="timeline-section">
+                    <h3>Project Timeline</h3>
+                    <div class="timeline-info">
+                        <div class="timeline-item">
+                            <span>Start Date:</span>
+                            <span>Jan 15, 2025</span>
+                        </div>
+                        <div class="timeline-item">
+                            <span>End Date:</span>
+                            <span>Jul 15, 2025</span>
+                        </div>
+                        <div class="timeline-item">
+                            <span>Duration:</span>
+                            <span>6 months</span>
+                        </div>
+                        <div class="timeline-item">
+                            <span>Critical Path:</span>
+                            <span>Billing Integration</span>
+                        </div>
+                    </div>
+                    <div class="gantt-preview">
+                        <div class="gantt-bar" style="width: 100%; height: 20px; background: linear-gradient(90deg, #4CAF50 0%, #FF9800 50%, #4CAF50 100%); border-radius: 4px;"></div>
+                        <div class="gantt-labels">
+                            <span>Jan</span>
+                            <span>Feb</span>
+                            <span>Mar</span>
+                            <span>Apr</span>
+                            <span>May</span>
+                            <span>Jun</span>
+                            <span>Jul</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Bottom Dashboard fully removed; now rendered within Workflow tab -->
+
+        <!-- Workflow Visualizer (kept only once; remove if duplicative with tab content) -->
+        <section class="workflow-section" id="workflow-visualizer-bottom">
+            <div class="workflow-header">
+                <h2><i class="fas fa-route"></i> Delivery Journey Workflow</h2>
+                <div class="workflow-controls">
+                    <button class="btn-small" id="updateProgress">
+                        <i class="fas fa-sync"></i> Update Progress
+                    </button>
+                    <button class="btn-small" id="resetWorkflow">
+                        <i class="fas fa-undo"></i> Reset
+                    </button>
+                </div>
+            </div>
+            
+            <div class="workflow-container">
+                <!-- Presales Phase -->
+                <div class="workflow-phase presales">
+                    <div class="phase-header">
+                        <div class="phase-icon">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <h3>Presales</h3>
+                        <div class="phase-status completed">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Completed</span>
+                        </div>
+                    </div>
+                    <div class="phase-steps">
+                        <div class="step completed">
+                            <span class="step-icon"><i class="fas fa-check"></i></span>
+                            <span class="step-name">Solutioning</span>
+                        </div>
+                        <div class="step completed">
+                            <span class="step-icon"><i class="fas fa-check"></i></span>
+                            <span class="step-name">Service Design</span>
+                        </div>
+                        <div class="step completed">
+                            <span class="step-icon"><i class="fas fa-check"></i></span>
+                            <span class="step-name">Estimation</span>
+                        </div>
+                        <div class="step completed">
+                            <span class="step-icon"><i class="fas fa-check"></i></span>
+                            <span class="step-name">Pricing</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contract Phase -->
+                <div class="workflow-phase contract">
+                    <div class="phase-header">
+                        <div class="phase-icon">
+                            <i class="fas fa-file-contract"></i>
+                        </div>
+                        <h3>Contract</h3>
+                        <div class="phase-status in-progress">
+                            <i class="fas fa-clock"></i>
+                            <span>In Progress</span>
+                        </div>
+                    </div>
+                    <div class="phase-steps">
+                        <div class="step completed">
+                            <span class="step-icon"><i class="fas fa-check"></i></span>
+                            <span class="step-name">Negotiation</span>
+                        </div>
+                        <div class="step current">
+                            <span class="step-icon"><i class="fas fa-play"></i></span>
+                            <span class="step-name">Finalization</span>
+                        </div>
+                        <div class="step pending">
+                            <span class="step-icon"><i class="fas fa-circle"></i></span>
+                            <span class="step-name">Sign-off</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delivery Phase -->
+                <div class="workflow-phase delivery">
+                    <div class="phase-header">
+                        <div class="phase-icon">
+                            <i class="fas fa-rocket"></i>
+                        </div>
+                        <h3>Delivery</h3>
+                        <div class="phase-status pending">
+                            <i class="fas fa-hourglass-start"></i>
+                            <span>Pending</span>
+                        </div>
+                    </div>
+                    <div class="phase-steps">
+                        <div class="step pending">
+                            <span class="step-icon"><i class="fas fa-circle"></i></span>
+                            <span class="step-name">Definition</span>
+                        </div>
+                        <div class="step pending">
+                            <span class="step-icon"><i class="fas fa-circle"></i></span>
+                            <span class="step-name">Architecture</span>
+                        </div>
+                        <div class="step pending">
+                            <span class="step-icon"><i class="fas fa-circle"></i></span>
+                            <span class="step-name">Design</span>
+                        </div>
+                        <div class="step pending">
+                            <span class="step-icon"><i class="fas fa-circle"></i></span>
+                            <span class="step-name">Build</span>
+                        </div>
+                        <div class="step pending">
+                            <span class="step-icon"><i class="fas fa-circle"></i></span>
+                            <span class="step-name">Integration</span>
+                        </div>
+                        <div class="step pending">
+                            <span class="step-icon"><i class="fas fa-circle"></i></span>
+                            <span class="step-name">Testing</span>
+                        </div>
+                        <div class="step pending">
+                            <span class="step-icon"><i class="fas fa-circle"></i></span>
+                            <span class="step-name">Migration</span>
+                        </div>
+                        <div class="step pending">
+                            <span class="step-icon"><i class="fas fa-circle"></i></span>
+                            <span class="step-name">Cutover</span>
+                        </div>
+                        <div class="step pending">
+                            <span class="step-icon"><i class="fas fa-circle"></i></span>
+                            <span class="step-name">Release</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Post-Deployment Phase -->
+                <div class="workflow-phase post-deployment">
+                    <div class="phase-header">
+                        <div class="phase-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3>Post-Deployment</h3>
+                        <div class="phase-status pending">
+                            <i class="fas fa-hourglass-start"></i>
+                            <span>Pending</span>
+                        </div>
+                    </div>
+                    <div class="phase-steps">
+                        <div class="step pending">
+                            <span class="step-icon"><i class="fas fa-circle"></i></span>
+                            <span class="step-name">Testing</span>
+                        </div>
+                        <div class="step pending">
+                            <span class="step-icon"><i class="fas fa-circle"></i></span>
+                            <span class="step-name">Monitoring</span>
+                        </div>
+                        <div class="step pending">
+                            <span class="step-icon"><i class="fas fa-circle"></i></span>
+                            <span class="step-name">Hypercare</span>
+                        </div>
+                        <div class="step pending">
+                            <span class="step-icon"><i class="fas fa-circle"></i></span>
+                            <span class="step-name">Warranty</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Summary -->
+            <div class="workflow-summary">
+                <div class="summary-item">
+                    <span class="summary-label">Overall Progress:</span>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 35%"></div>
+                    </div>
+                    <span class="summary-value">35%</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Current Phase:</span>
+                    <span class="summary-value">Contract Finalization</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Next Milestone:</span>
+                    <span class="summary-value">Contract Sign-off</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Estimated Go-Live:</span>
+                    <span class="summary-value">Q3 2025</span>
+                </div>
+            </div>
+        </section>
+
+        
+    </div>
+
+    <!-- UI Toggle Button -->
+    <div class="ui-toggle">
+        <button class="toggle-btn" id="uiToggle">
+            <i class="fas fa-exchange-alt"></i>
+            <span>Switch to Modern UI</span>
+        </button>
+    </div>
+
+    <script src="lib/xlsx.full.min.js"></script>
+    <script src="script.js"></script>
+    
+
+</body>
+</html>

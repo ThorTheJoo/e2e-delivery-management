@@ -1,0 +1,830 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Project, TMFCapability, ETOMProcess, WorkPackage, Milestone, Risk, Dependency, Document } from '@/types';
+import { dataService } from '@/lib/data-service';
+import { formatDate, calculateEffortTotal, getStatusColor, getSeverityColor } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { SpecSyncImport, SpecSyncState } from '@/components/specsync-import';
+import { RequirementBadge } from '@/components/requirement-badge';
+import { TMFDomainCapabilityManager } from '@/components/tmf-domain-capability-manager';
+import { NavigationSidebar } from '@/components/navigation-sidebar';
+import { useToast, ToastContainer } from '@/components/ui/toast';
+import { mapSpecSyncToCapabilities, saveSpecSyncData, loadSpecSyncData, clearSpecSyncData } from '@/lib/specsync-utils';
+import { 
+  Network, 
+  Lightbulb, 
+  Route, 
+  Calculator, 
+  Calendar, 
+  DollarSign, 
+  FileText, 
+  AlertTriangle,
+  Flag,
+  Users,
+  Clock,
+  TrendingUp,
+  BarChart3,
+  ChevronDown,
+  ChevronRight
+} from 'lucide-react';
+import Link from 'next/link';
+
+export default function HomePage() {
+  const [project, setProject] = useState<Project | null>(null);
+  const [tmfCapabilities, setTmfCapabilities] = useState<TMFCapability[]>([]);
+  const [etomProcesses, setEtomProcesses] = useState<ETOMProcess[]>([]);
+  const [workPackages, setWorkPackages] = useState<WorkPackage[]>([]);
+  const [milestones, setMilestones] = useState<Milestone[]>([]);
+  const [risks, setRisks] = useState<Risk[]>([]);
+  const [dependencies, setDependencies] = useState<Dependency[]>([]);
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [loading, setLoading] = useState(true);
+  const [specSyncState, setSpecSyncState] = useState<SpecSyncState | null>(null);
+  const [requirementCounts, setRequirementCounts] = useState<Record<string, number>>({});
+  const [isSpecSyncExpanded, setIsSpecSyncExpanded] = useState(true);
+  const [isTmfManagerExpanded, setIsTmfManagerExpanded] = useState(true);
+  
+  const toast = useToast();
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        console.log('Starting data load...');
+        
+        // Test data service first
+        console.log('Testing data service...');
+        const testProject = await dataService.getProject();
+        console.log('Test project loaded:', testProject);
+        
+        const [
+          projectData,
+          tmfData,
+          etomData,
+          workPackagesData,
+          milestonesData,
+          risksData,
+          dependenciesData,
+          documentsData
+        ] = await Promise.all([
+          dataService.getProject(),
+          dataService.getTMFCapabilities(),
+          dataService.getETOMProcesses(),
+          dataService.getWorkPackages(),
+          dataService.getMilestones(),
+          dataService.getRisks(),
+          dataService.getDependencies(),
+          dataService.getDocuments()
+        ]);
+
+        console.log('Data loaded successfully:', {
+          project: projectData,
+          tmfCapabilities: tmfData?.length,
+          etomProcesses: etomData?.length,
+          workPackages: workPackagesData?.length,
+          milestones: milestonesData?.length,
+          risks: risksData?.length,
+          dependencies: dependenciesData?.length,
+          documents: documentsData?.length
+        });
+
+        setProject(projectData);
+        setTmfCapabilities(tmfData || []);
+        setEtomProcesses(etomData || []);
+        setWorkPackages(workPackagesData || []);
+        setMilestones(milestonesData || []);
+        setRisks(risksData || []);
+        setDependencies(dependenciesData || []);
+        setDocuments(documentsData || []);
+      } catch (error) {
+        console.error('Error loading data:', error);
+        
+        // Fallback data if data service fails
+        console.log('Using fallback data...');
+        const fallbackProject: Project = {
+          id: 'FALLBACK-001',
+          name: 'Fallback Project',
+          customer: 'Demo Customer',
+          status: 'In Progress',
+          startDate: '2025-01-15',
+          endDate: '2025-07-15',
+          duration: '6 months',
+          teamSize: 4,
+          workingDaysPerMonth: 20
+        };
+        
+        setProject(fallbackProject);
+        setTmfCapabilities([]);
+        setEtomProcesses([]);
+        setWorkPackages([]);
+        setMilestones([]);
+        setRisks([]);
+        setDependencies([]);
+        setDocuments([]);
+        
+        // Set loading to false even on error so the UI can render
+        setLoading(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  // Load saved SpecSync data
+  useEffect(() => {
+    const savedState = loadSpecSyncData();
+    if (savedState) {
+      setSpecSyncState(savedState);
+      updateRequirementCounts(savedState);
+      // Don't show toast on page reload - only show when user actually imports
+    }
+  }, []);
+
+  const handleSpecSyncImport = (state: SpecSyncState) => {
+    console.log('handleSpecSyncImport called with:', state);
+    setSpecSyncState(state);
+    updateRequirementCounts(state);
+    saveSpecSyncData(state);
+    
+    const mapping = mapSpecSyncToCapabilities(state.items, tmfCapabilities);
+    const topCaps = Object.entries(mapping.countsByCapability)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 2)
+      .map(([k, v]) => `${k}(${v})`)
+      .join(', ');
+    
+    // Enhanced success notification
+    toast.showSuccess(
+      '🎉 SpecSync Import Successful!',
+      `Successfully imported ${state.items.length} requirements from ${Object.keys(state.counts.domains).length} domains. ${topCaps ? `Top capabilities: ${topCaps}` : ''}`
+    );
+  };
+
+  const handleSpecSyncClear = () => {
+    setSpecSyncState(null);
+    setRequirementCounts({});
+    clearSpecSyncData();
+    toast.showInfo('🗑️ SpecSync data cleared successfully');
+  };
+
+  const updateRequirementCounts = (state: SpecSyncState) => {
+    const mapping = mapSpecSyncToCapabilities(state.items, tmfCapabilities);
+    setRequirementCounts(mapping.countsByCapability);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-lg text-muted-foreground">Loading E2E Delivery Management System...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!project) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-destructive">Error Loading Project</h1>
+          <p className="mt-2 text-muted-foreground">Unable to load project data</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const totalEffort = tmfCapabilities.reduce((sum, capability) => {
+    return sum + calculateEffortTotal(capability.baseEffort);
+  }, 0);
+
+  const completedWorkPackages = workPackages.filter(wp => wp.status === 'Completed').length;
+  const totalWorkPackages = workPackages.length;
+  const progressPercentage = totalWorkPackages > 0 ? (completedWorkPackages / totalWorkPackages) * 100 : 0;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-tmf-50 via-white to-etom-50">
+      {/* Header */}
+      <header className="bg-gradient-to-r from-tmf-600 to-etom-600 text-white shadow-lg">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Network className="h-8 w-8" />
+              <div>
+                <h1 className="text-2xl font-bold">CSG Delivery Orchestrator</h1>
+                <p className="text-tmf-100">v1.0 - ODA 2025 Compliant</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-6">
+              <div className="text-right">
+                <div className="text-sm text-tmf-100">Project</div>
+                <div className="font-semibold">{project.name}</div>
+              </div>
+              <div className="text-right">
+                <div className="text-sm text-tmf-100">Status</div>
+                <div className="font-semibold">{project.status}</div>
+              </div>
+              <div className="text-right">
+                <div className="text-sm text-tmf-100">Customer</div>
+                <div className="font-semibold">{project.customer}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content with Sidebar */}
+      <div className="flex h-[calc(100vh-120px)]">
+        {/* Navigation Sidebar */}
+        <NavigationSidebar 
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
+        
+        {/* Main Content Area */}
+        <main className="flex-1 overflow-y-auto p-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-8">
+            <TabsTrigger value="dashboard" className="flex items-center space-x-2">
+              <BarChart3 className="h-4 w-4" />
+              <span className="hidden sm:inline">Dashboard</span>
+            </TabsTrigger>
+            <TabsTrigger value="tmf" className="flex items-center space-x-2">
+              <Network className="h-4 w-4" />
+              <span className="hidden sm:inline">TMF</span>
+            </TabsTrigger>
+            <TabsTrigger value="tmf-demo" className="flex items-center space-x-2">
+              <Network className="h-4 w-4" />
+              <span className="hidden sm:inline">TMF Demo</span>
+            </TabsTrigger>
+            <TabsTrigger value="etom" className="flex items-center space-x-2">
+              <Route className="h-4 w-4" />
+              <span className="hidden sm:inline">eTOM</span>
+            </TabsTrigger>
+            <TabsTrigger value="estimation" className="flex items-center space-x-2">
+              <Calculator className="h-4 w-4" />
+              <span className="hidden sm:inline">Estimation</span>
+            </TabsTrigger>
+            <TabsTrigger value="scheduling" className="flex items-center space-x-2">
+              <Calendar className="h-4 w-4" />
+              <span className="hidden sm:inline">Scheduling</span>
+            </TabsTrigger>
+            <TabsTrigger value="commercial" className="flex items-center space-x-2">
+              <DollarSign className="h-4 w-4" />
+              <span className="hidden sm:inline">Commercial</span>
+            </TabsTrigger>
+            <TabsTrigger value="documents" className="flex items-center space-x-2">
+              <FileText className="h-4 w-4" />
+              <span className="hidden sm:inline">Documents</span>
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Dashboard Tab */}
+          <TabsContent value="dashboard" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Card className="metric-card">
+                <div className="metric-value">{totalEffort}</div>
+                <div className="metric-label">Total Effort (Days)</div>
+              </Card>
+              <Card className="metric-card">
+                <div className="metric-value">{tmfCapabilities.length}</div>
+                <div className="metric-label">TMF Capabilities</div>
+              </Card>
+              <Card className="metric-card">
+                <div className="metric-value">{etomProcesses.length}</div>
+                <div className="metric-label">eTOM Processes</div>
+              </Card>
+              <Card className="metric-card">
+                <div className="metric-value">{progressPercentage.toFixed(0)}%</div>
+                <div className="metric-label">Progress</div>
+              </Card>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <TrendingUp className="h-5 w-5" />
+                    <span>Project Overview</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <div className="text-sm text-muted-foreground">Duration</div>
+                      <div className="font-semibold">{project.duration}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-muted-foreground">Team Size</div>
+                      <div className="font-semibold">{project.teamSize} people</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-muted-foreground">Start Date</div>
+                      <div className="font-semibold">{formatDate(project.startDate)}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-muted-foreground">End Date</div>
+                      <div className="font-semibold">{formatDate(project.endDate)}</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <AlertTriangle className="h-5 w-5" />
+                    <span>Risks & Issues</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {risks.slice(0, 3).map((risk) => (
+                      <div key={risk.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                        <div>
+                          <div className="font-medium">{risk.name}</div>
+                          <div className="text-sm text-muted-foreground">{risk.description}</div>
+                        </div>
+                        <div className={`status-badge ${getSeverityColor(risk.severity)}`}>
+                          {risk.severity}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* TMF Capabilities Tab */}
+          <TabsContent value="tmf" className="space-y-6">
+            {/* TMF ODA Management Section */}
+            <Card>
+              <CardHeader>
+                                 <CardTitle className="flex items-center space-x-2">
+                   <Network className="h-5 w-5" />
+                   <span>TMF Domain and Capability Management</span>
+                 </CardTitle>
+                 <CardDescription>
+                   Manage TMF ODA domains and capabilities with imported requirements
+                 </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* SpecSync Import at the top - Collapsible */}
+                <div className="border-b pb-6">
+                  <div 
+                    className="flex items-center justify-between mb-4 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors"
+                    onClick={() => setIsSpecSyncExpanded(!isSpecSyncExpanded)}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-lg border-2 border-blue-200">
+                        {isSpecSyncExpanded ? (
+                          <ChevronDown className="w-5 h-5 text-blue-700" />
+                        ) : (
+                          <ChevronRight className="w-5 h-5 text-blue-700" />
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="text-base font-semibold flex items-center space-x-2">
+                          <FileText className="h-4 w-4" />
+                          <span>SpecSync Import</span>
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          Import requirements and map to TMF capabilities
+                        </p>
+                      </div>
+                    </div>
+                    {specSyncState && (
+                      <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
+                        <Badge variant="secondary">
+                          {specSyncState.items.length} requirements loaded
+                        </Badge>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleSpecSyncClear}
+                        >
+                          Clear
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                  {isSpecSyncExpanded && (
+                    <SpecSyncImport
+                      onImport={handleSpecSyncImport}
+                      onClear={handleSpecSyncClear}
+                      currentState={specSyncState}
+                    />
+                  )}
+                </div>
+
+                {/* TMF Domain and Capability Manager - Collapsible */}
+                <div className="border-b pb-6">
+                  <div 
+                    className="flex items-center justify-between mb-4 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors"
+                    onClick={() => setIsTmfManagerExpanded(!isTmfManagerExpanded)}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-lg border-2 border-green-200">
+                        {isTmfManagerExpanded ? (
+                          <ChevronDown className="w-5 h-5 text-green-700" />
+                        ) : (
+                          <ChevronRight className="w-5 h-5 text-green-700" />
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="text-base font-semibold flex items-center space-x-2">
+                          <Network className="h-4 w-4" />
+                          <span>TMF Domain and Capability Manager</span>
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          Manage TMF ODA domains and capabilities with imported requirements
+                        </p>
+                      </div>
+                    </div>
+                    {specSyncState && (
+                      <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
+                        <Badge variant="secondary">
+                          {specSyncState.items.length} requirements available
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
+                  {isTmfManagerExpanded && (
+                    <TMFDomainCapabilityManager specSyncData={specSyncState} />
+                  )}
+                </div>
+
+                {/* TMF Capabilities Overview */}
+                <div className="border-t pt-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                                             <h3 className="text-base font-semibold flex items-center space-x-2">
+                         <Network className="h-4 w-4" />
+                         <span>TMF Capabilities Overview</span>
+                       </h3>
+                      <p className="text-sm text-muted-foreground">
+                        View TMF capabilities with requirement counts from imported SpecSync data
+                      </p>
+                    </div>
+                    {specSyncState && (
+                      <Badge variant="secondary">
+                        {specSyncState.items.length} requirements mapped
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {tmfCapabilities.map((capability) => (
+                      <Card key={capability.id} className="effort-card hover-lift">
+                        <CardHeader className="pb-3">
+                          <CardTitle className="text-base flex items-center justify-between">
+                            <span className="truncate">{capability.name}</span>
+                            <RequirementBadge count={requirementCounts[capability.id] || 0} />
+                          </CardTitle>
+                          <CardDescription className="text-xs line-clamp-2">{capability.description}</CardDescription>
+                        </CardHeader>
+                        <CardContent className="pt-0">
+                          <div className="space-y-3">
+                            <div className="grid grid-cols-2 gap-2 text-xs">
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">BA:</span>
+                                <span className="font-medium">{capability.baseEffort.businessAnalyst}d</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">SA:</span>
+                                <span className="font-medium">{capability.baseEffort.solutionArchitect}d</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Dev:</span>
+                                <span className="font-medium">{capability.baseEffort.developer}d</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">QA:</span>
+                                <span className="font-medium">{capability.baseEffort.qaEngineer}d</span>
+                              </div>
+                            </div>
+                            <div className="pt-2 border-t">
+                              <div className="text-xs text-muted-foreground mb-1">Segments</div>
+                              <div className="flex flex-wrap gap-1">
+                                {capability.segments.slice(0, 3).map((segment) => (
+                                  <span key={segment} className="px-1.5 py-0.5 bg-tmf-100 text-tmf-800 text-xs rounded">
+                                    {segment}
+                                  </span>
+                                ))}
+                                {capability.segments.length > 3 && (
+                                  <span className="px-1.5 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">
+                                    +{capability.segments.length - 3}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                        <CardFooter className="pt-0">
+                          <div className="w-full text-center">
+                            <div className="text-xs text-muted-foreground mb-1">Total Effort</div>
+                            <div className="text-lg font-bold text-tmf-600">
+                              {calculateEffortTotal(capability.baseEffort)} days
+                            </div>
+                          </div>
+                        </CardFooter>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* TMF Demo Tab */}
+          <TabsContent value="tmf-demo" className="space-y-6">
+            <div className="text-center py-12">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">TMF ODA Management Demo</h2>
+              <p className="text-gray-600 mb-6">
+                Experience the interactive TMF ODA domain and capability management system in a dedicated demo environment
+              </p>
+              <div className="flex justify-center space-x-4">
+                <Link 
+                  href="/tmf-demo" 
+                  className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <Network className="w-5 h-5 mr-2" />
+                  Launch TMF ODA Demo
+                </Link>
+                <Button 
+                  variant="outline"
+                  onClick={() => setActiveTab('tmf')}
+                  className="inline-flex items-center px-6 py-3"
+                >
+                  <Network className="w-5 h-5 mr-2" />
+                  Go to Main TMF Section
+                </Button>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* eTOM Processes Tab */}
+          <TabsContent value="etom" className="space-y-6">
+            <div className="space-y-4">
+              {etomProcesses.map((process) => (
+                <Card key={process.id}>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <span>Level {process.level}: {process.name}</span>
+                    </CardTitle>
+                    <CardDescription>{process.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <div className="text-sm font-medium mb-2">Effort Breakdown</div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between">
+                            <span className="text-sm">Business Analyst:</span>
+                            <span className="font-medium">{process.baseEffort.businessAnalyst}d</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm">Solution Architect:</span>
+                            <span className="font-medium">{process.baseEffort.solutionArchitect}d</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm">Developer:</span>
+                            <span className="font-medium">{process.baseEffort.developer}d</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm">QA Engineer:</span>
+                            <span className="font-medium">{process.baseEffort.qaEngineer}d</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium mb-2">Complexity Factors</div>
+                        <div className="space-y-2">
+                          {Object.entries(process.complexityFactors).map(([key, value]) => (
+                            <div key={key} className="flex justify-between">
+                              <span className="text-sm capitalize">{key.replace(/([A-Z])/g, ' $1')}:</span>
+                              <span className="font-medium">{value}x</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Estimation Tab */}
+          <TabsContent value="estimation" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Work Package Estimation</CardTitle>
+                <CardDescription>Calculate effort estimates for work packages</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {workPackages.map((workPackage) => (
+                    <div key={workPackage.id} className="p-4 border rounded-lg">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="font-semibold">{workPackage.name}</h3>
+                        <div className={`status-badge ${getStatusColor(workPackage.status)}`}>
+                          {workPackage.status}
+                        </div>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-3">{workPackage.description}</p>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div>
+                          <div className="text-muted-foreground">BA Effort</div>
+                          <div className="font-medium">{workPackage.effort.businessAnalyst}d</div>
+                        </div>
+                        <div>
+                          <div className="text-muted-foreground">SA Effort</div>
+                          <div className="font-medium">{workPackage.effort.solutionArchitect}d</div>
+                        </div>
+                        <div>
+                          <div className="text-muted-foreground">Dev Effort</div>
+                          <div className="font-medium">{workPackage.effort.developer}d</div>
+                        </div>
+                        <div>
+                          <div className="text-muted-foreground">QA Effort</div>
+                          <div className="font-medium">{workPackage.effort.qaEngineer}d</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Scheduling Tab */}
+          <TabsContent value="scheduling" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Calendar className="h-5 w-5" />
+                    <span>Project Timeline</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Start Date</span>
+                      <span className="font-medium">{formatDate(project.startDate)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">End Date</span>
+                      <span className="font-medium">{formatDate(project.endDate)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Duration</span>
+                      <span className="font-medium">{project.duration}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Working Days/Month</span>
+                      <span className="font-medium">{project.workingDaysPerMonth}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Flag className="h-5 w-5" />
+                    <span>Milestones</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {milestones.map((milestone) => (
+                      <div key={milestone.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                        <div>
+                          <div className="font-medium">{milestone.name}</div>
+                          <div className="text-sm text-muted-foreground">{milestone.date}</div>
+                        </div>
+                        <div className={`status-badge ${getStatusColor(milestone.status)}`}>
+                          {milestone.status}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Commercial Tab */}
+          <TabsContent value="commercial" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <DollarSign className="h-5 w-5" />
+                  <span>Commercial Model</span>
+                </CardTitle>
+                <CardDescription>Project financial overview and cost structure</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Cost Structure</h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span>Base Cost:</span>
+                        <span className="font-medium">$0</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Risk Contingency:</span>
+                        <span className="font-medium">$0</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Profit Margin:</span>
+                        <span className="font-medium">$0</span>
+                      </div>
+                      <div className="border-t pt-2 font-semibold">
+                        <div className="flex justify-between">
+                          <span>Total Cost:</span>
+                          <span>$0</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Resource Allocation</h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span>Team Size:</span>
+                        <span className="font-medium">{project.teamSize} people</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Total Effort:</span>
+                        <span className="font-medium">{totalEffort} days</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Duration:</span>
+                        <span className="font-medium">{project.duration}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Documents Tab */}
+          <TabsContent value="documents" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <FileText className="h-5 w-5" />
+                  <span>Project Documents</span>
+                </CardTitle>
+                <CardDescription>Manage project documentation and deliverables</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {documents.map((document) => (
+                    <div key={document.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <FileText className="h-5 w-5 text-muted-foreground" />
+                        <div>
+                          <div className="font-medium">{document.name}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {document.type} • v{document.version} • {formatDate(document.lastModified)}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className={`status-badge ${getStatusColor(document.status)}`}>
+                          {document.status}
+                        </div>
+                        <Button variant="outline" size="sm">View</Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </main>
+      </div>
+      
+      <ToastContainer toasts={toast.toasts} onRemove={toast.removeToast} />
+    </div>
+  );
+}

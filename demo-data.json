@@ -1,0 +1,442 @@
+{
+  "project": {
+    "id": "MOB-2025-001",
+    "name": "Mobily BSS Transformation",
+    "customer": "Mobily",
+    "status": "Pre-CR",
+    "startDate": "2025-01-15",
+    "endDate": "2025-07-15",
+    "duration": "6 months",
+    "teamSize": 4,
+    "workingDaysPerMonth": 20
+  },
+  "tmfCapabilities": {
+    "customerInformationManagement": {
+      "id": "crm",
+      "name": "Customer Information Management",
+      "description": "Comprehensive customer data management across all segments",
+      "segments": ["Consumer", "USMB", "MSMB", "Corporate", "Gov"],
+      "baseEffort": {
+        "businessAnalyst": 15,
+        "solutionArchitect": 8,
+        "developer": 25,
+        "qaEngineer": 12
+      },
+      "complexityFactors": {
+        "dataQuality": 1.2,
+        "integrationCount": 1.1,
+        "complianceLevel": 1.15
+      }
+    },
+    "productPortfolioManagement": {
+      "id": "portfolio",
+      "name": "Product/Offer & Sales Portfolio Management",
+      "description": "End-to-end product lifecycle management",
+      "segments": ["Mobile", "FTTH", "Devices", "Digital", "IoT"],
+      "baseEffort": {
+        "businessAnalyst": 12,
+        "solutionArchitect": 10,
+        "developer": 30,
+        "qaEngineer": 15
+      },
+      "complexityFactors": {
+        "productVariants": 1.3,
+        "channelCount": 1.2,
+        "pricingComplexity": 1.25
+      }
+    },
+    "billingAndCharging": {
+      "id": "billing",
+      "name": "Charging/Billing/Payments",
+      "description": "Comprehensive billing and revenue management",
+      "segments": ["Postpaid", "Prepaid", "Converged"],
+      "baseEffort": {
+        "businessAnalyst": 18,
+        "solutionArchitect": 12,
+        "developer": 40,
+        "qaEngineer": 18
+      },
+      "complexityFactors": {
+        "billingCycles": 1.4,
+        "paymentMethods": 1.2,
+        "taxComplexity": 1.3
+      }
+    },
+    "orderManagement": {
+      "id": "order",
+      "name": "Order Management",
+      "description": "Complete order lifecycle management",
+      "segments": ["L2O", "O2C"],
+      "baseEffort": {
+        "businessAnalyst": 10,
+        "solutionArchitect": 6,
+        "developer": 20,
+        "qaEngineer": 10
+      },
+      "complexityFactors": {
+        "orderTypes": 1.2,
+        "approvalWorkflows": 1.3,
+        "fulfillmentComplexity": 1.25
+      }
+    },
+    "careAndAssurance": {
+      "id": "care",
+      "name": "Care & Assurance",
+      "description": "Customer service and support management",
+      "segments": ["T2R", "Self-Service"],
+      "baseEffort": {
+        "businessAnalyst": 8,
+        "solutionArchitect": 5,
+        "developer": 15,
+        "qaEngineer": 8
+      },
+      "complexityFactors": {
+        "channelCount": 1.2,
+        "escalationLevels": 1.15,
+        "knowledgeBase": 1.1
+      }
+    }
+  },
+  "etomProcesses": {
+    "leadToOrder": {
+      "id": "l2o",
+      "name": "Lead-to-Order",
+      "description": "Complete lead management and order conversion",
+      "complexityMultiplier": 1.2,
+      "dependencies": ["crm", "portfolio"],
+      "outputs": ["qualifiedLead", "order", "customerProfile"]
+    },
+    "orderToCash": {
+      "id": "o2c",
+      "name": "Order-to-Cash",
+      "description": "Order processing through to revenue recognition",
+      "complexityMultiplier": 1.3,
+      "dependencies": ["order", "billing"],
+      "outputs": ["fulfilledOrder", "invoice", "payment"]
+    },
+    "troubleToResolve": {
+      "id": "t2r",
+      "name": "Trouble-to-Resolve",
+      "description": "Issue identification and resolution",
+      "complexityMultiplier": 1.1,
+      "dependencies": ["care"],
+      "outputs": ["resolvedIssue", "customerSatisfaction"]
+    },
+    "conceptToMarket": {
+      "id": "c2m",
+      "name": "Concept-to-Market",
+      "description": "Product concept through market launch",
+      "complexityMultiplier": 1.4,
+      "dependencies": ["portfolio"],
+      "outputs": ["launchedProduct", "marketMetrics"]
+    }
+  },
+  "strategies": {
+    "growth": {
+      "name": "Growth",
+      "description": "Focus on market expansion and revenue growth",
+      "costMultiplier": 1.1,
+      "timelineMultiplier": 1.15,
+      "riskLevel": "Medium"
+    },
+    "cxEnhancement": {
+      "name": "CX Enhancement",
+      "description": "Improve customer experience and satisfaction",
+      "costMultiplier": 1.05,
+      "timelineMultiplier": 1.1,
+      "riskLevel": "Low"
+    },
+    "costOptimization": {
+      "name": "Cost Optimization",
+      "description": "Reduce costs while maintaining quality",
+      "costMultiplier": 0.9,
+      "timelineMultiplier": 1.2,
+      "riskLevel": "Medium"
+    },
+    "compliance": {
+      "name": "Compliance",
+      "description": "Ensure regulatory and industry compliance",
+      "costMultiplier": 1.2,
+      "timelineMultiplier": 1.25,
+      "riskLevel": "High"
+    },
+    "timeToMarket": {
+      "name": "Time-to-Market",
+      "description": "Accelerate delivery for competitive advantage",
+      "costMultiplier": 1.3,
+      "timelineMultiplier": 0.8,
+      "riskLevel": "High"
+    }
+  },
+  "rateCards": {
+    "businessAnalyst": {
+      "baseRate": 1200,
+      "currency": "USD",
+      "geographicMultipliers": {
+        "US": 1.0,
+        "UK": 0.9,
+        "India": 0.4,
+        "MiddleEast": 0.8
+      }
+    },
+    "solutionArchitect": {
+      "baseRate": 1800,
+      "currency": "USD",
+      "geographicMultipliers": {
+        "US": 1.0,
+        "UK": 0.9,
+        "India": 0.4,
+        "MiddleEast": 0.8
+      }
+    },
+    "developer": {
+      "baseRate": 1400,
+      "currency": "USD",
+      "geographicMultipliers": {
+        "US": 1.0,
+        "UK": 0.9,
+        "India": 0.4,
+        "MiddleEast": 0.8
+      }
+    },
+    "qaEngineer": {
+      "baseRate": 1000,
+      "currency": "USD",
+      "geographicMultipliers": {
+        "US": 1.0,
+        "UK": 0.9,
+        "India": 0.4,
+        "MiddleEast": 0.8
+      }
+    }
+  },
+  "dependencies": {
+    "system": [
+      {
+        "id": "dep-001",
+        "name": "Legacy CRM",
+        "type": "System",
+        "status": "Pending",
+        "owner": "IT Team",
+        "description": "Existing customer relationship management system",
+        "impact": "High",
+        "resolutionDate": "2025-02-15"
+      },
+      {
+        "id": "dep-002",
+        "name": "Billing Gateway",
+        "type": "System",
+        "status": "In Progress",
+        "owner": "Integration Team",
+        "description": "Payment processing gateway integration",
+        "impact": "Medium",
+        "resolutionDate": "2025-01-30"
+      }
+    ],
+    "data": [
+      {
+        "id": "dep-003",
+        "name": "Customer Master Data",
+        "type": "Data",
+        "status": "Resolved",
+        "owner": "Data Team",
+        "description": "Customer data quality and migration",
+        "impact": "High",
+        "resolutionDate": "2025-01-20"
+      }
+    ],
+    "infrastructure": [
+      {
+        "id": "dep-004",
+        "name": "Cloud Environment",
+        "type": "Infrastructure",
+        "status": "In Progress",
+        "owner": "Infra Team",
+        "description": "AWS/Azure cloud infrastructure setup",
+        "impact": "Medium",
+        "resolutionDate": "2025-02-01"
+      }
+    ]
+  },
+  "integrations": {
+    "crmApi": {
+      "name": "CRM API",
+      "type": "REST",
+      "status": "Designed",
+      "description": "Customer data management API",
+      "endpoints": [
+        "/customers",
+        "/customers/{id}",
+        "/customers/{id}/orders"
+      ],
+      "authentication": "OAuth 2.0",
+      "rateLimit": "1000 requests/minute",
+      "sla": "99.9% uptime"
+    },
+    "billingGateway": {
+      "name": "Billing Gateway",
+      "type": "SOAP",
+      "status": "Pending",
+      "description": "Payment processing integration",
+      "endpoints": [
+        "/process-payment",
+        "/refund",
+        "/status"
+      ],
+      "authentication": "API Key",
+      "rateLimit": "500 requests/minute",
+      "sla": "99.95% uptime"
+    }
+  },
+  "nfrs": {
+    "performance": {
+      "responseTime": "< 2 seconds",
+      "throughput": "1000 requests/second",
+      "concurrency": "1000 users"
+    },
+    "availability": {
+      "uptime": "99.9%",
+      "maintenanceWindow": "2 hours/month",
+      "disasterRecovery": "RTO: 4 hours, RPO: 1 hour"
+    },
+    "security": {
+      "authentication": "OAuth 2.0, SAML 2.0",
+      "authorization": "Role-based access control",
+      "dataProtection": "PII masking, encryption at rest",
+      "compliance": "GDPR, PCI-DSS, SOX"
+    }
+  },
+  "assumptions": {
+    "technical": [
+      {
+        "id": "ass-001",
+        "category": "Technical",
+        "description": "Existing infrastructure can support new load",
+        "impact": "Medium",
+        "mitigation": "Performance testing and capacity planning",
+        "owner": "Infrastructure Team"
+      },
+      {
+        "id": "ass-002",
+        "category": "Technical",
+        "description": "Data migration tools are available",
+        "impact": "High",
+        "mitigation": "Tool evaluation and procurement",
+        "owner": "Data Team"
+      }
+    ],
+    "business": [
+      {
+        "id": "ass-003",
+        "category": "Business",
+        "description": "Business users available for UAT",
+        "impact": "Medium",
+        "mitigation": "Stakeholder commitment and scheduling",
+        "owner": "Project Manager"
+      }
+    ],
+    "external": [
+      {
+        "id": "ass-004",
+        "category": "External",
+        "description": "Third-party vendor support available",
+        "impact": "Low",
+        "mitigation": "Vendor agreements and SLAs",
+        "owner": "Vendor Manager"
+      }
+    ]
+  },
+  "risks": {
+    "high": [
+      {
+        "id": "risk-001",
+        "description": "Data migration complexity",
+        "probability": "High",
+        "impact": "High",
+        "mitigation": "Phased migration approach with rollback plan",
+        "owner": "Data Team",
+        "contingency": "$100K additional budget"
+      }
+    ],
+    "medium": [
+      {
+        "id": "risk-002",
+        "description": "Integration testing delays",
+        "probability": "Medium",
+        "impact": "Medium",
+        "mitigation": "Early integration testing and parallel development",
+        "owner": "Integration Team",
+        "contingency": "2 weeks buffer in timeline"
+      }
+    ],
+    "low": [
+      {
+        "id": "risk-003",
+        "description": "User adoption resistance",
+        "probability": "Low",
+        "impact": "Medium",
+        "mitigation": "Change management and training programs",
+        "owner": "Change Management Team",
+        "contingency": "Extended training period"
+      }
+    ]
+  },
+  "templates": {
+    "mobily": {
+      "name": "Mobily BSS Template",
+      "description": "Standard template for Mobily BSS transformations",
+      "capabilities": ["crm", "portfolio"],
+      "processes": ["l2o", "o2c"],
+      "strategies": ["Growth", "CX Enhancement"],
+      "markets": ["B2C", "Postpaid"],
+      "assumptions": ["ass-001", "ass-003"],
+      "risks": ["risk-001", "risk-002"]
+    },
+    "standard": {
+      "name": "Standard BSS Template",
+      "description": "Generic template for BSS transformations",
+      "capabilities": ["crm", "billing"],
+      "processes": ["o2c"],
+      "strategies": ["Cost Optimization"],
+      "markets": ["B2B"],
+      "assumptions": ["ass-002"],
+      "risks": ["risk-002"]
+    }
+  },
+  "kpis": {
+    "delivery": {
+      "cycleTime": {
+        "target": "4 weeks",
+        "current": "6 weeks",
+        "unit": "weeks"
+      },
+      "estimationAccuracy": {
+        "target": "±10%",
+        "current": "±15%",
+        "unit": "percentage"
+      },
+      "adoReadiness": {
+        "target": "≥95%",
+        "current": "90%",
+        "unit": "percentage"
+      }
+    },
+    "quality": {
+      "defectLeakage": {
+        "target": "<5%",
+        "current": "7%",
+        "unit": "percentage"
+      },
+      "timelineVariance": {
+        "target": "≤10%",
+        "current": "12%",
+        "unit": "percentage"
+      },
+      "slaAdherence": {
+        "target": ">95%",
+        "current": "93%",
+        "unit": "percentage"
+      }
+    }
+  }
+}
