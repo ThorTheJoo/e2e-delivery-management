@@ -76,6 +76,97 @@ export function mapSpecSyncToCapabilities(
   return { countsByCapability, assignments, unmapped };
 }
 
+// Calculate use case counts per capability from SpecSync data
+export function calculateUseCaseCountsByCapability(
+  items: SpecSyncItem[], 
+  tmfCapabilities: TMFCapability[]
+): Record<string, number> {
+  const useCaseCountsByCapability: Record<string, number> = {};
+  const capabilityUseCases: Record<string, Set<string>> = {};
+
+  // Build a label-to-id map from TMF capabilities
+  const labelToId = new Map<string, string>();
+  tmfCapabilities.forEach(cap => {
+    const normalizedName = cap.name.toLowerCase().trim();
+    labelToId.set(normalizedName, cap.id);
+    
+    // Also map segments
+    cap.segments.forEach(segment => {
+      const normalizedSegment = segment.toLowerCase().trim();
+      labelToId.set(normalizedSegment, cap.id);
+    });
+  });
+
+  const normalize = (s: string) => String(s || '').trim().toLowerCase();
+
+  items.forEach(item => {
+    const capName = normalize(item.capability);
+    const af2Name = normalize(item.afLevel2);
+    const funcName = normalize(item.functionName);
+    const domain = normalize(item.domain);
+    const useCase = item.usecase1?.trim();
+
+    if (!useCase) return; // Skip items without use case
+
+    let capId: string | null = null;
+
+    // Try to find exact matches first
+    if (capName && labelToId.has(capName)) {
+      capId = labelToId.get(capName)!;
+    } else if (af2Name && labelToId.has(af2Name)) {
+      capId = labelToId.get(af2Name)!;
+    } else if (funcName && labelToId.has(funcName)) {
+      capId = labelToId.get(funcName)!;
+    }
+
+    // Try partial matches for capability names
+    if (!capId) {
+      for (const [normalizedName, id] of labelToId.entries()) {
+        if (capName && normalizedName.includes(capName) || capName && capName.includes(normalizedName)) {
+          capId = id;
+          break;
+        }
+        if (af2Name && normalizedName.includes(af2Name) || af2Name && af2Name.includes(normalizedName)) {
+          capId = id;
+          break;
+        }
+      }
+    }
+
+    // Domain-guided fallback
+    if (!capId) {
+      if (/integration/i.test(domain)) {
+        capId = /workflow|orchestr/i.test(funcName) ? 'bpm-workflow' : 
+                /api|rest|soap|graphql/i.test(funcName) ? 'api-mgmt' : null;
+      } else if (/resource/i.test(domain) && /lifecycle|resource/i.test(funcName)) {
+        capId = 'resource-lifecycle-mgmt';
+      } else if (/product/i.test(domain) && (/billing|charging|pricing|tariff|rating/i.test(funcName) || /billing|charging|pricing|tariff|rating/i.test(capName))) {
+        capId = 'billing';
+      } else if (/customer/i.test(domain) && (/customer|profile|information/i.test(funcName) || /customer|profile|information/i.test(capName))) {
+        capId = 'crm';
+      } else if (/enterprise/i.test(domain) && /fraud/i.test(funcName)) {
+        capId = 'fraud-mgmt';
+      } else if (/enterprise/i.test(domain) && /compliance|regulatory|gdpr|sox/i.test(funcName)) {
+        capId = 'compliance-mgmt';
+      }
+    }
+
+    if (capId) {
+      if (!capabilityUseCases[capId]) {
+        capabilityUseCases[capId] = new Set();
+      }
+      capabilityUseCases[capId].add(useCase);
+    }
+  });
+
+  // Convert sets to counts
+  Object.entries(capabilityUseCases).forEach(([capId, useCases]) => {
+    useCaseCountsByCapability[capId] = useCases.size;
+  });
+
+  return useCaseCountsByCapability;
+}
+
 // Generate dynamic capability IDs for unmapped items
 export function generateDynamicCapabilityId(basis: string): string {
   const normalized = String(basis || 'capability')

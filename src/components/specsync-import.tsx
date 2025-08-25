@@ -15,6 +15,7 @@ export interface SpecSyncItem {
   afLevel2: string;
   capability: string;
   referenceCapability: string;
+  usecase1: string; // New field for use case identification
 }
 
 export interface SpecSyncState {
@@ -24,6 +25,7 @@ export interface SpecSyncState {
   counts: {
     totalRequirements: number;
     domains: Record<string, number>;
+    useCases: number; // Number of unique use cases
   };
   items: SpecSyncItem[];
   selectedCapabilityIds: string[];
@@ -55,7 +57,8 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
       functionName: headers.find(h => /rephrased.*function.*name/i.test(h)) || 'Rephrased Function Name',
       afLevel2: headers.find(h => /rephrased.*af.*lev.*2/i.test(h)) || 'Rephrased AF Lev.2',
       capability: headers.find(h => /reference.*capability/i.test(h)) || 'Reference Capability',
-      referenceCapability: headers.find(h => /reference.*capability/i.test(h)) || 'Reference Capability'
+      referenceCapability: headers.find(h => /reference.*capability/i.test(h)) || 'Reference Capability',
+      usecase1: headers.find(h => /usecase.*1/i.test(h)) || 'Usecase 1'
     };
 
     return lines.slice(1).map(line => {
@@ -73,7 +76,8 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
         functionName: row[headerMap.functionName] || '',
         afLevel2: row[headerMap.afLevel2] || '',
         capability: row[headerMap.afLevel2] || '', // Use AF Level 2 as capability
-        referenceCapability: row[headerMap.referenceCapability] || ''
+        referenceCapability: row[headerMap.referenceCapability] || '',
+        usecase1: row[headerMap.usecase1] || '' // Add usecase1 parsing
       };
     });
   };
@@ -102,18 +106,33 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
         functionName: fn,
         afLevel2: af2,
         capability: af2, // STRICT: only AF Level 2
-        referenceCapability: rc
+        referenceCapability: rc,
+        usecase1: r['Usecase 1'] || r['Usecase 1'] || '' // Add usecase1 parsing
       };
     });
   };
 
   const buildSpecSyncState = (items: SpecSyncItem[], fileName: string): SpecSyncState => {
-    const counts = { totalRequirements: items.length, domains: {} as Record<string, number> };
+    const counts = { 
+      totalRequirements: items.length, 
+      domains: {} as Record<string, number>,
+      useCases: 0
+    };
+    
+    // Track unique use cases
+    const uniqueUseCases = new Set<string>();
     
     items.forEach(item => {
       const domain = (item.domain || '').trim() || 'Unspecified';
       counts.domains[domain] = (counts.domains[domain] || 0) + 1;
+      
+      // Add use case to unique set if it has a value
+      if (item.usecase1 && item.usecase1.trim()) {
+        uniqueUseCases.add(item.usecase1.trim());
+      }
     });
+    
+    counts.useCases = uniqueUseCases.size;
     
     return {
       fileName: fileName || 'SpecSync Import',
@@ -238,6 +257,7 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
             <div className="text-sm text-muted-foreground space-y-1">
               <div>Total Requirements: {currentState.counts.totalRequirements}</div>
               <div>Domains: {Object.keys(currentState.counts.domains).length}</div>
+              <div>Use Cases: {currentState.counts.useCases}</div>
               <div>Imported: {new Date(currentState.importedAt).toLocaleString()}</div>
             </div>
             
@@ -252,6 +272,7 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
                       <th className="border border-muted-foreground/20 px-2 py-1 text-left">Requirement</th>
                       <th className="border border-muted-foreground/20 px-2 py-1 text-left">Domain</th>
                       <th className="border border-muted-foreground/20 px-2 py-1 text-left">Capability</th>
+                      <th className="border border-muted-foreground/20 px-2 py-1 text-left">Use Case</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -268,6 +289,9 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
                         </td>
                         <td className="border border-muted-foreground/20 px-2 py-1 max-w-xs truncate">
                           {item.capability || item.afLevel2 || 'N/A'}
+                        </td>
+                        <td className="border border-muted-foreground/20 px-2 py-1 max-w-xs truncate">
+                          {item.usecase1 || 'N/A'}
                         </td>
                       </tr>
                     ))}

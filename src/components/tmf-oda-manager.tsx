@@ -363,7 +363,7 @@ export function TMFOdaManager({ onStateChange, initialState }: TMFOdaManagerProp
           <CardTitle className="text-xl font-bold text-blue-900">Capability Overview</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="text-center">
               <div className="text-3xl font-bold text-blue-600">{state.domains.length}</div>
               <div className="text-sm text-blue-700">Total Domains</div>
@@ -376,6 +376,12 @@ export function TMFOdaManager({ onStateChange, initialState }: TMFOdaManagerProp
               <div className="text-3xl font-bold text-purple-600">{counts.capabilities}</div>
               <div className="text-sm text-purple-700">Selected Capabilities</div>
             </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-orange-600">
+                {specSyncState ? specSyncState.counts.useCases : 0}
+              </div>
+              <div className="text-sm text-orange-700">Use Cases</div>
+            </div>
           </div>
           <div className="mt-4 pt-4 border-t border-blue-200">
             <div className="text-sm text-blue-800">
@@ -383,7 +389,10 @@ export function TMFOdaManager({ onStateChange, initialState }: TMFOdaManagerProp
               <p>• {state.domains.length} TMF ODA domains available</p>
               <p>• {state.domains.reduce((sum, domain) => sum + domain.capabilities.length, 0)} total capabilities across all domains</p>
               {specSyncState && (
-                <p>• {specSyncState.counts.totalRequirements} SpecSync requirements imported</p>
+                <>
+                  <p>• {specSyncState.counts.totalRequirements} SpecSync requirements imported</p>
+                  <p>• {specSyncState.counts.useCases} unique use cases identified</p>
+                </>
               )}
             </div>
           </div>

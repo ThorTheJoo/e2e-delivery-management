@@ -1,69 +1,112 @@
 # E2E Delivery Management System
 
-A comprehensive, modern web application for managing end-to-end delivery processes, TMF capabilities, eTOM processes, and project orchestration. Built with Next.js 14, TypeScript, and modern UI components.
+A comprehensive, modern web application for managing end-to-end delivery projects with TMF ODA (Open Digital Architecture) compliance, SpecSync integration, and advanced estimation capabilities.
 
 ## 🚀 Features
 
-### Core Functionality
-- **TMF Capabilities Management**: Comprehensive TMF framework implementation
-- **eTOM Process Mapping**: End-to-end process management and optimization
-- **Project Estimation**: Advanced effort calculation and resource planning
-- **Scheduling & Timeline**: Project timeline management and milestone tracking
-- **Risk Management**: Risk assessment, mitigation, and monitoring
-- **Dependency Tracking**: Inter-project and technical dependency management
-- **Document Management**: Centralized project documentation and deliverables
-- **Commercial Modeling**: Cost structure and financial planning tools
+### Core System
+- **Modern React/Next.js Architecture** - Built with Next.js 14, TypeScript, and Tailwind CSS
+- **Responsive Design** - Mobile-first approach with beautiful, modern UI
+- **Real-time State Management** - Efficient state handling with React hooks
+- **Component Library** - Custom UI components built with Shadcn UI and Radix UI
 
-### Technical Features
-- **Modern UI/UX**: Built with Shadcn UI, Radix UI, and Tailwind CSS
-- **Responsive Design**: Mobile-first approach with full responsive support
-- **Type Safety**: Full TypeScript implementation with strict type checking
-- **Performance Optimized**: React Server Components and modern React patterns
-- **Accessibility**: WCAG compliant with proper ARIA labels and keyboard navigation
-- **Real-time Updates**: Dynamic data loading and state management
+### TMF ODA Management
+- **Domain & Capability Management** - Interactive management of TMF ODA domains and capabilities
+- **Shopping Cart Interface** - Intuitive selection and management of TMF components
+- **Real-time Statistics** - Live updates of selected domains, capabilities, and requirements
+- **Collapsible Sections** - Organized, expandable interface for better user experience
 
-## 🛠️ Technology Stack
+### SpecSync Integration
+- **Multi-format Import** - Support for CSV, Excel (.xlsx, .xls) files
+- **Flexible Column Mapping** - Intelligent header detection and mapping
+- **Use Case Tracking** - Advanced use case identification and counting from 'usecase 1' field
+- **Requirement Mapping** - Automatic mapping of SpecSync requirements to TMF capabilities
+- **Data Persistence** - Local storage for imported data with session persistence
 
-- **Frontend**: Next.js 14, React 18, TypeScript
-- **UI Components**: Shadcn UI, Radix UI, Tailwind CSS
-- **State Management**: React hooks and context
-- **Data Handling**: Custom data service with JSON backend
-- **Build Tool**: Next.js with SWC compiler
-- **Styling**: Tailwind CSS with custom design system
-- **Icons**: Lucide React for consistent iconography
+### TMF Capabilities Overview
+- **Dynamic Capability Cards** - Rich cards showing effort breakdown, segments, and statistics
+- **Use Case Statistics** - Display of unique use cases per capability with orange badges
+- **Requirement Counts** - Real-time requirement mapping counts with visual badges
+- **Effort Calculation** - Automatic effort calculation (BA, SA, Dev, QA) per capability
+
+### Project Management
+- **Dashboard Overview** - Comprehensive project metrics and KPIs
+- **eTOM Process Management** - Support for eTOM process frameworks
+- **Work Package Estimation** - Detailed effort estimation for work packages
+- **Risk Management** - Risk identification, assessment, and mitigation tracking
+- **Dependency Management** - Technical, business, and external dependency tracking
+
+### Estimation & Planning
+- **Effort Breakdown** - Detailed role-based effort estimation (Business Analyst, Solution Architect, Developer, QA)
+- **Complexity Factors** - Configurable complexity multipliers for accurate estimation
+- **Resource Planning** - Team size and resource allocation management
+- **Timeline Management** - Project scheduling with milestone tracking
+
+### Commercial & Financial
+- **Cost Structure** - Base cost, risk contingency, and profit margin calculations
+- **Rate Card Management** - Geographic rate multipliers and role-based pricing
+- **Commercial Models** - Support for Fixed Price, Time & Materials, and milestone-based models
+
+### Documentation & Reporting
+- **Document Management** - Project document tracking with version control
+- **Status Tracking** - Real-time status updates for all project components
+- **Export Capabilities** - Data export for reporting and analysis
+
+## 🛠️ Technical Stack
+
+### Frontend
+- **Next.js 14** - React framework with App Router
+- **TypeScript** - Type-safe development
+- **Tailwind CSS** - Utility-first CSS framework
+- **Shadcn UI** - Modern component library
+- **Radix UI** - Accessible UI primitives
+- **Lucide React** - Beautiful icon library
+
+### Data Management
+- **Local Storage** - Client-side data persistence
+- **JSON Data Service** - Mock data service for development
+- **State Management** - React hooks and context for state management
+
+### File Processing
+- **XLSX.js** - Excel file parsing and processing
+- **CSV Processing** - Native CSV parsing with flexible column mapping
 
 ## 📁 Project Structure
 
 ```
 src/
-├── app/                    # Next.js App Router
-│   ├── layout.tsx         # Root layout component
-│   ├── page.tsx           # Main dashboard page
-│   └── globals.css        # Global styles and Tailwind
-├── components/            # Reusable UI components
-│   └── ui/               # Shadcn UI components
-│       ├── button.tsx    # Button component
-│       ├── card.tsx      # Card component
-│       └── tabs.tsx      # Tabs component
+├── app/                    # Next.js App Router pages
+│   ├── globals.css        # Global styles
+│   ├── layout.tsx         # Root layout
+│   ├── page.tsx           # Main application page
+│   └── tmf-demo/          # TMF demo page
+├── components/            # React components
+│   ├── ui/               # Shadcn UI components
+│   ├── navigation-sidebar.tsx
+│   ├── requirement-badge.tsx
+│   ├── specsync-import.tsx
+│   ├── tmf-domain-capability-manager.tsx
+│   └── tmf-oda-manager.tsx
 ├── lib/                  # Utility libraries
-│   ├── utils.ts          # Common utility functions
-│   └── data-service.ts   # Data management service
+│   ├── data-service.ts   # Data service layer
+│   ├── specsync-utils.ts # SpecSync processing utilities
+│   └── utils.ts          # General utilities
 └── types/                # TypeScript type definitions
-    └── index.ts          # All application types
+    └── index.ts
 ```
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 - Node.js 18+ 
-- npm or yarn package manager
+- npm or yarn
 
 ### Installation
 
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd e2e-delivery-management
+   cd "E2E Delivery Management - Rebuild"
    ```
 
 2. **Install dependencies**
@@ -71,175 +114,196 @@ src/
    npm install
    ```
 
-3. **Run the development server**
+3. **Start the development server**
    ```bash
    npm run dev
    ```
 
 4. **Open your browser**
-   Navigate to [http://localhost:3000](http://localhost:3000)
+   Navigate to `http://localhost:3000`
 
-### Available Scripts
+### Development Commands
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
-- `npm run type-check` - Run TypeScript type checking
+```bash
+# Start development server
+npm run dev
 
-## 🎯 Key Components
+# Build for production
+npm run build
 
-### Dashboard
-- Project overview with key metrics
-- Progress tracking and status monitoring
-- Risk and issue summary
-- Quick access to all major functions
+# Start production server
+npm start
 
-### TMF Capabilities
-- Comprehensive TMF framework implementation
-- Effort breakdown by role (BA, SA, Dev, QA)
-- Complexity factor analysis
-- Segment-based categorization
+# Run linting
+npm run lint
 
-### eTOM Processes
-- End-to-end process mapping
-- Level-based process hierarchy
-- Effort estimation and resource planning
-- Complexity factor integration
+# Type checking
+npm run type-check
+```
 
-### Estimation Engine
-- Work package effort calculation
-- Role-based effort breakdown
-- Complexity and risk multipliers
-- Confidence level assessment
+## 📊 Usage Guide
 
-### Project Management
-- Timeline and milestone tracking
-- Resource allocation and planning
-- Dependency management
-- Risk assessment and mitigation
+### Importing SpecSync Data
+
+1. **Navigate to TMF Tab** - Click on the "TMF" tab in the main navigation
+2. **Expand SpecSync Import** - Click on the "SpecSync Import" section
+3. **Select File** - Choose a CSV or Excel file with the following columns:
+   - Rephrased Requirement ID
+   - Rephrased Domain
+   - Rephrased Function Name
+   - Rephrased AF Lev.2
+   - Reference Capability
+   - **Usecase 1** (new feature for use case tracking)
+4. **Review Import** - Check the import summary and requirements preview
+5. **View Results** - See mapped requirements and use cases in the TMF Capabilities Overview
+
+### Managing TMF ODA Domains
+
+1. **Access TMF Manager** - Use the TMF Domain and Capability Manager
+2. **Add Domains** - Click "Add Domain" to create new TMF ODA domains
+3. **Add Capabilities** - Add capabilities to domains using the "+" button
+4. **Select Components** - Use checkboxes to select domains and capabilities
+5. **View Statistics** - Monitor selection counts in the capability overview
+
+### Viewing Use Case Statistics
+
+1. **Import SpecSync Data** - Import data with 'usecase 1' field
+2. **Check Capability Cards** - Look for orange "Use Cases" badges
+3. **Review Counts** - See unique use case counts per capability
+4. **Analyze Mapping** - Understand how use cases map to TMF capabilities
 
 ## 🔧 Configuration
 
 ### Environment Variables
-Create a `.env.local` file in the root directory:
+Create a `.env.local` file for environment-specific configuration:
 
 ```env
+# Development settings
 NEXT_PUBLIC_APP_NAME="E2E Delivery Management"
 NEXT_PUBLIC_VERSION="1.0.0"
+
+# API endpoints (if using external APIs)
+NEXT_PUBLIC_API_URL="http://localhost:3000/api"
 ```
 
 ### Tailwind Configuration
-Custom color schemes for TMF, eTOM, and delivery domains are configured in `tailwind.config.js`.
+The project uses a custom Tailwind configuration with TMF-specific color schemes:
 
-### Data Sources
-The application currently uses a JSON-based data service (`demo-data.json`) which can be easily replaced with:
-- REST APIs
-- GraphQL endpoints
-- Database connections
-- Real-time data streams
+```javascript
+// tailwind.config.js
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        tmf: {
+          50: '#f0f9ff',
+          100: '#e0f2fe',
+          600: '#0284c7',
+          800: '#075985',
+        },
+        etom: {
+          50: '#fdf4ff',
+          100: '#fae8ff',
+          600: '#c026d3',
+          800: '#9d174d',
+        }
+      }
+    }
+  }
+}
+```
 
-## 🎨 Design System
+## 📈 Data Models
 
-### Color Palette
-- **TMF Colors**: Blue-based palette for TMF capabilities
-- **eTOM Colors**: Purple-based palette for eTOM processes  
-- **Delivery Colors**: Green-based palette for delivery management
-- **Semantic Colors**: Success, warning, error, and info states
+### SpecSync Data Structure
+```typescript
+interface SpecSyncItem {
+  rephrasedRequirementId: string;
+  sourceRequirementId: string;
+  domain: string;
+  vertical: string;
+  functionName: string;
+  afLevel2: string;
+  capability: string;
+  referenceCapability: string;
+  usecase1: string; // New field for use case tracking
+}
+```
 
-### Component Variants
-- **Button Variants**: Default, destructive, outline, secondary, ghost, link
-- **Card Variants**: Standard, metric, effort, and status cards
-- **Status Badges**: Color-coded status indicators
-- **Responsive Grid**: Mobile-first responsive layouts
-
-## 📱 Responsive Design
-
-The application is built with a mobile-first approach:
-- **Mobile**: Single column layout with collapsible navigation
-- **Tablet**: Two-column layout with sidebar navigation
-- **Desktop**: Full three-pane layout with persistent navigation
-- **Large Screens**: Optimized for 1440px+ displays
-
-## ♿ Accessibility
-
-- **ARIA Labels**: Proper labeling for screen readers
-- **Keyboard Navigation**: Full keyboard support
-- **Color Contrast**: WCAG AA compliant color schemes
-- **Semantic HTML**: Proper heading hierarchy and landmarks
-- **Focus Management**: Clear focus indicators and management
-
-## 🚀 Performance
-
-- **Code Splitting**: Automatic route-based code splitting
-- **Image Optimization**: Next.js Image component with WebP support
-- **Bundle Optimization**: Tree shaking and dead code elimination
-- **Caching**: Static generation and incremental static regeneration
-- **Lazy Loading**: Component-level lazy loading where appropriate
-
-## 🔒 Security
-
-- **Input Validation**: Type-safe data handling
-- **XSS Prevention**: React's built-in XSS protection
-- **CSRF Protection**: Built-in Next.js CSRF protection
-- **Secure Headers**: Configurable security headers
-- **Environment Variables**: Secure configuration management
+### TMF Capability Structure
+```typescript
+interface TMFCapability {
+  id: string;
+  name: string;
+  description: string;
+  segments: string[];
+  baseEffort: {
+    businessAnalyst: number;
+    solutionArchitect: number;
+    developer: number;
+    qaEngineer: number;
+  };
+  complexityFactors: Record<string, number>;
+}
+```
 
 ## 🧪 Testing
 
-### Unit Testing
-```bash
-npm run test
-```
+### Manual Testing
+1. **Import Test Files** - Use the provided test files:
+   - `test-import.csv` - Basic SpecSync data
+   - `test-import-with-usecases.csv` - Data with use case information
+2. **Verify Mapping** - Check that requirements map correctly to capabilities
+3. **Test Use Cases** - Verify use case counting and display
 
-### Type Checking
-```bash
-npm run type-check
-```
+### Test Data
+The system includes comprehensive test data in `demo-data.json` covering:
+- TMF capabilities with effort estimates
+- eTOM processes with complexity factors
+- Project templates and configurations
+- Risk and dependency examples
 
-### Linting
-```bash
-npm run lint
-```
+## 🔄 Recent Updates
 
-## 📦 Deployment
+### Version 1.0.0 (Latest)
+- ✅ **Use Case Tracking** - Added support for 'usecase 1' field in SpecSync imports
+- ✅ **Enhanced Capability Cards** - Display use case statistics with orange badges
+- ✅ **Improved Mapping Logic** - Better capability matching with domain-guided fallbacks
+- ✅ **Real-time Statistics** - Live updates of use case counts and requirement mapping
 
-### Vercel (Recommended)
-1. Connect your GitHub repository
-2. Configure environment variables
-3. Deploy automatically on push
-
-### Other Platforms
-- **Netlify**: Configure build settings for Next.js
-- **AWS Amplify**: Use the Next.js build specification
-- **Docker**: Use the provided Dockerfile
+### Previous Versions
+- **Initial Release** - Core TMF ODA management functionality
+- **SpecSync Integration** - CSV/Excel import capabilities
+- **Dashboard & Analytics** - Project overview and metrics
+- **Estimation Engine** - Effort calculation and complexity factors
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+### Development Workflow
+1. **Create Feature Branch** - `git checkout -b feature/use-case-tracking`
+2. **Make Changes** - Implement new features or fixes
+3. **Test Thoroughly** - Ensure all functionality works correctly
+4. **Commit Changes** - Use descriptive commit messages
+5. **Push to Repository** - `git push origin feature/use-case-tracking`
+6. **Create Pull Request** - Submit for review and merge
 
-## 📄 License
+### Code Standards
+- **TypeScript** - Use strict typing for all new code
+- **Component Structure** - Follow established component patterns
+- **Styling** - Use Tailwind CSS classes consistently
+- **Documentation** - Add comments for complex logic
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+## 📝 License
+
+This project is proprietary software developed for CSG Systems Inc.
 
 ## 🆘 Support
 
-For support and questions:
-- Create an issue in the GitHub repository
-- Contact the development team
-- Check the documentation
-
-## 🔄 Version History
-
-- **v1.0.0** - Initial release with Next.js 14 rebuild
-- **v0.9.0** - Legacy HTML/JavaScript version
-- **v0.8.0** - Modern UI improvements
-- **v0.7.0** - Core functionality implementation
+For technical support or questions:
+- **Documentation** - Check this README and inline code comments
+- **Issues** - Report bugs through the project issue tracker
+- **Development** - Contact the development team for feature requests
 
 ---
 
-Built with ❤️ by CSG Systems Inc.
+**Built with ❤️ by the CSG Delivery Orchestrator Team**

@@ -1,0 +1,11 @@
+Rephrased Requirement ID,Rephrased Domain,Rephrased Function Name,Rephrased AF Lev.2,Reference Capability,Usecase 1
+FUNC_012.1,Product Domain,Price and Discount Calculation,Tariff Calculation and Rating,Tariff Calculation and Rating,UC_001_Price_Calculation
+FUNC_080.1,Product Domain,Discount Calculation,Tariff Calculation and Rating,Tariff Calculation and Rating,UC_001_Price_Calculation
+FUNC_080.2,Product Domain,Discount Calculation,Tariff Calculation and Rating,Tariff Calculation and Rating,UC_002_Discount_Management
+FUNC_080.3,Product Domain,Discount Calculation,Tariff Calculation and Rating,Tariff Calculation and Rating,UC_002_Discount_Management
+FUNC_080.4,Product Domain,Discount Calculation,Tariff Calculation and Rating,Tariff Calculation and Rating,UC_003_Promotional_Offers
+FUNC_090.1,Customer Domain,Customer Profile Management,Customer Information Management,Customer Information Management,UC_004_Customer_Onboarding
+FUNC_090.2,Customer Domain,Customer Profile Management,Customer Information Management,Customer Information Management,UC_004_Customer_Onboarding
+FUNC_100.1,Service Domain,Service Activation,Service Order Management,Service Order Management,UC_005_Service_Provisioning
+FUNC_100.2,Service Domain,Service Activation,Service Order Management,Service Order Management,UC_005_Service_Provisioning
+FUNC_110.1,Billing Domain,Invoice Generation,Billing and Charging,Billing and Charging,UC_006_Billing_Process
