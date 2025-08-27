@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Project, TMFCapability, ETOMProcess, WorkPackage, Milestone, Risk, Dependency, Document } from '@/types';
+import { Project, TMFCapability, ETOMProcess, WorkPackage, Milestone, Risk, Dependency, Document, TMFOdaDomain, SpecSyncItem } from '@/types';
 import { dataService } from '@/lib/data-service';
 import { formatDate, calculateEffortTotal, getStatusColor, getSeverityColor } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ import { RequirementBadge } from '@/components/requirement-badge';
 import { TMFDomainCapabilityManager } from '@/components/tmf-domain-capability-manager';
 import { NavigationSidebar } from '@/components/navigation-sidebar';
 import { SETImport } from '@/components/set-import';
+import { MiroBoardCreator } from '@/components/miro-board-creator';
 import { useToast, ToastContainer } from '@/components/ui/toast';
 import { mapSpecSyncToCapabilities, calculateUseCaseCountsByCapability, saveSpecSyncData, loadSpecSyncData, clearSpecSyncData } from '@/lib/specsync-utils';
 import { 
@@ -30,7 +31,8 @@ import {
   TrendingUp,
   BarChart3,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Layout
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -53,6 +55,8 @@ export default function HomePage() {
   const [isTmfCapabilitiesExpanded, setIsTmfCapabilitiesExpanded] = useState(true);
   const [setDomainEfforts, setSetDomainEfforts] = useState<Record<string, number>>({});
   const [setMatchedWorkPackages, setSetMatchedWorkPackages] = useState<Record<string, any>>({});
+  const [tmfDomains, setTmfDomains] = useState<TMFOdaDomain[]>([]);
+  const [specSyncItems, setSpecSyncItems] = useState<SpecSyncItem[]>([]);
   
   const toast = useToast();
 
@@ -270,7 +274,7 @@ export default function HomePage() {
         {/* Main Content Area */}
         <main className="flex-1 overflow-y-auto p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8">
+          <TabsList className="grid w-full grid-cols-9">
             <TabsTrigger value="dashboard" className="flex items-center space-x-2">
               <BarChart3 className="h-4 w-4" />
               <span className="hidden sm:inline">Dashboard</span>
@@ -302,6 +306,10 @@ export default function HomePage() {
             <TabsTrigger value="documents" className="flex items-center space-x-2">
               <FileText className="h-4 w-4" />
               <span className="hidden sm:inline">Documents</span>
+            </TabsTrigger>
+            <TabsTrigger value="visual-mapping" className="flex items-center space-x-2">
+              <Layout className="h-4 w-4" />
+              <span className="hidden sm:inline">Visual Mapping</span>
             </TabsTrigger>
           </TabsList>
 
@@ -895,6 +903,15 @@ export default function HomePage() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Visual Mapping Tab */}
+          <TabsContent value="visual-mapping" className="space-y-6">
+            <MiroBoardCreator 
+              project={project}
+              tmfDomains={tmfDomains}
+              specSyncItems={specSyncItems}
+            />
           </TabsContent>
         </Tabs>
       </main>
