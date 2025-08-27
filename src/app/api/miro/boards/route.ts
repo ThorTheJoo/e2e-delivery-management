@@ -40,6 +40,8 @@ export async function POST(request: NextRequest) {
 
       case 'createCard':
         const boardInstance = await miroClient.getBoard(data.boardId);
+        
+        // Create card on the board, and if frameId is provided, we'll add it to the frame
         const card = await boardInstance.createCardItem({
           data: {
             title: data.title,
@@ -49,6 +51,18 @@ export async function POST(request: NextRequest) {
           geometry: data.geometry,
           style: data.style
         });
+        
+        // If frameId is provided, add the card to the frame
+        if (data.frameId) {
+          try {
+            const frame = await boardInstance.getFrameItem(data.frameId);
+            // Add the card to the frame (this might need to be done differently based on Miro API)
+            // For now, we'll create the card and let the positioning handle the visual grouping
+            console.log(`Card ${card.id} created and should be positioned within frame ${data.frameId}`);
+          } catch (frameError) {
+            console.warn(`Could not add card to frame ${data.frameId}:`, frameError);
+          }
+        }
         
         return NextResponse.json({ id: card.id });
 

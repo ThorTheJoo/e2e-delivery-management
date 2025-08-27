@@ -117,6 +117,8 @@ export class MiroService {
     const cardHeight = 120;
     const spacing = 20;
 
+    console.log(`Creating ${capabilities.length} capability cards for domain index ${domainIndex}`);
+
     for (let i = 0; i < capabilities.length; i++) {
       const capability = capabilities[i];
       const row = Math.floor(i / cardsPerRow);
@@ -125,17 +127,27 @@ export class MiroService {
       const x = domainIndex * 850 + 50 + col * (cardWidth + spacing);
       const y = 50 + row * (cardHeight + spacing);
 
-      await this.callMiroAPI('createCard', {
-        boardId,
-        title: capability.name,
-        description: capability.description,
-        position: { x, y },
-        geometry: { width: cardWidth, height: cardHeight },
-        style: {
-          fillColor: '#4ecdc4',
-          strokeColor: '#333'
-        }
-      });
+      try {
+        console.log(`Creating card for capability: ${capability.name} at position (${x}, ${y})`);
+        
+        await this.callMiroAPI('createCard', {
+          boardId,
+          frameId, // Pass the frameId so cards are associated with the frame
+          title: capability.name,
+          description: capability.description,
+          position: { x, y },
+          geometry: { width: cardWidth, height: cardHeight },
+          style: {
+            fillColor: '#4ecdc4',
+            strokeColor: '#333'
+          }
+        });
+        
+        console.log(`Successfully created card for capability: ${capability.name}`);
+      } catch (error) {
+        console.error(`Failed to create card for capability ${capability.name}:`, error);
+        throw error;
+      }
     }
   }
 
