@@ -8,13 +8,13 @@ export async function GET(request: NextRequest) {
 
   if (error) {
     return NextResponse.redirect(
-      new URL(`/visual-mapping?error=${encodeURIComponent(error)}`, request.url)
+      new URL(`/?error=${encodeURIComponent(error)}`, request.url)
     );
   }
 
   if (!code) {
     return NextResponse.redirect(
-      new URL('/visual-mapping?error=No authorization code received', request.url)
+      new URL('/?error=No authorization code received', request.url)
     );
   }
 
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
 
     if (!clientId || !clientSecret || !redirectUri) {
       return NextResponse.redirect(
-        new URL('/visual-mapping?error=Miro configuration missing', request.url)
+        new URL('/?error=Miro configuration missing', request.url)
       );
     }
 
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
       const errorData = await tokenResponse.text();
       console.error('Token exchange failed:', errorData);
       return NextResponse.redirect(
-        new URL('/visual-mapping?error=Failed to exchange authorization code', request.url)
+        new URL('/?error=Failed to exchange authorization code', request.url)
       );
     }
 
@@ -57,13 +57,13 @@ export async function GET(request: NextRequest) {
     // Store the access token in a secure way (in production, use a database or secure session)
     // For now, we'll redirect with the token as a query parameter (not secure for production)
     return NextResponse.redirect(
-      new URL(`/visual-mapping?token=${encodeURIComponent(tokenData.access_token)}&success=true`, request.url)
+      new URL(`/?token=${encodeURIComponent(tokenData.access_token)}&success=true`, request.url)
     );
 
   } catch (error) {
     console.error('OAuth callback error:', error);
     return NextResponse.redirect(
-      new URL('/visual-mapping?error=OAuth callback processing failed', request.url)
+      new URL('/?error=OAuth callback processing failed', request.url)
     );
   }
 }

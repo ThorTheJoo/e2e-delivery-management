@@ -15,6 +15,7 @@ interface MiroBoardCreatorProps {
   project: Project;
   tmfDomains: TMFOdaDomain[];
   specSyncItems: SpecSyncItem[];
+  onAuthStatusChange?: (isAuthenticated: boolean) => void;
 }
 
 interface BoardLinks {
@@ -22,7 +23,7 @@ interface BoardLinks {
   specSyncBoard?: string;
 }
 
-export function MiroBoardCreator({ project, tmfDomains, specSyncItems }: MiroBoardCreatorProps) {
+export function MiroBoardCreator({ project, tmfDomains, specSyncItems, onAuthStatusChange }: MiroBoardCreatorProps) {
   const [boardLinks, setBoardLinks] = useState<BoardLinks>({});
   const [isCreatingTMF, setIsCreatingTMF] = useState(false);
   const [isCreatingSpecSync, setIsCreatingSpecSync] = useState(false);
@@ -41,20 +42,25 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems }: MiroBoa
       miroAuthService.setTokenFromUrl(token);
       setIsAuthenticated(true);
       setError(null);
+      // Notify parent component
+      onAuthStatusChange?.(true);
       // Clean up URL
       window.history.replaceState({}, document.title, window.location.pathname);
     } else if (error) {
       setError(`Authentication failed: ${error}`);
       setIsAuthenticated(false);
+      onAuthStatusChange?.(false);
       // Clean up URL
       window.history.replaceState({}, document.title, window.location.pathname);
     }
-  }, [searchParams]);
+  }, [searchParams, onAuthStatusChange]);
 
   // Check authentication status on mount
   useEffect(() => {
-    setIsAuthenticated(miroAuthService.isAuthenticated());
-  }, []);
+    const authStatus = miroAuthService.isAuthenticated();
+    setIsAuthenticated(authStatus);
+    onAuthStatusChange?.(authStatus);
+  }, [onAuthStatusChange]);
 
   const handleAuthenticate = async () => {
     setIsAuthenticating(true);
@@ -74,6 +80,7 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems }: MiroBoa
     setIsAuthenticated(false);
     setBoardLinks({});
     setError(null);
+    onAuthStatusChange?.(false);
   };
 
   const handleCreateTMFBoard = async () => {
@@ -95,6 +102,7 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems }: MiroBoa
       if (errorMessage.includes('token') || errorMessage.includes('authentication') || errorMessage.includes('401') || errorMessage.includes('403')) {
         setError('Miro access token is invalid or expired. Please re-authenticate with Miro.');
         setIsAuthenticated(false);
+        onAuthStatusChange?.(false);
       } else {
         setError('Failed to create TMF Architecture board. Please check your Miro credentials and try again.');
       }
@@ -122,6 +130,7 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems }: MiroBoa
       if (errorMessage.includes('token') || errorMessage.includes('authentication') || errorMessage.includes('401') || errorMessage.includes('403')) {
         setError('Miro access token is invalid or expired. Please re-authenticate with Miro.');
         setIsAuthenticated(false);
+        onAuthStatusChange?.(false);
       } else {
         setError('Failed to create SpecSync Requirements board. Please check your Miro credentials and try again.');
       }
