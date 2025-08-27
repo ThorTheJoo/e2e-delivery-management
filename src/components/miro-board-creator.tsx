@@ -139,6 +139,19 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems, onAuthSta
     }
   };
 
+  const handleClearTestBoard = async () => {
+    setError(null);
+    try {
+      await miroService.clearTestBoard();
+      setBoardLinks({});
+      setError('Test board cleared successfully.');
+      console.log('Test board cleared successfully.');
+    } catch (error) {
+      console.error('Failed to clear test board:', error);
+      setError('Failed to clear test board. Please try again.');
+    }
+  };
+
   const totalCapabilities = tmfDomains.reduce((acc, domain) => acc + domain.capabilities.length, 0);
   const selectedDomains = tmfDomains.filter(domain => domain.isSelected).length;
   const selectedCapabilities = tmfDomains.reduce((acc, domain) => 
@@ -193,6 +206,10 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems, onAuthSta
               <Button variant="outline" onClick={handleLogout} className="flex items-center space-x-2">
                 <LogOut className="h-4 w-4" />
                 <span>Disconnect</span>
+              </Button>
+              <Button variant="outline" onClick={handleClearTestBoard} className="flex items-center space-x-2">
+                <AlertCircle className="h-4 w-4" />
+                <span>Clear Test Board</span>
               </Button>
             </div>
           ) : (

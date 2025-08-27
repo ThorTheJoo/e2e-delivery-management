@@ -76,6 +76,20 @@ export async function POST(request: NextRequest) {
         
         return NextResponse.json({ id: frame.id });
 
+      case 'getBoard':
+        const boardToGet = await miroClient.getBoard(data.boardId);
+        
+        return NextResponse.json({
+          id: data.boardId,
+          viewLink: `https://miro.com/app/board/${data.boardId}`
+        });
+
+      case 'deleteBoard':
+        const boardToDelete = await miroClient.getBoard(data.boardId);
+        await boardToDelete.delete();
+        
+        return NextResponse.json({ success: true });
+
       default:
         return NextResponse.json(
           { error: 'Invalid action' },

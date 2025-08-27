@@ -27,9 +27,14 @@ export interface MiroFrameConfig {
 
 export class MiroService {
   private apiBaseUrl: string;
+  private testBoardId: string | null = null;
 
   constructor() {
     this.apiBaseUrl = '/api/miro/boards';
+    // Load test board ID from localStorage if available
+    if (typeof window !== 'undefined') {
+      this.testBoardId = localStorage.getItem('miro_test_board_id');
+    }
   }
 
   private async callMiroAPI(action: string, data: any): Promise<any> {
@@ -74,14 +79,62 @@ export class MiroService {
     }
   }
 
-  public async createTMFBoard(project: Project, domains: TMFOdaDomain[]): Promise<{ id: string; viewLink: string }> {
-    // Create main board
+  public async getOrCreateTestBoard(projectName: string): Promise<{ id: string; viewLink: string }> {
+    // Check if we have a stored test board ID
+    if (this.testBoardId) {
+      try {
+        console.log('Attempting to reuse existing test board:', this.testBoardId);
+        // Try to get the existing board
+        const board = await this.callMiroAPI('getBoard', { boardId: this.testBoardId });
+        console.log('Successfully reused existing test board');
+        return board;
+      } catch (error) {
+        console.log('Failed to reuse existing board, creating new one:', error);
+        // If the board doesn't exist or we can't access it, create a new one
+        this.testBoardId = null;
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('miro_test_board_id');
+        }
+      }
+    }
+
+    // Create new test board
     const boardConfig: MiroBoardConfig = {
-      name: `${project.name} - TMF Architecture`,
-      description: `Visual mapping of ${domains.length} TMF domains with ${domains.reduce((acc, domain) => acc + domain.capabilities.length, 0)} capabilities`
+      name: `${projectName} - TMF Architecture (Test)`,
+      description: `Test board for TMF domain and capability visualization - Created for prototyping`
     };
 
     const board = await this.createBoard(boardConfig);
+    
+    // Store the board ID for future reuse
+    this.testBoardId = board.id;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('miro_test_board_id', board.id);
+    }
+    
+    console.log('Created new test board and stored ID for reuse:', board.id);
+    return board;
+  }
+
+  public async clearTestBoard(): Promise<void> {
+    if (this.testBoardId) {
+      try {
+        await this.callMiroAPI('deleteBoard', { boardId: this.testBoardId });
+        console.log('Test board deleted successfully');
+      } catch (error) {
+        console.error('Failed to delete test board:', error);
+      }
+    }
+    
+    this.testBoardId = null;
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('miro_test_board_id');
+    }
+  }
+
+  public async createTMFBoard(project: Project, domains: TMFOdaDomain[]): Promise<{ id: string; viewLink: string }> {
+    // For prototyping, use the test board functionality
+    const board = await this.getOrCreateTestBoard(project.name);
 
     // Create domain frames and capability cards
     await this.createDomainFrames(board.id, domains);
