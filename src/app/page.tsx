@@ -154,8 +154,136 @@ export default function HomePage() {
       setSpecSyncItems(savedState.items); // Set specSyncItems for MiroBoardCreator
       updateRequirementCounts(savedState);
       // Don't show toast on page reload - only show when user actually imports
+    } else {
+      // Set default sample SpecSync data if none exists
+      const defaultSpecSyncItems: SpecSyncItem[] = [
+        {
+          id: 'req-001',
+          requirementId: 'REQ-001',
+          rephrasedRequirementId: 'Customer Data Management',
+          domain: 'Customer Management',
+          functionName: 'Customer Information Management',
+          description: 'System shall manage customer information across all segments',
+          priority: 'High',
+          status: 'In Progress'
+        },
+        {
+          id: 'req-002',
+          requirementId: 'REQ-002',
+          rephrasedRequirementId: 'Product Portfolio Management',
+          domain: 'Product Management',
+          functionName: 'Product Portfolio Management',
+          description: 'System shall support end-to-end product lifecycle management',
+          priority: 'High',
+          status: 'In Progress'
+        },
+        {
+          id: 'req-003',
+          requirementId: 'REQ-003',
+          rephrasedRequirementId: 'Billing and Charging',
+          domain: 'Revenue Management',
+          functionName: 'Billing and Charging',
+          description: 'System shall provide comprehensive billing and revenue management',
+          priority: 'High',
+          status: 'In Progress'
+        }
+      ];
+      setSpecSyncItems(defaultSpecSyncItems);
     }
   }, []);
+
+  // Initialize default TMF domains if none exist
+  useEffect(() => {
+    if (tmfDomains.length === 0) {
+      const defaultTmfDomains: TMFOdaDomain[] = [
+        {
+          id: 'customer-management',
+          name: 'Customer Management',
+          description: 'Customer data and relationship management capabilities',
+          capabilities: [
+            {
+              id: 'customer-information-management',
+              name: 'Customer Information Management',
+              description: 'Comprehensive customer data management across all segments',
+              domainId: 'customer-management',
+              isSelected: true,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            },
+            {
+              id: 'customer-relationship-management',
+              name: 'Customer Relationship Management',
+              description: 'Customer interaction and relationship tracking',
+              domainId: 'customer-management',
+              isSelected: true,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            }
+          ],
+          isSelected: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: 'product-management',
+          name: 'Product Management',
+          description: 'Product and service portfolio management capabilities',
+          capabilities: [
+            {
+              id: 'product-portfolio-management',
+              name: 'Product Portfolio Management',
+              description: 'End-to-end product lifecycle management',
+              domainId: 'product-management',
+              isSelected: true,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            },
+            {
+              id: 'offer-management',
+              name: 'Offer Management',
+              description: 'Product offer creation and management',
+              domainId: 'product-management',
+              isSelected: true,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            }
+          ],
+          isSelected: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: 'revenue-management',
+          name: 'Revenue Management',
+          description: 'Billing, charging, and revenue management capabilities',
+          capabilities: [
+            {
+              id: 'billing-and-charging',
+              name: 'Billing and Charging',
+              description: 'Comprehensive billing and revenue management',
+              domainId: 'revenue-management',
+              isSelected: true,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            },
+            {
+              id: 'payment-management',
+              name: 'Payment Management',
+              description: 'Payment processing and management',
+              domainId: 'revenue-management',
+              isSelected: true,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            }
+          ],
+          isSelected: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+      ];
+      setTmfDomains(defaultTmfDomains);
+    }
+  }, [tmfDomains.length]);
 
   const handleSpecSyncImport = (state: SpecSyncState) => {
     console.log('handleSpecSyncImport called with:', state);
