@@ -6,13 +6,30 @@ export async function GET(request: NextRequest) {
   const state = searchParams.get('state');
   const error = searchParams.get('error');
 
+  // Check if we're on port 3000 and need to redirect to port 3002
+  const currentPort = request.nextUrl.port || '3000';
+  if (currentPort === '3000') {
+    // Redirect to port 3002 with the same parameters
+    const redirectUrl = new URL(request.url);
+    redirectUrl.port = '3002';
+    redirectUrl.hostname = request.nextUrl.hostname;
+    
+    console.log(`Redirecting OAuth callback from port 3000 to port 3002: ${redirectUrl.toString()}`);
+    
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  console.log(`Processing OAuth callback on port ${currentPort} with code: ${code ? 'present' : 'missing'}`);
+
   if (error) {
+    console.error('OAuth error received:', error);
     return NextResponse.redirect(
       new URL(`/?error=${encodeURIComponent(error)}`, request.url)
     );
   }
 
   if (!code) {
+    console.error('No authorization code received');
     return NextResponse.redirect(
       new URL('/?error=No authorization code received', request.url)
     );
@@ -24,10 +41,13 @@ export async function GET(request: NextRequest) {
     const redirectUri = process.env.MIRO_REDIRECT_URI;
 
     if (!clientId || !clientSecret || !redirectUri) {
+      console.error('Missing Miro configuration');
       return NextResponse.redirect(
         new URL('/?error=Miro configuration missing', request.url)
       );
     }
+
+    console.log('Exchanging authorization code for access token...');
 
     // Exchange authorization code for access token
     const tokenResponse = await fetch('https://api.miro.com/v1/oauth/token', {
@@ -53,6 +73,7 @@ export async function GET(request: NextRequest) {
     }
 
     const tokenData = await tokenResponse.json();
+    console.log('Token exchange successful, redirecting to main page...');
 
     // Store the access token in a secure way (in production, use a database or secure session)
     // For now, we'll redirect with the token as a query parameter (not secure for production)

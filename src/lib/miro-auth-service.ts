@@ -29,10 +29,12 @@ class MiroAuthService {
 
   public async initiateOAuth(): Promise<string> {
     try {
+      console.log('Initiating OAuth flow...');
       const response = await fetch('/api/auth/miro');
       const data = await response.json();
       
       if (data.authUrl) {
+        console.log('OAuth authorization URL generated:', data.authUrl);
         return data.authUrl;
       } else {
         throw new Error('Failed to get authorization URL');
