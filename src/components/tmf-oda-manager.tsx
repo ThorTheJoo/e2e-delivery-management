@@ -6,7 +6,8 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Trash2, Edit, Check, X, ChevronDown, ChevronRight, Upload, FileSpreadsheet } from 'lucide-react';
 import { TMFOdaDomain, TMFOdaCapability, TMFOdaState } from '@/types';
-import { SpecSyncImport, SpecSyncState } from './specsync-import';
+import { SpecSyncImport } from './specsync-import';
+import { SpecSyncState } from '@/types';
 
 // Mock TMF ODA reference data based on real TMF standards
 const MOCK_TMF_ODA_DOMAINS: Omit<TMFOdaDomain, 'id' | 'capabilities' | 'isSelected' | 'createdAt' | 'updatedAt'>[] = [

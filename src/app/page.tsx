@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { SpecSyncImport, SpecSyncState } from '@/components/specsync-import';
+import { SpecSyncImport } from '@/components/specsync-import';
+import { SpecSyncState } from '@/types';
 import { RequirementBadge } from '@/components/requirement-badge';
 import { TMFDomainCapabilityManager } from '@/components/tmf-domain-capability-manager';
 import { NavigationSidebar } from '@/components/navigation-sidebar';
@@ -150,6 +151,7 @@ export default function HomePage() {
     const savedState = loadSpecSyncData();
     if (savedState) {
       setSpecSyncState(savedState);
+      setSpecSyncItems(savedState.items); // Set specSyncItems for MiroBoardCreator
       updateRequirementCounts(savedState);
       // Don't show toast on page reload - only show when user actually imports
     }
@@ -158,6 +160,7 @@ export default function HomePage() {
   const handleSpecSyncImport = (state: SpecSyncState) => {
     console.log('handleSpecSyncImport called with:', state);
     setSpecSyncState(state);
+    setSpecSyncItems(state.items); // Update specSyncItems for MiroBoardCreator
     updateRequirementCounts(state);
     saveSpecSyncData(state);
     
@@ -177,6 +180,7 @@ export default function HomePage() {
 
   const handleSpecSyncClear = () => {
     setSpecSyncState(null);
+    setSpecSyncItems([]); // Clear specSyncItems for MiroBoardCreator
     setRequirementCounts({});
     setUseCaseCounts({});
     clearSpecSyncData();
@@ -589,7 +593,30 @@ export default function HomePage() {
                     )}
                   </div>
                   {isTmfManagerExpanded && (
-                    <TMFDomainCapabilityManager specSyncData={specSyncState} />
+                    <TMFDomainCapabilityManager 
+                      specSyncData={specSyncState}
+                      onStateChange={(domains) => {
+                        // Convert UserDomain[] to TMFOdaDomain[] for MiroBoardCreator
+                        const tmfDomains: TMFOdaDomain[] = domains.map(domain => ({
+                          id: domain.id,
+                          name: domain.name,
+                          description: domain.description,
+                          capabilities: domain.capabilities.map(cap => ({
+                            id: cap.id,
+                            name: cap.name,
+                            description: cap.description,
+                            domainId: domain.id,
+                            isSelected: cap.isSelected,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                          })),
+                          isSelected: domain.isSelected,
+                          createdAt: new Date().toISOString(),
+                          updatedAt: new Date().toISOString()
+                        }));
+                        setTmfDomains(tmfDomains);
+                      }}
+                    />
                   )}
                 </div>
 

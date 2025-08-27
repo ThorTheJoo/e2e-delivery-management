@@ -1,4 +1,3 @@
-import { MiroApi } from '@mirohq/miro-api';
 import { Project, TMFOdaDomain, TMFOdaCapability, SpecSyncItem } from '@/types';
 
 export interface MiroBoardConfig {
@@ -26,66 +25,40 @@ export interface MiroFrameConfig {
 }
 
 export class MiroService {
-  private client: MiroApi | null = null;
-  private isAuthenticated = false;
+  private apiBaseUrl: string;
 
   constructor() {
-    this.initializeClient();
+    this.apiBaseUrl = '/api/miro/boards';
   }
 
-  private initializeClient() {
-    const accessToken = process.env.MIRO_ACCESS_TOKEN;
-    
-    if (accessToken) {
-      this.client = new MiroApi(accessToken);
-      this.isAuthenticated = true;
-    } else {
-      console.warn('Miro access token not found. Please configure MIRO_ACCESS_TOKEN in .env.local');
-    }
-  }
+  private async callMiroAPI(action: string, data: any): Promise<any> {
+    const response = await fetch(this.apiBaseUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ action, data }),
+    });
 
-  public isReady(): boolean {
-    return this.isAuthenticated && this.client !== null;
-  }
-
-  public async authenticate(): Promise<boolean> {
-    // For now, we'll use the access token directly
-    // In a full implementation, you'd implement OAuth flow here
-    const accessToken = process.env.MIRO_ACCESS_TOKEN;
-    
-    if (!accessToken) {
-      throw new Error('Miro access token not configured. Please set MIRO_ACCESS_TOKEN in .env.local');
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
     }
 
-    try {
-      this.client = new MiroApi(accessToken);
-      this.isAuthenticated = true;
-      return true;
-    } catch (error) {
-      console.error('Failed to authenticate with Miro:', error);
-      return false;
-    }
+    return response.json();
   }
 
   public async createBoard(config: MiroBoardConfig): Promise<{ id: string; viewLink: string }> {
-    if (!this.isReady()) {
-      await this.authenticate();
-    }
-
-    if (!this.client) {
-      throw new Error('Miro client not initialized');
-    }
-
+    console.log('Creating Miro board:', config.name);
+    
     try {
-      const board = await this.client.createBoard({
+      const result = await this.callMiroAPI('createBoard', {
         name: config.name,
         description: config.description
       });
 
-      return {
-        id: board.id,
-        viewLink: board.viewLink || `https://miro.com/app/board/${board.id}`
-      };
+      console.log('Board created successfully:', result.id);
+      return result;
     } catch (error) {
       console.error('Failed to create Miro board:', error);
       throw error;
@@ -102,35 +75,30 @@ export class MiroService {
     const board = await this.createBoard(boardConfig);
 
     // Create domain frames and capability cards
-    if (this.client) {
-      await this.createDomainFrames(board.id, domains);
-    }
+    await this.createDomainFrames(board.id, domains);
 
     return board;
   }
 
   private async createDomainFrames(boardId: string, domains: TMFOdaDomain[]): Promise<void> {
-    if (!this.client) return;
-
-    const board = this.client.getBoard(boardId);
-    
     for (let i = 0; i < domains.length; i++) {
       const domain = domains[i];
       
       // Create frame for domain
-      const frame = await board.createFrameItem({
-        data: { title: domain.name },
+      const frame = await this.callMiroAPI('createFrame', {
+        boardId,
+        title: domain.name,
         position: { x: i * 850, y: 0 },
         geometry: { width: 800, height: 600 }
       });
 
       // Add capability cards within the frame
-      await this.createCapabilityCards(board, domain.capabilities, frame.id, i);
+      await this.createCapabilityCards(boardId, domain.capabilities, frame.id, i);
     }
   }
 
   private async createCapabilityCards(
-    board: any, 
+    boardId: string, 
     capabilities: TMFOdaCapability[], 
     frameId: string, 
     domainIndex: number
@@ -148,11 +116,10 @@ export class MiroService {
       const x = domainIndex * 850 + 50 + col * (cardWidth + spacing);
       const y = 50 + row * (cardHeight + spacing);
 
-      await board.createCardItem({
-        data: {
-          title: capability.name,
-          description: capability.description
-        },
+      await this.callMiroAPI('createCard', {
+        boardId,
+        title: capability.name,
+        description: capability.description,
         position: { x, y },
         geometry: { width: cardWidth, height: cardHeight },
         style: {
@@ -171,17 +138,12 @@ export class MiroService {
 
     const board = await this.createBoard(boardConfig);
 
-    if (this.client) {
-      await this.createRequirementCards(board.id, specSyncItems);
-    }
+    await this.createRequirementCards(board.id, specSyncItems);
 
     return board;
   }
 
   private async createRequirementCards(boardId: string, items: SpecSyncItem[]): Promise<void> {
-    if (!this.client) return;
-
-    const board = this.client.getBoard(boardId);
     const cardsPerRow = 4;
     const cardWidth = 200;
     const cardHeight = 100;
@@ -195,11 +157,10 @@ export class MiroService {
       const x = 50 + col * (cardWidth + spacing);
       const y = 50 + row * (cardHeight + spacing);
 
-      await board.createCardItem({
-        data: {
-          title: item.rephrasedRequirementId,
-          description: `${item.domain} - ${item.functionName}`
-        },
+      await this.callMiroAPI('createCard', {
+        boardId,
+        title: item.rephrasedRequirementId,
+        description: `${item.domain} - ${item.functionName}`,
         position: { x, y },
         geometry: { width: cardWidth, height: cardHeight },
         style: {
@@ -211,38 +172,13 @@ export class MiroService {
   }
 
   public async getBoard(boardId: string): Promise<any> {
-    if (!this.isReady()) {
-      await this.authenticate();
-    }
-
-    if (!this.client) {
-      throw new Error('Miro client not initialized');
-    }
-
-    try {
-      return await this.client.getBoard(boardId);
-    } catch (error) {
-      console.error('Failed to get Miro board:', error);
-      throw error;
-    }
+    // This would need a separate API endpoint for getting board details
+    throw new Error('getBoard not implemented yet');
   }
 
   public async deleteBoard(boardId: string): Promise<void> {
-    if (!this.isReady()) {
-      await this.authenticate();
-    }
-
-    if (!this.client) {
-      throw new Error('Miro client not initialized');
-    }
-
-    try {
-      const board = this.client.getBoard(boardId);
-      await board.delete();
-    } catch (error) {
-      console.error('Failed to delete Miro board:', error);
-      throw error;
-    }
+    // This would need a separate API endpoint for deleting boards
+    throw new Error('deleteBoard not implemented yet');
   }
 }
 

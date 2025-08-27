@@ -6,30 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Upload, FileSpreadsheet, X, CheckCircle, AlertCircle } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
-export interface SpecSyncItem {
-  rephrasedRequirementId: string;
-  sourceRequirementId: string;
-  domain: string;
-  vertical: string;
-  functionName: string;
-  afLevel2: string;
-  capability: string;
-  referenceCapability: string;
-  usecase1: string; // New field for use case identification
-}
-
-export interface SpecSyncState {
-  fileName: string;
-  importedAt: number;
-  includeInEstimates: boolean;
-  counts: {
-    totalRequirements: number;
-    domains: Record<string, number>;
-    useCases: number; // Number of unique use cases
-  };
-  items: SpecSyncItem[];
-  selectedCapabilityIds: string[];
-}
+import { SpecSyncItem, SpecSyncState } from '@/types';
 
 interface SpecSyncImportProps {
   onImport: (state: SpecSyncState) => void;

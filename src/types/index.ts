@@ -252,3 +252,29 @@ export interface PaginatedResponse<T> {
   limit: number;
   totalPages: number;
 }
+
+// SpecSync types
+export interface SpecSyncItem {
+  rephrasedRequirementId: string;
+  sourceRequirementId: string;
+  domain: string;
+  vertical: string;
+  functionName: string;
+  afLevel2: string;
+  capability: string;
+  referenceCapability: string;
+  usecase1: string;
+}
+
+export interface SpecSyncState {
+  fileName: string;
+  importedAt: number;
+  includeInEstimates: boolean;
+  counts: {
+    totalRequirements: number;
+    domains: Record<string, number>;
+    useCases: number;
+  };
+  items: SpecSyncItem[];
+  selectedCapabilityIds: string[];
+}

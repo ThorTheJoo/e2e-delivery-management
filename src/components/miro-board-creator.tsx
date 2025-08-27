@@ -30,12 +30,23 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems }: MiroBoa
     setIsCreatingTMF(true);
     setError(null);
     
+    console.log('Creating TMF board with project:', project);
+    console.log('TMF domains:', tmfDomains);
+    console.log('Selected domains:', tmfDomains.filter(d => d.isSelected));
+    
     try {
       const board = await miroService.createTMFBoard(project, tmfDomains);
       setBoardLinks(prev => ({ ...prev, tmfBoard: board.viewLink }));
     } catch (error) {
       console.error('Failed to create TMF board:', error);
-      setError('Failed to create TMF Architecture board. Please check your Miro credentials.');
+      
+      // Check if it's a token-related error
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      if (errorMessage.includes('token') || errorMessage.includes('authentication') || errorMessage.includes('401') || errorMessage.includes('403')) {
+        setError('Miro access token is invalid or expired. Please check your token in the Miro Developer Platform and update the MIRO_ACCESS_TOKEN in your .env.local file.');
+      } else {
+        setError('Failed to create TMF Architecture board. Please check your Miro credentials and try again.');
+      }
     } finally {
       setIsCreatingTMF(false);
     }
@@ -45,12 +56,23 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems }: MiroBoa
     setIsCreatingSpecSync(true);
     setError(null);
     
+    console.log('Creating SpecSync board with items:', specSyncItems);
+    console.log('SpecSync items length:', specSyncItems.length);
+    console.log('First few items:', specSyncItems.slice(0, 3));
+    
     try {
       const board = await miroService.createSpecSyncBoard(specSyncItems);
       setBoardLinks(prev => ({ ...prev, specSyncBoard: board.viewLink }));
     } catch (error) {
       console.error('Failed to create SpecSync board:', error);
-      setError('Failed to create SpecSync Requirements board. Please check your Miro credentials.');
+      
+      // Check if it's a token-related error
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      if (errorMessage.includes('token') || errorMessage.includes('authentication') || errorMessage.includes('401') || errorMessage.includes('403')) {
+        setError('Miro access token is invalid or expired. Please check your token in the Miro Developer Platform and update the MIRO_ACCESS_TOKEN in your .env.local file.');
+      } else {
+        setError('Failed to create SpecSync Requirements board. Please check your Miro credentials and try again.');
+      }
     } finally {
       setIsCreatingSpecSync(false);
     }

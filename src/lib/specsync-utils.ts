@@ -1,4 +1,4 @@
-import { SpecSyncItem, SpecSyncState } from '@/components/specsync-import';
+import { SpecSyncItem, SpecSyncState } from '@/types';
 import { TMFCapability } from '@/types';
 
 // Map SpecSync items to existing TMF capabilities
