@@ -121,7 +121,7 @@ export function calculateUseCaseCountsByCapability(
 
     // Try partial matches for capability names
     if (!capId) {
-      for (const [normalizedName, id] of labelToId.entries()) {
+      for (const [normalizedName, id] of Array.from(labelToId.entries())) {
         if (capName && normalizedName.includes(capName) || capName && capName.includes(normalizedName)) {
           capId = id;
           break;

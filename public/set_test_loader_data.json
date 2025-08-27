@@ -1,0 +1,2699 @@
+{
+  "project_info": {
+    "title": "Hidden Row - Do Not Delete",
+    "scenario": "Selected Scenario: Phase 1",
+    "total_effort": "Total CUT Effort (Days):"
+  },
+  "components": [
+    {
+      "ref_num": "MAS00000",
+      "component": "Market & Sales Domain",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "MAS00001",
+      "component": "Campaign & Funnel Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "MAS00002",
+      "component": "Campaign & Funnel L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "MAS00003",
+      "component": "Campaign & Funnel L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "MAS00004",
+      "component": "Sales Account Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "MAS00005",
+      "component": "Sales Account L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "MAS00006",
+      "component": "Sales Account L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "MAS00007",
+      "component": "Sales & Marketing Reporting",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "MAS00008",
+      "component": "Sales & Marketing Reporting L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "MAS00009",
+      "component": "Sales & Marketing Reporting L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "MAS00010",
+      "component": "Sales Aids",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "MAS00011",
+      "component": "Sales Aids L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "MAS00012",
+      "component": "Sales Aids L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "D",
+      "template_effort": null
+    },
+    {
+      "ref_num": "MAS00013",
+      "component": "Compensation & Results",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "MAS00014",
+      "component": "Compensation & Results L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "MAS00015",
+      "component": "Compensation & Results L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "MAS00016",
+      "component": "Channel Sales Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "MAS00017",
+      "component": "Channel Sales Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "MAS00018",
+      "component": "Channel Sales Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "MAS00019",
+      "component": "Solution Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "MAS00020",
+      "component": "Solution Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "MAS00021",
+      "component": "Solution Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "MAS00022",
+      "component": "Contract Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "MAS00023",
+      "component": "Contract Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "MAS00024",
+      "component": "Contract Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "MAS00025",
+      "component": "Sales Portal",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "MAS00026",
+      "component": "Sales Portal L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "MAS00027",
+      "component": "Sales Portal L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "PRD00000",
+      "component": "Product Domain",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "PRD00001",
+      "component": "Product Catalogue Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "PRD00002",
+      "component": "Product Catalogue L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "PRD00003",
+      "component": "Product Catalogue L2",
+      "details": "Bulk loading of offers via CSV file - supported by R&D",
+      "customer_ref": "EI 504469",
+      "phase1_effort": null,
+      "scenario2_effort": "EC CB",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "PRD00201",
+      "component": "Product Model",
+      "details": null,
+      "customer_ref": "4.1 Product Management",
+      "phase1_effort": 20,
+      "scenario2_effort": "EC CB",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "PRD00202",
+      "component": "Product Lifecycle",
+      "details": "Additional PE/CC changes needed due to updates to Product Model",
+      "customer_ref": null,
+      "phase1_effort": 5,
+      "scenario2_effort": "EC CC",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "PRD00004",
+      "component": "Product Lifecycle Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "PRD00005",
+      "component": "Product Lifecycle L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "PRD00006",
+      "component": "Product Lifecycle L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "PRD00007",
+      "component": "Product Strategy & Proposition Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "PRD00008",
+      "component": "Product Strategy & Proposition Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "PRD00009",
+      "component": "Product Strategy & Proposition Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "PRD00010",
+      "component": "Product Performance Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "PRD00011",
+      "component": "Product Performance Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "PRD00012",
+      "component": "Product Performance Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00000",
+      "component": "Customer Domain",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00001",
+      "component": "Customer Information Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00002",
+      "component": "Customer Information Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00003",
+      "component": "Customer Information Management L3",
+      "details": null,
+      "customer_ref": "4.2.1 Customer Information Management",
+      "phase1_effort": 10,
+      "scenario2_effort": "EC CB",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00201",
+      "component": "Bulk loading of Customer Nodes",
+      "details": null,
+      "customer_ref": "EI\n4.2.2.2 Bulk Loading Tools",
+      "phase1_effort": 3,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00218",
+      "component": "Bulk loading of Hierarchy Changes",
+      "details": null,
+      "customer_ref": "EI\n4.2.2.2 Bulk Loading Tools",
+      "phase1_effort": 2,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00219",
+      "component": "Bulk loading of Contacts",
+      "details": null,
+      "customer_ref": "EI\n4.2.2.2 Bulk Loading Tools",
+      "phase1_effort": 2,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00004",
+      "component": "Billing Account Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00005",
+      "component": "Billing Account Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00006",
+      "component": "Billing Account Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00007",
+      "component": "Case Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00008",
+      "component": "Case Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00009",
+      "component": "Case Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC CB",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00010",
+      "component": "Customer Order Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00011",
+      "component": "Customer Order Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00012",
+      "component": "Bulk Service Loading",
+      "details": null,
+      "customer_ref": "EI\n4.2.2.2 Bulk Loading Tools",
+      "phase1_effort": 5,
+      "scenario2_effort": "EC CB",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00202",
+      "component": "Service Updates",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC CB",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00207",
+      "component": "Inventory File - Validation",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00013",
+      "component": "Billing Event Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00014",
+      "component": "Billing Event Management L2",
+      "details": null,
+      "customer_ref": "Mediation",
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00015",
+      "component": "FlexCab Translator",
+      "details": null,
+      "customer_ref": "4.2.3.1 Telstra Retail",
+      "phase1_effort": 10,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00206",
+      "component": "SAP Translator",
+      "details": null,
+      "customer_ref": "4.2.3.1 SAP",
+      "phase1_effort": 10,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00205",
+      "component": "Optus Data Feed Translator",
+      "details": null,
+      "customer_ref": "4.2.3.1 Amdocs (Jarvis) Feed",
+      "phase1_effort": 10,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00204",
+      "component": "Telstra Wholesale Translator",
+      "details": null,
+      "customer_ref": "4.2.3.1 Telstra Wholesale",
+      "phase1_effort": 10,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00203",
+      "component": "GTS Translator",
+      "details": null,
+      "customer_ref": "4.2.3.1 Other Telco Feeds",
+      "phase1_effort": 10,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00211",
+      "component": "Input File Verifications + Normalisation Effort",
+      "details": null,
+      "customer_ref": "4.2.3.2 Event Verifications",
+      "phase1_effort": 15,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00016",
+      "component": "Charge Calculation & Balance Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00017",
+      "component": "Charge Calculation & Balance Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00018",
+      "component": "Charge Calculation & Balance Management L3",
+      "details": null,
+      "customer_ref": "4.2.4.1 Rating\n4.2.4.2 Split Charging\n4.2.4.3 Report Codes",
+      "phase1_effort": 15,
+      "scenario2_effort": "EC CB",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00213",
+      "component": "Contract Termination Fees",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00217",
+      "component": "Customer specific requirements",
+      "details": null,
+      "customer_ref": "4.2.5.6 Customer Specific Billing Logic",
+      "phase1_effort": 120,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00220",
+      "component": "One Off Charge Bulk Loader",
+      "details": null,
+      "customer_ref": "4.2.4.4 One Off Charges",
+      "phase1_effort": 3,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00019",
+      "component": "Bill Calculation",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00020",
+      "component": "Bill Calculation L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00021",
+      "component": "Account Level Charge Distribution",
+      "details": null,
+      "customer_ref": "4.2.5.3 Distribution of Account Level Charges to Services",
+      "phase1_effort": 20,
+      "scenario2_effort": "EC CB",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00208",
+      "component": "Aggregations during billing - Discounts",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00214",
+      "component": "Volume based Charging",
+      "details": null,
+      "customer_ref": "4.2.5.5 Volume Based Charging",
+      "phase1_effort": 20,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00209",
+      "component": "Bill Verifications",
+      "details": null,
+      "customer_ref": "4.2.5.2 Bill Variance Checks",
+      "phase1_effort": 8,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00210",
+      "component": "Pre Bill Verifications",
+      "details": null,
+      "customer_ref": "4.2.5.1 Billing Readiness Verification",
+      "phase1_effort": 7,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00212",
+      "component": "Automatically pay off invoice each month",
+      "details": null,
+      "customer_ref": "Not in SD",
+      "phase1_effort": 3,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00216",
+      "component": "Australia Taxation Support",
+      "details": null,
+      "customer_ref": "4.2.5.8 Tax Calculation",
+      "phase1_effort": 5,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00221",
+      "component": "Ad-hoc Bill with Selected charges",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC CB",
+      "scenario3_effort": "C",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00222",
+      "component": "Selection of bills to be put on hold",
+      "details": null,
+      "customer_ref": "4.2.5.1.1 Holding Customer Hierarchy from Billing",
+      "phase1_effort": 6,
+      "scenario2_effort": "EC CB",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00223",
+      "component": "Updates to Processed Charges",
+      "details": null,
+      "customer_ref": "4.2.5.1.2 Updates to Processed Charges",
+      "phase1_effort": 15,
+      "scenario2_effort": "EC CB",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00022",
+      "component": "Bill Format & Render",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00023",
+      "component": "Bill Format & Render L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00024",
+      "component": "Bill Format & Render L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00025",
+      "component": "Transactional Document Production",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00026",
+      "component": "Transactional Document Production L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00027",
+      "component": "Transactional Document Production L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00028",
+      "component": "Receivables Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00029",
+      "component": "Receivables Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00030",
+      "component": "Adjustments",
+      "details": null,
+      "customer_ref": "Not in SD",
+      "phase1_effort": 5,
+      "scenario2_effort": "EC CB",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00215",
+      "component": "Finance - Support splitting charge across multiple GL",
+      "details": null,
+      "customer_ref": "Not in SD",
+      "phase1_effort": 5,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00031",
+      "component": "Collection Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00032",
+      "component": "Collection Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00033",
+      "component": "Collection Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00034",
+      "component": "Customer & Network Care",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00035",
+      "component": "Customer & Network Care L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00036",
+      "component": "Customer & Network Care L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00037",
+      "component": "Billing Inquiry, Dispute & Adjustment Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00038",
+      "component": "Billing Inquiry, Dispute & Adjustment Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00039",
+      "component": "Billing Inquiry, Dispute & Adjustment Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00040",
+      "component": "Customer Problem Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00041",
+      "component": "Customer Problem Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00042",
+      "component": "Customer Problem Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00043",
+      "component": "CSR Toolbox",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00044",
+      "component": "CSR Toolbox L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00045",
+      "component": "CSR Toolbox L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00046",
+      "component": "Customer Self Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00047",
+      "component": "Customer Self Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00048",
+      "component": "Customer Self Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00049",
+      "component": "Customer Loyalty Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00050",
+      "component": "Customer Loyalty Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00051",
+      "component": "Customer Loyalty Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00052",
+      "component": "Customer SLA Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00053",
+      "component": "Customer SLA Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00054",
+      "component": "Customer SLA Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00055",
+      "component": "Customer Insight Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00056",
+      "component": "Customer Insight Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "CUS00057",
+      "component": "Customer Insight Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "SER00000",
+      "component": "Service Domain",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "SER00001",
+      "component": "Service Catalogue Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "SER00002",
+      "component": "Service Catalogue L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "SER00003",
+      "component": "Service Catalogue L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "SER00004",
+      "component": "Service Inventory Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "SER00005",
+      "component": "Service Inventory Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "SER00006",
+      "component": "Service Inventory Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "SER00007",
+      "component": "Service Test Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "SER00008",
+      "component": "Service Test Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "SER00009",
+      "component": "Service Test Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "SER00010",
+      "component": "Service Order Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "SER00011",
+      "component": "Service Order Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "SER00012",
+      "component": "Service Order Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "SER00013",
+      "component": "Service Problem Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "SER00014",
+      "component": "Service Problem Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "SER00015",
+      "component": "Service Problem Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "SER00016",
+      "component": "Service Quality Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "SER00017",
+      "component": "Service Quality Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "SER00018",
+      "component": "Service Quality Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "SER00019",
+      "component": "Service Performance Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "SER00020",
+      "component": "Service Performance Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "SER00021",
+      "component": "Service Performance Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00000",
+      "component": "Resource Domain",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00001",
+      "component": "Resource Lifecycle Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00002",
+      "component": "Resource Lifecycle L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00003",
+      "component": "Resource Lifecycle L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00004",
+      "component": "Resource Inventory Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00005",
+      "component": "Resource Inventory Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00006",
+      "component": "Resource Inventory Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00007",
+      "component": "Workforce Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00008",
+      "component": "Workforce Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00009",
+      "component": "Workforce Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00010",
+      "component": "Location Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00011",
+      "component": "Location Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00012",
+      "component": "Location Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00013",
+      "component": "Network Number Inventory Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00014",
+      "component": "Network Number Inventory Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00015",
+      "component": "Network Number Inventory Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00016",
+      "component": "Resource Test Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00017",
+      "component": "Resource Test Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00018",
+      "component": "Resource Test Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00019",
+      "component": "Resource Process Management (Workflow & Integration)",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00020",
+      "component": "Resource Process Management (Workflow & Integration) L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00021",
+      "component": "Resource Process Management (Workflow & Integration) L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00022",
+      "component": "Resource Order Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00023",
+      "component": "Resource Order Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00024",
+      "component": "Resource Order Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00025",
+      "component": "Resource Performance Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00026",
+      "component": "Resource Performance Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00027",
+      "component": "Resource Performance Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00028",
+      "component": "Resource Domain Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00029",
+      "component": "Resource Domain Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00030",
+      "component": "Resource Domain Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00031",
+      "component": "Usage Management (Mediation)",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00032",
+      "component": "Usage Management (Mediation) L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00033",
+      "component": "Usage Management (Mediation) L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00034",
+      "component": "Voucher Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00035",
+      "component": "Voucher Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "RES00036",
+      "component": "Voucher Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "SUP00000",
+      "component": "Supplier-Partner Domain",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "SUP00001",
+      "component": "Supplier/Partner Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "SUP00002",
+      "component": "Supplier/Partner Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "SUP00003",
+      "component": "Supplier/Partner Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "SUP00004",
+      "component": "Wholesale/Interconnect Billing",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "SUP00005",
+      "component": "Wholesale/Interconnect Billing L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "SUP00006",
+      "component": "Wholesale/Interconnect Billing L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00000",
+      "component": "Enterprise Domain",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00001",
+      "component": "Supply Chain Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00002",
+      "component": "Supply Chain Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00003",
+      "component": "Supply Chain Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00004",
+      "component": "Revenue Assurance Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00005",
+      "component": "Revenue Assurance Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00006",
+      "component": "Revenue Assurance Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00007",
+      "component": "HR Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00008",
+      "component": "HR Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00009",
+      "component": "HR Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00010",
+      "component": "Financial Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00011",
+      "component": "Financial Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00012",
+      "component": "Financial Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00013",
+      "component": "Asset Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00014",
+      "component": "Asset Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00015",
+      "component": "Asset Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00016",
+      "component": "Security Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00017",
+      "component": "Security Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00018",
+      "component": "Multiple Customer Security Groups",
+      "details": "3 customer Security groups\nNeed automatic allocation in bulk loader but with abilty to override",
+      "customer_ref": "4.3.1.3 Customer Data Access Restrictions",
+      "phase1_effort": 3,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00201",
+      "component": "View Auditing Setup",
+      "details": "Adapt from CT-Bill",
+      "customer_ref": "4.3.1.4.1 View Auditing",
+      "phase1_effort": 3,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00202",
+      "component": "Sailpoint Integration for User Maintenance",
+      "details": "Reuse Optus Wholesale integration",
+      "customer_ref": "4.3.1.2 User Maintenance + Interface Table (Sailpoint to Encompass)",
+      "phase1_effort": 3,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00019",
+      "component": "Knowledge Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00020",
+      "component": "Knowledge Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00021",
+      "component": "Knowldege Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00022",
+      "component": "Fraud Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00023",
+      "component": "Fraud Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00024",
+      "component": "Fraud Management L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00025",
+      "component": "Regulatory & Compliance",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00026",
+      "component": "Regulatory & Compliance L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00027",
+      "component": "Regulatory & Complaince L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00028",
+      "component": "Administrative Services",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00029",
+      "component": "Administrative Services L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "ENT00030",
+      "component": "Administrative Services L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "INT00000",
+      "component": "Integration Infrastructure Domain",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "INT00001",
+      "component": "Enterprise Application Integration",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "INT00002",
+      "component": "Enterprise Application Integration L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "INT00003",
+      "component": "Currency Conversion Load",
+      "details": "Load currency conversions \nAssume re-use of Digicel Pacific exchange rate loader",
+      "customer_ref": "4.2.6.2 Multi-Currency Support; Interfaces Table - SAP to Encompass",
+      "phase1_effort": 3,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "INT00203",
+      "component": "Bulk Upload - Customer Nodes",
+      "details": "Potential re-use from Digicel Pacific",
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "INT00204",
+      "component": "Bulk Upload - Services/Product Instances",
+      "details": "Potential re-use from Digicel Pacific",
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "INT00202",
+      "component": "Currency Conversion Load",
+      "details": "Load currency conversions \nAssume re-use of Digicel Pacific exchange rate loader",
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "INT00004",
+      "component": "Business Process Management & Workflow",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "INT00005",
+      "component": "Business Process Management & Workflow L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "INT00006",
+      "component": "Business Process Management & Workflow L3",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "EC PE",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "INT00007",
+      "component": "API Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "INT00008",
+      "component": "API Management L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "INT00009",
+      "component": "CB TMF Rest API",
+      "details": "TMF CB Rest API for \nCustomer Management (List, Retrieve, Patch, Create)\nService Inventory Management (List, Retrieve, Patch)\nAccount Management (List, Retrieve)\nParty (List, Retrieve, Patch, Create)\nAssumption is these APIs are largely OOTB from R&D - note these need to be CB Only APIs and will be Kafka based i.e. so no additional CUT effort needed to get Kafka working",
+      "customer_ref": "EI\n4.2.2.1 APIs Based on TMF",
+      "phase1_effort": 10,
+      "scenario2_effort": "EC CB",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "INT00205",
+      "component": "Kafka Input Queue support",
+      "details": "Effort to integrate these REST API's to Kafka",
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "INT00206",
+      "component": "Fetch Address Details from Geosite",
+      "details": "Outbound interface to fetch address details given an Address Identifier",
+      "customer_ref": "Interfaces Table (Encompass to Geosite)",
+      "phase1_effort": 4,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "INT00201",
+      "component": "Kafka Output File Based for SNOW Updates",
+      "details": "Send Serviec Updates to SNOW when Service is updated directly in CB - rather than from received Kafka request",
+      "customer_ref": "Interfaces Table (Encompass to SNOW)",
+      "phase1_effort": 10,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "OTH00000",
+      "component": "Other Efforts",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "OTH00001",
+      "component": "Other Efforts Management",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "OTH00002",
+      "component": "Reporting",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "OTH00003",
+      "component": "Report to eFRAMs",
+      "details": "Summary and Detailed information of \nBill Summary\nBill Detail \nFor CT-Bill was around 5 extract files that were required.  Assuming some limited reuse of CT-Bill",
+      "customer_ref": "Interface Table (Encompass to eFRAMS)",
+      "phase1_effort": 20,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "OTH00201",
+      "component": "Report fo FinReporting",
+      "details": "generate data for Fin Reporting.\nFinance team have 2 very imp reports (INT371 and INT372) which are used for posting revenue to SAP. It need to be in same format as today. Other reports will be discussed later with Billing team and Finance team\n\nINT 371 \u2013 For Fixed charges in the BOSS system. See headers of report below\n- BOSS Code; VarProductCode; Revenue account; Revenue; GSTRev; Bill Month\n\nINT 372 \u2013 For variable charges in the BOSS system. See headers of report below. \n- BOSS Code; Bill Type; BOSS Trans+Call type; Account number; BOSS Line Class; ServiceClass; InvoiceNo; Supplier;\nRevenue account; Revenue; GSTRev; Cost; ;GSTCost; VarProductCode; Bill Month\"\n\nINT064 - Report for Fixed fee charges\nIN033 - Summary of Fixed charges of bill\nINT035 - Summary of Variable Charge to pay suppliers\nINT155 - Service Level details required by Finance Team",
+      "customer_ref": "4.2.6.1 Financial Reporting + Interface Table (Bill Reporting)",
+      "phase1_effort": 40,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "OTH00202",
+      "component": "Invoice Feed to Amdocs",
+      "details": "Invoice Feed generated for each Account in separate files.\nTransfer to destination system based on configuration.",
+      "customer_ref": "4.2.5.7 Invoice Generation + Interfaces Table",
+      "phase1_effort": 20,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "OTH00208",
+      "component": "Data Warehouse Feed",
+      "details": "Expected to be based on Kafka File based\nPotential re-use of CT-Bill DWH solution\nTBC - does OW have a DWH feed - if so we could potentially replicate",
+      "customer_ref": "Interfaces table - Encompass to DWH",
+      "phase1_effort": 15,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "OTH00207",
+      "component": "Customer custom Reports",
+      "details": "Allowance for 50 custom reports",
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "OTH00209",
+      "component": "Additional 11 Reports from BRS",
+      "details": "Refer BRS",
+      "customer_ref": null,
+      "phase1_effort": 0,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "OTH00210",
+      "component": "Additional Misc CC related effort",
+      "details": "Details TBD",
+      "customer_ref": "Not in SD",
+      "phase1_effort": 20,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "OTH00203",
+      "component": "Migration",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "OTH00204",
+      "component": "New entry L2",
+      "details": null,
+      "customer_ref": null,
+      "phase1_effort": null,
+      "scenario2_effort": null,
+      "scenario3_effort": null,
+      "template_effort": null
+    },
+    {
+      "ref_num": "OTH00205",
+      "component": "Migration - Transformation",
+      "details": "Prepare Data \nValidate Data",
+      "customer_ref": "Moved to NonCUT",
+      "phase1_effort": 0,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    },
+    {
+      "ref_num": "OTH00206",
+      "component": "Migration - Reconcilaition Report",
+      "details": "Migration - Reconcilaition Report",
+      "customer_ref": "Moved to NonCUT",
+      "phase1_effort": 0,
+      "scenario2_effort": "INT",
+      "scenario3_effort": "A",
+      "template_effort": null
+    }
+  ],
+  "domains": {
+    "MAS": {
+      "count": 28,
+      "effort": 0
+    },
+    "PRD": {
+      "count": 15,
+      "effort": 25
+    },
+    "CUS": {
+      "count": 81,
+      "effort": 319
+    },
+    "SER": {
+      "count": 22,
+      "effort": 0
+    },
+    "RES": {
+      "count": 37,
+      "effort": 0
+    },
+    "SUP": {
+      "count": 7,
+      "effort": 0
+    },
+    "ENT": {
+      "count": 33,
+      "effort": 9
+    },
+    "INT": {
+      "count": 16,
+      "effort": 27
+    },
+    "OTH": {
+      "count": 14,
+      "effort": 115
+    }
+  },
+  "sample_data": [
+    {
+      "Reference": "MAS00000",
+      "Component": "Market & Sales Domain",
+      "Phase1_Effort": null,
+      "Details": ""
+    },
+    {
+      "Reference": "MAS00001",
+      "Component": "Campaign & Funnel Management",
+      "Phase1_Effort": null,
+      "Details": ""
+    },
+    {
+      "Reference": "MAS00002",
+      "Component": "Campaign & Funnel L2",
+      "Phase1_Effort": null,
+      "Details": ""
+    },
+    {
+      "Reference": "MAS00003",
+      "Component": "Campaign & Funnel L3",
+      "Phase1_Effort": null,
+      "Details": ""
+    },
+    {
+      "Reference": "MAS00004",
+      "Component": "Sales Account Management",
+      "Phase1_Effort": null,
+      "Details": ""
+    },
+    {
+      "Reference": "MAS00005",
+      "Component": "Sales Account L2",
+      "Phase1_Effort": null,
+      "Details": ""
+    },
+    {
+      "Reference": "MAS00006",
+      "Component": "Sales Account L3",
+      "Phase1_Effort": null,
+      "Details": ""
+    },
+    {
+      "Reference": "MAS00007",
+      "Component": "Sales & Marketing Reporting",
+      "Phase1_Effort": null,
+      "Details": ""
+    },
+    {
+      "Reference": "MAS00008",
+      "Component": "Sales & Marketing Reporting L2",
+      "Phase1_Effort": null,
+      "Details": ""
+    },
+    {
+      "Reference": "MAS00009",
+      "Component": "Sales & Marketing Reporting L3",
+      "Phase1_Effort": null,
+      "Details": ""
+    },
+    {
+      "Reference": "MAS00010",
+      "Component": "Sales Aids",
+      "Phase1_Effort": null,
+      "Details": ""
+    },
+    {
+      "Reference": "MAS00011",
+      "Component": "Sales Aids L2",
+      "Phase1_Effort": null,
+      "Details": ""
+    },
+    {
+      "Reference": "MAS00012",
+      "Component": "Sales Aids L3",
+      "Phase1_Effort": null,
+      "Details": ""
+    },
+    {
+      "Reference": "MAS00013",
+      "Component": "Compensation & Results",
+      "Phase1_Effort": null,
+      "Details": ""
+    },
+    {
+      "Reference": "MAS00014",
+      "Component": "Compensation & Results L2",
+      "Phase1_Effort": null,
+      "Details": ""
+    },
+    {
+      "Reference": "MAS00015",
+      "Component": "Compensation & Results L3",
+      "Phase1_Effort": null,
+      "Details": ""
+    },
+    {
+      "Reference": "MAS00016",
+      "Component": "Channel Sales Management",
+      "Phase1_Effort": null,
+      "Details": ""
+    },
+    {
+      "Reference": "MAS00017",
+      "Component": "Channel Sales Management L2",
+      "Phase1_Effort": null,
+      "Details": ""
+    },
+    {
+      "Reference": "MAS00018",
+      "Component": "Channel Sales Management L3",
+      "Phase1_Effort": null,
+      "Details": ""
+    },
+    {
+      "Reference": "MAS00019",
+      "Component": "Solution Management",
+      "Phase1_Effort": null,
+      "Details": ""
+    }
+  ]
+}

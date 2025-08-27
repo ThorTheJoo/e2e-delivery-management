@@ -12,6 +12,7 @@ import { SpecSyncImport, SpecSyncState } from '@/components/specsync-import';
 import { RequirementBadge } from '@/components/requirement-badge';
 import { TMFDomainCapabilityManager } from '@/components/tmf-domain-capability-manager';
 import { NavigationSidebar } from '@/components/navigation-sidebar';
+import { SETImport } from '@/components/set-import';
 import { useToast, ToastContainer } from '@/components/ui/toast';
 import { mapSpecSyncToCapabilities, calculateUseCaseCountsByCapability, saveSpecSyncData, loadSpecSyncData, clearSpecSyncData } from '@/lib/specsync-utils';
 import { 
@@ -50,6 +51,8 @@ export default function HomePage() {
   const [isSpecSyncExpanded, setIsSpecSyncExpanded] = useState(true);
   const [isTmfManagerExpanded, setIsTmfManagerExpanded] = useState(true);
   const [isTmfCapabilitiesExpanded, setIsTmfCapabilitiesExpanded] = useState(true);
+  const [setDomainEfforts, setSetDomainEfforts] = useState<Record<string, number>>({});
+  const [setMatchedWorkPackages, setSetMatchedWorkPackages] = useState<Record<string, any>>({});
   
   const toast = useToast();
 
@@ -182,6 +185,11 @@ export default function HomePage() {
     
     const useCaseMapping = calculateUseCaseCountsByCapability(state.items, tmfCapabilities);
     setUseCaseCounts(useCaseMapping);
+  };
+
+  const handleSETDataLoaded = (domainEfforts: Record<string, number>, matchedWorkPackages: Record<string, any>) => {
+    setSetDomainEfforts(domainEfforts);
+    setSetMatchedWorkPackages(matchedWorkPackages);
   };
 
   if (loading) {
@@ -663,6 +671,8 @@ export default function HomePage() {
 
           {/* Estimation Tab */}
           <TabsContent value="estimation" className="space-y-6">
+            <SETImport onDataLoaded={handleSETDataLoaded} />
+            
             <Card>
               <CardHeader>
                 <CardTitle>Work Package Estimation</CardTitle>
@@ -670,35 +680,67 @@ export default function HomePage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {workPackages.map((workPackage) => (
-                    <div key={workPackage.id} className="p-4 border rounded-lg">
-                      <div className="flex items-center justify-between mb-3">
-                        <h3 className="font-semibold">{workPackage.name}</h3>
-                        <div className={`status-badge ${getStatusColor(workPackage.status)}`}>
-                          {workPackage.status}
+                  {workPackages.map((workPackage) => {
+                    // Check if this work package has SET data updates
+                    const setMatch = Object.entries(setMatchedWorkPackages).find(([domain, match]) => 
+                      match.workPackages.includes(workPackage.name)
+                    );
+                    
+                    const setEffort = setMatch ? setMatch[1].effort : null;
+                    const setDomain = setMatch ? setMatch[0] : null;
+                    
+                    return (
+                      <div key={workPackage.id} className="p-4 border rounded-lg">
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="font-semibold">{workPackage.name}</h3>
+                          <div className="flex items-center space-x-2">
+                            {setEffort && (
+                              <Badge variant="secondary" className="text-xs">
+                                SET: {setEffort}d
+                              </Badge>
+                            )}
+                            <div className={`status-badge ${getStatusColor(workPackage.status)}`}>
+                              {workPackage.status}
+                            </div>
+                          </div>
                         </div>
+                        <p className="text-sm text-muted-foreground mb-3">{workPackage.description}</p>
+                        {setDomain && (
+                          <p className="text-xs text-blue-600 mb-2">
+                            📊 SET Domain: {setDomain} | Total Effort: {setEffort}d
+                          </p>
+                        )}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <div className="text-muted-foreground">BA Effort</div>
+                            <div className="font-medium">{workPackage.effort.businessAnalyst}d</div>
+                          </div>
+                          <div>
+                            <div className="text-muted-foreground">SA Effort</div>
+                            <div className="font-medium">{workPackage.effort.solutionArchitect}d</div>
+                          </div>
+                          <div>
+                            <div className="text-muted-foreground">Dev Effort</div>
+                            <div className="font-medium">{workPackage.effort.developer}d</div>
+                          </div>
+                          <div>
+                            <div className="text-muted-foreground">QA Effort</div>
+                            <div className="font-medium">{workPackage.effort.qaEngineer}d</div>
+                          </div>
+                        </div>
+                        {setEffort && (
+                          <div className="mt-3 pt-3 border-t">
+                            <div className="text-sm font-medium text-green-600">
+                              SET Total Effort: {setEffort}d
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              Original Total: {workPackage.effort.businessAnalyst + workPackage.effort.solutionArchitect + workPackage.effort.developer + workPackage.effort.qaEngineer}d
+                            </div>
+                          </div>
+                        )}
                       </div>
-                      <p className="text-sm text-muted-foreground mb-3">{workPackage.description}</p>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                        <div>
-                          <div className="text-muted-foreground">BA Effort</div>
-                          <div className="font-medium">{workPackage.effort.businessAnalyst}d</div>
-                        </div>
-                        <div>
-                          <div className="text-muted-foreground">SA Effort</div>
-                          <div className="font-medium">{workPackage.effort.solutionArchitect}d</div>
-                        </div>
-                        <div>
-                          <div className="text-muted-foreground">Dev Effort</div>
-                          <div className="font-medium">{workPackage.effort.developer}d</div>
-                        </div>
-                        <div>
-                          <div className="text-muted-foreground">QA Effort</div>
-                          <div className="font-medium">{workPackage.effort.qaEngineer}d</div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
