@@ -11,6 +11,7 @@ This guide covers the integration of Miro boards with the E2E Delivery Managemen
 - **SpecSync Requirements Boards**: Visual representation of imported requirements
 - **Interactive Board Creation**: One-click board generation with proper layout
 - **Board Management**: Easy access to created boards with direct links
+- **OAuth 2.0 Authentication**: Secure authentication flow with Miro
 
 ### 🏗️ **Board Types**
 
@@ -18,296 +19,147 @@ This guide covers the integration of Miro boards with the E2E Delivery Managemen
 - **Domain Frames**: Each TMF domain gets its own organizational frame
 - **Capability Cards**: Individual capability cards within domain frames
 - **Visual Hierarchy**: Clear organization with proper spacing and layout
-- **Color Coding**: Different colors for domains vs capabilities
+- **Color Coding**: Different colors for different domain types
+- **Interactive Elements**: Clickable cards with detailed information
 
 #### **2. SpecSync Requirements Board**
-- **Requirement Cards**: Each SpecSync item becomes a visual card
-- **Domain Grouping**: Requirements grouped by domain
-- **Function Mapping**: Visual representation of function relationships
-- **Grid Layout**: Organized grid layout for easy scanning
+- **Requirement Cards**: Individual cards for each SpecSync requirement
+- **Domain Grouping**: Requirements organized by TMF domain
+- **Function Categorization**: Visual grouping by function name
+- **Metadata Display**: Shows requirement ID, domain, and function
+- **Color-Coded Categories**: Different colors for different requirement types
 
-## Setup
+## Setup Instructions
 
 ### **1. Environment Configuration**
 
-Create or update your `.env.local` file:
+Create a `.env.local` file in the project root with the following variables:
 
 ```bash
-# Miro API Configuration
-MIRO_CLIENT_ID="your-miro-client-id"
-MIRO_CLIENT_SECRET="your-miro-client-secret"
-MIRO_REDIRECT_URI="http://localhost:3000/api/auth/miro/callback"
-MIRO_ACCESS_TOKEN="your-miro-access-token"
+MIRO_CLIENT_ID=your_miro_client_id
+MIRO_CLIENT_SECRET=your_miro_client_secret
+MIRO_REDIRECT_URI=http://localhost:3002/api/auth/miro/callback
+NEXT_PUBLIC_APP_NAME=E2E Delivery Management
+NEXT_PUBLIC_VERSION=1.0.0
 ```
 
-### **2. Miro App Setup**
+**Important Notes:**
+- The `MIRO_REDIRECT_URI` should match your development server port (currently 3002)
+- If your server runs on a different port, update the redirect URI accordingly
+- The redirect URI must be registered in your Miro Developer Platform app settings
 
-1. **Create Miro App**:
+### **2. Miro Developer Platform Setup**
+
+1. **Create a Miro App**:
    - Go to [Miro Developer Platform](https://developers.miro.com/)
-   - Create a new app
+   - Create a new app or use an existing one
    - Note your Client ID and Client Secret
 
-2. **Configure Permissions**:
-   - Enable `boards:read` and `boards:write` scopes
-   - Set redirect URI to `http://localhost:3000/api/auth/miro/callback`
+2. **Configure OAuth Settings**:
+   - Set the redirect URI to: `http://localhost:3002/api/auth/miro/callback`
+   - Add required scopes: `boards:read`, `boards:write`, `boards:write:team`
+   - Save the configuration
 
-3. **Get Access Token**:
-   - For development, use a personal access token
-   - For production, implement OAuth flow
+3. **Update Environment Variables**:
+   - Copy your Client ID and Client Secret to `.env.local`
+   - Ensure the redirect URI matches exactly
 
-### **3. Installation**
+### **3. Application Usage**
 
-```bash
-# Install Miro API client
-npm install @mirohq/miro-api
+#### **Authentication Flow**
+1. Navigate to the "Visual Mapping" tab
+2. Click "Connect to Miro" button
+3. Complete OAuth authorization on Miro's website
+4. Return to the application (automatic redirect)
+5. Authentication status will show as "Connected"
 
-# Start development server
-npm run dev
-```
-
-## Usage
-
-### **1. Access Visual Mapping**
-
-1. Navigate to the **Visual Mapping** tab in the main application
-2. The interface shows two main sections:
-   - TMF Architecture Board
-   - SpecSync Requirements Board
-
-### **2. Create TMF Architecture Board**
-
-1. **Prerequisites**:
-   - Select at least one TMF domain in the TMF ODA Manager
-   - Ensure you have project data loaded
-
-2. **Creation Process**:
+#### **Creating Boards**
+1. **TMF Architecture Board**:
+   - Select TMF domains and capabilities
    - Click "Create TMF Architecture Board"
-   - System creates domain frames and capability cards
-   - Board link appears when creation is complete
+   - Board will be generated with domain frames and capability cards
 
-3. **Board Structure**:
-   ```
-   ┌─────────────────────────────────────┐
-   │ Domain Frame: Market & Sales        │
-   │ ┌─────────┐ ┌─────────┐ ┌─────────┐ │
-   │ │ Cap 1   │ │ Cap 2   │ │ Cap 3   │ │
-   │ └─────────┘ └─────────┘ └─────────┘ │
-   └─────────────────────────────────────┘
-   ```
-
-### **3. Create SpecSync Requirements Board**
-
-1. **Prerequisites**:
-   - Import SpecSync data via the SpecSync Import feature
-   - Ensure requirements are properly mapped
-
-2. **Creation Process**:
+2. **SpecSync Requirements Board**:
+   - Import SpecSync data first
    - Click "Create SpecSync Requirements Board"
-   - System creates requirement cards in grid layout
-   - Board link appears when creation is complete
+   - Board will be generated with requirement cards organized by domain
 
-3. **Board Structure**:
-   ```
-   ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐
-   │ Req 1   │ │ Req 2   │ │ Req 3   │ │ Req 4   │
-   └─────────┘ └─────────┘ └─────────┘ └─────────┘
-   ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐
-   │ Req 5   │ │ Req 6   │ │ Req 7   │ │ Req 8   │
-   └─────────┘ └─────────┘ └─────────┘ └─────────┘
-   ```
+#### **Board Management**
+- View created boards in the "Board Management" section
+- Click "Open in Miro" to access boards directly
+- Boards are automatically organized and styled
 
-### **4. Board Management**
+## Technical Implementation
 
-- **View Boards**: Click "Open in Miro" to view created boards
-- **Board Links**: All created boards are listed in the Board Management section
-- **Direct Access**: Links open boards directly in Miro web interface
+### **OAuth 2.0 Flow**
+- **Authorization Endpoint**: `/api/auth/miro`
+- **Callback Handler**: `/api/auth/miro/callback`
+- **Token Management**: Automatic token storage and refresh
+- **Security**: Tokens stored in browser localStorage (development)
 
-## Architecture
+### **API Integration**
+- **Miro API Client**: Uses `@mirohq/miro-api` package
+- **Server-Side Operations**: All Miro API calls handled server-side
+- **Error Handling**: Comprehensive error handling and user feedback
+- **Rate Limiting**: Built-in rate limiting and retry logic
 
-### **1. Service Layer**
-
-```typescript
-// src/lib/miro-service.ts
-export class MiroService {
-  // Board creation methods
-  async createTMFBoard(project: Project, domains: TMFOdaDomain[])
-  async createSpecSyncBoard(specSyncItems: SpecSyncItem[])
-  
-  // Board management methods
-  async getBoard(boardId: string)
-  async deleteBoard(boardId: string)
-}
-```
-
-### **2. Component Structure**
-
-```typescript
-// src/components/miro-board-creator.tsx
-export function MiroBoardCreator({
-  project: Project,
-  tmfDomains: TMFOdaDomain[],
-  specSyncItems: SpecSyncItem[]
-})
-```
-
-### **3. API Routes**
-
-```typescript
-// src/app/api/auth/miro/route.ts
-// Future OAuth implementation
-```
-
-## Configuration
-
-### **1. Card Templates**
-
-The system uses flexible card templates:
-
-```typescript
-interface MiroCardConfig {
-  title: string;
-  description?: string;
-  metadata?: Record<string, any>;
-  position?: { x: number; y: number };
-  geometry?: { width: number; height: number };
-  style?: {
-    fillColor?: string;
-    strokeColor?: string;
-  };
-}
-```
-
-### **2. Color Schemes**
-
-- **TMF Capabilities**: `#4ecdc4` (teal)
-- **SpecSync Requirements**: `#ff6b6b` (coral)
-- **Domain Frames**: `#45b7d1` (blue)
-
-### **3. Layout Configuration**
-
-- **Domain Frames**: 800x600 pixels, spaced 850px apart
-- **Capability Cards**: 250x120 pixels, 3 per row
-- **Requirement Cards**: 200x100 pixels, 4 per row
-
-## Error Handling
-
-### **1. Authentication Errors**
-
-- **Missing Credentials**: Clear error message with setup instructions
-- **Invalid Token**: Automatic retry with user notification
-- **Rate Limiting**: Graceful handling with retry logic
-
-### **2. Board Creation Errors**
-
-- **API Failures**: Detailed error logging and user feedback
-- **Data Validation**: Pre-creation validation of input data
-- **Network Issues**: Retry mechanism with exponential backoff
-
-## Security
-
-### **1. Credential Management**
-
-- **Environment Variables**: All credentials stored in `.env.local`
-- **Access Tokens**: Secure token storage and rotation
-- **OAuth Flow**: Future implementation for production use
-
-### **2. Data Privacy**
-
-- **No Data Storage**: Miro boards contain only visual representations
-- **Secure Transmission**: All API calls use HTTPS
-- **Token Scoping**: Minimal required permissions
+### **Component Architecture**
+- **MiroBoardCreator**: Main UI component for board creation
+- **MiroService**: Service layer for Miro API operations
+- **MiroAuthService**: OAuth authentication and token management
+- **API Routes**: Server-side handlers for Miro operations
 
 ## Troubleshooting
 
-### **1. Common Issues**
+### **Common Issues**
 
-**"Failed to create board"**
-- Check Miro credentials in `.env.local`
-- Verify internet connection
-- Ensure Miro app has correct permissions
+1. **404 Error on OAuth Callback**:
+   - Check that the redirect URI in `.env.local` matches your server port
+   - Ensure the redirect URI is registered in Miro Developer Platform
+   - Verify the callback route exists: `/api/auth/miro/callback`
 
-**"Authentication failed"**
-- Verify `MIRO_ACCESS_TOKEN` is valid
-- Check token expiration
-- Ensure app is properly configured
+2. **Authentication Failures**:
+   - Verify Client ID and Client Secret are correct
+   - Check that required scopes are configured in Miro
+   - Ensure the app is properly configured in Miro Developer Platform
 
-**"No domains selected"**
-- Select at least one TMF domain in TMF ODA Manager
-- Refresh the page to reload domain data
+3. **Board Creation Errors**:
+   - Verify authentication status
+   - Check that data (TMF domains, SpecSync items) is available
+   - Review server logs for detailed error messages
 
-### **2. Debug Mode**
+4. **Port Mismatch Issues**:
+   - If your development server runs on a different port, update `MIRO_REDIRECT_URI`
+   - Common ports: 3000, 3001, 3002 (check your server startup logs)
+   - Update both `.env.local` and Miro Developer Platform settings
 
-Enable debug logging by setting:
+### **Development Notes**
 
-```bash
-NODE_ENV=development
-```
-
-Check browser console for detailed error messages.
+- **Token Storage**: In development, tokens are stored in localStorage
+- **Security**: For production, implement secure token storage (database/session)
+- **Error Handling**: All errors are logged and displayed to users
+- **Testing**: Test with small datasets before creating large boards
 
 ## Future Enhancements
 
-### **1. Planned Features**
+### **Planned Features**
+- **Board Templates**: Pre-defined board layouts and styles
+- **Collaborative Editing**: Real-time collaboration features
+- **Advanced Styling**: Custom themes and visual customization
+- **Export Options**: Export boards to various formats
+- **Integration APIs**: Additional third-party integrations
 
-- **OAuth Integration**: Full OAuth 2.0 flow for production
-- **Board Templates**: Pre-configured board layouts
-- **Real-time Sync**: Live updates when data changes
-- **Collaboration**: Multi-user board editing
-- **Export Options**: Board export to various formats
-
-### **2. Advanced Capabilities**
-
-- **Custom Card Types**: Flexible card templates
-- **Connector Lines**: Visual relationships between items
-- **Comments & Annotations**: Interactive feedback system
-- **Version Control**: Board versioning and history
-- **Integration APIs**: Webhook support for external systems
-
-## API Reference
-
-### **1. MiroService Methods**
-
-```typescript
-// Board Creation
-createBoard(config: MiroBoardConfig): Promise<{ id: string; viewLink: string }>
-createTMFBoard(project: Project, domains: TMFOdaDomain[]): Promise<{ id: string; viewLink: string }>
-createSpecSyncBoard(specSyncItems: SpecSyncItem[]): Promise<{ id: string; viewLink: string }>
-
-// Board Management
-getBoard(boardId: string): Promise<any>
-deleteBoard(boardId: string): Promise<void>
-
-// Authentication
-authenticate(): Promise<boolean>
-isReady(): boolean
-```
-
-### **2. Component Props**
-
-```typescript
-interface MiroBoardCreatorProps {
-  project: Project;
-  tmfDomains: TMFOdaDomain[];
-  specSyncItems: SpecSyncItem[];
-}
-```
+### **Production Considerations**
+- **Secure Token Storage**: Database-based token management
+- **User Sessions**: Proper session management and security
+- **Rate Limiting**: Production-grade rate limiting
+- **Monitoring**: Application performance monitoring
+- **Backup**: Board data backup and recovery
 
 ## Support
 
-### **1. Documentation**
-
-- **Miro API Docs**: https://developers.miro.com/
-- **Component Documentation**: See component files for detailed usage
-- **Type Definitions**: Check `src/types/index.ts` for interfaces
-
-### **2. Development**
-
-- **GitHub Issues**: Report bugs and feature requests
-- **Code Review**: Follow project coding standards
-- **Testing**: Ensure all features work with test data
-
----
-
-**Version**: 1.0.0  
-**Last Updated**: 2025-01-27  
-**Compatibility**: Miro API v1, Next.js 14, React 18
+For technical support or questions about the Miro integration:
+- Check the troubleshooting section above
+- Review server logs for detailed error information
+- Verify Miro Developer Platform configuration
+- Ensure environment variables are correctly set
