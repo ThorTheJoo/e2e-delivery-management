@@ -6,12 +6,21 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { action, data } = body;
 
-    const accessToken = process.env.MIRO_ACCESS_TOKEN;
-    
+    // Get access token from Authorization header
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json(
+        { error: 'Authorization header with Bearer token is required' },
+        { status: 401 }
+      );
+    }
+
+    const accessToken = authHeader.substring(7); // Remove 'Bearer ' prefix
+
     if (!accessToken) {
       return NextResponse.json(
-        { error: 'Miro access token not configured' },
-        { status: 500 }
+        { error: 'Access token is required' },
+        { status: 401 }
       );
     }
 
@@ -30,7 +39,7 @@ export async function POST(request: NextRequest) {
         });
 
       case 'createCard':
-        const boardInstance = miroClient.getBoard(data.boardId);
+        const boardInstance = await miroClient.getBoard(data.boardId);
         const card = await boardInstance.createCardItem({
           data: {
             title: data.title,
@@ -44,7 +53,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ id: card.id });
 
       case 'createFrame':
-        const boardForFrame = miroClient.getBoard(data.boardId);
+        const boardForFrame = await miroClient.getBoard(data.boardId);
         const frame = await boardForFrame.createFrameItem({
           data: { title: data.title },
           position: data.position,

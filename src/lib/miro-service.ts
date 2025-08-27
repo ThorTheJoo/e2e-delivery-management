@@ -1,4 +1,5 @@
 import { Project, TMFOdaDomain, TMFOdaCapability, SpecSyncItem } from '@/types';
+import { miroAuthService } from './miro-auth-service';
 
 export interface MiroBoardConfig {
   name: string;
@@ -32,10 +33,18 @@ export class MiroService {
   }
 
   private async callMiroAPI(action: string, data: any): Promise<any> {
+    // Check if we have a valid access token
+    const accessToken = miroAuthService.getAccessToken();
+    
+    if (!accessToken) {
+      throw new Error('No valid Miro access token. Please authenticate with Miro first.');
+    }
+
     const response = await fetch(this.apiBaseUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
       },
       body: JSON.stringify({ action, data }),
     });
@@ -179,6 +188,17 @@ export class MiroService {
   public async deleteBoard(boardId: string): Promise<void> {
     // This would need a separate API endpoint for deleting boards
     throw new Error('deleteBoard not implemented yet');
+  }
+
+  public isAuthenticated(): boolean {
+    return miroAuthService.isAuthenticated();
+  }
+
+  public async authenticate(): Promise<void> {
+    if (!this.isAuthenticated()) {
+      const authUrl = await miroAuthService.initiateOAuth();
+      window.location.href = authUrl;
+    }
   }
 }
 

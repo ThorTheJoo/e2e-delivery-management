@@ -1,13 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Layout, ExternalLink, Plus, FileText, Network, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { Layout, ExternalLink, Plus, FileText, Network, Loader2, CheckCircle, AlertCircle, LogIn, LogOut } from 'lucide-react';
 import { miroService } from '@/lib/miro-service';
+import { miroAuthService } from '@/lib/miro-auth-service';
 import { Project, TMFOdaDomain, SpecSyncItem } from '@/types';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 interface MiroBoardCreatorProps {
   project: Project;
@@ -25,6 +27,54 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems }: MiroBoa
   const [isCreatingTMF, setIsCreatingTMF] = useState(false);
   const [isCreatingSpecSync, setIsCreatingSpecSync] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const searchParams = useSearchParams();
+
+  // Handle OAuth callback
+  useEffect(() => {
+    const token = searchParams.get('token');
+    const success = searchParams.get('success');
+    const error = searchParams.get('error');
+
+    if (token && success === 'true') {
+      miroAuthService.setTokenFromUrl(token);
+      setIsAuthenticated(true);
+      setError(null);
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (error) {
+      setError(`Authentication failed: ${error}`);
+      setIsAuthenticated(false);
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [searchParams]);
+
+  // Check authentication status on mount
+  useEffect(() => {
+    setIsAuthenticated(miroAuthService.isAuthenticated());
+  }, []);
+
+  const handleAuthenticate = async () => {
+    setIsAuthenticating(true);
+    setError(null);
+    
+    try {
+      await miroService.authenticate();
+    } catch (error) {
+      console.error('Authentication failed:', error);
+      setError('Failed to initiate Miro authentication. Please try again.');
+      setIsAuthenticating(false);
+    }
+  };
+
+  const handleLogout = () => {
+    miroAuthService.clearToken();
+    setIsAuthenticated(false);
+    setBoardLinks({});
+    setError(null);
+  };
 
   const handleCreateTMFBoard = async () => {
     setIsCreatingTMF(true);
@@ -43,7 +93,8 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems }: MiroBoa
       // Check if it's a token-related error
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       if (errorMessage.includes('token') || errorMessage.includes('authentication') || errorMessage.includes('401') || errorMessage.includes('403')) {
-        setError('Miro access token is invalid or expired. Please check your token in the Miro Developer Platform and update the MIRO_ACCESS_TOKEN in your .env.local file.');
+        setError('Miro access token is invalid or expired. Please re-authenticate with Miro.');
+        setIsAuthenticated(false);
       } else {
         setError('Failed to create TMF Architecture board. Please check your Miro credentials and try again.');
       }
@@ -69,7 +120,8 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems }: MiroBoa
       // Check if it's a token-related error
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       if (errorMessage.includes('token') || errorMessage.includes('authentication') || errorMessage.includes('401') || errorMessage.includes('403')) {
-        setError('Miro access token is invalid or expired. Please check your token in the Miro Developer Platform and update the MIRO_ACCESS_TOKEN in your .env.local file.');
+        setError('Miro access token is invalid or expired. Please re-authenticate with Miro.');
+        setIsAuthenticated(false);
       } else {
         setError('Failed to create SpecSync Requirements board. Please check your Miro credentials and try again.');
       }
@@ -97,6 +149,68 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems }: MiroBoa
             Create interactive visual boards for TMF domains, capabilities, and SpecSync requirements
           </CardDescription>
         </CardHeader>
+      </Card>
+
+      {/* Authentication Status */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            {isAuthenticated ? (
+              <>
+                <CheckCircle className="h-5 w-5 text-green-600" />
+                <span>Connected to Miro</span>
+              </>
+            ) : (
+              <>
+                <AlertCircle className="h-5 w-5 text-orange-600" />
+                <span>Not Connected to Miro</span>
+              </>
+            )}
+          </CardTitle>
+          <CardDescription>
+            {isAuthenticated 
+              ? 'You are authenticated with Miro and can create boards.'
+              : 'Please authenticate with Miro to create visual boards.'
+            }
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isAuthenticated ? (
+            <div className="flex items-center space-x-4">
+              <Badge variant="secondary" className="text-green-700 bg-green-100">
+                <CheckCircle className="h-3 w-3 mr-1" />
+                Authenticated
+              </Badge>
+              <Button variant="outline" onClick={handleLogout} className="flex items-center space-x-2">
+                <LogOut className="h-4 w-4" />
+                <span>Disconnect</span>
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center space-x-4">
+              <Button 
+                onClick={handleAuthenticate} 
+                disabled={isAuthenticating}
+                className="flex items-center space-x-2"
+              >
+                {isAuthenticating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Connecting...</span>
+                  </>
+                ) : (
+                  <>
+                    <LogIn className="h-4 w-4" />
+                    <span>Connect to Miro</span>
+                  </>
+                )}
+              </Button>
+              <p className="text-sm text-muted-foreground">
+                You'll be redirected to Miro to authorize this application.
+              </p>
+            </div>
+          )}
+        </CardContent>
       </Card>
 
       {/* Error Display */}
@@ -148,7 +262,7 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems }: MiroBoa
             <div className="flex items-center space-x-4">
               <Button 
                 onClick={handleCreateTMFBoard} 
-                disabled={isCreatingTMF || selectedDomains === 0}
+                disabled={!isAuthenticated || isCreatingTMF || selectedDomains === 0}
                 className="flex items-center space-x-2"
               >
                 {isCreatingTMF ? (
@@ -174,7 +288,13 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems }: MiroBoa
               )}
             </div>
 
-            {selectedDomains === 0 && (
+            {!isAuthenticated && (
+              <div className="text-sm text-muted-foreground">
+                Please connect to Miro first to create boards.
+              </div>
+            )}
+
+            {isAuthenticated && selectedDomains === 0 && (
               <div className="text-sm text-muted-foreground">
                 Please select at least one TMF domain before creating the board.
               </div>
@@ -218,7 +338,7 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems }: MiroBoa
             <div className="flex items-center space-x-4">
               <Button 
                 onClick={handleCreateSpecSyncBoard} 
-                disabled={isCreatingSpecSync || specSyncItems.length === 0}
+                disabled={!isAuthenticated || isCreatingSpecSync || specSyncItems.length === 0}
                 className="flex items-center space-x-2"
               >
                 {isCreatingSpecSync ? (
@@ -244,7 +364,13 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems }: MiroBoa
               )}
             </div>
 
-            {specSyncItems.length === 0 && (
+            {!isAuthenticated && (
+              <div className="text-sm text-muted-foreground">
+                Please connect to Miro first to create boards.
+              </div>
+            )}
+
+            {isAuthenticated && specSyncItems.length === 0 && (
               <div className="text-sm text-muted-foreground">
                 Please import SpecSync data before creating the requirements board.
               </div>
