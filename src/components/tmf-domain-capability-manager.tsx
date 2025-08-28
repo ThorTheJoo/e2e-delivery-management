@@ -90,14 +90,14 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
       // Use setTimeout to break the synchronous update cycle
       setTimeout(processSpecSyncData, 0);
     }
-  }, [specSyncData?.items, loading]); // Remove 'domains' from dependencies to prevent infinite loop
+  }, [specSyncData?.items, loading, domains.length]); // Only depend on domains.length, not the full domains array
 
   // Handle onStateChange callback when domains change (but not during SpecSync processing)
   useEffect(() => {
     if (domains.length > 0 && !loading && !isProcessingSpecSync.current) {
       onStateChange?.(domains);
     }
-  }, [domains, loading, onStateChange]);
+  }, [domains, loading]); // Remove onStateChange from dependencies to prevent infinite loop
 
   // Initialize sample data
   const initializeSampleData = (referenceDomains: TMFReferenceDomain[], referenceCapabilities: TMFReferenceCapability[]) => {
@@ -559,7 +559,7 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
                   </div>
                   <div className="flex items-center space-x-2">
                     <Badge variant="secondary">
-                      {domain.capabilities.length} capabilities
+                      {domain.capabilities.filter(cap => cap.isSelected).length} selected capabilities
                     </Badge>
                     {domain.requirementCount > 0 && (
                       <Badge variant="outline" className="text-blue-600 border-blue-600">
@@ -625,7 +625,7 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
                             </button>
                           </div>
                           <div className="flex items-center space-x-2">
-                            {capability.requirementCount > 0 && (
+                            {capability.isSelected && capability.requirementCount > 0 && (
                               <Badge variant="outline" className="text-blue-600 border-blue-600 text-xs">
                                 {capability.requirementCount} reqs
                               </Badge>

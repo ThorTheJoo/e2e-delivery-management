@@ -350,10 +350,93 @@ export function TMFOdaManager({ onStateChange, initialState }: TMFOdaManagerProp
   const handleSpecSyncImport = (specSyncData: SpecSyncState) => {
     setSpecSyncState(specSyncData);
     console.log('SpecSync data imported:', specSyncData);
+    
+    // Auto-select capabilities based on SpecSync data
+    const newSelectedCapabilityIds = new Set<string>();
+    
+    specSyncData.items.forEach(item => {
+      const capabilityName = (item.capability || item.afLevel2 || '').trim().toLowerCase();
+      const domainName = (item.domain || '').trim().toLowerCase();
+      
+      // Find matching domain
+      const matchingDomain = state.domains.find(domain => 
+        domain.name.toLowerCase().includes(domainName) || 
+        domainName.includes(domain.name.toLowerCase())
+      );
+      
+      if (matchingDomain) {
+        // Find matching capabilities within the domain
+        matchingDomain.capabilities.forEach(capability => {
+          const capName = capability.name.toLowerCase();
+          if (capName.includes(capabilityName) || capabilityName.includes(capName)) {
+            newSelectedCapabilityIds.add(capability.id);
+          }
+        });
+      }
+    });
+    
+    // Update state with auto-selected capabilities
+    if (newSelectedCapabilityIds.size > 0) {
+      setState(prev => ({
+        ...prev,
+        selectedCapabilityIds: Array.from(newSelectedCapabilityIds)
+      }));
+    }
   };
 
   const handleSpecSyncClear = () => {
     setSpecSyncState(null);
+  };
+
+  // Calculate requirement and use case counts for domains and capabilities
+  const getDomainRequirementCount = (domainName: string) => {
+    if (!specSyncState) return 0;
+    return specSyncState.counts.domains[domainName] || 0;
+  };
+
+  const getDomainUseCaseCount = (domainName: string) => {
+    if (!specSyncState) return 0;
+    const domainItems = specSyncState.items.filter(item => 
+      (item.domain || '').trim().toLowerCase() === domainName.toLowerCase()
+    );
+    const uniqueUseCases = new Set<string>();
+    domainItems.forEach(item => {
+      if (item.usecase1 && item.usecase1.trim()) {
+        uniqueUseCases.add(item.usecase1.trim());
+      }
+    });
+    return uniqueUseCases.size;
+  };
+
+  const getSelectedCapabilityCount = (domainId: string) => {
+    const domain = state.domains.find(d => d.id === domainId);
+    if (!domain) return 0;
+    
+    // Count only selected capabilities within this domain
+    return domain.capabilities.filter(cap => 
+      state.selectedCapabilityIds.includes(cap.id)
+    ).length;
+  };
+
+  const getCapabilityRequirementCount = (capabilityName: string) => {
+    if (!specSyncState) return 0;
+    return specSyncState.items.filter(item => 
+      (item.capability || item.afLevel2 || '').trim().toLowerCase() === capabilityName.toLowerCase()
+    ).length;
+  };
+
+  const getCapabilityUseCaseCount = (capabilityName: string) => {
+    if (!specSyncState) return 0;
+    const capabilityItems = specSyncState.items.filter(item => 
+      (item.capability || item.afLevel2 || '').trim().toLowerCase() === capabilityName.toLowerCase()
+    );
+    const uniqueUseCases = new Set<string>();
+    capabilityItems.forEach(item => {
+      if (item.usecase1 && item.usecase1.trim()) {
+        uniqueUseCases.add(item.usecase1.trim());
+      }
+    });
+    return uniqueUseCases.size;
   };
 
   return (
@@ -568,8 +651,18 @@ export function TMFOdaManager({ onStateChange, initialState }: TMFOdaManagerProp
                       
                       <div className="flex items-center space-x-2">
                         <Badge variant="secondary" className="text-xs">
-                          {domain.capabilities.length} capabilities
+                          {getSelectedCapabilityCount(domain.id)} selected capabilities
                         </Badge>
+                        {specSyncState && (
+                          <>
+                            <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700">
+                              {getDomainRequirementCount(domain.name)} reqs
+                            </Badge>
+                            <Badge variant="outline" className="text-xs bg-green-50 text-green-700">
+                              {getDomainUseCaseCount(domain.name)} use cases
+                            </Badge>
+                          </>
+                        )}
                         <Button
                           size="sm"
                           variant="ghost"
@@ -710,6 +803,16 @@ export function TMFOdaManager({ onStateChange, initialState }: TMFOdaManagerProp
                             </div>
                             
                             <div className="flex items-center space-x-2">
+                              {specSyncState && state.selectedCapabilityIds.includes(capability.id) && (
+                                <>
+                                  <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700">
+                                    {getCapabilityRequirementCount(capability.name)} reqs
+                                  </Badge>
+                                  <Badge variant="outline" className="text-xs bg-green-50 text-green-700">
+                                    {getCapabilityUseCaseCount(capability.name)} use cases
+                                  </Badge>
+                                </>
+                              )}
                               <Button
                                 size="sm"
                                 variant="ghost"

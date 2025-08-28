@@ -3,8 +3,10 @@
 import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Upload, FileSpreadsheet, X, CheckCircle, AlertCircle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Upload, FileSpreadsheet, X, CheckCircle, AlertCircle, Edit, Save, X as Cancel } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import { useEffect } from 'react';
 
 import { SpecSyncItem, SpecSyncState } from '@/types';
 
@@ -17,7 +19,16 @@ interface SpecSyncImportProps {
 export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImportProps) {
   const [isImporting, setIsImporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [editingItem, setEditingItem] = useState<{ index: number; field: keyof SpecSyncItem } | null>(null);
+  const [editedItems, setEditedItems] = useState<SpecSyncItem[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Initialize edited items when currentState changes
+  useEffect(() => {
+    if (currentState) {
+      setEditedItems([...currentState.items]);
+    }
+  }, [currentState]);
 
   const parseCSVToSpecSyncItems = (text: string): SpecSyncItem[] => {
     const lines = text.split(/\r?\n/).filter(l => l.trim().length);
@@ -38,7 +49,7 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
       usecase1: headers.find(h => /usecase.*1/i.test(h)) || 'Usecase 1'
     };
 
-    return lines.slice(1).map(line => {
+    return lines.slice(1).map((line, index) => {
       const values = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
       const row: any = {};
       headers.forEach((header, index) => {
@@ -46,8 +57,9 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
       });
 
       return {
+        id: `imported-${index + 1}`,
+        requirementId: row[headerMap.sourceRequirementId] || `REQ-${index + 1}`,
         rephrasedRequirementId: row[headerMap.rephrasedRequirementId] || '',
-        sourceRequirementId: row[headerMap.sourceRequirementId] || '',
         domain: row[headerMap.domain] || '',
         vertical: row[headerMap.vertical] || '',
         functionName: row[headerMap.functionName] || '',
@@ -70,14 +82,15 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
     const ws = workbook.Sheets[preferred];
     const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
     
-    return json.map((r: any) => {
+    return json.map((r: any, index: number) => {
       const fn = r['Rephrased Function Name'] || r['Function Name'] || r['Function'] || '';
       const af2 = r['Rephrased AF Lev.2'] || r['Rephrased AF Lev. 2'] || r['AF Lev.2'] || r['AF Level 2'] || r['Architecture Framework Level 2'] || '';
       const rc = r['Reference Capability'] || r['Capability'] || '';
       
       return {
+        id: `excel-${index + 1}`,
+        requirementId: r['Source Requirement ID'] || r['SourceRequirementId'] || `REQ-${index + 1}`,
         rephrasedRequirementId: r['Rephrased Requirement ID'] || r['RephrasedRequirementId'] || r['RequirementId'] || '',
-        sourceRequirementId: r['Source Requirement ID'] || r['SourceRequirementId'] || '',
         domain: r['Rephrased Domain'] || r['Domain'] || '',
         vertical: r['Rephrased Vertical'] || r['Vertical'] || '',
         functionName: fn,
@@ -182,6 +195,52 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
     }
     onClear();
     setError(null);
+    setEditingItem(null);
+    setEditedItems([]);
+  };
+
+  const handleEditItem = (index: number, field: keyof SpecSyncItem) => {
+    setEditingItem({ index, field });
+  };
+
+  const handleSaveEdit = (index: number, field: keyof SpecSyncItem, value: string) => {
+    const newItems = [...editedItems];
+    newItems[index] = { ...newItems[index], [field]: value };
+    setEditedItems(newItems);
+    setEditingItem(null);
+    
+    // Update the parent state with edited items
+    if (currentState) {
+      const updatedState = {
+        ...currentState,
+        items: newItems,
+        counts: buildSpecSyncState(newItems, currentState.fileName).counts
+      };
+      onImport(updatedState);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingItem(null);
+  };
+
+  const getDomainRequirementCount = (domain: string) => {
+    if (!currentState) return 0;
+    return currentState.counts.domains[domain] || 0;
+  };
+
+  const getDomainUseCaseCount = (domain: string) => {
+    if (!currentState) return 0;
+    const domainItems = currentState.items.filter(item => 
+      (item.domain || '').trim() === domain.trim()
+    );
+    const uniqueUseCases = new Set<string>();
+    domainItems.forEach(item => {
+      if (item.usecase1 && item.usecase1.trim()) {
+        uniqueUseCases.add(item.usecase1.trim());
+      }
+    });
+    return uniqueUseCases.size;
   };
 
   return (
@@ -238,9 +297,31 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
               <div>Imported: {new Date(currentState.importedAt).toLocaleString()}</div>
             </div>
             
-            {/* Requirements Preview Table */}
+            {/* Domain Summary with Badge Counts */}
             <div className="mt-4">
-              <h4 className="text-sm font-medium mb-2">Requirements Preview (First 10)</h4>
+              <h4 className="text-sm font-medium mb-2">Domain Summary</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {Object.entries(currentState.counts.domains).map(([domain, count]) => (
+                  <div key={domain} className="p-3 bg-white rounded-lg border border-gray-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <h5 className="font-medium text-sm text-gray-900">{domain}</h5>
+                      <div className="flex space-x-1">
+                        <Badge variant="secondary" className="text-xs">
+                          {count} reqs
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">
+                          {getDomainUseCaseCount(domain)} use cases
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Requirements Preview Table - Now Modifiable */}
+            <div className="mt-4">
+              <h4 className="text-sm font-medium mb-2">Requirements Preview (First 10) - Click to Edit</h4>
               <div className="overflow-x-auto">
                 <table className="w-full text-xs border-collapse">
                   <thead>
@@ -250,25 +331,246 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
                       <th className="border border-muted-foreground/20 px-2 py-1 text-left">Domain</th>
                       <th className="border border-muted-foreground/20 px-2 py-1 text-left">Capability</th>
                       <th className="border border-muted-foreground/20 px-2 py-1 text-left">Use Case</th>
+                      <th className="border border-muted-foreground/20 px-2 py-1 text-left">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {currentState.items.slice(0, 10).map((item, index) => (
+                    {editedItems.slice(0, 10).map((item, index) => (
                       <tr key={index} className="hover:bg-muted/30">
                         <td className="border border-muted-foreground/20 px-2 py-1 font-mono text-xs">
-                          {item.rephrasedRequirementId || item.sourceRequirementId || `R${index + 1}`}
+                          {editingItem?.index === index && editingItem?.field === 'rephrasedRequirementId' ? (
+                            <div className="flex items-center space-x-1">
+                              <input
+                                type="text"
+                                value={item.rephrasedRequirementId}
+                                onChange={(e) => {
+                                  const newItems = [...editedItems];
+                                  newItems[index] = { ...newItems[index], rephrasedRequirementId: e.target.value };
+                                  setEditedItems(newItems);
+                                }}
+                                className="w-full px-1 py-0.5 text-xs border rounded"
+                                autoFocus
+                              />
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-4 w-4 p-0"
+                                onClick={() => handleSaveEdit(index, 'rephrasedRequirementId', item.rephrasedRequirementId)}
+                              >
+                                <Save className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-4 w-4 p-0"
+                                onClick={handleCancelEdit}
+                              >
+                                <Cancel className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-between">
+                              <span>{item.rephrasedRequirementId || item.requirementId || `R${index + 1}`}</span>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-4 w-4 p-0"
+                                onClick={() => handleEditItem(index, 'rephrasedRequirementId')}
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          )}
                         </td>
                         <td className="border border-muted-foreground/20 px-2 py-1 max-w-xs truncate">
-                          {item.functionName || item.afLevel2 || 'N/A'}
+                          {editingItem?.index === index && editingItem?.field === 'functionName' ? (
+                            <div className="flex items-center space-x-1">
+                              <input
+                                type="text"
+                                value={item.functionName}
+                                onChange={(e) => {
+                                  const newItems = [...editedItems];
+                                  newItems[index] = { ...newItems[index], functionName: e.target.value };
+                                  setEditedItems(newItems);
+                                }}
+                                className="w-full px-1 py-0.5 text-xs border rounded"
+                                autoFocus
+                              />
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-4 w-4 p-0"
+                                onClick={() => handleSaveEdit(index, 'functionName', item.functionName)}
+                              >
+                                <Save className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-4 w-4 p-0"
+                                onClick={handleCancelEdit}
+                              >
+                                <Cancel className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-between">
+                              <span>{item.functionName || item.afLevel2 || 'N/A'}</span>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-4 w-4 p-0"
+                                onClick={() => handleEditItem(index, 'functionName')}
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          )}
                         </td>
                         <td className="border border-muted-foreground/20 px-2 py-1">
-                          {item.domain || 'Unspecified'}
+                          {editingItem?.index === index && editingItem?.field === 'domain' ? (
+                            <div className="flex items-center space-x-1">
+                              <input
+                                type="text"
+                                value={item.domain}
+                                onChange={(e) => {
+                                  const newItems = [...editedItems];
+                                  newItems[index] = { ...newItems[index], domain: e.target.value };
+                                  setEditedItems(newItems);
+                                }}
+                                className="w-full px-1 py-0.5 text-xs border rounded"
+                                autoFocus
+                              />
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-4 w-4 p-0"
+                                onClick={() => handleSaveEdit(index, 'domain', item.domain)}
+                              >
+                                <Save className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-4 w-4 p-0"
+                                onClick={handleCancelEdit}
+                              >
+                                <Cancel className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-between">
+                              <span>{item.domain || 'Unspecified'}</span>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-4 w-4 p-0"
+                                onClick={() => handleEditItem(index, 'domain')}
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          )}
                         </td>
                         <td className="border border-muted-foreground/20 px-2 py-1 max-w-xs truncate">
-                          {item.capability || item.afLevel2 || 'N/A'}
+                          {editingItem?.index === index && editingItem?.field === 'capability' ? (
+                            <div className="flex items-center space-x-1">
+                              <input
+                                type="text"
+                                value={item.capability}
+                                onChange={(e) => {
+                                  const newItems = [...editedItems];
+                                  newItems[index] = { ...newItems[index], capability: e.target.value };
+                                  setEditedItems(newItems);
+                                }}
+                                className="w-full px-1 py-0.5 text-xs border rounded"
+                                autoFocus
+                              />
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-4 w-4 p-0"
+                                onClick={() => handleSaveEdit(index, 'capability', item.capability)}
+                              >
+                                <Save className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-4 w-4 p-0"
+                                onClick={handleCancelEdit}
+                              >
+                                <Cancel className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-between">
+                              <span>{item.capability || item.afLevel2 || 'N/A'}</span>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-4 w-4 p-0"
+                                onClick={() => handleEditItem(index, 'capability')}
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          )}
                         </td>
                         <td className="border border-muted-foreground/20 px-2 py-1 max-w-xs truncate">
-                          {item.usecase1 || 'N/A'}
+                          {editingItem?.index === index && editingItem?.field === 'usecase1' ? (
+                            <div className="flex items-center space-x-1">
+                              <input
+                                type="text"
+                                value={item.usecase1}
+                                onChange={(e) => {
+                                  const newItems = [...editedItems];
+                                  newItems[index] = { ...newItems[index], usecase1: e.target.value };
+                                  setEditedItems(newItems);
+                                }}
+                                className="w-full px-1 py-0.5 text-xs border rounded"
+                                autoFocus
+                              />
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-4 w-4 p-0"
+                                onClick={() => handleSaveEdit(index, 'usecase1', item.usecase1)}
+                              >
+                                <Save className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-4 w-4 p-0"
+                                onClick={handleCancelEdit}
+                              >
+                                <Cancel className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-between">
+                              <span>{item.usecase1 || 'N/A'}</span>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-4 w-4 p-0"
+                                onClick={() => handleEditItem(index, 'usecase1')}
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          )}
+                        </td>
+                        <td className="border border-muted-foreground/20 px-2 py-1 text-center">
+                          <div className="flex items-center justify-center space-x-1">
+                            <Badge variant="secondary" className="text-xs">
+                              {getDomainRequirementCount(item.domain)} reqs
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              {getDomainUseCaseCount(item.domain)} use cases
+                            </Badge>
+                          </div>
                         </td>
                       </tr>
                     ))}

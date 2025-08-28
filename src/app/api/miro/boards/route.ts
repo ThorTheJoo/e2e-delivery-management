@@ -41,38 +41,76 @@ export async function POST(request: NextRequest) {
       case 'createCard':
         const boardInstance = await miroClient.getBoard(data.boardId);
         
-        // Create card on the board, and if frameId is provided, we'll add it to the frame
-        const card = await boardInstance.createCardItem({
+        // Create card on the board with minimal required parameters
+        const cardData: any = {
           data: {
-            title: data.title,
-            description: data.description
-          },
-          position: data.position,
-          geometry: data.geometry,
-          style: data.style
-        });
-        
-        // If frameId is provided, add the card to the frame
-        if (data.frameId) {
-          try {
-            const frame = await boardInstance.getFrameItem(data.frameId);
-            // Add the card to the frame (this might need to be done differently based on Miro API)
-            // For now, we'll create the card and let the positioning handle the visual grouping
-            console.log(`Card ${card.id} created and should be positioned within frame ${data.frameId}`);
-          } catch (frameError) {
-            console.warn(`Could not add card to frame ${data.frameId}:`, frameError);
+            title: data.title || 'Untitled Card'
           }
+        };
+
+        // Add optional parameters only if they exist
+        if (data.position) {
+          cardData.position = data.position;
         }
+        
+        if (data.geometry) {
+          cardData.geometry = data.geometry;
+        }
+
+        // Add parent frame if provided (this might be the issue)
+        if (data.frameId) {
+          cardData.parent = { id: data.frameId };
+        }
+
+        console.log('Creating card with data:', JSON.stringify(cardData, null, 2));
+        
+        const card = await boardInstance.createCardItem(cardData);
+        
+        console.log(`Card ${card.id} created successfully`);
         
         return NextResponse.json({ id: card.id });
 
+      case 'createShape':
+        const boardForShape = await miroClient.getBoard(data.boardId);
+        
+        const shapeData: any = {
+          data: {
+            shape: data.shape || 'rectangle',
+            content: data.content || ''
+          },
+          position: data.position || { x: 0, y: 0 },
+          geometry: data.geometry || { width: 200, height: 100 }
+        };
+
+        // Add parent frame if provided
+        if (data.frameId) {
+          shapeData.parent = { id: data.frameId };
+        }
+
+        console.log('Creating shape with data:', JSON.stringify(shapeData, null, 2));
+        
+        const shape = await boardForShape.createShapeItem(shapeData);
+        
+        console.log(`Shape ${shape.id} created successfully`);
+        
+        return NextResponse.json({ id: shape.id });
+
       case 'createFrame':
         const boardForFrame = await miroClient.getBoard(data.boardId);
-        const frame = await boardForFrame.createFrameItem({
-          data: { title: data.title },
-          position: data.position,
-          geometry: data.geometry
-        });
+        
+        const frameData = {
+          data: { 
+            title: data.title || 'Untitled Frame'
+          },
+          position: data.position || { x: 0, y: 0 },
+          geometry: data.geometry || { width: 800, height: 600 }
+        };
+
+        console.log('Creating frame with data:', JSON.stringify(frameData, null, 2));
+        
+        const frame = await boardForFrame.createFrameItem(frameData);
+        
+        console.log(`Frame ${frame.id} created successfully`);
         
         return NextResponse.json({ id: frame.id });
 
@@ -98,10 +136,17 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     console.error('Miro API error:', error);
+    
+    // Log detailed error information for debugging
+    if (error && typeof error === 'object' && 'body' in error) {
+      console.error('Miro API error details:', JSON.stringify(error.body, null, 2));
+    }
+    
     return NextResponse.json(
       { 
         error: 'Failed to perform Miro operation',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
+        miroError: error && typeof error === 'object' && 'body' in error ? error.body : null
       },
       { status: 500 }
     );

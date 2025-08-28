@@ -23,6 +23,14 @@ A comprehensive, modern web application for managing end-to-end delivery project
 - **Requirement Mapping** - Automatic mapping of SpecSync requirements to TMF capabilities
 - **Data Persistence** - Local storage for imported data with session persistence
 
+### Blue Dolphin Integration
+- **OData v4.0 Integration** - Full integration with Blue Dolphin enterprise architecture tool
+- **Solution Model Management** - Create and manage solution models in Blue Dolphin
+- **Object Data Retrieval** - Load and display Blue Dolphin objects with advanced filtering
+- **Service Discovery** - Automatic discovery of available OData endpoints and metadata
+- **Authentication Support** - Basic authentication and API key support
+- **Real-time Data Preview** - Live preview of retrieved Blue Dolphin objects
+
 ### TMF Capabilities Overview
 - **Dynamic Capability Cards** - Rich cards showing effort breakdown, segments, and statistics
 - **Use Case Statistics** - Display of unique use cases per capability with orange badges
@@ -82,16 +90,19 @@ src/
 │   └── tmf-demo/          # TMF demo page
 ├── components/            # React components
 │   ├── ui/               # Shadcn UI components
+│   ├── blue-dolphin-integration.tsx
 │   ├── navigation-sidebar.tsx
 │   ├── requirement-badge.tsx
 │   ├── specsync-import.tsx
 │   ├── tmf-domain-capability-manager.tsx
 │   └── tmf-oda-manager.tsx
 ├── lib/                  # Utility libraries
+│   ├── blue-dolphin-service.ts # Blue Dolphin service layer
 │   ├── data-service.ts   # Data service layer
 │   ├── specsync-utils.ts # SpecSync processing utilities
 │   └── utils.ts          # General utilities
 └── types/                # TypeScript type definitions
+    ├── blue-dolphin.ts   # Blue Dolphin type definitions
     └── index.ts
 ```
 

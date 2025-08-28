@@ -5,6 +5,73 @@ All notable changes to the E2E Delivery Management System will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-08-28 - Blue Dolphin Integration Release
+
+### 🎉 Major Features Added
+
+#### Blue Dolphin Enterprise Architecture Integration
+- **OData v4.0 Integration** - Full integration with Blue Dolphin OData service
+- **Solution Model Tab** - New dedicated tab for Blue Dolphin integration
+- **Object Data Retrieval** - Load and display Blue Dolphin objects with filtering
+- **Service Discovery** - Automatic discovery of available OData endpoints
+- **Authentication Support** - Basic authentication with username/password
+
+#### Blue Dolphin Integration Components
+- **Configuration Management** - Save and load Blue Dolphin connection settings
+- **Connection Testing** - Comprehensive connection testing with detailed logging
+- **Object Filtering** - Filter objects by Definition, ArchimateType, and custom criteria
+- **Data Preview** - Real-time preview of retrieved Blue Dolphin objects
+- **Endpoint Investigation** - Discover available OData endpoints and metadata
+
+#### Solution Model Management
+- **Domain Management** - Preview and manage Blue Dolphin domains
+- **Capability Mapping** - Map TMF capabilities to Blue Dolphin objects
+- **Requirement Synchronization** - Sync SpecSync requirements to Blue Dolphin
+- **Object Data Display** - Rich display of Blue Dolphin object properties
+
+### 🔧 Technical Improvements
+
+#### OData Service Integration
+- **Service Layer Architecture** - Modular service layer for Blue Dolphin integration
+- **OData v4.0 Compliance** - Full compliance with OData v4.0 specification
+- **Query Parameter Support** - Support for $filter, $select, $orderby, $top, $skip
+- **Error Handling** - Comprehensive error handling and user feedback
+- **URL Normalization** - Automatic URL formatting and validation
+
+#### Authentication & Security
+- **Basic Authentication** - Username/password authentication support
+- **API Key Support** - Bearer token authentication for API access
+- **Secure Configuration** - Local storage for connection settings
+- **Connection Validation** - Multi-step connection validation process
+
+#### UI/UX Enhancements
+- **Modern Interface** - Clean, modern interface for Blue Dolphin integration
+- **Loading States** - Comprehensive loading states and progress indicators
+- **Error Feedback** - Clear error messages and troubleshooting guidance
+- **Success Notifications** - Toast notifications for successful operations
+- **Responsive Design** - Mobile-first responsive design approach
+
+### 🐛 Bug Fixes
+- **Infinite Re-render Loop** - Fixed React infinite re-render loop in toast system
+- **Authentication Issues** - Resolved 401 Unauthorized errors with proper auth headers
+- **URL Formatting** - Fixed trailing slash issues in OData URLs
+- **Service Creation** - Enhanced error handling for service creation failures
+
+### 📁 Files Added
+- `src/components/blue-dolphin-integration.tsx` - Main Blue Dolphin integration component
+- `src/lib/blue-dolphin-service.ts` - Blue Dolphin service layer
+- `src/types/blue-dolphin.ts` - Blue Dolphin TypeScript interfaces
+- `src/app/api/blue-dolphin/route.ts` - Blue Dolphin API route handler
+- `BLUE-DOLPHIN-INTEGRATION-README.md` - Comprehensive documentation
+- `BLUE-DOLPHIN-ODATA-ANALYSIS.md` - OData integration analysis
+
+### 📁 Files Modified
+- `src/components/navigation-sidebar.tsx` - Added Solution Model tab
+- `src/app/page.tsx` - Added Blue Dolphin integration tab content
+- `src/types/index.ts` - Added Blue Dolphin type exports
+
+---
+
 ## [1.0.0] - 2025-01-XX - Use Case Tracking Release
 
 ### 🎉 Major Features Added
@@ -447,6 +514,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Release Date | Key Features |
 |---------|-------------|--------------|
+| 1.1.0 | 2025-08-28 | Blue Dolphin Integration, OData v4.0, Solution Model |
 | 1.0.0 | 2025-01-XX | Use Case Tracking, Enhanced SpecSync Integration |
 | 0.9.0 | 2025-01-XX | SpecSync Import System, Requirement Mapping |
 | 0.8.0 | 2025-01-XX | TMF ODA Management, Domain & Capability Management |

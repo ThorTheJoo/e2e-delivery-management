@@ -60,7 +60,7 @@ export function mapSpecSyncToCapabilities(
     }
 
     if (capId) {
-      const rid = String(item.rephrasedRequirementId || item.sourceRequirementId || Math.random());
+      const rid = String(item.rephrasedRequirementId || item.requirementId || Math.random());
       const key = `${capId}||${rid}`;
       
       if (!seenLocal.has(key)) {

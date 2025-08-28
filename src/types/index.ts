@@ -255,8 +255,9 @@ export interface PaginatedResponse<T> {
 
 // SpecSync types
 export interface SpecSyncItem {
+  id: string;
+  requirementId: string;
   rephrasedRequirementId: string;
-  sourceRequirementId: string;
   domain: string;
   vertical: string;
   functionName: string;
@@ -264,6 +265,9 @@ export interface SpecSyncItem {
   capability: string;
   referenceCapability: string;
   usecase1: string;
+  description?: string;
+  priority?: string;
+  status?: string;
 }
 
 export interface SpecSyncState {

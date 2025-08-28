@@ -125,6 +125,41 @@ export function NavigationSidebar({ activeTab, onTabChange, onScrollToSection }:
       ]
     },
     {
+      id: 'solution-model',
+      label: 'Solution Model',
+      icon: <PencilRuler className="h-4 w-4" />,
+      children: [
+        {
+          id: 'blue-dolphin-integration',
+          label: 'Blue Dolphin Integration',
+          icon: <Server className="h-4 w-4" />,
+          action: 'tab',
+          target: 'blue-dolphin-integration'
+        },
+        {
+          id: 'domain-management',
+          label: 'Domain Management',
+          icon: <Network className="h-4 w-4" />,
+          action: 'tab',
+          target: 'domain-management'
+        },
+        {
+          id: 'capability-mapping',
+          label: 'Capability Mapping',
+          icon: <Link className="h-4 w-4" />,
+          action: 'tab',
+          target: 'capability-mapping'
+        },
+        {
+          id: 'requirement-sync',
+          label: 'Requirement Sync',
+          icon: <ArrowLeftRight className="h-4 w-4" />,
+          action: 'tab',
+          target: 'requirement-sync'
+        }
+      ]
+    },
+    {
       id: 'presales',
       label: 'Presales',
       icon: <Lightbulb className="h-4 w-4" />,
@@ -329,19 +364,19 @@ export function NavigationSidebar({ activeTab, onTabChange, onScrollToSection }:
         <button
           onClick={() => hasChildren ? toggleSection(item.id) : handleNavigationClick(item)}
           className={cn(
-            "w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer",
+            "w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer",
             "hover:bg-accent hover:text-accent-foreground",
             level === 0 ? "text-foreground" : "text-muted-foreground",
             isActive && "bg-accent text-accent-foreground",
             hasChildren ? "hover:bg-accent/50" : ""
           )}
         >
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 flex-1 text-left">
             {item.icon}
-            <span>{item.label}</span>
+            <span className="text-left">{item.label}</span>
           </div>
           {hasChildren && (
-            <div className="flex items-center">
+            <div className="flex items-center ml-auto">
               {isExpanded ? (
                 <ChevronDown className="h-4 w-4" />
               ) : (
@@ -363,9 +398,9 @@ export function NavigationSidebar({ activeTab, onTabChange, onScrollToSection }:
   return (
     <aside className="w-64 bg-card border-r border-border h-full overflow-y-auto p-4">
       <div className="mb-6">
-        <div className="flex items-center space-x-2 px-3 py-2">
+        <div className="flex items-center space-x-2 px-3 py-2 text-left">
           <Route className="h-5 w-5 text-primary" />
-          <span className="font-semibold text-lg">Navigation</span>
+          <span className="font-semibold text-lg text-left">Navigation</span>
         </div>
       </div>
       

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Project, TMFCapability, ETOMProcess, WorkPackage, Milestone, Risk, Dependency, Document, TMFOdaDomain, SpecSyncItem } from '@/types';
 import { dataService } from '@/lib/data-service';
 import { formatDate, calculateEffortTotal, getStatusColor, getSeverityColor } from '@/lib/utils';
@@ -15,6 +15,7 @@ import { TMFDomainCapabilityManager } from '@/components/tmf-domain-capability-m
 import { NavigationSidebar } from '@/components/navigation-sidebar';
 import { SETImport } from '@/components/set-import';
 import { MiroBoardCreator } from '@/components/miro-board-creator';
+import { BlueDolphinIntegration } from '@/components/blue-dolphin-integration';
 import { useToast, ToastContainer } from '@/components/ui/toast';
 import { mapSpecSyncToCapabilities, calculateUseCaseCountsByCapability, saveSpecSyncData, loadSpecSyncData, clearSpecSyncData } from '@/lib/specsync-utils';
 import { 
@@ -33,7 +34,8 @@ import {
   BarChart3,
   ChevronDown,
   ChevronRight,
-  Layout
+  Layout,
+  PencilRuler
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -110,6 +112,8 @@ export default function HomePage() {
         setRisks(risksData || []);
         setDependencies(dependenciesData || []);
         setDocuments(documentsData || []);
+        
+        console.log('State updated, setting loading to false...');
       } catch (error) {
         console.error('Error loading data:', error);
         
@@ -136,14 +140,22 @@ export default function HomePage() {
         setDependencies([]);
         setDocuments([]);
         
-        // Set loading to false even on error so the UI can render
-        setLoading(false);
+        console.log('Fallback data set, setting loading to false...');
       } finally {
+        console.log('Finally block: setting loading to false');
         setLoading(false);
       }
     };
 
     loadData();
+    
+    // Fallback timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      console.log('Loading timeout reached, forcing loading to false');
+      setLoading(false);
+    }, 10000); // 10 seconds timeout
+
+    return () => clearTimeout(timeoutId);
   }, []);
 
   // Load saved SpecSync data
@@ -152,7 +164,6 @@ export default function HomePage() {
     if (savedState) {
       setSpecSyncState(savedState);
       setSpecSyncItems(savedState.items); // Set specSyncItems for MiroBoardCreator
-      updateRequirementCounts(savedState);
       // Don't show toast on page reload - only show when user actually imports
     } else {
       // Set default sample SpecSync data if none exists
@@ -162,7 +173,12 @@ export default function HomePage() {
           requirementId: 'REQ-001',
           rephrasedRequirementId: 'Customer Data Management',
           domain: 'Customer Management',
+          vertical: 'Telecommunications',
           functionName: 'Customer Information Management',
+          afLevel2: 'Customer Management',
+          capability: 'Customer Data Management',
+          referenceCapability: 'TMF Customer Management',
+          usecase1: 'Customer Onboarding',
           description: 'System shall manage customer information across all segments',
           priority: 'High',
           status: 'In Progress'
@@ -172,7 +188,12 @@ export default function HomePage() {
           requirementId: 'REQ-002',
           rephrasedRequirementId: 'Product Portfolio Management',
           domain: 'Product Management',
+          vertical: 'Telecommunications',
           functionName: 'Product Portfolio Management',
+          afLevel2: 'Product Management',
+          capability: 'Product Portfolio Management',
+          referenceCapability: 'TMF Product Management',
+          usecase1: 'Product Creation',
           description: 'System shall support end-to-end product lifecycle management',
           priority: 'High',
           status: 'In Progress'
@@ -182,7 +203,12 @@ export default function HomePage() {
           requirementId: 'REQ-003',
           rephrasedRequirementId: 'Billing and Charging',
           domain: 'Revenue Management',
+          vertical: 'Telecommunications',
           functionName: 'Billing and Charging',
+          afLevel2: 'Revenue Management',
+          capability: 'Billing and Charging',
+          referenceCapability: 'TMF Revenue Management',
+          usecase1: 'Invoice Generation',
           description: 'System shall provide comprehensive billing and revenue management',
           priority: 'High',
           status: 'In Progress'
@@ -191,6 +217,13 @@ export default function HomePage() {
       setSpecSyncItems(defaultSpecSyncItems);
     }
   }, []);
+
+  // Update requirement counts when tmfCapabilities are loaded
+  useEffect(() => {
+    if (specSyncState && tmfCapabilities.length > 0) {
+      updateRequirementCounts(specSyncState);
+    }
+  }, [tmfCapabilities, specSyncState]);
 
   // Initialize default TMF domains if none exist
   useEffect(() => {
@@ -283,7 +316,7 @@ export default function HomePage() {
       ];
       setTmfDomains(defaultTmfDomains);
     }
-  }, [tmfDomains.length]);
+  }, []); // Changed from [tmfDomains.length] to [] to prevent infinite loop
 
   const handleSpecSyncImport = (state: SpecSyncState) => {
     console.log('handleSpecSyncImport called with:', state);
@@ -315,12 +348,37 @@ export default function HomePage() {
     toast.showInfo('🗑️ SpecSync data cleared successfully');
   };
 
+  const handleTmfStateChange = useCallback((domains: any[]) => {
+    // Convert UserDomain[] to TMFOdaDomain[] for MiroBoardCreator
+    const tmfDomains: TMFOdaDomain[] = domains.map(domain => ({
+      id: domain.id,
+      name: domain.name,
+      description: domain.description,
+      capabilities: domain.capabilities.map((cap: any) => ({
+        id: cap.id,
+        name: cap.name,
+        description: cap.description,
+        domainId: domain.id,
+        isSelected: cap.isSelected,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      })),
+      isSelected: domain.isSelected,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }));
+    setTmfDomains(tmfDomains);
+  }, []);
+
   const updateRequirementCounts = (state: SpecSyncState) => {
-    const mapping = mapSpecSyncToCapabilities(state.items, tmfCapabilities);
-    setRequirementCounts(mapping.countsByCapability);
-    
-    const useCaseMapping = calculateUseCaseCountsByCapability(state.items, tmfCapabilities);
-    setUseCaseCounts(useCaseMapping);
+    // Only update counts if tmfCapabilities are loaded
+    if (tmfCapabilities.length > 0) {
+      const mapping = mapSpecSyncToCapabilities(state.items, tmfCapabilities);
+      setRequirementCounts(mapping.countsByCapability);
+      
+      const useCaseMapping = calculateUseCaseCountsByCapability(state.items, tmfCapabilities);
+      setUseCaseCounts(useCaseMapping);
+    }
   };
 
   const handleSETDataLoaded = (domainEfforts: Record<string, number>, matchedWorkPackages: Record<string, any>) => {
@@ -406,7 +464,7 @@ export default function HomePage() {
         {/* Main Content Area */}
         <main className="flex-1 overflow-y-auto p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-9">
+          <TabsList className="grid w-full grid-cols-10">
             <TabsTrigger value="dashboard" className="flex items-center space-x-2">
               <BarChart3 className="h-4 w-4" />
               <span className="hidden sm:inline">Dashboard</span>
@@ -418,6 +476,10 @@ export default function HomePage() {
             <TabsTrigger value="tmf-demo" className="flex items-center space-x-2">
               <Network className="h-4 w-4" />
               <span className="hidden sm:inline">TMF Demo</span>
+            </TabsTrigger>
+            <TabsTrigger value="solution-model" className="flex items-center space-x-2">
+              <PencilRuler className="h-4 w-4" />
+              <span className="hidden sm:inline">Solution Model</span>
             </TabsTrigger>
             <TabsTrigger value="etom" className="flex items-center space-x-2">
               <Route className="h-4 w-4" />
@@ -723,27 +785,7 @@ export default function HomePage() {
                   {isTmfManagerExpanded && (
                     <TMFDomainCapabilityManager 
                       specSyncData={specSyncState}
-                      onStateChange={(domains) => {
-                        // Convert UserDomain[] to TMFOdaDomain[] for MiroBoardCreator
-                        const tmfDomains: TMFOdaDomain[] = domains.map(domain => ({
-                          id: domain.id,
-                          name: domain.name,
-                          description: domain.description,
-                          capabilities: domain.capabilities.map(cap => ({
-                            id: cap.id,
-                            name: cap.name,
-                            description: cap.description,
-                            domainId: domain.id,
-                            isSelected: cap.isSelected,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                          })),
-                          isSelected: domain.isSelected,
-                          createdAt: new Date().toISOString(),
-                          updatedAt: new Date().toISOString()
-                        }));
-                        setTmfDomains(tmfDomains);
-                      }}
+                      onStateChange={handleTmfStateChange}
                     />
                   )}
                 </div>
@@ -778,6 +820,25 @@ export default function HomePage() {
                 </Button>
               </div>
             </div>
+          </TabsContent>
+
+          {/* Solution Model Tab */}
+          <TabsContent value="solution-model" className="space-y-6">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Solution Model - Blue Dolphin Integration</h2>
+              <p className="text-gray-600">
+                Create and manage your solution model in Blue Dolphin. Import domains, capabilities, and requirements from SpecSync and TMF data.
+              </p>
+            </div>
+            
+            <BlueDolphinIntegration 
+              specSyncData={specSyncState}
+              tmfDomains={tmfDomains}
+              onSyncComplete={(result) => {
+                console.log('Blue Dolphin sync completed:', result);
+                toast.showSuccess(`Sync completed: ${result.syncedCount} items processed`);
+              }}
+            />
           </TabsContent>
 
           {/* eTOM Processes Tab */}
