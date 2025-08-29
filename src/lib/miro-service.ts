@@ -28,12 +28,14 @@ export interface MiroFrameConfig {
 export class MiroService {
   private apiBaseUrl: string;
   private testBoardId: string | null = null;
+  private specSyncTestBoardId: string | null = null;
 
   constructor() {
     this.apiBaseUrl = '/api/miro/boards';
-    // Load test board ID from localStorage if available
+    // Load test board IDs from localStorage if available
     if (typeof window !== 'undefined') {
       this.testBoardId = localStorage.getItem('miro_test_board_id');
+      this.specSyncTestBoardId = localStorage.getItem('miro_specsync_test_board_id');
     }
   }
 
@@ -64,11 +66,40 @@ export class MiroService {
   }
 
   public async createBoard(config: MiroBoardConfig): Promise<{ id: string; viewLink: string }> {
-    console.log('Creating Miro board:', config.name);
+    console.log('=== MIRO SERVICE CREATE BOARD DEBUG ===');
+    console.log('Board config received:', JSON.stringify(config, null, 2));
+    console.log('Board name:', config.name);
+    console.log('Board name length:', config.name?.length);
+    console.log('Board name type:', typeof config.name);
+    console.log('Board description:', config.description);
+    console.log('Board description length:', config.description?.length);
+    console.log('=== END MIRO SERVICE DEBUG ===');
+    
+    // Ensure board name is valid and within Miro's 60-character limit
+    const maxNameLength = 60;
+    let boardName = config.name;
+    
+    // Validate board name
+    if (!boardName || typeof boardName !== 'string' || boardName.trim() === '') {
+      console.error('Invalid board name:', boardName);
+      throw new Error('Board name is required and must be a non-empty string');
+    }
+    
+    // Trim whitespace
+    boardName = boardName.trim();
+    
+    // Check length limit
+    if (boardName.length > maxNameLength) {
+      console.warn(`Board name exceeds ${maxNameLength} characters (${boardName.length}), truncating...`);
+      boardName = boardName.substring(0, maxNameLength - 3) + '...';
+      console.log('Truncated board name:', boardName);
+    }
+    
+    console.log('Creating Miro board:', boardName);
     
     try {
       const result = await this.callMiroAPI('createBoard', {
-        name: config.name,
+        name: boardName,
         description: config.description
       });
 
@@ -133,14 +164,99 @@ export class MiroService {
     }
   }
 
+  public async getOrCreateTMFBoard(projectName: string): Promise<{ id: string; viewLink: string }> {
+    // Check if we have a stored TMF test board ID
+    if (this.testBoardId) {
+      try {
+        console.log('Attempting to reuse existing TMF test board:', this.testBoardId);
+        // Try to get the existing board
+        const board = await this.callMiroAPI('getBoard', { boardId: this.testBoardId });
+        console.log('Successfully reused existing TMF test board');
+        return board;
+      } catch (error) {
+        console.log('Failed to reuse existing TMF board, creating new one:', error);
+        // If the board doesn't exist or we can't access it, create a new one
+        this.testBoardId = null;
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('miro_test_board_id');
+        }
+      }
+    }
+
+    // Create new TMF test board
+    const boardConfig: MiroBoardConfig = {
+      name: `${projectName} - TMF Architecture (Test)`,
+      description: `Test board for ${projectName} TMF architecture visualization - Created for prototyping`
+    };
+
+    const board = await this.createBoard(boardConfig);
+    
+    // Store the board ID for future reuse
+    this.testBoardId = board.id;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('miro_test_board_id', board.id);
+    }
+    
+    console.log('Created new TMF test board and stored ID for reuse:', board.id);
+    return board;
+  }
+
+  public async getOrCreateSpecSyncBoard(projectName: string): Promise<{ id: string; viewLink: string }> {
+    // Check if we have a stored SpecSync test board ID
+    if (this.specSyncTestBoardId) {
+      try {
+        console.log('Attempting to reuse existing SpecSync test board:', this.specSyncTestBoardId);
+        // Try to get the existing board
+        const board = await this.callMiroAPI('getBoard', { boardId: this.specSyncTestBoardId });
+        console.log('Successfully reused existing SpecSync test board');
+        return board;
+      } catch (error) {
+        console.log('Failed to reuse existing SpecSync board, creating new one:', error);
+        // If the board doesn't exist or we can't access it, create a new one
+        this.specSyncTestBoardId = null;
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('miro_specsync_test_board_id');
+        }
+      }
+    }
+
+    // Create new SpecSync test board
+    const boardConfig: MiroBoardConfig = {
+      name: `${projectName} - SpecSync Requirements (Test)`,
+      description: `Test board for ${projectName} SpecSync requirements visualization - Created for prototyping`
+    };
+
+    const board = await this.createBoard(boardConfig);
+    
+    // Store the board ID for future reuse
+    this.specSyncTestBoardId = board.id;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('miro_specsync_test_board_id', board.id);
+    }
+    
+    console.log('Created new SpecSync test board and stored ID for reuse:', board.id);
+    return board;
+  }
+
   public async clearSpecSyncTestBoard(): Promise<void> {
-    // Clear the test board for SpecSync specifically
-    await this.clearTestBoard();
+    if (this.specSyncTestBoardId) {
+      try {
+        await this.callMiroAPI('deleteBoard', { boardId: this.specSyncTestBoardId });
+        console.log('SpecSync test board deleted successfully');
+      } catch (error) {
+        console.error('Failed to delete SpecSync test board:', error);
+      }
+    }
+    
+    this.specSyncTestBoardId = null;
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('miro_specsync_test_board_id');
+    }
   }
 
   public async createTMFBoard(project: Project, domains: TMFOdaDomain[]): Promise<{ id: string; viewLink: string }> {
-    // For prototyping, use the test board functionality
-    const board = await this.getOrCreateTestBoard(`${project.name} - TMF Architecture`);
+    // For prototyping, use the TMF test board functionality
+    const board = await this.getOrCreateTMFBoard(`${project.name} - TMF Architecture`);
 
     // Create domain frames and capability cards
     await this.createDomainFrames(board.id, domains);
@@ -241,8 +357,12 @@ export class MiroService {
   }
 
   public async createSpecSyncBoard(specSyncItems: SpecSyncItem[]): Promise<{ id: string; viewLink: string }> {
+    console.log('=== MIRO SERVICE: createSpecSyncBoard called ===');
+    console.log('Input items count:', specSyncItems.length);
+    console.log('First item:', specSyncItems[0]);
+    
     // For prototyping, use the test board functionality
-    const board = await this.getOrCreateTestBoard('SpecSync Requirements Mapping');
+    const board = await this.getOrCreateSpecSyncBoard('SpecSync Requirements Mapping');
 
     // Create domain frames and usecase cards
     await this.createSpecSyncDomainFrames(board.id, specSyncItems);

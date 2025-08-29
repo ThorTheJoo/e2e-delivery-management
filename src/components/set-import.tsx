@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Loader2, ChevronDown, ChevronRight } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
 
 interface SETComponent {
@@ -32,7 +32,7 @@ interface SETImportProps {
 
 export function SETImport({ onDataLoaded }: SETImportProps) {
   const [state, setState] = useState<SETImportState>({
-    isExpanded: true,
+    isExpanded: false,
     isProcessing: false,
     data: null,
     domainEfforts: {},
@@ -149,18 +149,20 @@ export function SETImport({ onDataLoaded }: SETImportProps) {
     <Card className="w-full">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-3">
             <FileSpreadsheet className="h-5 w-5" />
+            <div 
+              className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-lg border-2 border-blue-200 cursor-pointer hover:bg-blue-200 transition-colors"
+              onClick={toggleExpanded}
+            >
+              {state.isExpanded ? (
+                <ChevronDown className="w-5 h-5 text-blue-700" />
+              ) : (
+                <ChevronRight className="w-5 h-5 text-blue-700" />
+              )}
+            </div>
             <CardTitle>SET Test Loader Import</CardTitle>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggleExpanded}
-            className="h-8 w-8 p-0"
-          >
-            {state.isExpanded ? '−' : '+'}
-          </Button>
         </div>
         <CardDescription>
           Import effort estimates from SET Test Loader CUT.xlsx file

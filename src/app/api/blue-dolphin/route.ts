@@ -320,9 +320,34 @@ export async function POST(request: NextRequest) {
             console.log('Top:', top, 'Skip:', skip);
             console.log('Select fields:', select);
 
+            // Validate and sanitize filter if provided
+            let sanitizedFilter = filter;
+            if (filter) {
+              try {
+                // Basic OData filter validation - check for common syntax issues
+                if (filter.includes("'") && !filter.includes("contains(") && !filter.includes("eq '")) {
+                  // If it contains single quotes but doesn't look like proper OData syntax
+                  // This might be a user entering raw text instead of a proper filter
+                  throw new Error('Invalid OData filter syntax. Please use proper OData expressions or text search.');
+                }
+                
+                // Check for unbalanced parentheses
+                const openParens = (filter.match(/\(/g) || []).length;
+                const closeParens = (filter.match(/\)/g) || []).length;
+                if (openParens !== closeParens) {
+                  throw new Error('Unbalanced parentheses in OData filter');
+                }
+                
+                sanitizedFilter = filter;
+              } catch (filterError) {
+                console.error('Filter validation error:', filterError);
+                throw new Error(`OData filter validation failed: ${filterError instanceof Error ? filterError.message : 'Invalid filter syntax'}`);
+              }
+            }
+
             // Build OData v4.0 URL with query parameters
             const queryParams = new URLSearchParams();
-            if (filter) queryParams.append('$filter', filter);
+            if (sanitizedFilter) queryParams.append('$filter', sanitizedFilter);
             if (select && select.length > 0) queryParams.append('$select', select.join(','));
             if (orderby) queryParams.append('$orderby', orderby);
             if (top) queryParams.append('$top', top.toString());
@@ -377,7 +402,24 @@ export async function POST(request: NextRequest) {
               console.error('Status:', response.status);
               console.error('Status text:', response.statusText);
               console.error('Response body:', errorText);
-              throw new Error(`Object retrieval failed: ${response.status} ${response.statusText} - ${errorText}`);
+              
+              // Parse error response for better error messages
+              let errorMessage = `Object retrieval failed: ${response.status} ${response.statusText}`;
+              try {
+                const errorData = JSON.parse(errorText);
+                if (errorData.error?.message) {
+                  errorMessage = `OData Error: ${errorData.error.message}`;
+                  // Add helpful suggestions for common OData syntax errors
+                  if (errorData.error.message.includes('Syntax error')) {
+                    errorMessage += '\n\nTip: Use the "Text Search" field to search for text content instead of entering raw OData expressions.';
+                  }
+                }
+              } catch (parseError) {
+                // If we can't parse the error, use the raw text
+                errorMessage += ` - ${errorText}`;
+              }
+              
+              throw new Error(errorMessage);
             }
 
             const result = await response.json();
@@ -407,6 +449,78 @@ export async function POST(request: NextRequest) {
               { status: 500 }
             );
           }
+
+       case 'test-odata-functions':
+         try {
+           console.log('Testing OData filter functions...');
+           
+           if (config.protocol !== 'ODATA') {
+             throw new Error('Function testing only available for OData protocol');
+           }
+
+           const testResults: any = {
+             supportedFunctions: [],
+             failedFunctions: [],
+             sampleData: {}
+           };
+
+           // Test different OData filter functions
+           const testFunctions = [
+             { name: 'contains', filter: "contains(Title, 'test')" },
+             { name: 'substringof', filter: "substringof('test', Title)" },
+             { name: 'startswith', filter: "startswith(Title, 'test')" },
+             { name: 'endswith', filter: "endswith(Title, 'test')" },
+             { name: 'tolower', filter: "tolower(Title) eq 'test'" },
+             { name: 'toupper', filter: "toupper(Title) eq 'TEST'" },
+             { name: 'length', filter: "length(Title) gt 0" },
+             { name: 'trim', filter: "trim(Title) eq 'test'" },
+             { name: 'concat', filter: "concat(Title, 'test') eq 'testtest'" },
+             { name: 'indexof', filter: "indexof(Title, 'test') ge 0" },
+             { name: 'replace', filter: "replace(Title, 'test', 'new') eq 'new'" },
+             { name: 'substring', filter: "substring(Title, 0, 4) eq 'test'" }
+           ];
+
+           for (const testFunc of testFunctions) {
+             try {
+               console.log(`Testing function: ${testFunc.name}`);
+               const response = await fetch(`${config.odataUrl}/Objects?$filter=${encodeURIComponent(testFunc.filter)}&$top=1`, {
+                 headers: {
+                   'Accept': 'application/json',
+                   'OData-MaxVersion': '4.0',
+                   'OData-Version': '4.0',
+                   ...(config.apiKey ? { 'Authorization': `Bearer ${config.apiKey}` } : {}),
+                   ...(config.username && config.password ? { 
+                     'Authorization': `Basic ${btoa(`${config.username}:${config.password}`)}` 
+                   } : {})
+                 }
+               });
+
+               if (response.ok) {
+                 testResults.supportedFunctions.push(testFunc.name);
+                 console.log(`✅ Function ${testFunc.name} is supported`);
+               } else {
+                 const errorText = await response.text();
+                 testResults.failedFunctions.push({ name: testFunc.name, error: errorText });
+                 console.log(`❌ Function ${testFunc.name} failed: ${response.status} - ${errorText}`);
+               }
+             } catch (error) {
+               testResults.failedFunctions.push({ name: testFunc.name, error: error instanceof Error ? error.message : 'Unknown error' });
+               console.log(`❌ Function ${testFunc.name} test failed:`, error);
+             }
+           }
+
+           return NextResponse.json({ 
+             success: true, 
+             message: 'OData function testing completed',
+             data: testResults 
+           });
+         } catch (error) {
+           console.error('OData function testing failed:', error);
+           return NextResponse.json(
+             { success: false, error: error instanceof Error ? error.message : 'Function testing failed' },
+             { status: 500 }
+           );
+         }
 
        case 'investigate-odata':
          try {

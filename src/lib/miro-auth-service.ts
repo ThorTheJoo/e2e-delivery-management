@@ -29,15 +29,18 @@ class MiroAuthService {
 
   public async initiateOAuth(): Promise<string> {
     try {
-      console.log('Initiating OAuth flow...');
       const response = await fetch('/api/auth/miro');
+      
+      if (!response.ok) {
+        throw new Error(`Failed to initiate OAuth: ${response.statusText}`);
+      }
+      
       const data = await response.json();
       
       if (data.authUrl) {
-        console.log('OAuth authorization URL generated:', data.authUrl);
         return data.authUrl;
       } else {
-        throw new Error('Failed to get authorization URL');
+        throw new Error('No authorization URL received from server');
       }
     } catch (error) {
       console.error('Failed to initiate OAuth:', error);
@@ -54,6 +57,10 @@ class MiroAuthService {
         },
         body: JSON.stringify({ code }),
       });
+
+      if (!response.ok) {
+        throw new Error(`Token exchange failed: ${response.statusText}`);
+      }
 
       const data = await response.json();
 
@@ -128,7 +135,9 @@ class MiroAuthService {
 
   public isAuthenticated(): boolean {
     const token = this.getAccessToken();
-    return token !== null;
+    const hasLocalStorageToken = typeof window !== 'undefined' ? !!localStorage.getItem('miro_access_token') : false;
+    
+    return token !== null || hasLocalStorageToken;
   }
 
   public setTokenFromUrl(token: string): void {

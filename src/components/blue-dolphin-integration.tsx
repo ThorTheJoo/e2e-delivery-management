@@ -55,24 +55,16 @@ export function BlueDolphinIntegration({
   tmfDomains = [], 
   onSyncComplete 
 }: BlueDolphinIntegrationProps) {
-  const [config, setConfig] = useState<BlueDolphinConfig>({
-    apiUrl: 'https://public-api.eu.bluedolphin.app',
-    odataUrl: 'https://public-api.eu.bluedolphin.app/odata/v4',
-    protocol: 'HYBRID'
-  });
-  const [isConfigured, setIsConfigured] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isSavingConfig, setIsSavingConfig] = useState(false);
-  const [isTestingConnection, setIsTestingConnection] = useState(false);
   const [isLoadingDomains, setIsLoadingDomains] = useState(false);
   const [domains, setDomains] = useState<BlueDolphinDomain[]>([]);
   const [capabilities, setCapabilities] = useState<BlueDolphinCapability[]>([]);
   const [requirements, setRequirements] = useState<BlueDolphinRequirement[]>([]);
   const [syncOperations, setSyncOperations] = useState<SyncOperation[]>([]);
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['config', 'domains']));
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
-  const [connectionStatus, setConnectionStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
+
   const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
   const [toasts, setToasts] = useState<Array<{id: string, type: 'success' | 'error' | 'info', title: string, message?: string}>>([]);
   
@@ -85,6 +77,7 @@ export function BlueDolphinIntegration({
   const [availableEndpoints, setAvailableEndpoints] = useState<string[]>([]);
   const [objectCount, setObjectCount] = useState<number>(0);
   const [objectTotal, setObjectTotal] = useState<number>(0);
+  const [schemaInfo, setSchemaInfo] = useState<any>(null);
 
   // Simple toast function to avoid infinite loops
   const showToast = useCallback((type: 'success' | 'error' | 'info', title: string, message?: string) => {
@@ -95,108 +88,21 @@ export function BlueDolphinIntegration({
     }, 5000);
   }, []);
 
-  // Load configuration from localStorage
-  useEffect(() => {
-    const savedConfig = localStorage.getItem('blueDolphinConfig');
-    if (savedConfig) {
-      try {
-        const parsedConfig = JSON.parse(savedConfig);
-        
-        // Normalize URLs by removing trailing slashes
-        const normalizedConfig = {
-          ...parsedConfig,
-          apiUrl: parsedConfig.apiUrl?.endsWith('/') ? parsedConfig.apiUrl.slice(0, -1) : parsedConfig.apiUrl,
-          odataUrl: parsedConfig.odataUrl?.endsWith('/') ? parsedConfig.odataUrl.slice(0, -1) : parsedConfig.odataUrl
-        };
-        
-        setConfig(normalizedConfig);
-        setIsConfigured(true);
-      } catch (error) {
-        console.error('Failed to load Blue Dolphin configuration:', error);
-      }
-    }
-  }, []);
 
-  const saveConfig = useCallback(async () => {
-    setIsSavingConfig(true);
-    try {
-      // Validate configuration
-      if (!config.apiUrl && !config.odataUrl) {
-        throw new Error('At least one URL (API or OData) is required');
-      }
-      
-      if (!config.apiKey && (!config.username || !config.password)) {
-        throw new Error('Either API key or username/password is required');
-      }
 
-      // Normalize URLs by removing trailing slashes
-      const normalizedConfig = {
-        ...config,
-        apiUrl: config.apiUrl?.endsWith('/') ? config.apiUrl.slice(0, -1) : config.apiUrl,
-        odataUrl: config.odataUrl?.endsWith('/') ? config.odataUrl.slice(0, -1) : config.odataUrl
-      };
 
-      localStorage.setItem('blueDolphinConfig', JSON.stringify(normalizedConfig));
-      setConfig(normalizedConfig);
-      setIsConfigured(true);
-      setConnectionStatus('idle');
-      showToast('success', 'Configuration Saved', 'Blue Dolphin configuration has been saved successfully');
-    } catch (error) {
-      showToast('error', 'Save Failed', error instanceof Error ? error.message : 'Failed to save configuration');
-    } finally {
-      setIsSavingConfig(false);
-    }
-  }, [config, showToast]);
-
-  const testConnection = useCallback(async () => {
-    if (!config.apiKey && (!config.username || !config.password)) {
-      showToast('error', 'Authentication Required', 'Please provide either API key or username/password');
-      return;
-    }
-
-    setIsTestingConnection(true);
-    setConnectionStatus('testing');
-    
-    try {
-      const response = await fetch('/api/blue-dolphin', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'test-connection',
-          config,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        setConnectionStatus('success');
-        showToast('success', 'Connection Successful', 'Successfully connected to Blue Dolphin');
-      } else {
-        setConnectionStatus('error');
-        const errorMessage = result.error || 'Failed to connect to Blue Dolphin';
-        console.error('Connection test failed:', errorMessage);
-        showToast('error', 'Connection Failed', errorMessage);
-      }
-    } catch (error) {
-      setConnectionStatus('error');
-      showToast('error', 'Connection Error', error instanceof Error ? error.message : 'Network error occurred');
-    } finally {
-      setIsTestingConnection(false);
-    }
-  }, [config, showToast]);
 
   const loadDomains = useCallback(async () => {
-    if (!isConfigured) {
-      showToast('error', 'Configuration Required', 'Please configure Blue Dolphin connection first');
-      return;
-    }
-
     setIsLoadingDomains(true);
     try {
-      console.log('Loading domains with config:', config);
+      // Get configuration from localStorage
+      const savedConfig = localStorage.getItem('blueDolphinConfig');
+      if (!savedConfig) {
+        showToast('error', 'Configuration Required', 'Please configure Blue Dolphin settings first');
+        return;
+      }
+      
+      const config = JSON.parse(savedConfig);
       
       const response = await fetch('/api/blue-dolphin', {
         method: 'POST',
@@ -205,7 +111,7 @@ export function BlueDolphinIntegration({
         },
         body: JSON.stringify({
           action: 'get-domains',
-          config,
+          config: config,
           data: {
             params: { type: 'TMF_ODA_DOMAIN', status: 'ACTIVE', size: 50 }
           }
@@ -228,21 +134,20 @@ export function BlueDolphinIntegration({
     } finally {
       setIsLoadingDomains(false);
     }
-  }, [config, isConfigured, showToast]);
+  }, [showToast]);
 
   const investigateOData = useCallback(async () => {
-    if (!isConfigured) {
-      showToast('error', 'Configuration Required', 'Please configure Blue Dolphin connection first');
-      return;
-    }
-
-    if (config.protocol !== 'ODATA') {
-      showToast('error', 'Protocol Error', 'Investigation is only available for OData protocol');
-      return;
-    }
-
     setIsLoadingDomains(true);
     try {
+      // Get configuration from localStorage
+      const savedConfig = localStorage.getItem('blueDolphinConfig');
+      if (!savedConfig) {
+        showToast('error', 'Configuration Required', 'Please configure Blue Dolphin settings first');
+        return;
+      }
+      
+      const config = JSON.parse(savedConfig);
+      
       const response = await fetch('/api/blue-dolphin', {
         method: 'POST',
         headers: {
@@ -250,7 +155,7 @@ export function BlueDolphinIntegration({
         },
         body: JSON.stringify({
           action: 'investigate-odata',
-          config,
+          config: config,
         }),
       });
 
@@ -277,22 +182,20 @@ export function BlueDolphinIntegration({
     } finally {
       setIsLoadingDomains(false);
     }
-  }, [config, isConfigured, showToast]);
+  }, [showToast]);
 
   const loadObjects = useCallback(async () => {
-    if (!isConfigured) {
-      showToast('error', 'Configuration Required', 'Please configure Blue Dolphin connection first');
-      return;
-    }
-
-    if (config.protocol !== 'ODATA') {
-      showToast('error', 'Protocol Error', 'Object retrieval is only available for OData protocol');
-      return;
-    }
-
     setIsLoadingObjects(true);
     try {
-      console.log('Loading objects with config:', config);
+      // Get configuration from localStorage
+      const savedConfig = localStorage.getItem('blueDolphinConfig');
+      if (!savedConfig) {
+        showToast('error', 'Configuration Required', 'Please configure Blue Dolphin settings first');
+        return;
+      }
+      
+      const config = JSON.parse(savedConfig);
+      
       console.log('Selected endpoint:', selectedEndpoint);
       console.log('Definition filter:', objectDefinitionFilter);
       console.log('Additional filter:', objectFilter);
@@ -302,16 +205,23 @@ export function BlueDolphinIntegration({
       if (objectDefinitionFilter) {
         filter = `Definition eq '${objectDefinitionFilter}'`;
       }
-      if (objectFilter) {
-        const additionalFilter = objectFilter;
-        filter = filter ? `${filter} and ${additionalFilter}` : additionalFilter;
+      
+      // Re-enable text search using the supported contains() function
+      if (objectFilter && objectFilter.trim()) {
+        const additionalFilter = objectFilter.trim();
+        // Use contains() which is supported by Blue Dolphin OData
+        const escapedFilter = additionalFilter.replace(/'/g, "''");
+        // Search across Title field (we can expand this once we confirm it works)
+        const textSearchFilter = `contains(Title, '${escapedFilter}')`;
+        filter = filter ? `${filter} and ${textSearchFilter}` : textSearchFilter;
+        console.log('Using contains() for text search:', textSearchFilter);
       }
 
       console.log('Final filter:', filter);
 
       const requestBody = {
         action: 'get-objects',
-        config,
+        config: config,
         data: {
           endpoint: selectedEndpoint,
           filter: filter, // Use server-side filtering with OData v4.0
@@ -357,14 +267,95 @@ export function BlueDolphinIntegration({
     } finally {
       setIsLoadingObjects(false);
     }
-  }, [config, isConfigured, selectedEndpoint, objectDefinitionFilter, objectFilter, showToast]);
+  }, [selectedEndpoint, objectDefinitionFilter, objectFilter, showToast]);
+
+  // Function to test OData functions
+  const testODataFunctions = useCallback(async () => {
+    try {
+      // Get configuration from localStorage
+      const savedConfig = localStorage.getItem('blueDolphinConfig');
+      if (!savedConfig) {
+        showToast('error', 'Configuration Required', 'Please configure Blue Dolphin settings first');
+        return;
+      }
+      
+      const config = JSON.parse(savedConfig);
+      
+      console.log('Testing OData functions...');
+      
+      const requestBody = {
+        action: 'test-odata-functions',
+        config: config,
+        data: {}
+      };
+
+      const response = await fetch('/api/blue-dolphin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      const result = await response.json();
+      console.log('OData function test result:', result);
+
+      if (result.success) {
+        setSchemaInfo(result.data);
+        showToast('success', 'OData Function Test Complete', 'Check console for supported functions');
+      } else {
+        showToast('error', 'OData Function Test Failed', result.error || 'Failed to test functions');
+      }
+    } catch (error) {
+      console.error('OData function test error:', error);
+      showToast('error', 'OData Function Test Error', error instanceof Error ? error.message : 'Network error occurred');
+    }
+  }, [showToast]);
+
+  // Function to investigate Blue Dolphin schema
+  const investigateSchema = useCallback(async () => {
+    try {
+      // Get configuration from localStorage
+      const savedConfig = localStorage.getItem('blueDolphinConfig');
+      if (!savedConfig) {
+        showToast('error', 'Configuration Required', 'Please configure Blue Dolphin settings first');
+        return;
+      }
+      
+      const config = JSON.parse(savedConfig);
+      
+      console.log('Investigating Blue Dolphin schema...');
+      
+      const requestBody = {
+        action: 'investigate-odata',
+        config: config,
+        data: {}
+      };
+
+      const response = await fetch('/api/blue-dolphin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      const result = await response.json();
+      console.log('Schema investigation result:', result);
+
+      if (result.success) {
+        setSchemaInfo(result.data);
+        showToast('success', 'Schema Investigation Complete', 'Check console for detailed schema information');
+      } else {
+        showToast('error', 'Schema Investigation Failed', result.error || 'Failed to investigate schema');
+      }
+    } catch (error) {
+      console.error('Schema investigation error:', error);
+      showToast('error', 'Schema Investigation Error', error instanceof Error ? error.message : 'Network error occurred');
+    }
+  }, [showToast]);
 
   const syncDomainsToBlueDolphin = useCallback(async () => {
-    if (!isConfigured) {
-      showToast('error', 'Configuration Required', 'Please configure Blue Dolphin connection first');
-      return;
-    }
-
     if (tmfDomains.length === 0) {
       showToast('error', 'No Data Available', 'No TMF domains available for sync');
       return;
@@ -403,14 +394,9 @@ export function BlueDolphinIntegration({
     } finally {
       setIsLoading(false);
     }
-  }, [config, isConfigured, tmfDomains, onSyncComplete, showToast]);
+  }, [tmfDomains, onSyncComplete, showToast]);
 
   const syncRequirementsToBlueDolphin = useCallback(async () => {
-    if (!isConfigured) {
-      showToast('error', 'Configuration Required', 'Please configure Blue Dolphin connection first');
-      return;
-    }
-
     if (!specSyncData?.items || specSyncData.items.length === 0) {
       showToast('error', 'No Data Available', 'No SpecSync requirements available for sync');
       return;
@@ -449,7 +435,7 @@ export function BlueDolphinIntegration({
     } finally {
       setIsLoading(false);
     }
-  }, [config, isConfigured, specSyncData, onSyncComplete, showToast]);
+  }, [specSyncData, onSyncComplete, showToast]);
 
   const toggleSection = (sectionId: string) => {
     const newExpanded = new Set(expandedSections);
@@ -474,21 +460,7 @@ export function BlueDolphinIntegration({
     }
   };
 
-  const getConnectionStatusBadge = () => {
-    switch (connectionStatus) {
-      case 'success':
-        return <Badge variant="default" className="bg-green-100 text-green-800">Connected</Badge>;
-      case 'error':
-        return <Badge variant="destructive">Connection Failed</Badge>;
-      case 'testing':
-        return <Badge variant="secondary" className="flex items-center space-x-1">
-          <Loader2 className="h-3 w-3 animate-spin" />
-          <span>Testing...</span>
-        </Badge>;
-      default:
-        return <Badge variant="secondary">Not Tested</Badge>;
-    }
-  };
+
 
   const filteredDomains = domains.filter(domain => {
     const matchesSearch = domain.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -499,155 +471,7 @@ export function BlueDolphinIntegration({
 
   return (
     <div className="space-y-6">
-      {/* Configuration Section */}
-      <Card>
-        <CardHeader>
-          <div 
-            className="flex items-center justify-between cursor-pointer"
-            onClick={() => toggleSection('config')}
-          >
-            <div className="flex items-center space-x-2">
-              {expandedSections.has('config') ? (
-                <ChevronDown className="h-5 w-5" />
-              ) : (
-                <ChevronRight className="h-5 w-5" />
-              )}
-              <Settings className="h-5 w-5" />
-              <CardTitle>Blue Dolphin Configuration</CardTitle>
-            </div>
-            <div className="flex items-center space-x-2">
-              {getConnectionStatusBadge()}
-              <Badge variant={isConfigured ? "default" : "secondary"}>
-                {isConfigured ? "Configured" : "Not Configured"}
-              </Badge>
-            </div>
-          </div>
-          <CardDescription>
-            Configure connection settings for Blue Dolphin integration
-          </CardDescription>
-        </CardHeader>
-        {expandedSections.has('config') && (
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="apiUrl">API URL</Label>
-                <Input
-                  id="apiUrl"
-                  value={config.apiUrl}
-                  onChange={(e) => setConfig({ ...config, apiUrl: e.target.value })}
-                  placeholder="https://public-api.eu.bluedolphin.app"
-                />
-              </div>
-              <div>
-                <Label htmlFor="odataUrl">OData URL</Label>
-                <Input
-                  id="odataUrl"
-                  value={config.odataUrl}
-                  onChange={(e) => setConfig({ ...config, odataUrl: e.target.value })}
-                  placeholder="https://public-api.eu.bluedolphin.app/odata/v4"
-                />
-              </div>
-              <div>
-                <Label htmlFor="protocol">Protocol</Label>
-                <Select value={config.protocol} onValueChange={(value: any) => setConfig({ ...config, protocol: value })}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="REST">REST API</SelectItem>
-                    <SelectItem value="ODATA">OData</SelectItem>
-                    <SelectItem value="HYBRID">Hybrid (Both)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="apiKey">API Key (Optional)</Label>
-                <Input
-                  id="apiKey"
-                  type="password"
-                  value={config.apiKey || ''}
-                  onChange={(e) => setConfig({ ...config, apiKey: e.target.value })}
-                  placeholder="Enter API key"
-                />
-              </div>
-              <div>
-                <Label htmlFor="username">Username (Alternative)</Label>
-                <Input
-                  id="username"
-                  value={config.username || ''}
-                  onChange={(e) => setConfig({ ...config, username: e.target.value })}
-                  placeholder="Enter username"
-                />
-              </div>
-              <div>
-                <Label htmlFor="password">Password (Alternative)</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={config.password || ''}
-                  onChange={(e) => setConfig({ ...config, password: e.target.value })}
-                  placeholder="Enter password"
-                />
-              </div>
-            </div>
-            <div className="flex space-x-2">
-              <Button 
-                onClick={saveConfig} 
-                disabled={isSavingConfig || isTestingConnection}
-                className="min-w-[140px]"
-              >
-                {isSavingConfig ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-4 w-4 mr-2" />
-                    Save Configuration
-                  </>
-                )}
-              </Button>
-              <Button 
-                onClick={testConnection} 
-                disabled={!isConfigured || isSavingConfig || isTestingConnection} 
-                variant="outline"
-                className="min-w-[140px]"
-              >
-                {isTestingConnection ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Testing...
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Test Connection
-                  </>
-                )}
-              </Button>
-            </div>
-            {connectionStatus === 'success' && (
-              <div className="flex items-center space-x-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-                <div>
-                  <p className="text-sm font-medium text-green-800">Connection Successful</p>
-                  <p className="text-xs text-green-600">Blue Dolphin is accessible and ready for integration</p>
-                </div>
-              </div>
-            )}
-            {connectionStatus === 'error' && (
-              <div className="flex items-center space-x-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-                <XCircle className="h-5 w-5 text-red-600" />
-                <div>
-                  <p className="text-sm font-medium text-red-800">Connection Failed</p>
-                  <p className="text-xs text-red-600">Please check your configuration and try again</p>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        )}
-      </Card>
+
 
       {/* Domain Management Section */}
       <Card>
@@ -706,7 +530,7 @@ export function BlueDolphinIntegration({
                              <div className="flex space-x-2">
                  <Button 
                    onClick={loadDomains} 
-                   disabled={!isConfigured || isLoadingDomains} 
+                   disabled={isLoadingDomains} 
                    variant="outline"
                    className="min-w-[120px]"
                  >
@@ -724,7 +548,7 @@ export function BlueDolphinIntegration({
                  </Button>
                  <Button 
                    onClick={investigateOData} 
-                   disabled={!isConfigured || isLoadingDomains} 
+                   disabled={isLoadingDomains} 
                    variant="outline"
                    className="min-w-[140px]"
                  >
@@ -733,7 +557,7 @@ export function BlueDolphinIntegration({
                  </Button>
                  <Button 
                    onClick={syncDomainsToBlueDolphin} 
-                   disabled={!isConfigured || isLoading || tmfDomains.length === 0}
+                   disabled={isLoading || tmfDomains.length === 0}
                    className="min-w-[140px]"
                  >
                    {isLoading ? (
@@ -888,7 +712,6 @@ export function BlueDolphinIntegration({
                     };
                     setCapabilities(prev => [...prev, newCapability]);
                   }}
-                  disabled={!isConfigured}
                   className="min-w-[140px]"
                 >
                   <Plus className="h-4 w-4 mr-2" />
@@ -908,7 +731,6 @@ export function BlueDolphinIntegration({
                     };
                     setRequirements(prev => [...prev, newRequirement]);
                   }}
-                  disabled={!isConfigured}
                   className="min-w-[140px]"
                 >
                   <Plus className="h-4 w-4 mr-2" />
@@ -1033,7 +855,7 @@ export function BlueDolphinIntegration({
               </div>
               <Button 
                 onClick={syncRequirementsToBlueDolphin} 
-                disabled={!isConfigured || isLoading || !specSyncData?.items || specSyncData.items.length === 0}
+                disabled={isLoading || !specSyncData?.items || specSyncData.items.length === 0}
                 className="min-w-[140px]"
               >
                 {isLoading ? (
@@ -1133,34 +955,58 @@ export function BlueDolphinIntegration({
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="object-filter">Additional Filter</Label>
+                <Label htmlFor="object-filter">Text Search</Label>
                 <Input
                   id="object-filter"
-                  placeholder="OData filter expression"
+                  placeholder="e.g., Encompass v12 (searches Title, Description, Name)"
                   value={objectFilter}
                   onChange={(e) => setObjectFilter(e.target.value)}
                 />
+                <p className="text-xs text-muted-foreground">
+                  Enter text to search in object titles (uses contains() function)
+                </p>
+                <p className="text-xs text-green-600 bg-green-50 p-2 rounded">
+                  ✅ Text search enabled - using supported OData functions
+                </p>
               </div>
               
               <div className="space-y-2">
                 <Label>&nbsp;</Label>
-                <Button 
-                  onClick={loadObjects} 
-                  disabled={!isConfigured || isLoadingObjects || config.protocol !== 'ODATA'} 
-                  className="w-full"
-                >
-                  {isLoadingObjects ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Loading...
-                    </>
-                  ) : (
-                    <>
-                      <Download className="h-4 w-4 mr-2" />
-                      Load Objects
-                    </>
-                  )}
-                </Button>
+                <div className="grid grid-cols-3 gap-2">
+                  <Button 
+                    onClick={loadObjects} 
+                    disabled={isLoadingObjects} 
+                    className="w-full"
+                  >
+                    {isLoadingObjects ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Loading...
+                      </>
+                    ) : (
+                      <>
+                        <Download className="h-4 w-4 mr-2" />
+                        Load Objects
+                      </>
+                    )}
+                  </Button>
+                  <Button 
+                    onClick={testODataFunctions} 
+                    variant="outline"
+                    className="w-full"
+                  >
+                    <Search className="h-4 w-4 mr-2" />
+                    Test Functions
+                  </Button>
+                  <Button 
+                    onClick={investigateSchema} 
+                    variant="outline"
+                    className="w-full"
+                  >
+                    <Database className="h-4 w-4 mr-2" />
+                    Schema
+                  </Button>
+                </div>
               </div>
             </div>
 
@@ -1171,6 +1017,20 @@ export function BlueDolphinIntegration({
                 <p className="text-sm text-muted-foreground">
                   Configure filters and click "Load Objects" to retrieve data.
                 </p>
+              </div>
+            )}
+
+            {schemaInfo && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium">Schema Information</h4>
+                  <Badge variant="outline">Schema Investigation</Badge>
+                </div>
+                <Card className="p-4">
+                  <pre className="text-xs overflow-auto max-h-64">
+                    {JSON.stringify(schemaInfo, null, 2)}
+                  </pre>
+                </Card>
               </div>
             )}
 

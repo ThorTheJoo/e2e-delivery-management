@@ -195,7 +195,7 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
         ...domain,
         isSelected,
         capabilities: updatedCapabilities,
-        isExpanded: isSelected // Auto-expand selected domains
+        isExpanded: false // Keep domains collapsed by default
       };
     });
 
@@ -214,7 +214,7 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
           description: `Imported domain: ${importedDomain}`,
           capabilities: [],
           isSelected: true,
-          isExpanded: true,
+          isExpanded: false,
           requirementCount: 0
         };
         newDomains.push(newDomain);
@@ -270,7 +270,7 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
       referenceDomainId: domainData.referenceDomainId,
       capabilities: [],
       isSelected: false,
-      isExpanded: true,
+      isExpanded: false,
       requirementCount: 0
     };
 
@@ -336,11 +336,11 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
           ...cap,
           isSelected: newSelection
         }));
-        return { 
+                return {
           ...domain, 
           isSelected: newSelection,
           capabilities: updatedCapabilities,
-          isExpanded: newSelection // Auto-expand when selected
+          isExpanded: false // Keep collapsed by default
         };
       }
       return domain;
@@ -368,7 +368,7 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
           ...domain,
           capabilities: updatedCapabilities,
           isSelected: allCapabilitiesSelected || anyCapabilitiesSelected,
-          isExpanded: anyCapabilitiesSelected // Auto-expand when any capability is selected
+          isExpanded: false // Keep collapsed by default
         };
       }
       return domain;
@@ -415,7 +415,7 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
             requirementCount: 0
           })),
           isSelected: false,
-          isExpanded: true,
+          isExpanded: false,
           requirementCount: 0
         };
 

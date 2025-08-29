@@ -159,7 +159,7 @@ export function TMFOdaManager({ onStateChange, initialState }: TMFOdaManagerProp
   
   // New state for collapsible sections
   const [isSpecSyncExpanded, setIsSpecSyncExpanded] = useState(false);
-  const [isDomainsExpanded, setIsDomainsExpanded] = useState(true);
+  const [isDomainsExpanded, setIsDomainsExpanded] = useState(false);
   const [specSyncState, setSpecSyncState] = useState<SpecSyncState | null>(null);
 
   // Initialize with mock data if no initial state

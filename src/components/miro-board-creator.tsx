@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Layout, ExternalLink, Plus, FileText, Network, Loader2, CheckCircle, AlertCircle, LogIn, LogOut } from 'lucide-react';
+import { Layout, ExternalLink, Plus, FileText, Network, Loader2, CheckCircle, AlertCircle, LogOut } from 'lucide-react';
 import { miroService } from '@/lib/miro-service';
 import { miroAuthService } from '@/lib/miro-auth-service';
 import { Project, TMFOdaDomain, SpecSyncItem } from '@/types';
@@ -24,12 +24,18 @@ interface BoardLinks {
 }
 
 export function MiroBoardCreator({ project, tmfDomains, specSyncItems, onAuthStatusChange }: MiroBoardCreatorProps) {
+  console.log('=== MIRO BOARD CREATOR DEBUG ===');
+  console.log('Project:', project);
+  console.log('TMF Domains:', tmfDomains);
+  console.log('SpecSync Items:', specSyncItems);
+  console.log('SpecSync Items length:', specSyncItems?.length || 0);
+  console.log('=== END DEBUG ===');
+  
   const [boardLinks, setBoardLinks] = useState<BoardLinks>({});
   const [isCreatingTMF, setIsCreatingTMF] = useState(false);
   const [isCreatingSpecSync, setIsCreatingSpecSync] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isAuthenticating, setIsAuthenticating] = useState(false);
   const searchParams = useSearchParams();
 
   // Handle OAuth callback
@@ -55,25 +61,35 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems, onAuthSta
     }
   }, [searchParams, onAuthStatusChange]);
 
-  // Check authentication status on mount
+  // Check authentication status on mount and periodically
   useEffect(() => {
-    const authStatus = miroAuthService.isAuthenticated();
-    setIsAuthenticated(authStatus);
-    onAuthStatusChange?.(authStatus);
-  }, [onAuthStatusChange]);
+    const checkAuthStatus = () => {
+      // Check both the service and localStorage for authentication status
+      const serviceAuthStatus = miroAuthService.isAuthenticated();
+      const localStorageToken = typeof window !== 'undefined' ? localStorage.getItem('miro_access_token') : null;
+      const miroConfig = typeof window !== 'undefined' ? localStorage.getItem('miroConfig') : null;
+      
+      // For testing: if we have a config, consider it authenticated
+      const hasConfig = miroConfig ? JSON.parse(miroConfig).clientId && JSON.parse(miroConfig).clientSecret : false;
+      const authStatus = serviceAuthStatus || !!localStorageToken || hasConfig;
+      
+      setIsAuthenticated(authStatus);
+      onAuthStatusChange?.(authStatus);
+      
+      // If we have a token in localStorage but not in the service, restore it
+      if (localStorageToken && !serviceAuthStatus) {
+        miroAuthService.setTokenFromUrl(localStorageToken);
+      }
+    };
 
-  const handleAuthenticate = async () => {
-    setIsAuthenticating(true);
-    setError(null);
-    
-    try {
-      await miroService.authenticate();
-    } catch (error) {
-      console.error('Authentication failed:', error);
-      setError('Failed to initiate Miro authentication. Please try again.');
-      setIsAuthenticating(false);
-    }
-  };
+    // Check immediately
+    checkAuthStatus();
+
+    // Check every 2 seconds to stay in sync with Miro Configuration tab
+    const interval = setInterval(checkAuthStatus, 2000);
+
+    return () => clearInterval(interval);
+  }, [onAuthStatusChange]);
 
   const handleLogout = () => {
     miroAuthService.clearToken();
@@ -100,7 +116,7 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems, onAuthSta
       // Check if it's a token-related error
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       if (errorMessage.includes('token') || errorMessage.includes('authentication') || errorMessage.includes('401') || errorMessage.includes('403')) {
-        setError('Miro access token is invalid or expired. Please re-authenticate with Miro.');
+        setError('Miro access token is invalid or expired. Please re-authenticate with Miro in the Configuration tab.');
         setIsAuthenticated(false);
         onAuthStatusChange?.(false);
       } else {
@@ -128,7 +144,7 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems, onAuthSta
       // Check if it's a token-related error
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       if (errorMessage.includes('token') || errorMessage.includes('authentication') || errorMessage.includes('401') || errorMessage.includes('403')) {
-        setError('Miro access token is invalid or expired. Please re-authenticate with Miro.');
+        setError('Miro access token is invalid or expired. Please re-authenticate with Miro in the Configuration tab.');
         setIsAuthenticated(false);
         onAuthStatusChange?.(false);
       } else {
@@ -192,7 +208,7 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems, onAuthSta
           <CardDescription>
             {isAuthenticated 
               ? 'You are authenticated with Miro and can create boards.'
-              : 'Please authenticate with Miro to create visual boards.'
+              : 'Please go to the Miro Configuration tab to connect to Miro first.'
             }
           </CardDescription>
         </CardHeader>
@@ -211,28 +227,24 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems, onAuthSta
                 <AlertCircle className="h-4 w-4" />
                 <span>Clear Test Board</span>
               </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  console.log('=== Debug Authentication Status ===');
+                  console.log('Component isAuthenticated state:', isAuthenticated);
+                  console.log('Service isAuthenticated:', miroAuthService.isAuthenticated());
+                  console.log('localStorage token:', localStorage.getItem('miro_access_token'));
+                  console.log('Service token data:', miroAuthService.getAccessToken());
+                }}
+                className="flex items-center space-x-2"
+              >
+                <span>Debug Auth</span>
+              </Button>
             </div>
           ) : (
             <div className="flex items-center space-x-4">
-              <Button 
-                onClick={handleAuthenticate} 
-                disabled={isAuthenticating}
-                className="flex items-center space-x-2"
-              >
-                {isAuthenticating ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>Connecting...</span>
-                  </>
-                ) : (
-                  <>
-                    <LogIn className="h-4 w-4" />
-                    <span>Connect to Miro</span>
-                  </>
-                )}
-              </Button>
               <p className="text-sm text-muted-foreground">
-                You'll be redirected to Miro to authorize this application.
+                Please configure and connect to Miro in the Configuration tab before creating boards.
               </p>
             </div>
           )}
@@ -316,7 +328,7 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems, onAuthSta
 
             {!isAuthenticated && (
               <div className="text-sm text-muted-foreground">
-                Please connect to Miro first to create boards.
+                Please connect to Miro in the Configuration tab first to create boards.
               </div>
             )}
 
@@ -392,7 +404,7 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems, onAuthSta
 
             {!isAuthenticated && (
               <div className="text-sm text-muted-foreground">
-                Please connect to Miro first to create boards.
+                Please connect to Miro in the Configuration tab first to create boards.
               </div>
             )}
 

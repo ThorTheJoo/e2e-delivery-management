@@ -16,6 +16,9 @@ import { NavigationSidebar } from '@/components/navigation-sidebar';
 import { SETImport } from '@/components/set-import';
 import { MiroBoardCreator } from '@/components/miro-board-creator';
 import { BlueDolphinIntegration } from '@/components/blue-dolphin-integration';
+import { BlueDolphinConfiguration } from '@/components/blue-dolphin-configuration';
+import { MiroConfiguration } from '@/components/miro-configuration';
+import { MiroSetupGuide } from '@/components/miro-setup-guide';
 import { useToast, ToastContainer } from '@/components/ui/toast';
 import { mapSpecSyncToCapabilities, calculateUseCaseCountsByCapability, saveSpecSyncData, loadSpecSyncData, clearSpecSyncData } from '@/lib/specsync-utils';
 import { 
@@ -40,7 +43,17 @@ import {
 import Link from 'next/link';
 
 export default function HomePage() {
-  const [project, setProject] = useState<Project | null>(null);
+  const [project, setProject] = useState<Project | null>({
+    id: 'INIT-001',
+    name: 'Initial Project',
+    customer: 'Demo Customer',
+    status: 'In Progress',
+    startDate: '2025-01-15',
+    endDate: '2025-07-15',
+    duration: '6 months',
+    teamSize: 4,
+    workingDaysPerMonth: 20
+  });
   const [tmfCapabilities, setTmfCapabilities] = useState<TMFCapability[]>([]);
   const [etomProcesses, setEtomProcesses] = useState<ETOMProcess[]>([]);
   const [workPackages, setWorkPackages] = useState<WorkPackage[]>([]);
@@ -50,12 +63,21 @@ export default function HomePage() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [loading, setLoading] = useState(true);
+
+  // Handle tab changes and reset expanded states
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    // Reset all expanded states when switching tabs
+    setIsSpecSyncExpanded(false);
+    setIsTmfManagerExpanded(false);
+    setIsTmfCapabilitiesExpanded(false);
+  };
   const [specSyncState, setSpecSyncState] = useState<SpecSyncState | null>(null);
   const [requirementCounts, setRequirementCounts] = useState<Record<string, number>>({});
   const [useCaseCounts, setUseCaseCounts] = useState<Record<string, number>>({});
-  const [isSpecSyncExpanded, setIsSpecSyncExpanded] = useState(true);
-  const [isTmfManagerExpanded, setIsTmfManagerExpanded] = useState(true);
-  const [isTmfCapabilitiesExpanded, setIsTmfCapabilitiesExpanded] = useState(true);
+  const [isSpecSyncExpanded, setIsSpecSyncExpanded] = useState(false);
+  const [isTmfManagerExpanded, setIsTmfManagerExpanded] = useState(false);
+  const [isTmfCapabilitiesExpanded, setIsTmfCapabilitiesExpanded] = useState(false);
   const [setDomainEfforts, setSetDomainEfforts] = useState<Record<string, number>>({});
   const [setMatchedWorkPackages, setSetMatchedWorkPackages] = useState<Record<string, any>>({});
   const [tmfDomains, setTmfDomains] = useState<TMFOdaDomain[]>([]);
@@ -63,57 +85,112 @@ export default function HomePage() {
   
   const toast = useToast();
 
+  // Check for error messages in URL parameters (for Miro auth errors)
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const error = urlParams.get('error');
+    const success = urlParams.get('success');
+    
+    if (error) {
+      toast.showError(`Miro Authentication Error: ${error}`);
+      // Clean up the URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    
+    if (success) {
+      toast.showSuccess('Miro authentication successful!');
+      // Clean up the URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [toast]);
+
+  useEffect(() => {
+    console.log('useEffect triggered, starting data loading process...');
+    
     const loadData = async () => {
       try {
         console.log('Starting data load...');
         
-        // Test data service first
-        console.log('Testing data service...');
-        const testProject = await dataService.getProject();
-        console.log('Test project loaded:', testProject);
+        // Test data service initialization
+        console.log('Data service instance:', dataService);
         
-        const [
-          projectData,
-          tmfData,
-          etomData,
-          workPackagesData,
-          milestonesData,
-          risksData,
-          dependenciesData,
-          documentsData
-        ] = await Promise.all([
-          dataService.getProject(),
-          dataService.getTMFCapabilities(),
-          dataService.getETOMProcesses(),
-          dataService.getWorkPackages(),
-          dataService.getMilestones(),
-          dataService.getRisks(),
-          dataService.getDependencies(),
-          dataService.getDocuments()
-        ]);
-
-        console.log('Data loaded successfully:', {
-          project: projectData,
-          tmfCapabilities: tmfData?.length,
-          etomProcesses: etomData?.length,
-          workPackages: workPackagesData?.length,
-          milestones: milestonesData?.length,
-          risks: risksData?.length,
-          dependencies: dependenciesData?.length,
-          documents: documentsData?.length
-        });
-
+        // Load project data first to ensure we have basic data
+        console.log('Attempting to load project data...');
+        const projectData = await dataService.getProject();
+        console.log('Project loaded successfully:', projectData);
         setProject(projectData);
-        setTmfCapabilities(tmfData || []);
-        setEtomProcesses(etomData || []);
-        setWorkPackages(workPackagesData || []);
-        setMilestones(milestonesData || []);
-        setRisks(risksData || []);
-        setDependencies(dependenciesData || []);
-        setDocuments(documentsData || []);
         
-        console.log('State updated, setting loading to false...');
+        // Set loading to false immediately after project is loaded
+        console.log('Setting loading to false...');
+        setLoading(false);
+        
+        // Load other data in parallel with individual error handling
+        console.log('Loading additional data...');
+        
+        try {
+          const tmfData = await dataService.getTMFCapabilities();
+          console.log('TMF capabilities loaded:', tmfData?.length || 0);
+          setTmfCapabilities(tmfData || []);
+        } catch (e) {
+          console.error('Error loading TMF capabilities:', e);
+          setTmfCapabilities([]);
+        }
+        
+        try {
+          const etomData = await dataService.getETOMProcesses();
+          console.log('eTOM processes loaded:', etomData?.length || 0);
+          setEtomProcesses(etomData || []);
+        } catch (e) {
+          console.error('Error loading eTOM processes:', e);
+          setEtomProcesses([]);
+        }
+        
+        try {
+          const workPackagesData = await dataService.getWorkPackages();
+          console.log('Work packages loaded:', workPackagesData?.length || 0);
+          setWorkPackages(workPackagesData || []);
+        } catch (e) {
+          console.error('Error loading work packages:', e);
+          setWorkPackages([]);
+        }
+        
+        try {
+          const milestonesData = await dataService.getMilestones();
+          console.log('Milestones loaded:', milestonesData?.length || 0);
+          setMilestones(milestonesData || []);
+        } catch (e) {
+          console.error('Error loading milestones:', e);
+          setMilestones([]);
+        }
+        
+        try {
+          const risksData = await dataService.getRisks();
+          console.log('Risks loaded:', risksData?.length || 0);
+          setRisks(risksData || []);
+        } catch (e) {
+          console.error('Error loading risks:', e);
+          setRisks([]);
+        }
+        
+        try {
+          const dependenciesData = await dataService.getDependencies();
+          console.log('Dependencies loaded:', dependenciesData?.length || 0);
+          setDependencies(dependenciesData || []);
+        } catch (e) {
+          console.error('Error loading dependencies:', e);
+          setDependencies([]);
+        }
+        
+        try {
+          const documentsData = await dataService.getDocuments();
+          console.log('Documents loaded:', documentsData?.length || 0);
+          setDocuments(documentsData || []);
+        } catch (e) {
+          console.error('Error loading documents:', e);
+          setDocuments([]);
+        }
+
+        console.log('All data loading attempts completed');
       } catch (error) {
         console.error('Error loading data:', error);
         
@@ -141,32 +218,85 @@ export default function HomePage() {
         setDocuments([]);
         
         console.log('Fallback data set, setting loading to false...');
-      } finally {
-        console.log('Finally block: setting loading to false');
         setLoading(false);
       }
     };
 
+    // Start loading immediately
+    console.log('Calling loadData function...');
     loadData();
     
-    // Fallback timeout to prevent infinite loading
+    // Immediate fallback timeout to prevent infinite loading
     const timeoutId = setTimeout(() => {
       console.log('Loading timeout reached, forcing loading to false');
       setLoading(false);
-    }, 10000); // 10 seconds timeout
+    }, 1000); // Reduced to 1 second timeout
 
     return () => clearTimeout(timeoutId);
   }, []);
 
   // Load saved SpecSync data
   useEffect(() => {
-    const savedState = loadSpecSyncData();
-    if (savedState) {
-      setSpecSyncState(savedState);
-      setSpecSyncItems(savedState.items); // Set specSyncItems for MiroBoardCreator
-      // Don't show toast on page reload - only show when user actually imports
-    } else {
-      // Set default sample SpecSync data if none exists
+    try {
+      const savedState = loadSpecSyncData();
+      if (savedState) {
+        setSpecSyncState(savedState);
+        setSpecSyncItems(savedState.items); // Set specSyncItems for MiroBoardCreator
+        // Don't show toast on page reload - only show when user actually imports
+      } else {
+        // Set default sample SpecSync data if none exists
+        const defaultSpecSyncItems: SpecSyncItem[] = [
+          {
+            id: 'req-001',
+            requirementId: 'REQ-001',
+            rephrasedRequirementId: 'Customer Data Management',
+            domain: 'Customer Management',
+            vertical: 'Telecommunications',
+            functionName: 'Customer Information Management',
+            afLevel2: 'Customer Management',
+            capability: 'Customer Data Management',
+            referenceCapability: 'TMF Customer Management',
+            usecase1: 'Customer Onboarding',
+            description: 'System shall manage customer information across all segments',
+            priority: 'High',
+            status: 'In Progress'
+          },
+          {
+            id: 'req-002',
+            requirementId: 'REQ-002',
+            rephrasedRequirementId: 'Product Portfolio Management',
+            domain: 'Product Management',
+            vertical: 'Telecommunications',
+            functionName: 'Product Portfolio Management',
+            afLevel2: 'Product Management',
+            capability: 'Product Portfolio Management',
+            referenceCapability: 'TMF Product Management',
+            usecase1: 'Product Creation',
+            description: 'System shall support end-to-end product lifecycle management',
+            priority: 'High',
+            status: 'In Progress'
+          },
+          {
+            id: 'req-003',
+            requirementId: 'REQ-003',
+            rephrasedRequirementId: 'Billing and Charging',
+            domain: 'Revenue Management',
+            vertical: 'Telecommunications',
+            functionName: 'Billing and Charging',
+            afLevel2: 'Revenue Management',
+            capability: 'Billing and Charging',
+            referenceCapability: 'TMF Revenue Management',
+            usecase1: 'Invoice Generation',
+            description: 'System shall provide comprehensive billing and revenue management',
+            priority: 'High',
+            status: 'In Progress'
+          }
+        ];
+        setSpecSyncItems(defaultSpecSyncItems);
+      }
+    } catch (error) {
+      console.error('Error loading SpecSync data:', error);
+      // Set default data on error
       const defaultSpecSyncItems: SpecSyncItem[] = [
         {
           id: 'req-001',
@@ -180,36 +310,6 @@ export default function HomePage() {
           referenceCapability: 'TMF Customer Management',
           usecase1: 'Customer Onboarding',
           description: 'System shall manage customer information across all segments',
-          priority: 'High',
-          status: 'In Progress'
-        },
-        {
-          id: 'req-002',
-          requirementId: 'REQ-002',
-          rephrasedRequirementId: 'Product Portfolio Management',
-          domain: 'Product Management',
-          vertical: 'Telecommunications',
-          functionName: 'Product Portfolio Management',
-          afLevel2: 'Product Management',
-          capability: 'Product Portfolio Management',
-          referenceCapability: 'TMF Product Management',
-          usecase1: 'Product Creation',
-          description: 'System shall support end-to-end product lifecycle management',
-          priority: 'High',
-          status: 'In Progress'
-        },
-        {
-          id: 'req-003',
-          requirementId: 'REQ-003',
-          rephrasedRequirementId: 'Billing and Charging',
-          domain: 'Revenue Management',
-          vertical: 'Telecommunications',
-          functionName: 'Billing and Charging',
-          afLevel2: 'Revenue Management',
-          capability: 'Billing and Charging',
-          referenceCapability: 'TMF Revenue Management',
-          usecase1: 'Invoice Generation',
-          description: 'System shall provide comprehensive billing and revenue management',
           priority: 'High',
           status: 'In Progress'
         }
@@ -387,11 +487,22 @@ export default function HomePage() {
   };
 
   if (loading) {
+    console.log('Rendering loading screen, loading state:', loading);
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
           <p className="mt-4 text-lg text-muted-foreground">Loading E2E Delivery Management System...</p>
+          <p className="mt-2 text-sm text-muted-foreground">If this takes too long, please refresh the page</p>
+          <button 
+            onClick={() => {
+              console.log('Manual refresh button clicked');
+              setLoading(false);
+            }} 
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Skip Loading
+          </button>
         </div>
       </div>
     );
@@ -458,13 +569,13 @@ export default function HomePage() {
         {/* Navigation Sidebar */}
         <NavigationSidebar 
           activeTab={activeTab}
-          onTabChange={setActiveTab}
+          onTabChange={handleTabChange}
         />
         
         {/* Main Content Area */}
         <main className="flex-1 overflow-y-auto p-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-10">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="dashboard" className="flex items-center space-x-2">
               <BarChart3 className="h-4 w-4" />
               <span className="hidden sm:inline">Dashboard</span>
@@ -472,10 +583,6 @@ export default function HomePage() {
             <TabsTrigger value="tmf" className="flex items-center space-x-2">
               <Network className="h-4 w-4" />
               <span className="hidden sm:inline">TMF</span>
-            </TabsTrigger>
-            <TabsTrigger value="tmf-demo" className="flex items-center space-x-2">
-              <Network className="h-4 w-4" />
-              <span className="hidden sm:inline">TMF Demo</span>
             </TabsTrigger>
             <TabsTrigger value="solution-model" className="flex items-center space-x-2">
               <PencilRuler className="h-4 w-4" />
@@ -496,10 +603,6 @@ export default function HomePage() {
             <TabsTrigger value="commercial" className="flex items-center space-x-2">
               <DollarSign className="h-4 w-4" />
               <span className="hidden sm:inline">Commercial</span>
-            </TabsTrigger>
-            <TabsTrigger value="documents" className="flex items-center space-x-2">
-              <FileText className="h-4 w-4" />
-              <span className="hidden sm:inline">Documents</span>
             </TabsTrigger>
             <TabsTrigger value="visual-mapping" className="flex items-center space-x-2">
               <Layout className="h-4 w-4" />
@@ -1121,13 +1224,28 @@ export default function HomePage() {
             </Card>
           </TabsContent>
 
-          {/* Visual Mapping Tab */}
-          <TabsContent value="visual-mapping" className="space-y-6">
-            <MiroBoardCreator 
-              project={project}
-              tmfDomains={tmfDomains}
-              specSyncItems={specSyncItems}
-            />
+                     {/* Visual Mapping Tab */}
+           <TabsContent value="visual-mapping" className="space-y-6">
+             <MiroBoardCreator 
+               project={project}
+               tmfDomains={tmfDomains}
+               specSyncItems={specSyncItems}
+             />
+           </TabsContent>
+
+           {/* Blue Dolphin Configuration Tab */}
+           <TabsContent value="blue-dolphin-config" className="space-y-6">
+             <BlueDolphinConfiguration />
+           </TabsContent>
+
+                     {/* Miro Configuration Tab */}
+          <TabsContent value="miro-config" className="space-y-6">
+            <MiroConfiguration />
+          </TabsContent>
+
+          {/* Miro Setup Guide Tab */}
+          <TabsContent value="miro-setup" className="space-y-6">
+            <MiroSetupGuide />
           </TabsContent>
         </Tabs>
       </main>

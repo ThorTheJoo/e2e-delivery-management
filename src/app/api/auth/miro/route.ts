@@ -1,12 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
-  const clientId = process.env.MIRO_CLIENT_ID;
-  const redirectUri = process.env.MIRO_REDIRECT_URI;
-
-  if (!clientId || !redirectUri) {
+  console.log('=== MIRO AUTH DEBUG ===');
+  
+  // Read configuration from server-side storage (set by /api/miro/config)
+  const serverConfig = (global as any).miroConfig;
+  
+  if (!serverConfig) {
+    console.error('No Miro configuration found on server. Please save configuration in the UI first.');
     return NextResponse.json(
-      { error: 'Miro configuration missing' },
+      { 
+        error: 'Miro configuration not found on server',
+        details: 'Please save your Miro configuration in the UI first, then try again.',
+        solution: 'Go to Miro Configuration tab, enter your credentials, and click "Save Configuration"'
+      },
+      { status: 500 }
+    );
+  }
+
+  const { clientId, redirectUri, scopes } = serverConfig;
+  
+  console.log('Using server-side configuration:');
+  console.log('MIRO_CLIENT_ID:', clientId);
+  console.log('MIRO_REDIRECT_URI:', redirectUri);
+  console.log('MIRO_SCOPES:', scopes);
+  console.log('All env vars:', Object.keys(process.env).filter(key => key.includes('MIRO')));
+  
+  // Validate configuration
+  if (!clientId || !redirectUri) {
+    console.error('Invalid server configuration:', { clientId: !!clientId, redirectUri: !!redirectUri });
+    return NextResponse.json(
+      { 
+        error: 'Invalid Miro configuration on server',
+        details: {
+          clientId: !!clientId,
+          redirectUri: !!redirectUri,
+          message: 'Server configuration is missing required fields'
+        }
+      },
       { status: 500 }
     );
   }
@@ -17,7 +48,10 @@ export async function GET(request: NextRequest) {
   authUrl.searchParams.set('client_id', clientId);
   authUrl.searchParams.set('redirect_uri', redirectUri);
   authUrl.searchParams.set('state', 'miro-oauth-state'); // In production, use a secure random string
-  authUrl.searchParams.set('scope', 'boards:read boards:write boards:write:team');
+  authUrl.searchParams.set('scope', scopes?.join(' ') || 'boards:read boards:write boards:write:team');
+
+  console.log('Generated auth URL:', authUrl.toString());
+  console.log('=== END MIRO AUTH DEBUG ===');
 
   return NextResponse.json({
     authUrl: authUrl.toString(),
@@ -37,13 +71,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const clientId = process.env.MIRO_CLIENT_ID;
-    const clientSecret = process.env.MIRO_CLIENT_SECRET;
-    const redirectUri = process.env.MIRO_REDIRECT_URI;
+    // Read configuration from server-side storage
+    const serverConfig = (global as any).miroConfig;
+    
+    if (!serverConfig) {
+      return NextResponse.json(
+        { error: 'Miro configuration not found on server. Please save configuration first.' },
+        { status: 500 }
+      );
+    }
+
+    const { clientId, clientSecret, redirectUri } = serverConfig;
 
     if (!clientId || !clientSecret || !redirectUri) {
       return NextResponse.json(
-        { error: 'Miro configuration missing' },
+        { error: 'Incomplete Miro configuration on server' },
         { status: 500 }
       );
     }

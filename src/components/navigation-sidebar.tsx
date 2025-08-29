@@ -31,7 +31,9 @@ import {
   Server,
   TrendingUp,
   Headphones,
-  Award
+  Award,
+  Settings,
+  Palette
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -331,6 +333,34 @@ export function NavigationSidebar({ activeTab, onTabChange, onScrollToSection }:
           icon: <Users className="h-4 w-4" />,
           action: 'tab',
           target: 'workflow-status'
+        }
+      ]
+    },
+    {
+      id: 'configurations',
+      label: 'Configurations',
+      icon: <Settings className="h-4 w-4" />,
+      children: [
+        {
+          id: 'blue-dolphin-config',
+          label: 'Blue Dolphin Configuration',
+          icon: <Server className="h-4 w-4" />,
+          action: 'tab',
+          target: 'blue-dolphin-config'
+        },
+        {
+          id: 'miro-config',
+          label: 'Miro Configuration',
+          icon: <Palette className="h-4 w-4" />,
+          action: 'tab',
+          target: 'miro-config'
+        },
+        {
+          id: 'miro-setup',
+          label: 'Miro Setup Guide',
+          icon: <Settings className="h-4 w-4" />,
+          action: 'tab',
+          target: 'miro-setup'
         }
       ]
     }

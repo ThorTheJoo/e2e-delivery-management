@@ -31,6 +31,14 @@ A comprehensive, modern web application for managing end-to-end delivery project
 - **Authentication Support** - Basic authentication and API key support
 - **Real-time Data Preview** - Live preview of retrieved Blue Dolphin objects
 
+### Miro Visual Mapping Integration
+- **OAuth 2.0 Authentication** - Secure Miro integration with proper OAuth flow
+- **TMF Architecture Boards** - Automated creation of TMF domain and capability visualizations
+- **SpecSync Requirements Boards** - Visual mapping of SpecSync requirements with domain categorization
+- **Real-time Board Management** - Create, update, and manage Miro boards directly from the application
+- **Secure Configuration** - UI-based configuration management with server-side synchronization
+- **Comprehensive Error Handling** - Robust error handling and recovery mechanisms
+
 ### TMF Capabilities Overview
 - **Dynamic Capability Cards** - Rich cards showing effort breakdown, segments, and statistics
 - **Use Case Statistics** - Display of unique use cases per capability with orange badges
@@ -78,6 +86,18 @@ A comprehensive, modern web application for managing end-to-end delivery project
 ### File Processing
 - **XLSX.js** - Excel file parsing and processing
 - **CSV Processing** - Native CSV parsing with flexible column mapping
+
+## 📚 Documentation
+
+### Integration Guides
+- **[Miro Integration Documentation](./MIRO-INTEGRATION-DOCUMENTATION.md)** - Comprehensive guide for Miro visual mapping integration
+- **[Miro Integration Cleanup Summary](./MIRO-INTEGRATION-CLEANUP-SUMMARY.md)** - Summary of improvements and fixes made to the Miro integration
+- **[Blue Dolphin Integration Guide](./BLUE-DOLPHIN-INTEGRATION-README.md)** - Complete guide for Blue Dolphin OData integration
+- **[SpecSync Analysis Report](./SpecSync_Analysis_Report.md)** - Detailed analysis of SpecSync requirements integration
+
+### Architecture Documentation
+- **[E2E Architecture Context](./e2e_architecture_context.md)** - High-level architecture overview
+- **[Project Architecture](./project-arch.md)** - Detailed project structure and design decisions
 
 ## 📁 Project Structure
 
