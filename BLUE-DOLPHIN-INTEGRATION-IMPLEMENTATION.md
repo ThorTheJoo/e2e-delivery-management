@@ -4,6 +4,237 @@
 
 This guide provides practical implementation details for integrating the E2E Delivery Management application with Blue Dolphin. It includes code examples, integration patterns, and step-by-step implementation instructions.
 
+## Enhanced Object Retrieval Implementation
+
+### MoreColumns Support Analysis
+
+Based on analysis of Excel Power Query capabilities, we've identified that Blue Dolphin OData supports enhanced object retrieval through the `MoreColumns=true` parameter. This enables access to significantly more metadata than the current implementation.
+
+#### Current vs Enhanced Field Comparison
+
+**Current Implementation (Limited Fields):**
+```typescript
+select: [
+  'Id', 'Title', 'Definition', 'Description', 'ArchimateType', 
+  'Status', 'CreatedOn', 'ChangedOn', 'Workspace'
+]
+```
+
+**Enhanced Implementation (With MoreColumns):**
+```typescript
+select: [
+  // Standard fields (existing)
+  'Id', 'Title', 'Definition', 'Description', 'ArchimateType', 
+  'Status', 'CreatedOn', 'ChangedOn', 'Workspace',
+  
+  // Enhanced properties (new)
+  'Object_Properties_Name',
+  'Object_Properties_AMEFF_Import_Identifier',
+  'Deliverable_Object_Status_Status',
+  'Object_Properties_Deliverable_Object_Status',
+  'Object_Properties_User_Interface_Integration',
+  'Ameff_properties_Domain',
+  'Ameff_properties_Category',
+  'Ameff_properties_Source_ID',
+  'Ameff_properties_Compliance',
+  'Resource_x26_Rate_Role_required_to_deliver_this_servicex3F',
+  'Resource_x26_Rate_Rate',
+  'External_Design_Description_Service',
+  'External_Design_User_Interface',
+  'Object_Properties_Needs_Localization',
+  'Object_Properties_Needs_Specialization',
+  'Object_Properties_Needs_External_Integration',
+  'Object_Properties_Documentation',
+  'Object_Properties_Provided_by',
+  'Object_Properties_Supplied_By',
+  'Object_Properties_Questions',
+  'Object_Properties_Action_Items',
+  'Object_Properties_Base_Implementation_Costs'
+]
+```
+
+#### Excel Query Analysis
+
+The Excel Power Query implementation shows the following structure:
+```m
+let
+    Source = OData.Feed("https://csgipoc.odata.bluedolphin.app", null, [MoreColumns=true]),
+    Objects_table = Source{[Name="Objects",Signature="table"]}[Data],
+    #"Expanded More Columns" = Table.ExpandRecordColumn(Objects_table, "More Columns", {...})
+in
+    #"Expanded More Columns"
+```
+
+**Key Findings:**
+1. **MoreColumns=true** parameter enables additional metadata
+2. **Nested "More Columns" structure** contains expanded properties
+3. **Significantly more fields** available than current implementation
+4. **Excel successfully retrieves** all enhanced properties
+
+#### Implementation Strategy
+
+**Phase 1: API Enhancement**
+1. Add `MoreColumns=true` support to the Blue Dolphin service
+2. Update the select fields array to include new properties
+3. Modify the API route to handle enhanced queries
+4. Test with small result sets (top=2) to validate
+
+**Phase 2: UI Enhancement**
+1. Update object card components to display new fields
+2. Add filtering capabilities for new properties
+3. Implement field selection controls
+4. Add data export functionality for enhanced data
+
+**Phase 3: Performance Optimization**
+1. Implement field selection controls
+2. Add caching for frequently accessed properties
+3. Optimize response handling for large datasets
+4. Add progress indicators for enhanced queries
+
+#### Technical Implementation Details
+
+**Updated Blue Dolphin Service:**
+```typescript
+// Enhanced object retrieval with MoreColumns support
+async getObjectsWithMoreColumns(options: {
+  endpoint: string;
+  filter?: string;
+  select?: string[];
+  orderby?: string;
+  top?: number;
+  skip?: number;
+  moreColumns?: boolean;
+}): Promise<ODataResponse<any>> {
+  
+  const queryParams = new URLSearchParams();
+  
+  // Add MoreColumns parameter if enabled
+  if (options.moreColumns) {
+    queryParams.append('MoreColumns', 'true');
+  }
+  
+  // Standard OData parameters
+  if (options.filter) queryParams.append('$filter', options.filter);
+  if (options.select && options.select.length > 0) {
+    queryParams.append('$select', options.select.join(','));
+  }
+  if (options.orderby) queryParams.append('$orderby', options.orderby);
+  if (options.top) queryParams.append('$top', options.top.toString());
+  if (options.skip) queryParams.append('$skip', options.skip.toString());
+
+  const endpoint = `${options.endpoint}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+  return this.odataRequest<ODataResponse<any>>(endpoint);
+}
+```
+
+**Updated API Route:**
+```typescript
+case 'get-objects-enhanced':
+  try {
+    const { endpoint, filter, top = 2, skip = 0, select, orderby, moreColumns } = data || {};
+    
+    // Build enhanced query with MoreColumns support
+    const queryParams = new URLSearchParams();
+    if (moreColumns) queryParams.append('MoreColumns', 'true');
+    if (filter) queryParams.append('$filter', filter);
+    if (select && select.length > 0) queryParams.append('$select', select.join(','));
+    if (orderby) queryParams.append('$orderby', orderby);
+    if (top) queryParams.append('$top', top.toString());
+    if (skip) queryParams.append('$skip', skip.toString());
+
+    const url = `${baseUrl}${endpoint}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    
+    // Make request and return enhanced data
+    const response = await fetch(url, { headers });
+    const result = await response.json();
+    
+    return NextResponse.json({
+      success: true,
+      data: result.value || result || [],
+      count: (result.value || result || []).length,
+      moreColumns: moreColumns,
+      enhancedFields: moreColumns ? 'enabled' : 'disabled'
+    });
+  } catch (error) {
+    // Error handling
+  }
+```
+
+**Enhanced Type Definitions:**
+```typescript
+export interface BlueDolphinObjectEnhanced extends BlueDolphinObject {
+  // Enhanced properties
+  Object_Properties_Name?: string;
+  Object_Properties_AMEFF_Import_Identifier?: string;
+  Deliverable_Object_Status_Status?: string;
+  Object_Properties_Deliverable_Object_Status?: string;
+  Object_Properties_User_Interface_Integration?: string;
+  Ameff_properties_Domain?: string;
+  Ameff_properties_Category?: string;
+  Ameff_properties_Source_ID?: string;
+  Ameff_properties_Compliance?: string;
+  Resource_x26_Rate_Role_required_to_deliver_this_servicex3F?: string;
+  Resource_x26_Rate_Rate?: string;
+  External_Design_Description_Service?: string;
+  External_Design_User_Interface?: string;
+  Object_Properties_Needs_Localization?: string;
+  Object_Properties_Needs_Specialization?: string;
+  Object_Properties_Needs_External_Integration?: string;
+  Object_Properties_Documentation?: string;
+  Object_Properties_Provided_by?: string;
+  Object_Properties_Supplied_By?: string;
+  Object_Properties_Questions?: string;
+  Object_Properties_Action_Items?: string;
+  Object_Properties_Base_Implementation_Costs?: string;
+}
+```
+
+#### Testing Strategy
+
+**Initial Testing (Top=2):**
+```typescript
+// Test enhanced query with minimal results
+const testRequest = {
+  action: 'get-objects-enhanced',
+  config: blueDolphinConfig,
+  data: {
+    endpoint: '/Objects',
+    filter: "Definition eq 'Application Component'",
+    top: 2, // Small result set for testing
+    select: [
+      'Id', 'Title', 'Definition', 'Status',
+      'Object_Properties_Name',
+      'Deliverable_Object_Status_Status',
+      'Ameff_properties_Domain'
+    ],
+    moreColumns: true
+  }
+};
+```
+
+**Validation Steps:**
+1. Verify `MoreColumns=true` parameter is accepted
+2. Confirm additional fields are returned in response
+3. Validate field data types and values
+4. Test error handling for invalid field names
+5. Measure performance impact of enhanced queries
+
+#### Benefits and Considerations
+
+**Benefits:**
+- **Richer Data Model**: Access to comprehensive object metadata
+- **Better Reporting**: More fields for analysis and reporting
+- **Enhanced Filtering**: Filter by additional properties like compliance, costs
+- **Improved UI**: Display more relevant information to users
+- **Better Integration**: More data points for external system integration
+
+**Considerations:**
+- **Performance Impact**: More fields may increase response size
+- **Data Mapping**: Need to update UI components to display new fields
+- **Error Handling**: Some fields may be null or undefined
+- **Backward Compatibility**: Maintain existing functionality while adding new features
+- **Field Selection**: Implement controls to select which enhanced fields to retrieve
+
 ## Implementation Strategy
 
 ### Phase 1: Foundation Setup
@@ -1235,3 +1466,67 @@ export const blueDolphinCache = new BlueDolphinCache();
 ```
 
 This implementation guide provides a comprehensive foundation for integrating with Blue Dolphin, covering both REST API and OData approaches. The modular design allows for easy extension and maintenance while providing robust error handling and performance optimization.
+
+---
+
+## Relationships Integration (Documentation-Only)
+
+### Feed and Protocol
+- **Endpoint**: `https://csgipoc.odata.bluedolphin.app/Relations`
+- **Protocol**: OData v2.0 (Excel Relations_table)
+- **Headers**: `Accept: application/json`, `OData-Version: 2.0`, `OData-MaxVersion: 2.0`
+- **Auth**: Basic (same as Objects)
+- **Enhanced Data**: `MoreColumns=true` supported
+
+### Core Fields
+- `RelationshipId` — stable identifier for a logical relationship
+- `BlueDolphinObjectItemId` — source object ID (lookup in Objects)
+- `RelatedBlueDolphinObjectItemId` — target object ID (lookup in Objects)
+- `RelationshipDefinitionName` — e.g., Composition, Flow, Association, Realization, Serving, Access
+- `BlueDolphinObjectDefinitionName` / `RelatedBlueDolphinObjectDefinitionName` — ArchiMate-like element types
+- `Type` — composition | flow | association | realization | access | usedby
+- `Name` — human label reflecting direction (composed of/in, flow to/from, serves/served by, accesses, realized by)
+- `IsRelationshipDirectionAlternative` — boolean directional indicator
+
+### Directionality and Consolidation
+Relationships often appear as directional pairs with the same `RelationshipId` and swapped object IDs:
+- Forward: `Name = composed of`
+- Reverse: `Name = composed in`
+For UI/presentation, consolidate pairs under a single logical relationship where appropriate.
+
+### ArchiMate Alignment (from e2e_architecture_context_full.md)
+- `Type=composition` → ArchiMate Composition (Structural)
+- `Type=flow` → Flow (Dynamic)
+- `Type=association` → Association (Structural)
+- `Type=realization` → Realization (Structural)
+- `Type=access` → Access (Dependency)
+- `Type=usedby` ↔ Serving (Dependency), labels: serves / served by
+
+Object definitions map to ArchiMate elements across layers:
+- Application: Application Component, Application Interface, Data Object
+- Strategy: Capability
+- Motivation: Principle, Goal
+- Business: Business Process
+- Technology: Technology Service, Node
+
+### Validated Filters (Relations)
+Supported and tested filters for UX:
+- `RelationshipDefinitionName`
+- `BlueDolphinObjectDefinitionName`
+- `RelatedBlueDolphinObjectWorkspaceName`
+- `RelatedBlueDolphinObjectDefinitionName`
+- `Type`
+- `Name`
+
+Combined filters are supported (e.g., `Type eq 'composition' and BlueDolphinObjectDefinitionName eq 'Application Component'`).
+
+### Enrichment Pattern
+1. Query `/Relations` for edges.
+2. Collect unique IDs from `BlueDolphinObjectItemId` and `RelatedBlueDolphinObjectItemId`.
+3. Fetch objects from `/Objects` (with `MoreColumns=true` if needed).
+4. Merge object data into relationships for display/analysis.
+
+### Non-Functional Notes
+- Performance: prefer batch object lookups and caching for enrichment.
+- Data quality: expect directional pairs and heterogeneous element types.
+- Semantics: use ArchiMate mapping above to ensure consistent terminology in UI and reports.

@@ -236,6 +236,41 @@ export class BlueDolphinODataService extends BlueDolphinBaseService {
     return response.json();
   }
 
+  // Enhanced object retrieval with MoreColumns support
+  async getObjectsWithMoreColumns(options: {
+    endpoint: string;
+    filter?: string;
+    select?: string[]; // WARNING: Will be ignored if moreColumns=true
+    orderby?: string;
+    top?: number;
+    skip?: number;
+    moreColumns?: boolean;
+  }): Promise<ODataResponse<any>> {
+    
+    const queryParams = new URLSearchParams();
+    
+    // Add MoreColumns parameter if enabled
+    if (options.moreColumns) {
+      queryParams.append('MoreColumns', 'true');
+      // CRITICAL: Do not add $select when MoreColumns=true
+      // The service will return all available fields
+    } else {
+      // Only add $select when MoreColumns=false
+      if (options.select && options.select.length > 0) {
+        queryParams.append('$select', options.select.join(','));
+      }
+    }
+    
+    // Standard OData parameters
+    if (options.filter) queryParams.append('$filter', options.filter);
+    if (options.orderby) queryParams.append('$orderby', options.orderby);
+    if (options.top) queryParams.append('$top', options.top.toString());
+    if (options.skip) queryParams.append('$skip', options.skip.toString());
+
+    const endpoint = `${options.endpoint}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    return this.odataRequest<ODataResponse<any>>(endpoint);
+  }
+
   // Domain operations
   async getDomains(options?: {
     filter?: string;

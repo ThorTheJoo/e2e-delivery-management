@@ -1,340 +1,178 @@
 # E2E Delivery Management System
 
-A comprehensive, modern web application for managing end-to-end delivery projects with TMF ODA (Open Digital Architecture) compliance, SpecSync integration, and advanced estimation capabilities.
+## Overview
 
-## 🚀 Features
+The E2E Delivery Management System is a comprehensive platform for managing end-to-end delivery processes, integrating with various enterprise systems including Blue Dolphin, Azure DevOps, Miro, and SpecSync. The system provides TMF ODA 2025 compliant architecture management, requirement tracking, and delivery orchestration capabilities.
+
+## 🚀 New Features
+
+### Enhanced Blue Dolphin Integration
+- **MoreColumns Support**: Discovered and validated enhanced object retrieval capabilities
+- **45+ Additional Fields**: Access to comprehensive enterprise metadata beyond standard fields
+- **Excel Power Query Compatibility**: Matches Excel integration capabilities
+- **Smart Field Handling**: Intelligent field selection and filtering
+
+**📋 CLI Testing Completed**: Successfully validated enhanced query capabilities via command-line testing. See [CLI Testing Summary](BLUE-DOLPHIN-CLI-TESTING-SUMMARY.md) for detailed findings.
+
+## Key Components
 
 ### Core System
-- **Modern React/Next.js Architecture** - Built with Next.js 14, TypeScript, and Tailwind CSS
-- **Responsive Design** - Mobile-first approach with beautiful, modern UI
-- **Real-time State Management** - Efficient state handling with React hooks
-- **Component Library** - Custom UI components built with Shadcn UI and Radix UI
+- **TMF ODA Manager**: TMF ODA 2025 compliant domain and capability management
+- **Blue Dolphin Integration**: Enterprise architecture management with enhanced metadata support
+- **Azure DevOps Integration**: Project management and requirement tracking
+- **Miro Integration**: Visual collaboration and diagram management
+- **SpecSync Integration**: Requirements synchronization and management
 
-### TMF ODA Management
-- **Domain & Capability Management** - Interactive management of TMF ODA domains and capabilities
-- **Shopping Cart Interface** - Intuitive selection and management of TMF components
-- **Real-time Statistics** - Live updates of selected domains, capabilities, and requirements
-- **Collapsible Sections** - Organized, expandable interface for better user experience
+### Enhanced Capabilities
+- **Object Data Retrieval**: Advanced Blue Dolphin object management with 45+ enhanced fields
+- **Requirement Synchronization**: Cross-platform requirement management
+- **Visual Mapping**: Interactive diagram and architecture visualization
+- **Delivery Orchestration**: End-to-end delivery process management
 
-### SpecSync Integration
-- **Multi-format Import** - Support for CSV, Excel (.xlsx, .xls) files
-- **Flexible Column Mapping** - Intelligent header detection and mapping
-- **Use Case Tracking** - Advanced use case identification and counting from 'usecase 1' field
-- **Requirement Mapping** - Automatic mapping of SpecSync requirements to TMF capabilities
-- **Data Persistence** - Local storage for imported data with session persistence
+## Documentation
 
 ### Blue Dolphin Integration
-- **OData v4.0 Integration** - Full integration with Blue Dolphin enterprise architecture tool
-- **Solution Model Management** - Create and manage solution models in Blue Dolphin
-- **Object Data Retrieval** - Load and display Blue Dolphin objects with advanced filtering
-- **Service Discovery** - Automatic discovery of available OData endpoints and metadata
-- **Authentication Support** - Basic authentication and API key support
-- **Real-time Data Preview** - Live preview of retrieved Blue Dolphin objects
+- [Enhanced Query Implementation Plan](BLUE-DOLPHIN-ENHANCED-QUERY-IMPLEMENTATION.md) - Comprehensive implementation roadmap
+- [CLI Testing Summary](BLUE-DOLPHIN-CLI-TESTING-SUMMARY.md) - Command-line testing results and findings
+- [OData Integration Guide](BLUE-DOLPHIN-ODATA-GUIDE.md) - Enhanced OData capabilities with MoreColumns support
+- [Integration Implementation](BLUE-DOLPHIN-INTEGRATION-IMPLEMENTATION.md) - Technical implementation details
+- [Comparison Analysis](BLUE-DOLPHIN-COMPARISON-ANALYSIS.md) - REST API vs OData analysis
 
-### Miro Visual Mapping Integration
-- **OAuth 2.0 Authentication** - Secure Miro integration with proper OAuth flow
-- **TMF Architecture Boards** - Automated creation of TMF domain and capability visualizations
-- **SpecSync Requirements Boards** - Visual mapping of SpecSync requirements with domain categorization
-- **Real-time Board Management** - Create, update, and manage Miro boards directly from the application
-- **Secure Configuration** - UI-based configuration management with server-side synchronization
-- **Comprehensive Error Handling** - Robust error handling and recovery mechanisms
+### Other Integrations
+- [Azure DevOps Integration](ADO-Integration-Guide.md) - ADO project management integration
+- [Miro Integration](MIRO-INTEGRATION.md) - Visual collaboration platform
+- [SpecSync Analysis](SpecSync_Analysis_Report.md) - Requirements management integration
 
-### TMF Capabilities Overview
-- **Dynamic Capability Cards** - Rich cards showing effort breakdown, segments, and statistics
-- **Use Case Statistics** - Display of unique use cases per capability with orange badges
-- **Requirement Counts** - Real-time requirement mapping counts with visual badges
-- **Effort Calculation** - Automatic effort calculation (BA, SA, Dev, QA) per capability
-
-### Project Management
-- **Dashboard Overview** - Comprehensive project metrics and KPIs
-- **eTOM Process Management** - Support for eTOM process frameworks
-- **Work Package Estimation** - Detailed effort estimation for work packages
-- **Risk Management** - Risk identification, assessment, and mitigation tracking
-- **Dependency Management** - Technical, business, and external dependency tracking
-
-### Estimation & Planning
-- **Effort Breakdown** - Detailed role-based effort estimation (Business Analyst, Solution Architect, Developer, QA)
-- **Complexity Factors** - Configurable complexity multipliers for accurate estimation
-- **Resource Planning** - Team size and resource allocation management
-- **Timeline Management** - Project scheduling with milestone tracking
-
-### Commercial & Financial
-- **Cost Structure** - Base cost, risk contingency, and profit margin calculations
-- **Rate Card Management** - Geographic rate multipliers and role-based pricing
-- **Commercial Models** - Support for Fixed Price, Time & Materials, and milestone-based models
-
-### Documentation & Reporting
-- **Document Management** - Project document tracking with version control
-- **Status Tracking** - Real-time status updates for all project components
-- **Export Capabilities** - Data export for reporting and analysis
-
-## 🛠️ Technical Stack
-
-### Frontend
-- **Next.js 14** - React framework with App Router
-- **TypeScript** - Type-safe development
-- **Tailwind CSS** - Utility-first CSS framework
-- **Shadcn UI** - Modern component library
-- **Radix UI** - Accessible UI primitives
-- **Lucide React** - Beautiful icon library
-
-### Data Management
-- **Local Storage** - Client-side data persistence
-- **JSON Data Service** - Mock data service for development
-- **State Management** - React hooks and context for state management
-
-### File Processing
-- **XLSX.js** - Excel file parsing and processing
-- **CSV Processing** - Native CSV parsing with flexible column mapping
-
-## 📚 Documentation
-
-### Integration Guides
-- **[Miro Integration Documentation](./MIRO-INTEGRATION-DOCUMENTATION.md)** - Comprehensive guide for Miro visual mapping integration
-- **[Miro Integration Cleanup Summary](./MIRO-INTEGRATION-CLEANUP-SUMMARY.md)** - Summary of improvements and fixes made to the Miro integration
-- **[Blue Dolphin Integration Guide](./BLUE-DOLPHIN-INTEGRATION-README.md)** - Complete guide for Blue Dolphin OData integration
-- **[SpecSync Analysis Report](./SpecSync_Analysis_Report.md)** - Detailed analysis of SpecSync requirements integration
-
-### Architecture Documentation
-- **[E2E Architecture Context](./e2e_architecture_context.md)** - High-level architecture overview
-- **[Project Architecture](./project-arch.md)** - Detailed project structure and design decisions
-
-## 📁 Project Structure
-
-```
-src/
-├── app/                    # Next.js App Router pages
-│   ├── globals.css        # Global styles
-│   ├── layout.tsx         # Root layout
-│   ├── page.tsx           # Main application page
-│   └── tmf-demo/          # TMF demo page
-├── components/            # React components
-│   ├── ui/               # Shadcn UI components
-│   ├── blue-dolphin-integration.tsx
-│   ├── navigation-sidebar.tsx
-│   ├── requirement-badge.tsx
-│   ├── specsync-import.tsx
-│   ├── tmf-domain-capability-manager.tsx
-│   └── tmf-oda-manager.tsx
-├── lib/                  # Utility libraries
-│   ├── blue-dolphin-service.ts # Blue Dolphin service layer
-│   ├── data-service.ts   # Data service layer
-│   ├── specsync-utils.ts # SpecSync processing utilities
-│   └── utils.ts          # General utilities
-└── types/                # TypeScript type definitions
-    ├── blue-dolphin.ts   # Blue Dolphin type definitions
-    └── index.ts
-```
-
-## 🚀 Getting Started
+## Quick Start
 
 ### Prerequisites
 - Node.js 18+ 
-- npm or yarn
+- Next.js 14+
+- Blue Dolphin OData access
+- Azure DevOps organization access
 
 ### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd "E2E Delivery Management - Rebuild"
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Start the development server**
-   ```bash
-   npm run dev
-   ```
-
-4. **Open your browser**
-   Navigate to `http://localhost:3000`
-
-### Development Commands
-
 ```bash
-# Start development server
+npm install
 npm run dev
-
-# Build for production
-npm run build
-
-# Start production server
-npm start
-
-# Run linting
-npm run lint
-
-# Type checking
-npm run type-check
 ```
 
-## 📊 Usage Guide
+### Configuration
+1. Configure Blue Dolphin OData endpoint in environment variables
+2. Set up Azure DevOps personal access token
+3. Configure Miro integration settings
+4. Set up SpecSync connection parameters
 
-### Importing SpecSync Data
+## Enhanced Object Retrieval
 
-1. **Navigate to TMF Tab** - Click on the "TMF" tab in the main navigation
-2. **Expand SpecSync Import** - Click on the "SpecSync Import" section
-3. **Select File** - Choose a CSV or Excel file with the following columns:
-   - Rephrased Requirement ID
-   - Rephrased Domain
-   - Rephrased Function Name
-   - Rephrased AF Lev.2
-   - Reference Capability
-   - **Usecase 1** (new feature for use case tracking)
-4. **Review Import** - Check the import summary and requirements preview
-5. **View Results** - See mapped requirements and use cases in the TMF Capabilities Overview
+### MoreColumns Parameter
+The system now supports Blue Dolphin's `MoreColumns=true` parameter, providing access to:
 
-### Managing TMF ODA Domains
+- **Object Properties**: Name, AMEFF identifiers, deliverable status, UI integration
+- **AMEFF Properties**: 25+ report and view management fields
+- **Deliverable Status**: Comprehensive status tracking and ADL information
+- **Enterprise Metadata**: Domain, category, compliance, and source information
 
-1. **Access TMF Manager** - Use the TMF Domain and Capability Manager
-2. **Add Domains** - Click "Add Domain" to create new TMF ODA domains
-3. **Add Capabilities** - Add capabilities to domains using the "+" button
-4. **Select Components** - Use checkboxes to select domains and capabilities
-5. **View Statistics** - Monitor selection counts in the capability overview
-
-### Viewing Use Case Statistics
-
-1. **Import SpecSync Data** - Import data with 'usecase 1' field
-2. **Check Capability Cards** - Look for orange "Use Cases" badges
-3. **Review Counts** - See unique use case counts per capability
-4. **Analyze Mapping** - Understand how use cases map to TMF capabilities
-
-## 🔧 Configuration
-
-### Environment Variables
-Create a `.env.local` file for environment-specific configuration:
-
-```env
-# Development settings
-NEXT_PUBLIC_APP_NAME="E2E Delivery Management"
-NEXT_PUBLIC_VERSION="1.0.0"
-
-# API endpoints (if using external APIs)
-NEXT_PUBLIC_API_URL="http://localhost:3000/api"
-```
-
-### Tailwind Configuration
-The project uses a custom Tailwind configuration with TMF-specific color schemes:
-
-```javascript
-// tailwind.config.js
-module.exports = {
-  theme: {
-    extend: {
-      colors: {
-        tmf: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          600: '#0284c7',
-          800: '#075985',
-        },
-        etom: {
-          50: '#fdf4ff',
-          100: '#fae8ff',
-          600: '#c026d3',
-          800: '#9d174d',
-        }
-      }
-    }
-  }
-}
-```
-
-## 📈 Data Models
-
-### SpecSync Data Structure
+### Usage Example
 ```typescript
-interface SpecSyncItem {
-  rephrasedRequirementId: string;
-  sourceRequirementId: string;
-  domain: string;
-  vertical: string;
-  functionName: string;
-  afLevel2: string;
-  capability: string;
-  referenceCapability: string;
-  usecase1: string; // New field for use case tracking
-}
+// Enhanced object retrieval (45+ fields)
+const enhancedObjects = await getObjectsWithMoreColumns({
+  endpoint: '/Objects',
+  filter: "Definition eq 'Business Process'",
+  top: 100,
+  moreColumns: true // Enable enhanced fields
+});
 ```
 
-### TMF Capability Structure
-```typescript
-interface TMFCapability {
-  id: string;
-  name: string;
-  description: string;
-  segments: string[];
-  baseEffort: {
-    businessAnalyst: number;
-    solutionArchitect: number;
-    developer: number;
-    qaEngineer: number;
-  };
-  complexityFactors: Record<string, number>;
-}
+**⚠️ Important**: Cannot use `$select` parameter with `MoreColumns=true` - the service will ignore enhanced fields.
+
+## Architecture
+
+### Technology Stack
+- **Frontend**: Next.js 14, React 18, TypeScript
+- **UI Components**: Shadcn UI, Radix UI, Tailwind CSS
+- **Backend**: Next.js API routes, tRPC
+- **Database**: Supabase (PostgreSQL)
+- **Authentication**: Supabase Auth
+- **Integration**: Blue Dolphin OData, Azure DevOps REST API, Miro API
+
+### System Architecture
+- **Modular Design**: Feature-based component organization
+- **Type Safety**: Full TypeScript implementation
+- **API-First**: RESTful API design with OData support
+- **Real-time Updates**: WebSocket integration for live data
+- **Responsive UI**: Mobile-first design approach
+
+## Development
+
+### Project Structure
+```
+src/
+├── app/                    # Next.js App Router
+├── components/            # React components
+│   ├── ui/               # Shadcn UI components
+│   └── [feature]/        # Feature-specific components
+├── lib/                  # Utility libraries
+├── types/                # TypeScript type definitions
+└── styles/               # Global styles and Tailwind config
 ```
 
-## 🧪 Testing
+### Key Features
+- **Enhanced Object Retrieval**: 45+ additional Blue Dolphin fields
+- **Smart Field Handling**: Intelligent field selection and filtering
+- **Performance Optimization**: Caching and pagination for large datasets
+- **Error Handling**: Comprehensive error management and user feedback
+- **Data Export**: CSV/Excel export with enhanced field support
 
-### Manual Testing
-1. **Import Test Files** - Use the provided test files:
-   - `test-import.csv` - Basic SpecSync data
-   - `test-import-with-usecases.csv` - Data with use case information
-2. **Verify Mapping** - Check that requirements map correctly to capabilities
-3. **Test Use Cases** - Verify use case counting and display
+## Testing
 
-### Test Data
-The system includes comprehensive test data in `demo-data.json` covering:
-- TMF capabilities with effort estimates
-- eTOM processes with complexity factors
-- Project templates and configurations
-- Risk and dependency examples
+### CLI Testing Completed
+- ✅ MoreColumns parameter validation
+- ✅ Enhanced field availability confirmation
+- ✅ Performance impact measurement
+- ✅ Field selection conflict discovery
+- ✅ Object type variation analysis
 
-## 🔄 Recent Updates
+### Next Testing Phase
+- [ ] Enhanced API implementation testing
+- [ ] UI component validation
+- [ ] Performance optimization testing
+- [ ] Field filtering and selection testing
 
-### Version 1.0.0 (Latest)
-- ✅ **Use Case Tracking** - Added support for 'usecase 1' field in SpecSync imports
-- ✅ **Enhanced Capability Cards** - Display use case statistics with orange badges
-- ✅ **Improved Mapping Logic** - Better capability matching with domain-guided fallbacks
-- ✅ **Real-time Statistics** - Live updates of use case counts and requirement mapping
+## Contributing
 
-### Previous Versions
-- **Initial Release** - Core TMF ODA management functionality
-- **SpecSync Integration** - CSV/Excel import capabilities
-- **Dashboard & Analytics** - Project overview and metrics
-- **Estimation Engine** - Effort calculation and complexity factors
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
 
-## 🤝 Contributing
+## License
 
-### Development Workflow
-1. **Create Feature Branch** - `git checkout -b feature/use-case-tracking`
-2. **Make Changes** - Implement new features or fixes
-3. **Test Thoroughly** - Ensure all functionality works correctly
-4. **Commit Changes** - Use descriptive commit messages
-5. **Push to Repository** - `git push origin feature/use-case-tracking`
-6. **Create Pull Request** - Submit for review and merge
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-### Code Standards
-- **TypeScript** - Use strict typing for all new code
-- **Component Structure** - Follow established component patterns
-- **Styling** - Use Tailwind CSS classes consistently
-- **Documentation** - Add comments for complex logic
+## Support
 
-## 📝 License
+For support and questions:
+- Check the documentation in the `/docs` folder
+- Review the CLI testing results in [BLUE-DOLPHIN-CLI-TESTING-SUMMARY.md](BLUE-DOLPHIN-CLI-TESTING-SUMMARY.md)
+- Refer to the enhanced query implementation plan in [BLUE-DOLPHIN-ENHANCED-QUERY-IMPLEMENTATION.md](BLUE-DOLPHIN-ENHANCED-QUERY-IMPLEMENTATION.md)
 
-This project is proprietary software developed for CSG Systems Inc.
+## Roadmap
 
-## 🆘 Support
+### Phase 1: Enhanced API Implementation (Current)
+- [x] CLI testing and validation
+- [ ] MoreColumns parameter support
+- [ ] Enhanced field handling
+- [ ] API route updates
 
-For technical support or questions:
-- **Documentation** - Check this README and inline code comments
-- **Issues** - Report bugs through the project issue tracker
-- **Development** - Contact the development team for feature requests
+### Phase 2: UI Enhancement
+- [ ] Enhanced object card components
+- [ ] Field filtering and selection
+- [ ] Data export functionality
 
----
+### Phase 3: Performance Optimization
+- [ ] Smart field selection
+- [ ] Caching strategy
+- [ ] Large dataset handling
 
-**Built with ❤️ by the CSG Delivery Orchestrator Team**
+### Phase 4: Advanced Features
+- [ ] Field population indicators
+- [ ] Progressive loading
+- [ ] Advanced reporting capabilities

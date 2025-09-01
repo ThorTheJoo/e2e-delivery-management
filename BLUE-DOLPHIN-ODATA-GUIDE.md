@@ -30,6 +30,231 @@ const headers = {
 };
 ```
 
+## Enhanced Object Retrieval with MoreColumns
+
+### MoreColumns Parameter
+The `MoreColumns=true` parameter enables retrieval of additional metadata columns that are not included in the standard object response. This is equivalent to the Excel Power Query `MoreColumns=true` functionality.
+
+#### Basic MoreColumns Usage
+```typescript
+// Enable additional columns
+GET /odata/v4/Objects?MoreColumns=true
+
+// With filtering and selection
+GET /odata/v4/Objects?$filter=Definition eq 'Application Component'&MoreColumns=true&$top=100
+```
+
+#### ⚠️ CRITICAL: Field Selection Conflict
+**Important Discovery**: When using `MoreColumns=true`, the `$select` parameter is **ignored** by the Blue Dolphin service. The service will return all available fields including enhanced ones.
+
+**Incorrect Usage (Will Not Work):**
+```typescript
+// This will NOT return enhanced fields - $select overrides MoreColumns
+GET /odata/v4/Objects?$select=Id,Title&MoreColumns=true
+```
+
+**Correct Usage:**
+```typescript
+// This WILL return enhanced fields - no $select parameter
+GET /odata/v4/Objects?MoreColumns=true&$top=100
+
+// Or use filtering without $select
+GET /odata/v4/Objects?$filter=Definition eq 'Business Process'&MoreColumns=true&$top=10
+```
+
+#### Expanded More Columns Properties
+When `MoreColumns=true` is enabled, the following additional properties become available:
+
+##### Object Properties
+- `Object_Properties_Name` - Object name property
+- `Object_Properties_AMEFF_Import_Identifier` - AMEFF import identifier
+- `Object_Properties_Deliverable_Object_Status` - Deliverable status
+- `Object_Properties_User_Interface_Integration` - UI integration details
+- `Object_Properties_Needs_Localization` - Localization requirements
+- `Object_Properties_Needs_Specialization` - Specialization requirements
+- `Object_Properties_Needs_External_Integration` - External integration needs
+- `Object_Properties_Documentation` - Documentation links
+- `Object_Properties_Provided_by` - Provider information
+- `Object_Properties_Supplied_By` - Supplier information
+- `Object_Properties_Questions` - Related questions
+- `Object_Properties_Action_Items` - Action items
+- `Object_Properties_Base_Implementation_Costs` - Implementation costs
+
+##### Deliverable Status Properties
+- `Deliverable_Object_Status_Status` - Current deliverable status
+- `Deliverable_Object_Status_Architectural_Decision_Log` - ADL information
+
+##### AMEFF Properties
+- `Ameff_properties_Reportx3AModelx3ACoverx3ABackground` - Model cover background
+- `Ameff_properties_Reportx3AModelx3AHeaderx3ABackground` - Model header background
+- `Ameff_properties_Reportx3AModelx3AHidex3AApplication` - Hide application in reports
+- `Ameff_properties_Reportx3AModelx3AHidex3ABusiness` - Hide business in reports
+- `Ameff_properties_Reportx3AModelx3AHidex3AImplementationx26Migration` - Hide implementation/migration
+- `Ameff_properties_Reportx3AModelx3AHidex3AMotivation` - Hide motivation in reports
+- `Ameff_properties_Reportx3AModelx3AHidex3AOther` - Hide other elements
+- `Ameff_properties_Reportx3AModelx3AHidex3ARelations` - Hide relations in reports
+- `Ameff_properties_Reportx3AModelx3AHidex3ATechnologyx26Physical` - Hide technology/physical
+- `Ameff_properties_Reportx3AModelx3AHidex3AViewNumbering` - Hide view numbering
+- `Ameff_properties_Reportx3AModelx3AHidex3AViews` - Hide views in reports
+- `Ameff_properties_Reportx3AViewx3ADetailed` - Detailed view settings
+- `Ameff_properties_Reportx3AViewx3AHide` - Hide view settings
+- `Ameff_properties_Reportx3AViewx3AHidex3ADiagram` - Hide diagram in views
+- `Ameff_properties_Reportx3AViewx3ATag` - View tag settings
+- `Ameff_properties_Documentation` - Documentation settings
+- `Ameff_properties_Hide_Business` - Hide business elements
+- `Ameff_properties_Hide_Application` - Hide application elements
+- `Ameff_properties_Hide_Technology` - Hide technology elements
+- `Ameff_properties_Hide_Motivation` - Hide motivation elements
+- `Ameff_properties_Show_Views` - Show views setting
+- `Ameff_properties_Domain` - Domain information
+- `Ameff_properties_Category` - Category information
+- `Ameff_properties_Source_ID` - Source identifier
+- `Ameff_properties_Compliance` - Compliance information
+
+##### Resource and Rate Properties
+- `Resource_x26_Rate_Role_required_to_deliver_this_servicex3F` - Required delivery role
+- `Resource_x26_Rate_Rate` - Resource rate information
+
+##### External Design Properties
+- `External_Design_Description_Service` - External service description
+- `External_Design_User_Interface` - External UI design
+
+#### CLI Testing Results
+
+Our command-line testing confirmed the following:
+
+**Test 1: Standard Query (Baseline)**
+```bash
+curl "https://csgipoc.odata.bluedolphin.app/Objects?$top=2&$select=Id,Title,Definition,Status"
+```
+**Result**: Basic fields only (4 fields)
+
+**Test 2: MoreColumns=true with Select Fields**
+```bash
+curl "https://csgipoc.odata.bluedolphin.app/Objects?$top=2&$select=Id,Title,Definition,Status&MoreColumns=true"
+```
+**Result**: Same as baseline - **MoreColumns parameter ignored when $select is specified**
+
+**Test 3: MoreColumns=true without Select Fields**
+```bash
+curl "https://csgipoc.odata.bluedolphin.app/Objects?$top=2&MoreColumns=true"
+```
+**Result**: **Significantly enhanced response with 45+ additional fields**
+
+**Test 4: MoreColumns=true with Object Type Filter**
+```bash
+curl "https://csgipoc.odata.bluedolphin.app/Objects?$filter=Definition eq 'Business Process'&$top=2&MoreColumns=true"
+```
+**Result**: **Maximum enhanced fields available for Business Process objects**
+
+#### Implementation Example
+```typescript
+// Enhanced object retrieval with MoreColumns support
+const enhancedObjectsRequest = {
+  action: 'get-objects-enhanced',
+  config: blueDolphinConfig,
+  data: {
+    endpoint: '/Objects',
+    filter: "Definition eq 'Business Process'", // Use Business Process for max fields
+    top: 100,
+    // NOTE: Do NOT include select parameter when using MoreColumns=true
+    moreColumns: true // Enable additional columns
+  }
+};
+```
+
+#### Response Structure with MoreColumns
+```json
+{
+  "@odata.context": "https://csgipoc.odata.bluedolphin.app/$metadata#Objects",
+  "value": [
+    {
+      "ID": "602a773bad3fc03ba4564bc0",
+      "Title": "(c) Business Process",
+      "Definition": "Business Process",
+      "Status": "Archived",
+      "Workspace": "CSG International",
+      "Object_Properties_Name": "",
+      "Object_Properties_AMEFF_Import_Identifier": "id-602a773bad3fc03ba4564bc0",
+      "Deliverable_Object_Status_Status": "",
+      "Object_Properties_Deliverable_Object_Status": "",
+      "Object_Properties_User_Interface_Integration": "",
+      "Ameff_properties_Domain": "",
+      "Ameff_properties_Category": "",
+      "Ameff_properties_Source_ID": "",
+      "Ameff_properties_Compliance": "",
+      "Ameff_properties_Reportx3AModelx3ACoverx3ABackground": "",
+      "Ameff_properties_Reportx3AModelx3AHeaderx3ABackground": "",
+      "Ameff_properties_Reportx3AModelx3AHidex3AApplication": "",
+      "Ameff_properties_Reportx3AModelx3AHidex3ABusiness": "",
+      "Ameff_properties_Reportx3AModelx3AHidex3AImplementationx26Migration": "",
+      "Ameff_properties_Reportx3AModelx3AHidex3AMotivation": "",
+      "Ameff_properties_Reportx3AModelx3AHidex3AOther": "",
+      "Ameff_properties_Reportx3AModelx3AHidex3ARelations": "",
+      "Ameff_properties_Reportx3AModelx3AHidex3ATechnologyx26Physical": "",
+      "Ameff_properties_Reportx3AModelx3AHidex3AViewNumbering": "",
+      "Ameff_properties_Reportx3AModelx3AHidex3AViews": "",
+      "Ameff_properties_Reportx3AViewx3ADetailed": "",
+      "Ameff_properties_Reportx3AViewx3AHide": "",
+      "Ameff_properties_Reportx3AViewx3AHidex3ADiagram": "",
+      "Ameff_properties_Reportx3AViewx3ATag": "",
+      "Ameff_properties_Documentation": "",
+      "Ameff_properties_Hide_Business": "",
+      "Ameff_properties_Hide_Application": "",
+      "Ameff_properties_Hide_Technology": "",
+      "Ameff_properties_Hide_Motivation": "",
+      "Ameff_properties_Show_Views": ""
+    }
+  ]
+}
+```
+
+### Comparison: Current vs Enhanced Implementation
+
+#### Current Implementation (Limited Fields)
+```typescript
+select: [
+  'Id', 'Title', 'Definition', 'Description', 'ArchimateType', 
+  'Status', 'CreatedOn', 'ChangedOn', 'Workspace'
+]
+```
+
+#### Enhanced Implementation (With MoreColumns)
+```typescript
+// When using MoreColumns=true, DO NOT use $select parameter
+// The service will return all available fields including enhanced ones
+// Total field count: 45+ fields vs 9 standard fields
+```
+
+### Benefits of Enhanced Implementation
+
+1. **Richer Data Model** - Access to comprehensive object metadata (45+ fields vs 9)
+2. **Better Reporting** - More fields for analysis and reporting
+3. **Enhanced Filtering** - Filter by additional properties like compliance, report settings
+4. **Improved UI** - Display more relevant information to users
+5. **Better Integration** - More data points for external system integration
+
+### Implementation Considerations
+
+1. **Performance Impact** - More fields may increase response size (confirmed via CLI testing)
+2. **Data Mapping** - Need to update UI components to display new fields
+3. **Error Handling** - Some fields may be null or undefined
+4. **Backward Compatibility** - Maintain existing functionality while adding new features
+5. **Field Selection Conflict** - **CRITICAL**: Cannot use `$select` with `MoreColumns=true`
+6. **Data Quality** - Many enhanced fields are empty strings but available for population
+7. **Object Type Variation** - Different object types have different enhanced field availability
+
+### CLI Testing Summary
+
+Our command-line testing has confirmed:
+
+- ✅ `MoreColumns=true` parameter works and provides 45+ additional fields
+- ✅ Enhanced fields match the Excel Power Query capabilities
+- ⚠️ Field selection conflicts exist (cannot use `$select` with `MoreColumns=true`)
+- ⚠️ Many enhanced fields are empty but available for population
+- 📊 Performance impact is measurable but acceptable for the data richness gained
+- 🔍 Business Process objects show the most comprehensive enhanced field set
+
 ## Core OData Endpoints
 
 ### 1. Domain Management
@@ -708,3 +933,59 @@ private handleODataError(error: any): never {
 - [Blue Dolphin OData Feed Documentation](https://support.valueblue.nl/hc/en-us/articles/10898596310812-Using-the-OData-Feed)
 - [OData v4 Specification](https://docs.oasis-open.org/odata/odata/v4.0/os/part1-protocol/odata-v4.0-os-part1-protocol.html)
 - [OData Query Language](https://docs.oasis-open.org/odata/odata/v4.0/os/part2-url-conventions/odata-v4.0-os-part2-url-conventions.html)
+
+---
+
+## Relations (OData) and ArchiMate Alignment
+
+While objects are fetched from `/odata/v4/Objects` (v4), the Excel feed for relationships (Relations_table) is accessible at the legacy feed root and responds to **OData v2.0** semantics:
+
+- Base: `https://csgipoc.odata.bluedolphin.app/Relations`
+- Headers: `Accept: application/json`, `OData-Version: 2.0`, `OData-MaxVersion: 2.0`
+- Auth: Basic (same credentials as Objects)
+- Supports `MoreColumns=true`
+
+### Key Relationship Fields
+- `RelationshipId` (stable relationship identifier)
+- `BlueDolphinObjectItemId` (source object ID)
+- `RelatedBlueDolphinObjectItemId` (target object ID)
+- `RelationshipDefinitionName` (e.g., Composition, Flow, Association, Realization, Serving, Access)
+- `BlueDolphinObjectDefinitionName` / `RelatedBlueDolphinObjectDefinitionName` (object types)
+- `Type` (composition | flow | association | realization | access | usedby)
+- `Name` (label reflecting direction: composed of/in, flow to/from, serves/served by, etc.)
+- `IsRelationshipDirectionAlternative` (direction indicator)
+
+### Directional Pairing
+Rows often appear as forward/backward pairs (same `RelationshipId`) with swapped object IDs and complementary names (e.g., composed of ↔ composed in).
+
+### ArchiMate Mapping (from e2e_architecture_context_full.md)
+- `Type=composition` → ArchiMate Composition (Structural)
+- `Type=flow` → Flow (Dynamic)
+- `Type=association` → Association (Structural)
+- `Type=realization` → Realization (Structural)
+- `Type=access` → Access (Dependency)
+- `Type=usedby` ↔ Serving (Dependency) — labels: serves / served by
+
+Object definition names map to ArchiMate elements/layers:
+- Application: Application Component, Application Interface, Data Object
+- Strategy: Capability
+- Motivation: Principle, Goal
+- Business: Business Process
+- Technology: Technology Service, Node
+
+### Validated Filters (Relations)
+- `RelationshipDefinitionName`
+- `BlueDolphinObjectDefinitionName`
+- `RelatedBlueDolphinObjectWorkspaceName`
+- `RelatedBlueDolphinObjectDefinitionName`
+- `Type`
+- `Name`
+
+Example (PowerShell):
+```powershell
+$h = @{ 'Accept'='application/json'; 'OData-Version'='2.0'; 'OData-MaxVersion'='2.0'; 'Authorization'='Basic <BASE64>' }
+(Invoke-WebRequest -Uri "https://csgipoc.odata.bluedolphin.app/Relations?`$filter=Type eq 'composition'&`$top=5&MoreColumns=true" -Headers $h).Content
+```
+
+### Enrichment Pattern
+Use `BlueDolphinObjectItemId` and `RelatedBlueDolphinObjectItemId` to fetch object details from `/Objects` and enrich relationship records for UI/analysis. Consolidate by `RelationshipId` when presenting bidirectional relationships.

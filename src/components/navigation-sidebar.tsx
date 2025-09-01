@@ -361,7 +361,14 @@ export function NavigationSidebar({ activeTab, onTabChange, onScrollToSection }:
           icon: <Settings className="h-4 w-4" />,
           action: 'tab',
           target: 'miro-setup'
-        }
+        },
+                        {
+                  id: 'ado-config',
+                  label: 'ADO Configuration',
+                  icon: <Server className="h-4 w-4" />,
+                  action: 'tab',
+                  target: 'ado-config'
+                }
       ]
     }
   ];

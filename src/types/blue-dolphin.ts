@@ -83,6 +83,70 @@ export interface BlueDolphinApplicationFunction {
   updatedAt: string;
 }
 
+export interface BlueDolphinObject {
+  ID: string;
+  Title: string;
+  Definition: string;
+  Description?: string;
+  ArchimateType?: string;
+  Status?: string;
+  CreatedOn?: string;
+  ChangedOn?: string;
+  Workspace?: string;
+  Category?: string;
+  ConditionalColor?: string;
+  ObjectLifecycleState?: string;
+  Completeness?: number;
+  CreatedBy?: string;
+  ChangedBy?: string;
+  ArchivedOn?: string;
+  ArchivedBy?: string;
+}
+
+export interface BlueDolphinObjectEnhanced extends BlueDolphinObject {
+  // Enhanced properties (confirmed via CLI testing)
+  Object_Properties_Name?: string;
+  Object_Properties_AMEFF_Import_Identifier?: string;
+  Deliverable_Object_Status_Status?: string;
+  Object_Properties_Deliverable_Object_Status?: string;
+  Object_Properties_User_Interface_Integration?: string;
+  Object_Properties_Documentation?: string;
+  Object_Properties_Provided_by?: string;
+  Object_Properties_Supplied_By?: string;
+  Object_Properties_Questions?: string;
+  Object_Properties_Action_Items?: string;
+  
+  // Deliverable Status Properties
+  Deliverable_Object_Status_Architectural_Decision_Log?: string;
+  
+  // AMEFF Properties (25+ fields confirmed)
+  Ameff_properties_Reportx3AModelx3ACoverx3ABackground?: string;
+  Ameff_properties_Reportx3AModelx3AHeaderx3ABackground?: string;
+  Ameff_properties_Reportx3AModelx3AHidex3AApplication?: string;
+  Ameff_properties_Reportx3AModelx3AHidex3ABusiness?: string;
+  Ameff_properties_Reportx3AModelx3AHidex3AImplementationx26Migration?: string;
+  Ameff_properties_Reportx3AModelx3AHidex3AMotivation?: string;
+  Ameff_properties_Reportx3AModelx3AHidex3AOther?: string;
+  Ameff_properties_Reportx3AModelx3AHidex3ARelations?: string;
+  Ameff_properties_Reportx3AModelx3AHidex3ATechnologyx26Physical?: string;
+  Ameff_properties_Reportx3AModelx3AHidex3AViewNumbering?: string;
+  Ameff_properties_Reportx3AModelx3AHidex3AViews?: string;
+  Ameff_properties_Reportx3AViewx3ADetailed?: string;
+  Ameff_properties_Reportx3AViewx3AHide?: string;
+  Ameff_properties_Reportx3AViewx3AHidex3ADiagram?: string;
+  Ameff_properties_Reportx3AViewx3ATag?: string;
+  Ameff_properties_Documentation?: string;
+  Ameff_properties_Hide_Business?: string;
+  Ameff_properties_Hide_Application?: string;
+  Ameff_properties_Hide_Technology?: string;
+  Ameff_properties_Hide_Motivation?: string;
+  Ameff_properties_Show_Views?: string;
+  Ameff_properties_Domain?: string;
+  Ameff_properties_Category?: string;
+  Ameff_properties_Source_ID?: string;
+  Ameff_properties_Compliance?: string;
+}
+
 // Request/Response types
 export interface CreateDomainRequest {
   name: string;

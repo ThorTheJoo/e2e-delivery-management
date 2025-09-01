@@ -944,6 +944,126 @@ export async function POST(request: NextRequest) {
            );
          }
 
+       case 'get-objects-enhanced':
+          try {
+            console.log('🔍 [Blue Dolphin] Enhanced object retrieval requested');
+            
+            const { endpoint, filter, top = 10, skip = 0, orderby, moreColumns = true } = data || {};
+            
+            console.log('📋 [Blue Dolphin] Request parameters:', {
+              endpoint,
+              filter,
+              top,
+              skip,
+              orderby,
+              moreColumns
+            });
+            
+                            // Validate filter parameter to prevent injection
+                let sanitizedFilter = filter;
+                if (filter && typeof filter === 'string') {
+                  // More permissive validation for OData filters
+                  // Allow OData operators: eq, ne, gt, lt, ge, le, and, or, not, contains, startswith, endswith
+                  // Allow parentheses, quotes, spaces, and common characters
+                  if (!/^[a-zA-Z0-9\s_\-\.\(\)\=\'\&\|\,\<\>\"\s]+$/.test(filter)) {
+                    console.warn('⚠️ [Blue Dolphin] Filter validation warning - potentially unsafe characters:', filter);
+                    // Don't throw error, just log warning and continue
+                  }
+                }
+            
+            const queryParams = new URLSearchParams();
+            
+            // Add MoreColumns parameter for enhanced field retrieval
+            if (moreColumns) {
+              queryParams.append('MoreColumns', 'true');
+              console.log('✅ [Blue Dolphin] MoreColumns=true added to query');
+              // NOTE: Do NOT add $select when MoreColumns=true
+            }
+            
+            if (sanitizedFilter) queryParams.append('$filter', sanitizedFilter);
+            if (orderby) queryParams.append('$orderby', orderby);
+            if (top) queryParams.append('$top', top.toString());
+            if (skip) queryParams.append('$skip', skip.toString());
+
+            const queryString = queryParams.toString();
+            const baseUrl = config.odataUrl.endsWith('/') ? config.odataUrl.slice(0, -1) : config.odataUrl;
+            const url = `${baseUrl}${endpoint}${queryString ? `?${queryString}` : ''}`;
+            
+            console.log('🌐 [Blue Dolphin] Final URL:', url);
+            console.log('🔑 [Blue Dolphin] Using authentication:', config.apiKey ? 'API Key' : 'Basic Auth');
+            
+            // Use OData v4.0 headers as per Blue Dolphin documentation
+            const headers: Record<string, string> = {
+              'Accept': 'application/json',
+              'OData-MaxVersion': '4.0',
+              'OData-Version': '4.0'
+            };
+
+            // Add authentication - API Key takes precedence
+            if (config.apiKey) {
+              headers['Authorization'] = `Bearer ${config.apiKey}`;
+            } else if (config.username && config.password) {
+              headers['Authorization'] = `Basic ${btoa(`${config.username}:${config.password}`)}`;
+            } else {
+              throw new Error('Authentication required');
+            }
+            
+            console.log('📤 [Blue Dolphin] Making request to Blue Dolphin...');
+            const response = await fetch(url, { headers });
+            
+            if (!response.ok) {
+              console.error('❌ [Blue Dolphin] HTTP Error:', response.status, response.statusText);
+              const errorText = await response.text();
+              console.error('❌ [Blue Dolphin] Error response:', errorText);
+              throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const result = await response.json();
+            console.log('✅ [Blue Dolphin] Response received successfully');
+            console.log('📊 [Blue Dolphin] Response stats:', {
+              hasValue: !!result.value,
+              valueCount: result.value?.length || 0,
+              odataCount: result['@odata.count'],
+              context: result['@odata.context']
+            });
+            
+            // Log first object to see enhanced fields
+            if (result.value && result.value.length > 0) {
+              const firstObj = result.value[0];
+              const enhancedFields = Object.keys(firstObj).filter(key => 
+                key.startsWith('Object_Properties_') || 
+                key.startsWith('Deliverable_Object_Status_') || 
+                key.startsWith('Ameff_properties_')
+              );
+              console.log('🔍 [Blue Dolphin] First object enhanced fields:', enhancedFields);
+              console.log('📋 [Blue Dolphin] Sample enhanced field values:', 
+                enhancedFields.reduce((acc, key) => ({ ...acc, [key]: firstObj[key] }), {})
+              );
+            }
+            
+            return NextResponse.json({
+              success: true,
+              data: result.value || result || [],
+              count: (result.value || result || []).length,
+              total: result['@odata.count'] || (result.value || result || []).length,
+              endpoint,
+              filter: sanitizedFilter,
+              query: queryString,
+              moreColumns: moreColumns,
+              enhancedFields: moreColumns ? 'enabled' : 'disabled'
+            });
+          } catch (error) {
+            console.error('❌ [Blue Dolphin] Enhanced object retrieval failed:', error);
+            return NextResponse.json(
+              { 
+                success: false, 
+                error: error instanceof Error ? error.message : 'Unknown error occurred',
+                timestamp: new Date().toISOString()
+              },
+              { status: 500 }
+            );
+          }
+
        default:
         return NextResponse.json(
           { error: `Unknown action: ${action}` },

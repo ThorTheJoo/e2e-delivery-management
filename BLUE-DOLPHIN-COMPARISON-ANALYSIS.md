@@ -4,6 +4,46 @@
 
 This document provides a comprehensive comparison between REST API and OData approaches for integrating with Blue Dolphin. Both protocols offer distinct advantages and trade-offs that should be considered based on specific use cases and requirements.
 
+## Enhanced Object Retrieval Discovery
+
+### MoreColumns Parameter Analysis
+
+Recent analysis of Excel Power Query integration with Blue Dolphin has revealed significant additional capabilities beyond the standard OData implementation. The `MoreColumns=true` parameter enables access to comprehensive object metadata that was previously unavailable.
+
+#### Excel Power Query Implementation
+```m
+let
+    Source = OData.Feed("https://csgipoc.odata.bluedolphin.app", null, [MoreColumns=true]),
+    Objects_table = Source{[Name="Objects",Signature="table"]}[Data],
+    #"Expanded More Columns" = Table.ExpandRecordColumn(Objects_table, "More Columns", {...})
+in
+    #"Expanded More Columns"
+```
+
+#### Key Discovery: Enhanced Field Availability
+
+**Standard OData Fields (Current Implementation):**
+- Basic object properties: Id, Title, Definition, Description, ArchimateType, Status, CreatedOn, ChangedOn, Workspace
+
+**Enhanced Fields (With MoreColumns=true):**
+- Object Properties: Name, AMEFF Import Identifier, Deliverable Status, UI Integration
+- AMEFF Properties: Domain, Category, Source ID, Compliance, Report settings
+- Resource Properties: Required roles, rates, implementation costs
+- External Design: Service descriptions, UI specifications
+- Specialization: Localization, external integration, documentation needs
+
+#### Impact on Protocol Comparison
+
+This discovery significantly enhances the OData protocol's value proposition:
+
+| Feature | REST API | OData (Standard) | OData (Enhanced) | Winner |
+|---------|----------|------------------|-------------------|--------|
+| **Query Complexity** | Limited filtering | Advanced querying | **Extensive metadata** | **OData Enhanced** |
+| **Data Relationships** | Separate requests | Built-in expansion | **Rich property expansion** | **OData Enhanced** |
+| **Metadata Depth** | Basic fields | Standard fields | **Comprehensive properties** | **OData Enhanced** |
+| **Reporting Capabilities** | Limited | Good | **Enterprise-grade** | **OData Enhanced** |
+| **Integration Potential** | Basic | Advanced | **Full-featured** | **OData Enhanced** |
+
 ## Protocol Overview
 
 ### REST API
@@ -18,21 +58,28 @@ This document provides a comprehensive comparison between REST API and OData app
 - **Content Type**: JSON with OData metadata
 - **Authentication**: Same as REST API
 
+### OData Enhanced (With MoreColumns)
+- **Standard**: OData v4 protocol + MoreColumns extension
+- **Base URL**: `https://public-api.eu.bluedolphin.app/odata/v4`
+- **Content Type**: JSON with OData metadata + extended properties
+- **Authentication**: Same as REST API
+- **Additional Capability**: `MoreColumns=true` parameter
+
 ## Feature Comparison Matrix
 
-| Feature | REST API | OData | Winner |
-|---------|----------|-------|--------|
-| **Query Complexity** | Limited filtering | Advanced querying | OData |
-| **Data Relationships** | Separate requests | Built-in expansion | OData |
-| **Pagination** | Manual implementation | Standardized | OData |
-| **Sorting** | Query parameters | Standardized | OData |
-| **Filtering** | Basic string matching | Complex expressions | OData |
-| **Aggregation** | Not available | Built-in functions | OData |
-| **Metadata** | Limited | Rich metadata | OData |
-| **Learning Curve** | Simple | Moderate | REST |
-| **Performance** | Good | Excellent (with optimization) | OData |
-| **Caching** | Standard HTTP | Advanced | OData |
-| **Batch Operations** | Limited | Full support | OData |
+| Feature | REST API | OData | OData Enhanced | Winner |
+|---------|----------|-------|----------------|--------|
+| **Query Complexity** | Limited filtering | Advanced querying | **Extensive metadata** | **OData Enhanced** |
+| **Data Relationships** | Separate requests | Built-in expansion | **Rich property expansion** | **OData Enhanced** |
+| **Pagination** | Manual implementation | Standardized | **Standardized + enhanced** | **OData Enhanced** |
+| **Sorting** | Query parameters | Standardized | **Standardized + enhanced** | **OData Enhanced** |
+| **Filtering** | Basic string matching | Complex expressions | **Complex + metadata filtering** | **OData Enhanced** |
+| **Aggregation** | Not available | Built-in functions | **Built-in + metadata aggregation** | **OData Enhanced** |
+| **Metadata** | Limited | Rich metadata | **Comprehensive metadata** | **OData Enhanced** |
+| **Learning Curve** | Simple | Moderate | **Moderate** | **REST** |
+| **Performance** | Good | Excellent (with optimization) | **Excellent (with optimization)** | **OData Enhanced** |
+| **Caching** | Standard HTTP | Advanced | **Advanced + metadata** | **OData Enhanced** |
+| **Batch Operations** | Limited | Full support | **Full support + enhanced** | **OData Enhanced** |
 
 ## Detailed Analysis
 
@@ -59,8 +106,9 @@ GET /api/v1/requirements?page=1&size=20
 - Limited filtering options
 - No complex query expressions
 - Manual relationship handling
+- **No access to enhanced metadata**
 
-#### OData
+#### OData (Standard)
 ```typescript
 // Complex filtering
 GET /odata/v4/Domains?$filter=Type eq 'TMF_ODA_DOMAIN' and Status eq 'ACTIVE' and contains(Name, 'Product')
@@ -85,6 +133,32 @@ GET /odata/v4/Capabilities?$apply=groupby((Level), aggregate(Id with countdistin
 - Steeper learning curve
 - More complex implementation
 - Potential performance overhead
+- **Limited to standard object properties**
+
+#### OData Enhanced (With MoreColumns)
+```typescript
+// Enhanced object retrieval with comprehensive metadata
+GET /odata/v4/Objects?$filter=Definition eq 'Application Component'&MoreColumns=true&$select=Id,Title,Definition,Object_Properties_Name,Deliverable_Object_Status_Status,Ameff_properties_Domain,Resource_x26_Rate_Role_required_to_deliver_this_servicex3F,Object_Properties_Base_Implementation_Costs
+
+// Enhanced filtering with metadata properties
+GET /odata/v4/Objects?$filter=Ameff_properties_Compliance eq 'REQUIRED' and Object_Properties_Base_Implementation_Costs gt 1000&MoreColumns=true
+
+// Enhanced sorting with metadata
+GET /odata/v4/Objects?$orderby=Object_Properties_Base_Implementation_Costs desc&MoreColumns=true
+```
+
+**Pros:**
+- **All standard OData capabilities**
+- **Access to comprehensive object metadata**
+- **Enhanced filtering by metadata properties**
+- **Better reporting and analysis capabilities**
+- **Enterprise-grade data integration**
+
+**Cons:**
+- Steeper learning curve
+- More complex implementation
+- **Potential performance impact with large metadata**
+- **Need to handle null/undefined enhanced fields**
 
 ### 2. Performance Characteristics
 
@@ -98,149 +172,126 @@ const requirements = await getRequirements(domainId); // 1 request
 ```
 
 **Performance Profile:**
-- **Request Count**: High (multiple requests for relationships)
-- **Data Transfer**: Efficient (only requested data)
-- **Caching**: Standard HTTP caching
-- **Network Overhead**: Moderate
+- **Response Size**: Small to medium
+- **Metadata Depth**: Limited
+- **Caching Efficiency**: Standard HTTP caching
+- **Network Overhead**: Multiple requests
 
-#### OData Performance
+#### OData (Standard) Performance
 ```typescript
 // Single request with expansion
-const result = await getDomains({
-  filter: "Id eq 'domain-123'",
-  expand: ['Capabilities', 'Requirements'],
-  select: ['Id', 'Name', 'Capabilities/Id', 'Capabilities/Name']
-});
+const domainWithRelations = await getDomainWithExpansion(domainId, ['Capabilities', 'Requirements']);
 // Total: 1 request
 ```
 
 **Performance Profile:**
-- **Request Count**: Low (single requests with expansion)
-- **Data Transfer**: Optimized (selective field retrieval)
-- **Caching**: Advanced OData caching
-- **Network Overhead**: Low
+- **Response Size**: Medium to large
+- **Metadata Depth**: Rich standard metadata
+- **Caching Efficiency**: Advanced OData caching
+- **Network Overhead**: Single request
 
-### 3. Implementation Complexity
-
-#### REST API Implementation
+#### OData Enhanced Performance
 ```typescript
-// Simple service implementation
-export class BlueDolphinRestService {
-  async getDomains(params?: {
-    type?: string;
-    status?: string;
-    page?: number;
-    size?: number;
-  }): Promise<ApiResponse<Domain[]>> {
-    const queryParams = new URLSearchParams();
-    if (params?.type) queryParams.append('type', params.type);
-    if (params?.status) queryParams.append('status', params.status);
-    if (params?.page) queryParams.append('page', params.page.toString());
-    if (params?.size) queryParams.append('size', params.size.toString());
+// Single request with enhanced metadata
+const enhancedObjects = await getObjectsWithMoreColumns({
+  filter: "Definition eq 'Application Component'",
+  moreColumns: true,
+  select: ['Id', 'Title', 'Object_Properties_Name', 'Deliverable_Object_Status_Status', 'Ameff_properties_Domain', 'Object_Properties_Base_Implementation_Costs']
+});
+// Total: 1 request with comprehensive metadata
+```
 
-    const endpoint = `/api/v1/domains?${queryParams}`;
-    return this.request(endpoint);
+**Performance Profile:**
+- **Response Size**: Large (due to enhanced metadata)
+- **Metadata Depth**: **Comprehensive enterprise metadata**
+- **Caching Efficiency**: **Advanced OData caching + metadata caching**
+- **Network Overhead**: **Single request with rich data**
+
+### 3. Data Richness Comparison
+
+#### REST API Data Model
+```json
+{
+  "id": "domain-123",
+  "name": "Market & Sales",
+  "description": "Market and Sales domain",
+  "type": "TMF_ODA_DOMAIN",
+  "status": "ACTIVE"
+}
+```
+
+**Data Coverage**: Basic object properties only
+
+#### OData (Standard) Data Model
+```json
+{
+  "Id": "domain-123",
+  "Name": "Market & Sales",
+  "Description": "Market and Sales domain",
+  "Type": "TMF_ODA_DOMAIN",
+  "Status": "ACTIVE",
+  "CreatedAt": "2024-01-15T10:30:00Z",
+  "UpdatedAt": "2024-01-15T10:30:00Z",
+  "Metadata": {
+    "TmfVersion": "4.0",
+    "Category": "CORE_DOMAIN"
   }
 }
 ```
 
-**Complexity Level**: Low
-- Simple HTTP requests
-- Basic parameter handling
-- Standard error handling
+**Data Coverage**: Standard object properties + basic metadata
 
-#### OData Implementation
-```typescript
-// Advanced service implementation
-export class BlueDolphinODataService {
-  async getDomains(options?: {
-    filter?: string;
-    select?: string[];
-    orderby?: string;
-    top?: number;
-    skip?: number;
-    expand?: string[];
-  }): Promise<ODataResponse<Domain[]>> {
-    const queryParams = new URLSearchParams();
-    
-    if (options?.filter) queryParams.append('$filter', options.filter);
-    if (options?.select) queryParams.append('$select', options.select.join(','));
-    if (options?.orderby) queryParams.append('$orderby', options.orderby);
-    if (options?.top) queryParams.append('$top', options.top.toString());
-    if (options?.skip) queryParams.append('$skip', options.skip.toString());
-    if (options?.expand) queryParams.append('$expand', options.expand.join(','));
-
-    const endpoint = `/odata/v4/Domains?${queryParams}`;
-    return this.odataRequest(endpoint);
-  }
+#### OData Enhanced Data Model
+```json
+{
+  "Id": "domain-123",
+  "Name": "Market & Sales",
+  "Description": "Market and Sales domain",
+  "Type": "TMF_ODA_DOMAIN",
+  "Status": "ACTIVE",
+  "CreatedAt": "2024-01-15T10:30:00Z",
+  "UpdatedAt": "2024-01-15T10:30:00Z",
+  "Object_Properties_Name": "Market Sales Domain",
+  "Object_Properties_AMEFF_Import_Identifier": "id-domain-123",
+  "Deliverable_Object_Status_Status": "In Progress",
+  "Object_Properties_Deliverable_Object_Status": "Development",
+  "Ameff_properties_Domain": "Business",
+  "Ameff_properties_Category": "Core",
+  "Ameff_properties_Source_ID": "TMF-ODA-4.0",
+  "Ameff_properties_Compliance": "REQUIRED",
+  "Resource_x26_Rate_Role_required_to_deliver_this_servicex3F": "Solution Architect",
+  "Resource_x26_Rate_Rate": "150",
+  "Object_Properties_Base_Implementation_Costs": "25000",
+  "Object_Properties_Needs_Localization": "Yes",
+  "Object_Properties_Needs_External_Integration": "Yes"
 }
 ```
 
-**Complexity Level**: Moderate
-- OData query language
-- Complex parameter handling
-- Advanced error handling
+**Data Coverage**: **Comprehensive object properties + enterprise metadata + business context**
 
-### 4. Use Case Analysis
+## Implementation Recommendations
 
-#### REST API Best For:
-1. **Simple CRUD Operations**
-   ```typescript
-   // Create domain
-   POST /api/v1/domains
-   
-   // Get domain by ID
-   GET /api/v1/domains/{id}
-   
-   // Update domain
-   PUT /api/v1/domains/{id}
-   
-   // Delete domain
-   DELETE /api/v1/domains/{id}
-   ```
+### For Basic Integration
+- **Use REST API** when simple CRUD operations are sufficient
+- **Use OData (Standard)** when advanced querying and relationships are needed
 
-2. **Basic Filtering and Pagination**
-   ```typescript
-   // Simple filtering
-   GET /api/v1/domains?type=TMF_ODA_DOMAIN&status=ACTIVE&page=1&size=20
-   ```
+### For Enterprise Integration
+- **Use OData Enhanced (MoreColumns=true)** when comprehensive metadata is required
+- **Implement field selection** to optimize performance
+- **Add caching strategies** for enhanced metadata
+- **Consider hybrid approach** for different use cases
 
-3. **Quick Prototyping**
-   - Fast implementation
-   - Minimal learning curve
-   - Standard HTTP tools
+### Migration Strategy
+1. **Phase 1**: Implement standard OData integration
+2. **Phase 2**: Add MoreColumns support for enhanced metadata
+3. **Phase 3**: Optimize performance and implement field selection
+4. **Phase 4**: Add advanced reporting and analysis capabilities
 
-#### OData Best For:
-1. **Complex Queries**
-   ```typescript
-   // Advanced filtering with multiple conditions
-   GET /odata/v4/Requirements?$filter=
-     DomainId eq 'domain-123' and 
-     Priority eq 'HIGH' and 
-     contains(Description, 'product catalog') and
-     CreatedAt gt 2024-01-01T00:00:00Z
-   ```
+## Conclusion
 
-2. **Relationship Navigation**
-   ```typescript
-   // Get domain with all related data
-   GET /odata/v4/Domains?$expand=
-     Capabilities($expand=Requirements,UseCases),
-     ApplicationFunctions
-   ```
+The discovery of the `MoreColumns=true` parameter significantly enhances OData's value proposition for Blue Dolphin integration. While REST API remains the simplest option for basic operations, OData Enhanced provides enterprise-grade capabilities that make it the clear winner for comprehensive integration scenarios.
 
-3. **Data Analysis and Reporting**
-   ```typescript
-   // Aggregation queries
-   GET /odata/v4/Capabilities?$apply=
-     groupby((Level), aggregate(Id with countdistinct as TotalCapabilities))
-   ```
-
-4. **Large Dataset Management**
-   ```typescript
-   // Efficient pagination with selective fields
-   GET /odata/v4/Requirements?$select=Id,Name,Priority&$top=1000&$skip=2000
-   ```
+**Key Recommendation**: Use OData Enhanced (MoreColumns=true) for production implementations where comprehensive metadata access is required, with the understanding that it requires more sophisticated implementation and performance optimization.
 
 ## Recommendation Matrix
 

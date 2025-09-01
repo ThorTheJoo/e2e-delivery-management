@@ -19,6 +19,8 @@ import { BlueDolphinIntegration } from '@/components/blue-dolphin-integration';
 import { BlueDolphinConfiguration } from '@/components/blue-dolphin-configuration';
 import { MiroConfiguration } from '@/components/miro-configuration';
 import { MiroSetupGuide } from '@/components/miro-setup-guide';
+import { ADOConfigurationComponent } from '@/components/ado-configuration';
+import { ADOIntegration } from '@/components/ado-integration';
 import { useToast, ToastContainer } from '@/components/ui/toast';
 import { mapSpecSyncToCapabilities, calculateUseCaseCountsByCapability, saveSpecSyncData, loadSpecSyncData, clearSpecSyncData } from '@/lib/specsync-utils';
 import { 
@@ -38,7 +40,8 @@ import {
   ChevronDown,
   ChevronRight,
   Layout,
-  PencilRuler
+  PencilRuler,
+  Server
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -72,12 +75,24 @@ export default function HomePage() {
     setIsTmfManagerExpanded(false);
     setIsTmfCapabilitiesExpanded(false);
   };
+
+  // Toggle solution model sections
+  const toggleSolutionModelSection = (sectionId: string) => {
+    const newExpanded = new Set(solutionModelSections);
+    if (newExpanded.has(sectionId)) {
+      newExpanded.delete(sectionId);
+    } else {
+      newExpanded.add(sectionId);
+    }
+    setSolutionModelSections(newExpanded);
+  };
   const [specSyncState, setSpecSyncState] = useState<SpecSyncState | null>(null);
   const [requirementCounts, setRequirementCounts] = useState<Record<string, number>>({});
   const [useCaseCounts, setUseCaseCounts] = useState<Record<string, number>>({});
   const [isSpecSyncExpanded, setIsSpecSyncExpanded] = useState(false);
   const [isTmfManagerExpanded, setIsTmfManagerExpanded] = useState(false);
   const [isTmfCapabilitiesExpanded, setIsTmfCapabilitiesExpanded] = useState(false);
+  const [solutionModelSections, setSolutionModelSections] = useState<Set<string>>(new Set(['domain-management', 'capabilities', 'requirements-sync', 'object-data']));
   const [setDomainEfforts, setSetDomainEfforts] = useState<Record<string, number>>({});
   const [setMatchedWorkPackages, setSetMatchedWorkPackages] = useState<Record<string, any>>({});
   const [tmfDomains, setTmfDomains] = useState<TMFOdaDomain[]>([]);
@@ -575,7 +590,7 @@ export default function HomePage() {
         {/* Main Content Area */}
         <main className="flex-1 overflow-y-auto p-6">
         <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8">
+          <TabsList className="grid w-full grid-cols-9">
             <TabsTrigger value="dashboard" className="flex items-center space-x-2">
               <BarChart3 className="h-4 w-4" />
               <span className="hidden sm:inline">Dashboard</span>
@@ -607,6 +622,10 @@ export default function HomePage() {
             <TabsTrigger value="visual-mapping" className="flex items-center space-x-2">
               <Layout className="h-4 w-4" />
               <span className="hidden sm:inline">Visual Mapping</span>
+            </TabsTrigger>
+            <TabsTrigger value="ado" className="flex items-center space-x-2">
+              <Server className="h-4 w-4" />
+              <span className="hidden sm:inline">ADO Integration</span>
             </TabsTrigger>
           </TabsList>
 
@@ -932,16 +951,134 @@ export default function HomePage() {
               <p className="text-gray-600">
                 Create and manage your solution model in Blue Dolphin. Import domains, capabilities, and requirements from SpecSync and TMF data.
               </p>
+              
+              {/* Section Control Buttons */}
+              <div className="mt-4 flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setSolutionModelSections(new Set(['domain-management', 'capabilities', 'requirements-sync', 'object-data']))}
+                >
+                  Expand All
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setSolutionModelSections(new Set())}
+                >
+                  Collapse All
+                </Button>
+              </div>
             </div>
             
-            <BlueDolphinIntegration 
-              specSyncData={specSyncState}
-              tmfDomains={tmfDomains}
-              onSyncComplete={(result) => {
-                console.log('Blue Dolphin sync completed:', result);
-                toast.showSuccess(`Sync completed: ${result.syncedCount} items processed`);
-              }}
-            />
+            {/* Domain Management Section */}
+            <Card>
+              <CardHeader 
+                className="cursor-pointer hover:bg-gray-50 transition-colors"
+                onClick={() => toggleSolutionModelSection('domain-management')}
+              >
+                <CardTitle className="flex items-center justify-between">
+                  <span>Domain Management</span>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                    {solutionModelSections.has('domain-management') ? (
+                      <ChevronDown className="h-4 w-4" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4" />
+                    )}
+                  </Button>
+                </CardTitle>
+                <CardDescription>Manage TMF ODA domains and capabilities</CardDescription>
+              </CardHeader>
+              {solutionModelSections.has('domain-management') && (
+                <CardContent>
+                  <p className="text-sm text-gray-600">Domain management functionality will be implemented here.</p>
+                </CardContent>
+              )}
+            </Card>
+
+            {/* Capabilities Section */}
+            <Card>
+              <CardHeader 
+                className="cursor-pointer hover:bg-gray-50 transition-colors"
+                onClick={() => toggleSolutionModelSection('capabilities')}
+              >
+                <CardTitle className="flex items-center justify-between">
+                  <span>Capabilities</span>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                    {solutionModelSections.has('capabilities') ? (
+                      <ChevronDown className="h-4 w-4" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4" />
+                    )}
+                  </Button>
+                </CardTitle>
+                <CardDescription>Manage TMF ODA capabilities within domains</CardDescription>
+              </CardHeader>
+              {solutionModelSections.has('capabilities') && (
+                <CardContent>
+                  <p className="text-sm text-gray-600">Capability management functionality will be implemented here.</p>
+                </CardContent>
+              )}
+            </Card>
+
+            {/* Requirements Synchronization Section */}
+            <Card>
+              <CardHeader 
+                className="cursor-pointer hover:bg-gray-50 transition-colors"
+                onClick={() => toggleSolutionModelSection('requirements-sync')}
+              >
+                <CardTitle className="flex items-center justify-between">
+                  <span>Requirements Synchronization</span>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                    {solutionModelSections.has('requirements-sync') ? (
+                      <ChevronDown className="h-4 w-4" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4" />
+                    )}
+                  </Button>
+                </CardTitle>
+                <CardDescription>Synchronize requirements between systems</CardDescription>
+              </CardHeader>
+              {solutionModelSections.has('requirements-sync') && (
+                <CardContent>
+                  <p className="text-sm text-gray-600">Requirements synchronization functionality will be implemented here.</p>
+                </CardContent>
+              )}
+            </Card>
+
+            {/* Object Data Section */}
+            <Card>
+              <CardHeader 
+                className="cursor-pointer hover:bg-gray-50 transition-colors"
+                onClick={() => toggleSolutionModelSection('object-data')}
+              >
+                <CardTitle className="flex items-center justify-between">
+                  <span>Object Data</span>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                    {solutionModelSections.has('object-data') ? (
+                      <ChevronDown className="h-4 w-4" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4" />
+                    )}
+                  </Button>
+                </CardTitle>
+                <CardDescription>Retrieve and manage Blue Dolphin objects with enhanced metadata</CardDescription>
+              </CardHeader>
+              {solutionModelSections.has('object-data') && (
+                <CardContent>
+                  <BlueDolphinIntegration 
+                    config={{
+                      protocol: 'ODATA',
+                      apiUrl: 'https://csgipoc.odata.bluedolphin.app',
+                      odataUrl: 'https://csgipoc.odata.bluedolphin.app',
+                      apiKey: '',
+                      username: 'csgipoc',
+                      password: 'ef498b94-732b-46c8-a24c-65fbd27c1482'
+                    }}
+                  />
+                </CardContent>
+              )}
+            </Card>
           </TabsContent>
 
           {/* eTOM Processes Tab */}
@@ -1233,6 +1370,15 @@ export default function HomePage() {
              />
            </TabsContent>
 
+           {/* ADO Integration Tab */}
+           <TabsContent value="ado" className="space-y-6">
+             <ADOIntegration 
+               project={project}
+               tmfDomains={tmfDomains}
+               specSyncItems={specSyncItems}
+             />
+           </TabsContent>
+
            {/* Blue Dolphin Configuration Tab */}
            <TabsContent value="blue-dolphin-config" className="space-y-6">
              <BlueDolphinConfiguration />
@@ -1246,6 +1392,11 @@ export default function HomePage() {
           {/* Miro Setup Guide Tab */}
           <TabsContent value="miro-setup" className="space-y-6">
             <MiroSetupGuide />
+          </TabsContent>
+
+          {/* ADO Configuration Tab */}
+          <TabsContent value="ado-config" className="space-y-6">
+            <ADOConfigurationComponent />
           </TabsContent>
         </Tabs>
       </main>
