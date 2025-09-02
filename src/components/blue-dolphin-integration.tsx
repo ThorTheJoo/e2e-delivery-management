@@ -462,12 +462,21 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
         </CardContent>
       </Card>
 
-      {/* Object Retrieval Controls */}
+      {/* Object Retrieval Controls (collapsible) */}
       <Card>
-        <CardHeader>
-          <CardTitle>Object Retrieval</CardTitle>
+        <CardHeader 
+          className="cursor-pointer hover:bg-gray-50 transition-colors"
+          onClick={() => toggleSection('object-retrieval')}
+        >
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg font-semibold">Object Retrieval</CardTitle>
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+              {expandedSections.has('object-retrieval') ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+            </Button>
+          </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        {expandedSections.has('object-retrieval') && (
+          <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="endpoint">Endpoint</Label>
@@ -654,7 +663,8 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
           </div>
 
           
-        </CardContent>
+          </CardContent>
+        )}
       </Card>
 
       {/* Results Display */}
@@ -914,10 +924,19 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
       {/* Relationship Data Section     */}
       {/* ------------------------------ */}
       <Card>
-        <CardHeader>
-          <CardTitle>Relationship Data (Relations_table)</CardTitle>
+        <CardHeader 
+          className="cursor-pointer hover:bg-gray-50 transition-colors"
+          onClick={() => toggleSection('relations-section')}
+        >
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg font-semibold">Relationship Data (Relations_table)</CardTitle>
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+              {expandedSections.has('relations-section') ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+            </Button>
+          </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        {expandedSections.has('relations-section') && (
+          <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label>Results Limit</Label>
@@ -1064,7 +1083,8 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
               ))}
             </div>
           )}
-        </CardContent>
+          </CardContent>
+        )}
       </Card>
 
       {/* ------------------------------ */}
@@ -1076,7 +1096,7 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
           onClick={() => toggleSection('export-csv')}
         >
           <div className="flex items-center justify-between">
-            <CardTitle className="text-sm">Export Model (Objects + Relations CSV)</CardTitle>
+            <CardTitle className="text-lg font-semibold">Export Model (Objects + Relations CSV)</CardTitle>
             <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
               {expandedSections.has('export-csv') ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
             </Button>
@@ -1185,7 +1205,7 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
                 {expandedSections.has('export-csv-preview') && (
                   <CardContent className="pt-0 space-y-3 text-xs">
                     {exportQueries && (
-                      <div className="grid grid-cols-1 md-grid-cols-2 gap-2">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                         <div>
                           <div className="font-semibold">Objects Query (constructed):</div>
                           <div className="p-2 bg-gray-100 rounded font-mono overflow-auto">{exportQueries.objects}</div>

@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createBlueDolphinService } from '@/lib/blue-dolphin-service';
 
+function encodeBasicAuth(username: string, password: string): string {
+  return Buffer.from(`${username}:${password}`).toString('base64');
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -85,7 +89,7 @@ export async function POST(request: NextRequest) {
               console.log('Using API Key authentication');
               console.log('API Key (first 10 chars):', config.apiKey.substring(0, 10) + '...');
             } else if (config.username && config.password) {
-              authHeaders['Authorization'] = `Basic ${btoa(`${config.username}:${config.password}`)}`;
+              authHeaders['Authorization'] = `Basic ${encodeBasicAuth(config.username, config.password)}`;
               console.log('Using Basic authentication');
               console.log('Username:', config.username);
             } else {
@@ -373,7 +377,7 @@ export async function POST(request: NextRequest) {
               console.log('Using API Key authentication');
               console.log('API Key (first 10 chars):', config.apiKey.substring(0, 10) + '...');
             } else if (config.username && config.password) {
-              headers['Authorization'] = `Basic ${btoa(`${config.username}:${config.password}`)}`;
+              headers['Authorization'] = `Basic ${encodeBasicAuth(config.username, config.password)}`;
               console.log('Using Basic authentication');
               console.log('Username:', config.username);
             } else {
@@ -490,7 +494,7 @@ export async function POST(request: NextRequest) {
                    'OData-Version': '4.0',
                    ...(config.apiKey ? { 'Authorization': `Bearer ${config.apiKey}` } : {}),
                    ...(config.username && config.password ? { 
-                     'Authorization': `Basic ${btoa(`${config.username}:${config.password}`)}` 
+                     'Authorization': `Basic ${encodeBasicAuth(config.username, config.password)}` 
                    } : {})
                  }
                });
@@ -547,7 +551,7 @@ export async function POST(request: NextRequest) {
                   'OData-Version': '4.0',
                   ...(config.apiKey ? { 'Authorization': `Bearer ${config.apiKey}` } : {}),
                   ...(config.username && config.password ? { 
-                    'Authorization': `Basic ${btoa(`${config.username}:${config.password}`)}` 
+                    'Authorization': `Basic ${encodeBasicAuth(config.username, config.password)}` 
                   } : {})
                 }
               });
@@ -906,7 +910,7 @@ export async function POST(request: NextRequest) {
                       'OData-Version': '4.0',
                       ...(config.apiKey ? { 'Authorization': `Bearer ${config.apiKey}` } : {}),
                       ...(config.username && config.password ? { 
-                        'Authorization': `Basic ${btoa(`${config.username}:${config.password}`)}` 
+                        'Authorization': `Basic ${encodeBasicAuth(config.username, config.password)}` 
                       } : {})
                     }
                   });
@@ -1003,7 +1007,7 @@ export async function POST(request: NextRequest) {
             if (config.apiKey) {
               headers['Authorization'] = `Bearer ${config.apiKey}`;
             } else if (config.username && config.password) {
-              headers['Authorization'] = `Basic ${btoa(`${config.username}:${config.password}`)}`;
+              headers['Authorization'] = `Basic ${encodeBasicAuth(config.username, config.password)}`;
             } else {
               throw new Error('Authentication required');
             }
