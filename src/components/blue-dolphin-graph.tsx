@@ -4,7 +4,7 @@ import React, { useMemo, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import type { BlueDolphinVisualLink, BlueDolphinVisualNode, VisualizationViewMode } from '@/types/blue-dolphin-visualization';
 
-const ForceGraph2D = dynamic(() => import('react-force-graph-2d'), { ssr: false }) as any;
+const ForceGraph2D = dynamic(() => import('react-force-graph-2d'), { ssr: false }) as unknown as React.ComponentType<any>;
 
 interface BlueDolphinGraphProps {
   nodes: BlueDolphinVisualNode[];
@@ -15,7 +15,7 @@ interface BlueDolphinGraphProps {
 }
 
 export function BlueDolphinGraph({ nodes, links, viewMode, onNodeClick, onLinkClick }: BlueDolphinGraphProps) {
-  const fgRef = useRef<any>();
+  const fgRef = useRef<unknown>();
 
   const graphData = useMemo(() => ({ nodes, links }), [nodes, links]);
 
@@ -98,20 +98,14 @@ export function BlueDolphinGraph({ nodes, links, viewMode, onNodeClick, onLinkCl
   const linkCanvasObject = useMemo(() => {
     return (link: any, ctx: CanvasRenderingContext2D, scale: number) => {
       const l = link as BlueDolphinVisualLink & { source: any; target: any };
-      ctx.save();
-      if (l.style === 'dashed') ctx.setLineDash([6 / scale, 6 / scale]);
-      if (l.style === 'dotted') ctx.setLineDash([2 / scale, 4 / scale]);
-      ctx.strokeStyle = l.color;
-      ctx.lineWidth = l.width || 3;
-      ctx.beginPath();
-      ctx.moveTo(l.source.x, l.source.y);
-      ctx.lineTo(l.target.x, l.target.y);
-      ctx.stroke();
-      ctx.restore();
+      const src = typeof l.source === 'object' ? l.source : null;
+      const tgt = typeof l.target === 'object' ? l.target : null;
+      if (!src || !tgt) return; // built-in renderer draws the line; we only draw the label when positions exist
+      if (typeof src.x !== 'number' || typeof src.y !== 'number' || typeof tgt.x !== 'number' || typeof tgt.y !== 'number') return;
 
-      // label at midpoint
-      const mx = (l.source.x + l.target.x) / 2;
-      const my = (l.source.y + l.target.y) / 2;
+      // Label in the middle
+      const mx = (src.x + tgt.x) / 2;
+      const my = (src.y + tgt.y) / 2;
       const label = l.relationshipName || l.type;
       ctx.font = `${Math.max(10, 12 / scale)}px Inter, system-ui`;
       const textWidth = ctx.measureText(label).width;
@@ -135,6 +129,9 @@ export function BlueDolphinGraph({ nodes, links, viewMode, onNodeClick, onLinkCl
         nodeCanvasObject={nodeCanvasObject}
         nodePointerAreaPaint={nodePointerAreaPaint}
         linkCanvasObject={linkCanvasObject}
+        linkCanvasObjectMode={() => 'after'}
+        linkColor={(l: any) => l.color}
+        linkWidth={(l: any) => l.width || 3}
         linkDirectionalArrowLength={6}
         linkDirectionalArrowRelPos={0.6}
         linkDirectionalArrowColor={(l: any) => l.color}

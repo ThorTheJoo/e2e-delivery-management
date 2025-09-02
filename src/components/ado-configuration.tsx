@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ADOConfiguration, ADOAuthStatus } from '@/types/ado';
+import { ADOConfiguration, ADOAuthStatus, ADOIntegrationLogEntry, ADONotification } from '@/types/ado';
 import { adoService } from '@/lib/ado-service';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
@@ -63,8 +63,8 @@ export function ADOConfigurationComponent() {
   const [isLoading, setIsLoading] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
   const [showToken, setShowToken] = useState(false);
-  const [logs, setLogs] = useState<any[]>([]);
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [logs, setLogs] = useState<ADOIntegrationLogEntry[]>([]);
+  const [notifications, setNotifications] = useState<ADONotification[]>([]);
   const [activeTab, setActiveTab] = useState('general');
   
   const toast = useToast();

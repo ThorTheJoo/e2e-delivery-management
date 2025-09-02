@@ -42,11 +42,11 @@ export function MiroSetupGuide() {
             </div>
             <div className="flex items-center space-x-2">
               <CheckCircle className="w-5 h-5 text-green-600" />
-              <span>Click "Create new app"</span>
+              <span>Click &quot;Create new app&quot;</span>
             </div>
             <div className="flex items-center space-x-2">
               <CheckCircle className="w-5 h-5 text-green-600" />
-              <span>Choose "OAuth 2.0" as the app type</span>
+              <span>Choose &quot;OAuth 2.0&quot; as the app type</span>
             </div>
           </div>
         </div>
@@ -88,11 +88,11 @@ export function MiroSetupGuide() {
           <div className="space-y-3">
             <div className="flex items-center space-x-2">
               <CheckCircle className="w-5 h-5 text-green-600" />
-              <span>Set App Name: "E2E Delivery Management"</span>
+              <span>Set App Name: &quot;E2E Delivery Management&quot;</span>
             </div>
             <div className="flex items-center space-x-2">
               <CheckCircle className="w-5 h-5 text-green-600" />
-              <span>Set App Description: "TMF Architecture and Requirements Mapping"</span>
+              <span>Set App Description: &quot;TMF Architecture and Requirements Mapping&quot;</span>
             </div>
             <div className="flex items-center space-x-2">
               <CheckCircle className="w-5 h-5 text-green-600" />
@@ -230,11 +230,11 @@ export function MiroSetupGuide() {
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
                 <CheckCircle className="w-5 h-5 text-green-600" />
-                <span>Go to the "Visual Mapping" tab</span>
+                <span>Go to the &quot;Visual Mapping&quot; tab</span>
               </div>
               <div className="flex items-center space-x-2">
                 <CheckCircle className="w-5 h-5 text-green-600" />
-                <span>Click "Create TMF Architecture Board"</span>
+                <span>Click &quot;Create TMF Architecture Board&quot;</span>
               </div>
               <div className="flex items-center space-x-2">
                 <CheckCircle className="w-5 h-5 text-green-600" />

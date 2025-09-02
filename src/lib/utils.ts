@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
+import type { EffortBreakdown } from '@/types'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -21,9 +22,9 @@ export function formatCurrency(amount: number, currency: string = 'USD'): string
   }).format(amount);
 }
 
-export function calculateEffortTotal(effort: any): number {
+export function calculateEffortTotal(effort: EffortBreakdown | null | undefined): number {
   if (!effort) return 0;
-  return Object.values(effort).reduce((sum: number, value: any) => {
+  return Object.values(effort).reduce((sum: number, value: number) => {
     return sum + (typeof value === 'number' ? value : 0);
   }, 0);
 }
@@ -62,7 +63,7 @@ export function getSeverityColor(severity: string): string {
   return severityColors[severity] || 'bg-gray-100 text-gray-800';
 }
 
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {

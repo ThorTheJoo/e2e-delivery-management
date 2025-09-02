@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1.0] - 2025-08-28 - Blue Dolphin Integration Release
 
+## [1.25.0] - 2025-09-02
+
+### Fixed
+- Prevent SSR/localStorage access in ADO service during server render.
+- Resolve temporal dead zone error by declaring `updateRequirementCounts` before effects.
+- Correct estimation tab to use `matchedWorkPackages` and remove unused state.
+- Escape JSX quotes in Miro and ADO components to satisfy lint.
+
+### Changed
+- Replace many `any` types with safer `unknown`/typed records across ADO types, utils, hooks, and Blue Dolphin services.
+- Improve hook dependency arrays to satisfy `react-hooks/exhaustive-deps`.
+
+### Developer Experience
+- Clear `.next` cache and start dev server on a free port to avoid stale chunks and EADDRINUSE conflicts.
+
 ### 🎉 Major Features Added
 
 #### Blue Dolphin Enterprise Architecture Integration

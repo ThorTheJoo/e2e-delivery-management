@@ -1,0 +1,5 @@
+[33mce8c196[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdev/next-features[m[33m, [m[1;31morigin/dev/next-features[m[33m)[m v1.2.1: Update CET v22 documentation and implementation roadmap
+[33mf3d8f61[m feat: bump version to 1.2.0 - Blue Dolphin visualization enhancements and UI improvements
+[33mb5eb85a[m[33m ([m[1;31morigin/v1.24[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mv1.24[m[33m, [m[1;32mmain[m[33m)[m v1.24: Blue Dolphin integration with graph visualization and controls
+[33m7636857[m[33m ([m[1;33mtag: [m[1;33mv1.23[m[33m)[m v1.23: Release version 1.23 with comprehensive Blue Dolphin integration, ADO integration, Miro integration, and enhanced documentation
+[33m0b5ef4c[m[33m ([m[1;33mtag: [m[1;33mv1.22[m[33m, [m[1;31morigin/backup-before-rollback_v2[m[33m, [m[1;32mbackup-before-rollback_v2[m[33m)[m v1.22: Enhanced Blue Dolphin integration with visualization capabilities and comprehensive documentation
