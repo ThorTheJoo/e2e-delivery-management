@@ -6,9 +6,12 @@
 #### Core files (to be created)
 - `src/components/blue-dolphin-visualization.tsx` — container: layout, controls, graph, sidebar; client-only shell.
 - `src/components/blue-dolphin-graph.tsx` — ForceGraph2D renderer (dynamic import with `ssr: false`).
+  - Uses `react-force-graph-2d` (2D-only) to avoid VR dependencies. Strokes via built-in `linkColor/linkWidth`, custom label painter guarded for unresolved endpoints.
 - `src/components/graph-controls.tsx` — workspace filters, view modes, search.
 - `src/components/object-details-panel.tsx` — Shadcn panel/drawer with node/link details.
 - `src/hooks/use-blue-dolphin-visualization.ts` — data load/transform/state; cache and filters.
+  - Preloads small samples of Objects and Relations on mount to populate dropdowns persistently.
+  - Loads Objects first; constructs a capped ID-constrained Relations filter; if the server rejects long OR filters, retries with the base relations filter.
 - `src/lib/blue-dolphin-visualization-utils.ts` — transformer utilities and helpers.
 - `src/types/blue-dolphin-visualization.ts` — interfaces for raw and visual models.
 

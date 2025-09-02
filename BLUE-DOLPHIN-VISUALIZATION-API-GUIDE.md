@@ -29,7 +29,8 @@
 
 #### Caching strategy (client-side hook)
 - Key: `endpoint|filter|top`.
-- Store JSON payloads in a `Map` (or React Query if desired) with 5-minute TTL.
+- Store JSON payloads in a `Map` with 5-minute TTL.
+- Preload: on first render, fetch small samples of `/Objects` and `/Relations` to populate dropdown options before user clicks Load.
 - Invalidate on workspace or view mode change when filter differs.
 
 #### Pagination
@@ -39,6 +40,7 @@
 #### Error handling
 - Surface readable message and include constructed query parts for debugging (redact auth).
 - Distinguish upstream OData error vs network.
+- Fallback for relations: if long OR-chain of object IDs triggers 400, retry with base relations filter without ID clause.
 
 #### Example composed queries (debug-only, redacted)
 ```text

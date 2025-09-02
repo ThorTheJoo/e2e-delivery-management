@@ -604,10 +604,7 @@ export default function HomePage() {
               <PencilRuler className="h-4 w-4" />
               <span className="hidden sm:inline">Solution Model</span>
             </TabsTrigger>
-            <TabsTrigger value="etom" className="flex items-center space-x-2">
-              <Route className="h-4 w-4" />
-              <span className="hidden sm:inline">eTOM</span>
-            </TabsTrigger>
+
             <TabsTrigger value="estimation" className="flex items-center space-x-2">
               <Calculator className="h-4 w-4" />
               <span className="hidden sm:inline">Estimation</span>
@@ -705,6 +702,63 @@ export default function HomePage() {
                 </CardContent>
               </Card>
             </div>
+
+            {/* eTOM Processes Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Route className="h-5 w-5" />
+                  <span>eTOM Processes</span>
+                </CardTitle>
+                <CardDescription>Enterprise Tomography Operations Map processes and effort breakdowns</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {etomProcesses.map((process) => (
+                    <div key={process.id} className="p-4 border rounded-lg">
+                      <div className="mb-3">
+                        <h3 className="font-semibold text-lg">Level {process.level}: {process.name}</h3>
+                        <p className="text-sm text-muted-foreground">{process.description}</p>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <div className="text-sm font-medium mb-2">Effort Breakdown</div>
+                          <div className="space-y-2">
+                            <div className="flex justify-between">
+                              <span className="text-sm">Business Analyst:</span>
+                              <span className="font-medium">{process.baseEffort.businessAnalyst}d</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-sm">Solution Architect:</span>
+                              <span className="font-medium">{process.baseEffort.solutionArchitect}d</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-sm">Developer:</span>
+                              <span className="font-medium">{process.baseEffort.developer}d</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-sm">QA Engineer:</span>
+                              <span className="font-medium">{process.baseEffort.qaEngineer}d</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium mb-2">Complexity Factors</div>
+                          <div className="space-y-2">
+                            {Object.entries(process.complexityFactors).map(([key, value]) => (
+                              <div key={key} className="flex justify-between">
+                                <span className="text-sm capitalize">{key.replace(/([A-Z])/g, ' $1')}:</span>
+                                <span className="font-medium">{value}x</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* TMF Capabilities Tab */}
@@ -1116,57 +1170,7 @@ export default function HomePage() {
             </Card>
           </TabsContent>
 
-          {/* eTOM Processes Tab */}
-          <TabsContent value="etom" className="space-y-6">
-            <div className="space-y-4">
-              {etomProcesses.map((process) => (
-                <Card key={process.id}>
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <span>Level {process.level}: {process.name}</span>
-                    </CardTitle>
-                    <CardDescription>{process.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <div className="text-sm font-medium mb-2">Effort Breakdown</div>
-                        <div className="space-y-2">
-                          <div className="flex justify-between">
-                            <span className="text-sm">Business Analyst:</span>
-                            <span className="font-medium">{process.baseEffort.businessAnalyst}d</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-sm">Solution Architect:</span>
-                            <span className="font-medium">{process.baseEffort.solutionArchitect}d</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-sm">Developer:</span>
-                            <span className="font-medium">{process.baseEffort.developer}d</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-sm">QA Engineer:</span>
-                            <span className="font-medium">{process.baseEffort.qaEngineer}d</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium mb-2">Complexity Factors</div>
-                        <div className="space-y-2">
-                          {Object.entries(process.complexityFactors).map(([key, value]) => (
-                            <div key={key} className="flex justify-between">
-                              <span className="text-sm capitalize">{key.replace(/([A-Z])/g, ' $1')}:</span>
-                              <span className="font-medium">{value}x</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
+
 
           {/* Estimation Tab */}
           <TabsContent value="estimation" className="space-y-6">

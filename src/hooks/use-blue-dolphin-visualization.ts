@@ -151,6 +151,38 @@ export function useBlueDolphinVisualization(config: BlueDolphinConfig): UseBlueD
     return { workspaces, relationTypes, relationNames, sourceDefinitions, targetDefinitions };
   }, [nodes, links]);
 
+  // Preload options on first hook usage (persist filter lists before user clicks Load)
+  // Use a light call to fetch a small objects sample and relations to populate dropdowns.
+  // Does not alter the graph until the user clicks Load.
+  const [preloaded, setPreloaded] = useState(false);
+  if (!preloaded) {
+    setPreloaded(true);
+    (async () => {
+      try {
+        const preloadObjectsBody = {
+          action: 'get-objects-enhanced',
+          config,
+          data: { endpoint: '/Objects', filter: '', top: 25, orderby: 'Title asc', moreColumns: true }
+        };
+        const preloadRelationsBody = {
+          action: 'get-objects-enhanced',
+          config,
+          data: { endpoint: '/Relations', filter: '', top: 25, moreColumns: true }
+        };
+        const [po, pr] = await Promise.all([
+          fetchWithCache('pre-obj|', preloadObjectsBody),
+          fetchWithCache('pre-rel|', preloadRelationsBody)
+        ]);
+        if (po?.success || pr?.success) {
+          const objs = (po?.data || []) as BlueDolphinObjectEnhanced[];
+          const rels = (pr?.data || []) as any[];
+          const existing = dataSnapshotRef.current;
+          dataSnapshotRef.current = { objects: existing ? (existing.objects.length ? existing.objects : objs) : objs, relations: existing ? (existing.relations.length ? existing.relations : rels) : rels };
+        }
+      } catch {}
+    })();
+  }
+
   return { nodes, links, loading, error, filters, setFilters, loadData, available };
 }
 
