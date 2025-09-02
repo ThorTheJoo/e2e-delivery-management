@@ -16,6 +16,7 @@ import { NavigationSidebar } from '@/components/navigation-sidebar';
 import { SETImport } from '@/components/set-import';
 import { MiroBoardCreator } from '@/components/miro-board-creator';
 import { BlueDolphinIntegration } from '@/components/blue-dolphin-integration';
+import { BlueDolphinVisualization } from '@/components/blue-dolphin-visualization';
 import { BlueDolphinConfiguration } from '@/components/blue-dolphin-configuration';
 import { MiroConfiguration } from '@/components/miro-configuration';
 import { MiroSetupGuide } from '@/components/miro-setup-guide';
@@ -92,7 +93,7 @@ export default function HomePage() {
   const [isSpecSyncExpanded, setIsSpecSyncExpanded] = useState(false);
   const [isTmfManagerExpanded, setIsTmfManagerExpanded] = useState(false);
   const [isTmfCapabilitiesExpanded, setIsTmfCapabilitiesExpanded] = useState(false);
-  const [solutionModelSections, setSolutionModelSections] = useState<Set<string>>(new Set(['domain-management', 'capabilities', 'requirements-sync', 'object-data']));
+  const [solutionModelSections, setSolutionModelSections] = useState<Set<string>>(new Set(['domain-management', 'capabilities', 'requirements-sync', 'object-data', 'visualization']));
   const [setDomainEfforts, setSetDomainEfforts] = useState<Record<string, number>>({});
   const [setMatchedWorkPackages, setSetMatchedWorkPackages] = useState<Record<string, any>>({});
   const [tmfDomains, setTmfDomains] = useState<TMFOdaDomain[]>([]);
@@ -957,7 +958,7 @@ export default function HomePage() {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => setSolutionModelSections(new Set(['domain-management', 'capabilities', 'requirements-sync', 'object-data']))}
+                  onClick={() => setSolutionModelSections(new Set(['domain-management', 'capabilities', 'requirements-sync', 'object-data', 'visualization']))}
                 >
                   Expand All
                 </Button>
@@ -1067,6 +1068,40 @@ export default function HomePage() {
               {solutionModelSections.has('object-data') && (
                 <CardContent>
                   <BlueDolphinIntegration 
+                    config={{
+                      protocol: 'ODATA',
+                      apiUrl: 'https://csgipoc.odata.bluedolphin.app',
+                      odataUrl: 'https://csgipoc.odata.bluedolphin.app',
+                      apiKey: '',
+                      username: 'csgipoc',
+                      password: 'ef498b94-732b-46c8-a24c-65fbd27c1482'
+                    }}
+                  />
+                </CardContent>
+              )}
+            </Card>
+
+            {/* Visualization (Blue Dolphin Graph) */}
+            <Card>
+              <CardHeader 
+                className="cursor-pointer hover:bg-gray-50 transition-colors"
+                onClick={() => toggleSolutionModelSection('visualization')}
+              >
+                <CardTitle className="flex items-center justify-between">
+                  <span>Visualization (Blue Dolphin Graph)</span>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                    {solutionModelSections.has('visualization') ? (
+                      <ChevronDown className="h-4 w-4" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4" />
+                    )}
+                  </Button>
+                </CardTitle>
+                <CardDescription>Explore objects as nodes and relationships as links with dedicated visualization filters</CardDescription>
+              </CardHeader>
+              {solutionModelSections.has('visualization') && (
+                <CardContent>
+                  <BlueDolphinVisualization 
                     config={{
                       protocol: 'ODATA',
                       apiUrl: 'https://csgipoc.odata.bluedolphin.app',
