@@ -43,6 +43,18 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
+interface BuildInfo {
+  version: string
+  branch: string
+  commitHash: string
+  commitShort: string
+  commitDate: string
+  buildTime: string
+  node: string
+  next: string
+  env: string
+}
+
 export default function HomePage() {
   const [project, setProject] = useState<Project | null>({
     id: 'INIT-001',
@@ -64,6 +76,7 @@ export default function HomePage() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [loading, setLoading] = useState(true);
+  const [buildInfo, setBuildInfo] = useState<BuildInfo | null>(null);
 
   // Handle tab changes and reset expanded states
   const handleTabChange = (tab: string) => {
@@ -247,6 +260,14 @@ export default function HomePage() {
     }, 1000); // Reduced to 1 second timeout
 
     return () => clearTimeout(timeoutId);
+  }, []);
+
+  // Fetch build info (client-side, non-blocking)
+  useEffect(() => {
+    fetch('/api/build-info')
+      .then(r => r.ok ? r.json() : null)
+      .then((info: BuildInfo | null) => info && setBuildInfo(info))
+      .catch(() => {});
   }, []);
 
   // Load saved SpecSync data
@@ -559,7 +580,9 @@ export default function HomePage() {
               <Network className="h-8 w-8" />
               <div>
                 <h1 className="text-2xl font-bold">CSG Delivery Orchestrator</h1>
-                <p className="text-tmf-100">v1.0 - ODA 2025 Compliant</p>
+                <p className="text-tmf-100">
+                  v{buildInfo?.version ?? '1.0'} - ODA 2025 Compliant
+                </p>
               </div>
             </div>
             <div className="flex items-center space-x-6">
@@ -575,6 +598,17 @@ export default function HomePage() {
                 <div className="text-sm text-tmf-100">Customer</div>
                 <div className="font-semibold">{project.customer}</div>
               </div>
+              {buildInfo && (
+                <div className="text-right hidden md:block">
+                  <div className="text-sm text-tmf-100">Build</div>
+                  <div className="font-semibold">
+                    {buildInfo.branch}@{buildInfo.commitShort}
+                  </div>
+                  <div className="text-xs text-tmf-100">
+                    {new Date(buildInfo.buildTime).toLocaleString()}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

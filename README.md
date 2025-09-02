@@ -4,14 +4,13 @@
 
 The E2E Delivery Management System is a comprehensive platform for managing end-to-end delivery processes, integrating with various enterprise systems including Blue Dolphin, Azure DevOps, Miro, and SpecSync. The system provides TMF ODA 2025 compliant architecture management, requirement tracking, and delivery orchestration capabilities.
 
-## 🚀 v1.25.0
+## 🚀 v1.26.0
 
 ### Highlights
-- Fix: Prevent SSR runtime error by guarding browser-only APIs in ADO service.
-- Fix: Eliminate temporal dead zone error by moving `updateRequirementCounts` above effects.
-- Fix: Remove unused imports/vars; escape JSX quotes in Miro and ADO components.
-- Types: Replace many `any` occurrences with safer types across utils, hooks, services, and ADO types.
-- DX: Stabilize dev server by clearing `.next` cache and binding to free ports.
+- Build Info: Added `/api/build-info` and header display of version, branch, commit, and build time.
+- Fix: Remaining lint warnings enumerated and tracked; added typings across services and hooks.
+- UI: Header now shows code version details for quick validation in all environments.
+- DX: Runtime hygiene scripts for cache clear/port selection retained.
 
 ### New Features
 
@@ -26,6 +25,7 @@ The E2E Delivery Management System is a comprehensive platform for managing end-
 ### Upgrade Notes
 - Requires Node 18+ and Next.js 14.2.32.
 - After pulling, run `npm install` and restart dev on a clean port (e.g., `npm run dev -- -p 3011`).
+- Header build details are fetched from `/api/build-info`; ensure the repo has Git metadata.
 
 ## Key Components
 
