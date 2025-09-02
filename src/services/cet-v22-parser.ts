@@ -95,11 +95,27 @@ export class CETv22ParserService {
   private processDemandSheet(sheetData: any[][], sheetName: string): CETv22ResourceDemand[] {
     const demands: CETv22ResourceDemand[] = [];
 
-    if (sheetData.length < 2) return demands; // Need at least header + one data row
+    if (sheetData.length < 6) return demands; // Need at least 6 rows for Ph1Demand structure
 
-    const headers = sheetData[0];
+    // For Ph1Demand sheet, headers are in row 3 (index 2), data starts from row 6 (index 5)
+    const headers = sheetName === 'Ph1Demand' ? sheetData[2] : sheetData[0];
+    const startRowIndex = sheetName === 'Ph1Demand' ? 5 : 1; // Start from row 6 for Ph1Demand
+    
+    // Debug: Log the headers for Ph1Demand sheet
+    if (sheetName === 'Ph1Demand') {
+      console.log('processDemandSheet - Ph1Demand headers:', headers);
+      console.log('processDemandSheet - Ph1Demand headers length:', headers.length);
+      headers.forEach((header, index) => {
+        console.log(`processDemandSheet - Header ${index}: "${header}"`);
+      });
+      
+      // Also log first few data rows to see the structure
+      for (let i = startRowIndex; i < Math.min(startRowIndex + 3, sheetData.length); i++) {
+        console.log(`processDemandSheet - Ph1Demand data row ${i}:`, sheetData[i]);
+      }
+    }
 
-    for (let i = 1; i < sheetData.length; i++) {
+    for (let i = startRowIndex; i < sheetData.length; i++) {
       const row = sheetData[i];
       if (this.isValidDemandRow(row, headers)) {
         const demand = this.createResourceDemand(row, headers, sheetName);
@@ -114,24 +130,70 @@ export class CETv22ParserService {
 
   private createResourceDemand(row: any[], headers: string[], sheetName: string): CETv22ResourceDemand | null {
     try {
-      const weekNumber = parseInt(this.getCellValue(row, headers, 'Week Number'));
-      const effortHours = parseFloat(this.getCellValue(row, headers, 'Effort Hours') || '0');
-      const resourceCount = parseInt(this.getCellValue(row, headers, 'Resource Count') || '0');
+      let weekNumber: number;
+      let effortHours: number;
+      let resourceCount: number;
+      
+      if (sheetName === 'Ph1Demand') {
+        // For Ph1Demand, we don't have weekly breakdown, so use default values
+        weekNumber = 1; // Default to week 1
+        effortHours = 0; // Will be overridden by totalMandateEffort
+        resourceCount = 1; // Default to 1 resource
+      } else {
+        // For other sheets, use the standard logic
+        weekNumber = parseInt(this.getCellValue(row, headers, 'Week Number'));
+        effortHours = parseFloat(this.getCellValue(row, headers, 'Effort Hours') || '0');
+        resourceCount = parseInt(this.getCellValue(row, headers, 'Resource Count') || '0');
+      }
 
       if (isNaN(weekNumber) || isNaN(effortHours) || isNaN(resourceCount)) {
         return null;
       }
 
-      return {
-        weekNumber,
-        weekDate: this.getCellValue(row, headers, 'Week Date') || '',
-        jobProfile: this.getCellValue(row, headers, 'Job Profile') || 'Unknown',
-        effortHours,
-        resourceCount,
-        productType: this.getProductTypeFromSheet(sheetName),
-        phaseNumber: this.getPhaseFromSheet(sheetName),
-        complexityLevel: this.getCellValue(row, headers, 'Complexity Level')
-      };
+        // Extract domain and total mandate effort for Ph1Demand sheet
+        let domain: string | undefined;
+        let totalMandateEffort: number | undefined;
+        
+        if (sheetName === 'Ph1Demand') {
+          console.log('createResourceDemand - Processing Ph1Demand sheet');
+          console.log('createResourceDemand - Row data:', row);
+          console.log('createResourceDemand - Headers:', headers);
+          console.log('createResourceDemand - Row length:', row.length);
+          console.log('createResourceDemand - Column M (index 12):', row[12]);
+          console.log('createResourceDemand - Column O (index 14):', row[14]);
+          
+          // Use direct index access since we know the exact positions
+          domain = this.getCellValueByIndex(row, 12); // Column M (index 12)
+          const totalEffortStr = this.getCellValueByIndex(row, 14); // Column O (index 14)
+          totalMandateEffort = parseFloat(totalEffortStr) || undefined;
+          
+          console.log('createResourceDemand - Extracted domain:', domain);
+          console.log('createResourceDemand - Extracted totalEffortStr:', totalEffortStr);
+          console.log('createResourceDemand - Parsed totalMandateEffort:', totalMandateEffort);
+        }
+
+                        const demand = {
+                  weekNumber,
+                  weekDate: this.getCellValue(row, headers, 'Week Date') || '',
+                  jobProfile: sheetName === 'Ph1Demand' ? this.getCellValueByIndex(row, 0) : (this.getCellValue(row, headers, 'Job Profile') || 'Unknown'),
+                  effortHours,
+                  resourceCount,
+                  productType: this.getProductTypeFromSheet(sheetName),
+                  phaseNumber: this.getPhaseFromSheet(sheetName),
+                  complexityLevel: this.getCellValue(row, headers, 'Complexity Level'),
+                  domain,
+                  totalMandateEffort
+                };
+
+                // Debug logging for Ph1Demand
+                if (sheetName === 'Ph1Demand') {
+                  console.log('createResourceDemand - Final demand object:', demand);
+                  console.log('createResourceDemand - domain field:', demand.domain);
+                  console.log('createResourceDemand - totalMandateEffort field:', demand.totalMandateEffort);
+                  console.log('createResourceDemand - phaseNumber field:', demand.phaseNumber);
+                }
+
+                return demand;
     } catch (error) {
       console.warn('Error creating resource demand:', error);
       return null;
@@ -406,7 +468,22 @@ export class CETv22ParserService {
     return index !== -1 && row[index] ? String(row[index]) : '';
   }
 
+  private getCellValueByIndex(row: any[], index: number): string {
+    return index < row.length && row[index] ? String(row[index]) : '';
+  }
+
   private isValidDemandRow(row: any[], headers: string[]): boolean {
+    // For Ph1Demand sheet, we know the structure - just check if we have basic data
+    if (headers.length > 14 && row.length > 14) {
+      // Check if we have a valid domain (column M, index 12) and total effort (column O, index 14)
+      const domain = String(row[12] || '').trim();
+      const totalEffort = parseFloat(String(row[14] || ''));
+      
+      // Valid if we have a domain and some effort value
+      return domain.length > 0 && !isNaN(totalEffort) && totalEffort > 0;
+    }
+    
+    // For other sheets, use the original logic
     const weekIndex = headers.findIndex(h => String(h || '').toLowerCase().includes('week number'));
     const effortIndex = headers.findIndex(h => String(h || '').toLowerCase().includes('effort hours'));
 

@@ -351,6 +351,8 @@ export interface CETv22ResourceDemand {
   productType: string;
   phaseNumber: number;
   complexityLevel?: string;
+  domain?: string; // Column M from Ph1Demand
+  totalMandateEffort?: number; // Column O from Ph1Demand
 }
 
 export interface CETv22LookupValue {
@@ -399,11 +401,20 @@ export interface CETv22ResourceAnalysis {
   resourceUtilization: number;
   roleBreakdown: CETv22RoleEffort[];
   timelineAnalysis: CETv22TimelineData[];
+  domainBreakdown: CETv22DomainEffort[]; // New field for domain aggregation
 }
 
 export interface CETv22RoleEffort {
   role: string;
   effort: number;
+  percentage: number;
+}
+
+// New interface for domain effort breakdown
+export interface CETv22DomainEffort {
+  domain: string;
+  totalEffort: number;
+  roleBreakdown: CETv22RoleEffort[];
   percentage: number;
 }
 
