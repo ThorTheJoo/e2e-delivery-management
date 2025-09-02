@@ -123,6 +123,13 @@ export function NavigationSidebar({ activeTab, onTabChange, onScrollToSection }:
           icon: <Rocket className="h-4 w-4" />,
           action: 'tab',
           target: 'tmf-demo'
+        },
+        {
+          id: 'etom',
+          label: 'eTOM Processes',
+          icon: <Route className="h-4 w-4" />,
+          action: 'tab',
+          target: 'etom'
         }
       ]
     },
