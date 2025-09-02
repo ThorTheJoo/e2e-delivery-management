@@ -4,7 +4,7 @@ import React, { useMemo, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import type { BlueDolphinVisualLink, BlueDolphinVisualNode, VisualizationViewMode } from '@/types/blue-dolphin-visualization';
 
-const ForceGraph2D = dynamic(() => import('react-force-graph-2d'), { ssr: false }) as any;
+const ForceGraph2D = dynamic(() => import('react-force-graph-2d'), { ssr: false }) as unknown as React.ComponentType<any>;
 
 interface BlueDolphinGraphProps {
   nodes: BlueDolphinVisualNode[];
@@ -15,7 +15,7 @@ interface BlueDolphinGraphProps {
 }
 
 export function BlueDolphinGraph({ nodes, links, viewMode, onNodeClick, onLinkClick }: BlueDolphinGraphProps) {
-  const fgRef = useRef<any>();
+  const fgRef = useRef<unknown>();
 
   const graphData = useMemo(() => ({ nodes, links }), [nodes, links]);
 

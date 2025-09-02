@@ -1,7 +1,16 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import type { BlueDolphinConfig, BlueDolphinObjectEnhanced } from '@/types/blue-dolphin';
 import type { BlueDolphinVisualLink, BlueDolphinVisualNode, VisualizationFilters, VisualizationViewMode } from '@/types/blue-dolphin-visualization';
-import { transformObjectsToNodes, transformRelationsToLinks, resolveLinkEndpoints, uniqueSorted } from '@/lib/blue-dolphin-visualization-utils';
+import { transformObjectsToNodes, transformRelationsToLinks, resolveLinkEndpoints, uniqueSorted, type BlueDolphinRelation } from '@/lib/blue-dolphin-visualization-utils';
+
+interface BlueDolphinApiResponse<T = unknown> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  count?: number;
+  total?: number;
+  enhancedFields?: string[];
+}
 
 interface UseBlueDolphinVisualizationResult {
   nodes: BlueDolphinVisualNode[];
@@ -36,8 +45,8 @@ export function useBlueDolphinVisualization(config: BlueDolphinConfig): UseBlueD
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFiltersState] = useState<VisualizationFilters>(DEFAULT_FILTERS);
-  const cacheRef = useRef<Map<string, any>>(new Map());
-  const dataSnapshotRef = useRef<{ objects: BlueDolphinObjectEnhanced[]; relations: any[] } | null>(null);
+  const cacheRef = useRef<Map<string, { timestamp: number; data: unknown }>>(new Map());
+  const dataSnapshotRef = useRef<{ objects: BlueDolphinObjectEnhanced[]; relations: Record<string, unknown>[] } | null>(null);
 
   const setFilters = useCallback((f: Partial<VisualizationFilters>) => {
     setFiltersState((prev) => ({ ...prev, ...f }));
@@ -59,12 +68,12 @@ export function useBlueDolphinVisualization(config: BlueDolphinConfig): UseBlueD
     return parts.join(' and ');
   }, [filters.workspace, filters.relationType, filters.relationName, filters.sourceDefinition, filters.targetDefinition]);
 
-  const fetchWithCache = useCallback(async (key: string, body: any) => {
+  const fetchWithCache = useCallback(async (key: string, body: Record<string, unknown>): Promise<BlueDolphinApiResponse> => {
     const now = Date.now();
     const cached = cacheRef.current.get(key);
-    if (cached && now - cached.timestamp < 5 * 60 * 1000) return cached.data;
+    if (cached && now - cached.timestamp < 5 * 60 * 1000) return cached.data as BlueDolphinApiResponse;
     const res = await fetch('/api/blue-dolphin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-    const json = await res.json();
+    const json: BlueDolphinApiResponse = await res.json();
     cacheRef.current.set(key, { timestamp: now, data: json });
     return json;
   }, []);
@@ -82,7 +91,7 @@ export function useBlueDolphinVisualization(config: BlueDolphinConfig): UseBlueD
       };
       const objectsJson = await fetchWithCache(`obj|${objectsBody.data.filter}|${filters.resultsTop}`, objectsBody);
       if (!objectsJson.success) throw new Error(objectsJson.error || 'Failed objects load');
-      const objects = (objectsJson.data || []) as BlueDolphinObjectEnhanced[];
+      const objects = (objectsJson.data as BlueDolphinObjectEnhanced[] | undefined) || [];
 
       // 2) Build relations filter constrained to fetched object IDs to guarantee edges
       const objectIds = objects.map(o => String(o.ID)).filter(Boolean);
@@ -112,11 +121,11 @@ export function useBlueDolphinVisualization(config: BlueDolphinConfig): UseBlueD
         relationsJson = await fetchWithCache(`rel|${fallbackRelBody.data.filter}|${filters.resultsTop}`, fallbackRelBody);
         if (!relationsJson.success) throw new Error(relationsJson.error || 'Failed relations load');
       }
-      const relations = (relationsJson.data || []) as any[];
+      const relations = (relationsJson.data as BlueDolphinRelation[] | undefined) || [];
       dataSnapshotRef.current = { objects, relations };
 
       const nodeList = transformObjectsToNodes(objects);
-      const linkList = transformRelationsToLinks(relations as any);
+      const linkList = transformRelationsToLinks(relations);
       // Resolve endpoints; if resolution yields zero (IDs mismatch), fall back to string IDs (library resolves lazily)
       const resolved = resolveLinkEndpoints(nodeList, linkList);
       const linksForGraph = resolved.length > 0 ? resolved : linkList;
@@ -139,15 +148,15 @@ export function useBlueDolphinVisualization(config: BlueDolphinConfig): UseBlueD
     if (!snap) return { workspaces: [], relationTypes: [], relationNames: [], sourceDefinitions: [], targetDefinitions: [] };
     const baseWorkspaces = uniqueSorted([
       ...snap.objects.map(o => o.Workspace),
-      ...snap.relations.map((r: any) => r.BlueDolphinObjectWorkspaceName),
-      ...snap.relations.map((r: any) => r.RelatedBlueDolphinObjectWorkspaceName)
+      ...snap.relations.map((r) => String(r.BlueDolphinObjectWorkspaceName || '')),
+      ...snap.relations.map((r) => String(r.RelatedBlueDolphinObjectWorkspaceName || ''))
     ]);
     const additionalWorkspaces = ['CSG International','Product Architecture','Customer Q','Simulated Case Study','RR'];
     const workspaces = uniqueSorted([ ...baseWorkspaces, ...additionalWorkspaces ]);
-    const relationTypes = uniqueSorted(snap.relations.map((r: any) => r.Type));
-    const relationNames = uniqueSorted(snap.relations.map((r: any) => r.Name));
-    const sourceDefinitions = uniqueSorted(snap.relations.map((r: any) => r.BlueDolphinObjectDefinitionName));
-    const targetDefinitions = uniqueSorted(snap.relations.map((r: any) => r.RelatedBlueDolphinObjectDefinitionName));
+    const relationTypes = uniqueSorted(snap.relations.map((r) => String(r.Type || '')));
+    const relationNames = uniqueSorted(snap.relations.map((r) => String(r.Name || '')));
+    const sourceDefinitions = uniqueSorted(snap.relations.map((r) => String(r.BlueDolphinObjectDefinitionName || '')));
+    const targetDefinitions = uniqueSorted(snap.relations.map((r) => String(r.RelatedBlueDolphinObjectDefinitionName || '')));
     return { workspaces, relationTypes, relationNames, sourceDefinitions, targetDefinitions };
   }, [nodes, links]);
 
@@ -155,7 +164,8 @@ export function useBlueDolphinVisualization(config: BlueDolphinConfig): UseBlueD
   // Use a light call to fetch a small objects sample and relations to populate dropdowns.
   // Does not alter the graph until the user clicks Load.
   const [preloaded, setPreloaded] = useState(false);
-  if (!preloaded) {
+  useMemo(() => {
+    if (preloaded) return;
     setPreloaded(true);
     (async () => {
       try {
@@ -175,13 +185,13 @@ export function useBlueDolphinVisualization(config: BlueDolphinConfig): UseBlueD
         ]);
         if (po?.success || pr?.success) {
           const objs = (po?.data || []) as BlueDolphinObjectEnhanced[];
-          const rels = (pr?.data || []) as any[];
+          const rels = (pr?.data || []) as BlueDolphinRelation[];
           const existing = dataSnapshotRef.current;
           dataSnapshotRef.current = { objects: existing ? (existing.objects.length ? existing.objects : objs) : objs, relations: existing ? (existing.relations.length ? existing.relations : rels) : rels };
         }
       } catch {}
     })();
-  }
+  }, [preloaded, config, fetchWithCache]);
 
   return { nodes, links, loading, error, filters, setFilters, loadData, available };
 }

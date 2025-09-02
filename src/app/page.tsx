@@ -26,7 +26,6 @@ import { useToast, ToastContainer } from '@/components/ui/toast';
 import { mapSpecSyncToCapabilities, calculateUseCaseCountsByCapability, saveSpecSyncData, loadSpecSyncData, clearSpecSyncData } from '@/lib/specsync-utils';
 import { 
   Network, 
-  Lightbulb, 
   Route, 
   Calculator, 
   Calendar, 
@@ -34,8 +33,6 @@ import {
   FileText, 
   AlertTriangle,
   Flag,
-  Users,
-  Clock,
   TrendingUp,
   BarChart3,
   ChevronDown,
@@ -63,7 +60,7 @@ export default function HomePage() {
   const [workPackages, setWorkPackages] = useState<WorkPackage[]>([]);
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [risks, setRisks] = useState<Risk[]>([]);
-  const [dependencies, setDependencies] = useState<Dependency[]>([]);
+  const [_dependencies, setDependencies] = useState<Dependency[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [loading, setLoading] = useState(true);
@@ -94,8 +91,9 @@ export default function HomePage() {
   const [isTmfManagerExpanded, setIsTmfManagerExpanded] = useState(false);
   const [isTmfCapabilitiesExpanded, setIsTmfCapabilitiesExpanded] = useState(false);
   const [solutionModelSections, setSolutionModelSections] = useState<Set<string>>(new Set(['domain-management', 'capabilities', 'requirements-sync', 'object-data', 'visualization']));
-  const [setDomainEfforts, setSetDomainEfforts] = useState<Record<string, number>>({});
-  const [setMatchedWorkPackages, setSetMatchedWorkPackages] = useState<Record<string, any>>({});
+  interface MatchedWorkPackageEntry { workPackages: string[]; effort: number }
+  const [_domainEfforts, setDomainEfforts] = useState<Record<string, number>>({});
+  const [matchedWorkPackages, setMatchedWorkPackages] = useState<Record<string, MatchedWorkPackageEntry>>({});
   const [tmfDomains, setTmfDomains] = useState<TMFOdaDomain[]>([]);
   const [specSyncItems, setSpecSyncItems] = useState<SpecSyncItem[]>([]);
   
@@ -334,12 +332,23 @@ export default function HomePage() {
     }
   }, []);
 
+  const updateRequirementCounts = useCallback((state: SpecSyncState) => {
+    // Only update counts if tmfCapabilities are loaded
+    if (tmfCapabilities.length > 0) {
+      const mapping = mapSpecSyncToCapabilities(state.items, tmfCapabilities);
+      setRequirementCounts(mapping.countsByCapability);
+      
+      const useCaseMapping = calculateUseCaseCountsByCapability(state.items, tmfCapabilities);
+      setUseCaseCounts(useCaseMapping);
+    }
+  }, [tmfCapabilities]);
+
   // Update requirement counts when tmfCapabilities are loaded
   useEffect(() => {
     if (specSyncState && tmfCapabilities.length > 0) {
       updateRequirementCounts(specSyncState);
     }
-  }, [tmfCapabilities, specSyncState]);
+  }, [tmfCapabilities, specSyncState, updateRequirementCounts]);
 
   // Initialize default TMF domains if none exist
   useEffect(() => {
@@ -432,7 +441,7 @@ export default function HomePage() {
       ];
       setTmfDomains(defaultTmfDomains);
     }
-  }, []); // Changed from [tmfDomains.length] to [] to prevent infinite loop
+  }, [tmfDomains.length]);
 
   const handleSpecSyncImport = (state: SpecSyncState) => {
     console.log('handleSpecSyncImport called with:', state);
@@ -486,20 +495,11 @@ export default function HomePage() {
     setTmfDomains(tmfDomains);
   }, []);
 
-  const updateRequirementCounts = (state: SpecSyncState) => {
-    // Only update counts if tmfCapabilities are loaded
-    if (tmfCapabilities.length > 0) {
-      const mapping = mapSpecSyncToCapabilities(state.items, tmfCapabilities);
-      setRequirementCounts(mapping.countsByCapability);
-      
-      const useCaseMapping = calculateUseCaseCountsByCapability(state.items, tmfCapabilities);
-      setUseCaseCounts(useCaseMapping);
-    }
-  };
+  
 
-  const handleSETDataLoaded = (domainEfforts: Record<string, number>, matchedWorkPackages: Record<string, any>) => {
-    setSetDomainEfforts(domainEfforts);
-    setSetMatchedWorkPackages(matchedWorkPackages);
+  const handleSETDataLoaded = (domainEfforts: Record<string, number>, matched: Record<string, MatchedWorkPackageEntry>) => {
+    setDomainEfforts(domainEfforts);
+    setMatchedWorkPackages(matched);
   };
 
   if (loading) {
@@ -1185,7 +1185,7 @@ export default function HomePage() {
                 <div className="space-y-4">
                   {workPackages.map((workPackage) => {
                     // Check if this work package has SET data updates
-                    const setMatch = Object.entries(setMatchedWorkPackages).find(([domain, match]) => 
+                    const setMatch = Object.entries(matchedWorkPackages).find(([_domain, match]) => 
                       match.workPackages.includes(workPackage.name)
                     );
                     

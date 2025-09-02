@@ -38,7 +38,7 @@ export type ADOFieldOperation = 'add' | 'remove' | 'replace' | 'move' | 'copy' |
 export interface ADOWorkItemField {
   op: ADOFieldOperation;
   path: string;
-  value: any;
+  value: unknown;
   from?: string;
 }
 
@@ -58,11 +58,11 @@ export interface ADOWorkItem {
   type: ADOWorkItemTypeName;
   title: string;
   description: string;
-  fields: Record<string, any>;
+  fields: Record<string, unknown>;
   relationships?: ADORelationship[];
   url?: string;
   rev?: number;
-  _links?: Record<string, any>;
+  _links?: Record<string, unknown>;
 }
 
 // ADO Work Item Creation Request
@@ -87,8 +87,8 @@ export interface ADOApiResponse<T> {
 export interface ADOWorkItemResponse {
   id: number;
   rev: number;
-  fields: Record<string, any>;
-  _links: Record<string, any>;
+  fields: Record<string, unknown>;
+  _links: Record<string, unknown>;
   url: string;
 }
 
@@ -124,7 +124,7 @@ export interface ADOWorkItemTypeField {
   description: string;
   required: boolean;
   allowedValues?: string[];
-  defaultValue?: any;
+  defaultValue?: unknown;
 }
 
 // ADO Area Path
@@ -210,7 +210,7 @@ export interface ADOTemplate {
   name: string;
   description: string;
   type: ADOWorkItemTypeName;
-  fields: Record<string, any>;
+  fields: Record<string, unknown>;
   relationships: string[];
   tags: string[];
   createdAt: string;
@@ -231,7 +231,7 @@ export interface ADOIntegrationSettings {
 // ADO Error Response
 export interface ADOErrorResponse {
   id: string;
-  innerException: any;
+  innerException: unknown;
   message: string;
   typeName: string;
   typeKey: string;
@@ -254,7 +254,7 @@ export interface ADOWorkItemLink {
   sourceId: number;
   targetId: number;
   linkType: string;
-  attributes?: Record<string, any>;
+  attributes?: Record<string, unknown>;
 }
 
 // ADO Bulk Operation
@@ -283,8 +283,8 @@ export interface ADOFieldMapping {
   sourceField: string;
   targetField: string;
   transformation?: 'none' | 'uppercase' | 'lowercase' | 'capitalize' | 'custom';
-  customTransform?: (value: any) => any;
-  defaultValue?: any;
+  customTransform?: (value: unknown) => unknown;
+  defaultValue?: unknown;
   required: boolean;
 }
 
@@ -304,7 +304,7 @@ export interface ADOIntegrationLogEntry {
   timestamp: string;
   level: 'info' | 'warning' | 'error' | 'debug';
   message: string;
-  details?: any;
+  details?: unknown;
   workItemId?: string;
   operation?: string;
   duration?: number;
@@ -316,7 +316,7 @@ export interface ADONotification {
   type: 'success' | 'warning' | 'error' | 'info';
   title: string;
   message: string;
-  details?: any;
+  details?: unknown;
   timestamp: string;
   read: boolean;
 }
