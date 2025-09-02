@@ -15,7 +15,7 @@ import {
   ADOIntegrationLogEntry,
   ADONotification
 } from '@/types/ado';
-import { Project, TMFOdaDomain, SpecSyncItem } from '@/types';
+import { Project, TMFOdaDomain, TMFOdaCapability, SpecSyncItem } from '@/types';
 
 // ADO Service Class
 export class ADOService {
@@ -25,14 +25,20 @@ export class ADOService {
   private notifications: ADONotification[] = [];
 
   constructor() {
-    this.loadConfiguration();
+    // Avoid accessing browser-only APIs during SSR
+    if (typeof window !== 'undefined') {
+      void this.loadConfiguration();
+    }
     this.log('info', 'ADO Service initialized');
   }
 
   // Configuration Management
   async loadConfiguration(): Promise<ADOConfiguration | null> {
     try {
-      const savedConfig = localStorage.getItem('ado-configuration');
+      if (typeof window === 'undefined') {
+        return null;
+      }
+      const savedConfig = window.localStorage.getItem('ado-configuration');
       if (savedConfig) {
         this.configuration = JSON.parse(savedConfig);
         this.log('info', 'Configuration loaded from storage');
@@ -47,7 +53,9 @@ export class ADOService {
   async saveConfiguration(config: ADOConfiguration): Promise<void> {
     try {
       this.configuration = config;
-      localStorage.setItem('ado-configuration', JSON.stringify(config));
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('ado-configuration', JSON.stringify(config));
+      }
       this.log('info', 'Configuration saved successfully');
       
       // Test connection if authentication is provided
@@ -229,7 +237,7 @@ export class ADOService {
     };
   }
 
-  private generateUserStoryFromCapability(capability: any, domain: TMFOdaDomain): ADOWorkItemMapping {
+  private generateUserStoryFromCapability(capability: TMFOdaCapability, domain: TMFOdaDomain): ADOWorkItemMapping {
     return {
       sourceType: 'capability',
       sourceId: capability.id,
@@ -306,7 +314,7 @@ export class ADOService {
     return domain.capabilities.reduce((total, capability) => total + this.calculateCapabilityEffort(capability), 0);
   }
 
-  private calculateCapabilityEffort(capability: any): number {
+  private calculateCapabilityEffort(capability: TMFOdaCapability): number {
     // Default effort calculation - can be enhanced with actual effort data
     return 5; // 5 days per capability
   }
@@ -338,7 +346,7 @@ export class ADOService {
     return 'Development';
   }
 
-  private findMatchingCapability(item: SpecSyncItem, domains: TMFOdaDomain[]): any | null {
+  private findMatchingCapability(item: SpecSyncItem, domains: TMFOdaDomain[]): TMFOdaCapability | null {
     // Find capability by name match or domain match
     for (const domain of domains) {
       for (const capability of domain.capabilities) {

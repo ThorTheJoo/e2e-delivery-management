@@ -245,7 +245,7 @@ export class BlueDolphinODataService extends BlueDolphinBaseService {
     top?: number;
     skip?: number;
     moreColumns?: boolean;
-  }): Promise<ODataResponse<any>> {
+  }): Promise<ODataResponse<Record<string, unknown>>> {
     
     const queryParams = new URLSearchParams();
     
@@ -268,7 +268,7 @@ export class BlueDolphinODataService extends BlueDolphinBaseService {
     if (options.skip) queryParams.append('$skip', options.skip.toString());
 
     const endpoint = `${options.endpoint}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-    return this.odataRequest<ODataResponse<any>>(endpoint);
+    return this.odataRequest<ODataResponse<Record<string, unknown>>>(endpoint);
   }
 
   // Domain operations
