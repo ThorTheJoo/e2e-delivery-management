@@ -22,6 +22,7 @@ import { MiroConfiguration } from '@/components/miro-configuration';
 import { MiroSetupGuide } from '@/components/miro-setup-guide';
 import { ADOConfigurationComponent } from '@/components/ado-configuration';
 import { ADOIntegration } from '@/components/ado-integration';
+import { CETv22ServiceDesign } from '@/components/cet-v22/CETv22ServiceDesign';
 import { useToast, ToastContainer } from '@/components/ui/toast';
 import { mapSpecSyncToCapabilities, calculateUseCaseCountsByCapability, saveSpecSyncData, loadSpecSyncData, clearSpecSyncData } from '@/lib/specsync-utils';
 import { 
@@ -608,6 +609,10 @@ export default function HomePage() {
             <TabsTrigger value="estimation" className="flex items-center space-x-2">
               <Calculator className="h-4 w-4" />
               <span className="hidden sm:inline">Estimation</span>
+            </TabsTrigger>
+            <TabsTrigger value="service-design" className="flex items-center space-x-2">
+              <PencilRuler className="h-4 w-4" />
+              <span className="hidden sm:inline">Service Design</span>
             </TabsTrigger>
             <TabsTrigger value="scheduling" className="flex items-center space-x-2">
               <Calendar className="h-4 w-4" />
@@ -1247,6 +1252,20 @@ export default function HomePage() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Service Design Tab */}
+          <TabsContent value="service-design" className="space-y-6">
+            <CETv22ServiceDesign
+              onIntegrationComplete={(result) => {
+                console.log('CET v22.0 integration completed:', result);
+                toast.showSuccess('CET v22.0 integration completed successfully!');
+              }}
+              onError={(error) => {
+                console.error('CET v22.0 error:', error);
+                toast.showError(`CET v22.0 Error: ${error.message}`);
+              }}
+            />
           </TabsContent>
 
           {/* Scheduling Tab */}

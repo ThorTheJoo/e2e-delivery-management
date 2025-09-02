@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-This document provides a **safe, practical analysis** of the CET (Cost Estimation Template) v22 Excel file structure, focusing on **incremental, error-avoiding processing strategies**. The CET v22 file is a critical **demand planner** that quantifies delivery services for telecommunications transformation programs, and our approach ensures stable processing without compromising application functionality.
+This document provides a comprehensive analysis of the CET (Cost Estimation Template) v22 Excel file structure, which serves as the foundation for our traceability system between Specsync requirements and estimation processes. The CET v22 file is a critical **demand planner** that quantifies delivery services for telecommunications transformation programs and large projects in our software vendor delivery methodology.
 
 ### **Business Context: Software Vendor Delivery Workflow**
 The CET v22 file operates at the **presales phase** of our delivery methodology, serving as the bridge between:
@@ -11,7 +11,7 @@ The CET v22 file operates at the **presales phase** of our delivery methodology,
 
 This file enables us to quantify delivery efforts across the entire project lifecycle, from analysis and design through production deployment, ensuring competitive pricing while maintaining profitability.
 
-## **📊 File Overview & Safe Processing Strategy**
+## File Overview
 
 - **File Name**: CET v22.xlsx
 - **Total Sheets**: 27
@@ -22,24 +22,7 @@ This file enables us to quantify delivery efforts across the entire project life
 - **Delivery Phase**: Service Design Phase (Post-Requirements, Pre-Contract)
 - **Analysis Date**: September 2, 2025
 
-### **🛡️ Safe Processing Approach**
-
-#### **Incremental Sheet Processing**
-- Process sheets **one at a time** to prevent system overload
-- **Validate each sheet independently** before proceeding to the next
-- **Isolate failures** so one sheet's problems don't affect others
-
-#### **Chunked Data Loading**
-- Load large sheets in **1000-row chunks** to prevent memory issues
-- **Process chunks sequentially** with progress feedback
-- **Allow user cancellation** of long-running operations
-
-#### **Progressive Validation**
-- **Validate critical data first** (project configuration, basic structure)
-- **Defer complex validation** until basic processing is complete
-- **Provide immediate feedback** on validation issues
-
-## **Software Vendor Delivery Methodology Context**
+## Software Vendor Delivery Methodology Context
 
 ### **Presales Workflow Integration**
 The CET v22 file serves as the **quantification engine** in our software vendor delivery methodology:
@@ -77,151 +60,160 @@ The file breaks down resource demand across these key delivery areas:
 - **Governance Activities**: Risk management, compliance, stakeholder management
 - **Change Management**: Organizational change, process transformation
 
-## **🔄 Safe Sheet Structure Analysis**
+## Sheet Structure Analysis
 
-### 1. **Core Configuration Sheets (Process First)**
+### 1. Core Configuration Sheets
 
-#### **Instructions Sheet** - **Priority: Critical**
+#### **Instructions Sheet**
 - **Purpose**: User guidance and sheet navigation
 - **Rows**: 32
 - **Columns**: 3
-- **Processing Strategy**: 
-  - **Load first** to understand file structure
-  - **Extract navigation guidance** for user interface
-  - **Validate basic format** before proceeding
-- **Risk Level**: **Low** - Small, simple structure
+- **Key Content**: 
+  - Blue tab identification for input requirements
+  - Instructions for each functional area
+  - Navigation guidance for users
 
-#### **Attributes Sheet** - **Priority: Critical**
+#### **Attributes Sheet**
 - **Purpose**: Project configuration and customer attributes
 - **Rows**: 293
 - **Columns**: 7
-- **Processing Strategy**:
-  - **Process in chunks** of 50 rows
-  - **Extract project metadata** (Customer Name, Project Name, SFDC Type, Region)
-  - **Validate required fields** before proceeding
-- **Risk Level**: **Medium** - Moderate size, structured data
+- **Key Fields**:
+  - Customer Name
+  - Digital Telco
+  - Project Name (e.g., "BSS Transformation")
+  - SFDC Type (e.g., "Type 2b")
+  - Customer Facing Language (e.g., "English")
+  - Region (e.g., "AMER")
 
-#### **Summary Sheet** - **Priority: High**
+#### **Summary Sheet**
 - **Purpose**: High-level project overview and phase summary
 - **Rows**: 47
 - **Columns**: 7
-- **Processing Strategy**:
-  - **Process entirely** (small enough for single load)
-  - **Extract phase information** and project totals
-  - **Cross-validate** with Attributes sheet data
-- **Risk Level**: **Low** - Small, summary data
+- **Key Content**:
+  - Project Name and Type
+  - Phase Attributes (Phase 1-4 + Total Program)
+  - Totals alignment indicators
 
-### 2. **Product Configuration Sheets (Process Second)**
+### 2. Project Planning Sheets
 
-#### **Encompass Sheet** - **Priority: High**
-- **Purpose**: Encompass product configuration and features
+#### **Project View Sheet**
+- **Purpose**: Timeline and milestone planning
+- **Rows**: 57
+- **Columns**: 207
+- **Structure**: Week-based timeline (1-207 weeks)
+- **Key Features**: 
+  - Week-by-week project planning
+  - Milestone tracking
+  - Resource allocation timeline
+
+#### **TurboProformaInput Sheet**
+- **Purpose**: High-level project input parameters
+- **Rows**: 123
+- **Columns**: 7
+- **Content**: Project configuration parameters for estimation
+
+### 3. Phase-Based Demand Sheets
+
+#### **Phase Demand Sheets (Ph1Demand, Ph2Demand, Ph3Demand, Ph4Demand)**
+- **Purpose**: **Core Resource Demand Planning** for Commercial Modeling & Pricing
+- **Business Impact**: Directly influences cost structure, margin analysis, and competitive positioning
+- **Rows**: 85 each
+- **Columns**: 223-224
+- **Structure**: 
+  - **Resource Demand Quantification**: Skill-specific resource requirements by week
+  - **Effort Estimation Breakdown**: Hours/days per role per activity
+  - **Timeline Allocation**: Week-by-week resource allocation (1-207 weeks)
+  - **Cost Driver Mapping**: Resource rates, effort multipliers, complexity factors
+
+#### **Key Phase Demand Characteristics**:
+- **Phase 1**: 85 rows × 223 columns
+- **Phase 2**: 85 rows × 224 columns  
+- **Phase 3**: 85 rows × 224 columns
+- **Phase 4**: 85 rows × 224 columns
+
+### 4. Product/Service Configuration Sheets
+
+#### **Governance Sheet**
+- **Purpose**: Governance framework configuration
+- **Rows**: 19
+- **Columns**: 111
+- **Content**: Governance rules, policies, and procedures
+
+#### **Encompass Sheet**
+- **Purpose**: Encompass product configuration
 - **Rows**: 76
 - **Columns**: 111
-- **Processing Strategy**:
-  - **Process in chunks** of 25 rows
-  - **Extract product features** and configuration options
-  - **Map to resource requirements** for commercial modeling
-- **Risk Level**: **Medium** - Moderate size, complex structure
+- **Content**: Product features, modules, and configuration options
 
-#### **Ascendon Sheet** - **Priority: High**
-- **Purpose**: Ascendon product configuration and features
+#### **Ascendon Sheet**
+- **Purpose**: Ascendon product configuration
 - **Rows**: 55
 - **Columns**: 109
-- **Processing Strategy**:
-  - **Process in chunks** of 25 rows
-  - **Extract product features** and configuration options
-  - **Map to resource requirements** for commercial modeling
-- **Risk Level**: **Medium** - Moderate size, complex structure
+- **Content**: Product features, modules, and configuration options
 
-#### **CMA Sheet** - **Priority: High**
-- **Purpose**: CMA product configuration and features
+#### **CMA Sheet**
+- **Purpose**: CMA product configuration
 - **Rows**: 20
 - **Columns**: 114
-- **Processing Strategy**:
-  - **Process entirely** (small enough for single load)
-  - **Extract product features** and configuration options
-  - **Map to resource requirements** for commercial modeling
-- **Risk Level**: **Low** - Small size, structured data
+- **Content**: Product features, modules, and configuration options
 
-#### **ManagedService Sheet** - **Priority: Medium**
-- **Purpose**: Managed service configuration and options
+#### **ManagedService Sheet**
+- **Purpose**: Managed service configuration
 - **Rows**: 30
 - **Columns**: 42
-- **Processing Strategy**:
-  - **Process entirely** (small enough for single load)
-  - **Extract service options** and configuration parameters
-  - **Map to resource requirements** for commercial modeling
-- **Risk Level**: **Low** - Small size, structured data
+- **Content**: Service level agreements and service definitions
 
-### 3. **Resource Demand Sheets (Process Third)**
+### 5. Demand and Reference Data Sheets
 
-#### **Phase Demand Sheets** - **Priority: High**
-- **Ph1Demand**: 85 rows × 223 columns
-- **Ph2Demand**: 85 rows × 224 columns
-- **Ph3Demand**: 85 rows × 224 columns
-- **Ph4Demand**: 85 rows × 224 columns
-- **Processing Strategy**:
-  - **Process each phase independently** to isolate failures
-  - **Process in chunks** of 20 rows (timeline weeks)
-  - **Extract resource allocation** by week and role
-  - **Validate timeline consistency** across phases
-- **Risk Level**: **High** - Large size, complex timeline structure
+#### **Demand Sheets (GovDemand, ENCDemand, ASCDemand, CMADemand)**
+- **Purpose**: Detailed resource demand by product/service area
+- **Structure**: 
+  - **GovDemand**: 629 rows × 223 columns
+  - **ENCDemand**: 2,917 rows × 223 columns
+  - **ASCDemand**: 2,085 rows × 223 columns
+  - **CMADemand**: 629 rows × 223 columns
 
-#### **Governance Demand** - **Priority: Medium**
-- **Purpose**: Governance and oversight resource requirements
-- **Rows**: 629
-- **Columns**: 223
-- **Processing Strategy**:
-  - **Process in chunks** of 100 rows
-  - **Extract governance activities** and resource requirements
-  - **Map to project management** and oversight needs
-- **Risk Level**: **High** - Large size, complex structure
+#### **Reference Data Sheets**
+- **GovRefData**: 55 rows × 28 columns
+- **ENCRefData**: 259 rows × 28 columns
+- **ASCRefData**: 172 rows × 27 columns
+- **CMARefData**: 52 rows × 27 columns
+- **MSRefData**: 269 rows × 12 columns
 
-#### **Product Demand Sheets** - **Priority: High**
-- **ENCDemand**: 2,917 rows × 223 columns
-- **ASCDemand**: 2,085 rows × 223 columns
-- **CMADemand**: 629 rows × 223 columns
-- **Processing Strategy**:
-  - **Process in chunks** of 200 rows
-  - **Extract product-specific** resource requirements
-  - **Map to product configuration** from earlier sheets
-- **Risk Level**: **Very High** - Very large size, complex structure
+### 6. Resource and Role Management
 
-### 4. **Reference Data Sheets (Process Last)**
-
-#### **JobProfiles** - **Priority: High**
-- **Purpose**: Standardized job profiles and role definitions
+#### **JobProfiles Sheet**
+- **Purpose**: **Resource Rate Structure & Skill Matrix** for Commercial Modeling
+- **Business Impact**: Defines cost structure, resource availability, and competitive positioning
 - **Rows**: 1,501
 - **Columns**: 12
-- **Processing Strategy**:
-  - **Process in chunks** of 250 rows
-  - **Extract role definitions** and skill requirements
-  - **Create lookup table** for resource mapping
-- **Risk Level**: **High** - Large size, reference data
+- **Key Fields**:
+  - **Product / Service**: Product-specific resource requirements
+  - **Project Team**: Team structure and composition
+  - **Project Role**: Role definitions and responsibilities
+  - **Sales Region**: Regional resource rates and availability
+  - **Skill Requirements**: Skill matrix for resource allocation
+  - **Resource Rates**: Cost per hour/day for commercial modeling
+  - **Availability**: Resource availability by region and skill
 
-#### **LookupValues** - **Priority: Medium**
+#### **LookupValues Sheet**
 - **Purpose**: Standardized lookup values and factors
 - **Rows**: 341
 - **Columns**: 5
-- **Processing Strategy**:
-  - **Process entirely** (small enough for single load)
-  - **Extract lookup values** and factors
-  - **Create reference tables** for validation
-- **Risk Level**: **Low** - Small size, simple structure
+- **Key Fields**:
+  - Factor Name
+  - Value
+  - Standardized reference data
 
-#### **Deal Types Definition** - **Priority: Low**
+#### **Deal Types Definition Sheet**
 - **Purpose**: Deal type classifications and definitions
 - **Rows**: 8
 - **Columns**: 7
-- **Processing Strategy**:
-  - **Process entirely** (very small)
-  - **Extract deal type** definitions and mappings
-  - **Create reference data** for project classification
-- **Risk Level**: **Very Low** - Very small size
+- **Content**: SFDC deal type definitions and mappings
 
-## **🛡️ Safe Data Processing Patterns**
+## Data Structure Patterns
 
-### 1. **Header Pattern Analysis**
+### 1. Header Pattern Analysis
 
 #### **Identification Fields**
 - Customer Name, Project Name, SFDC Type
@@ -244,7 +236,7 @@ The file breaks down resource demand across these key delivery areas:
 - Effort estimates
 - Cost factors
 
-### 2. **Safe Data Organization Patterns**
+### 2. Data Organization Patterns
 
 #### **Hierarchical Structure**
 - Project → Phase → Product → Service → Role → Skill
@@ -261,77 +253,7 @@ The file breaks down resource demand across these key delivery areas:
 - Product-based resource allocation
 - Cost and effort calculations
 
-## **🔄 Safe Processing Workflow**
-
-### **Phase 1: File Validation & Basic Structure**
-1. **Load Instructions Sheet** - Understand file structure
-2. **Load Attributes Sheet** - Extract project configuration
-3. **Load Summary Sheet** - Extract phase information
-4. **Validate basic structure** - Ensure file is processable
-
-### **Phase 2: Product Configuration**
-1. **Load Product Sheets** - Extract product features
-2. **Validate configuration** - Ensure product data is consistent
-3. **Create product mapping** - Link products to resource requirements
-
-### **Phase 3: Resource Demand Processing**
-1. **Load JobProfiles** - Create role reference table
-2. **Process Phase Demand** - Extract resource allocation by phase
-3. **Process Product Demand** - Extract product-specific requirements
-4. **Validate resource consistency** - Ensure demand data is coherent
-
-### **Phase 4: Reference Data & Validation**
-1. **Load Lookup Values** - Create reference tables
-2. **Cross-validate data** - Ensure consistency across sheets
-3. **Generate summary report** - Provide processing overview
-
-## **Key Insights for Safe Application Development**
-
-### 1. **Data Import Strategy**
-
-#### **Primary Input Sheet**
-- **Attributes Sheet**: Main configuration input (293 rows × 7 columns)
-- **Focus**: Customer, project, and product configuration
-
-#### **Secondary Input Sheets**
-- **Phase Demand Sheets**: Detailed resource requirements
-- **Product Configuration Sheets**: Feature and module selection
-
-### 2. **Safe Data Validation Requirements**
-
-#### **Immediate Validation (On Load)**
-- File format and structure
-- Required header fields
-- Basic data types
-
-#### **Deferred Validation (After Processing)**
-- Cross-sheet consistency
-- Business rule compliance
-- Data completeness
-
-#### **Optional Validation (User Requested)**
-- Advanced business rules
-- Historical data comparison
-- External system validation
-
-### 3. **Error Handling Strategy**
-
-#### **Sheet-Level Errors**
-- **Isolate failures** to individual sheets
-- **Continue processing** other sheets
-- **Provide clear error messages** for failed sheets
-
-#### **Data-Level Errors**
-- **Skip invalid rows** and continue processing
-- **Log errors** for later review
-- **Provide summary** of successful vs. failed data
-
-#### **System-Level Errors**
-- **Graceful degradation** when possible
-- **User-friendly error messages**
-- **Recovery options** for common failures
-
-## **Commercial & Pricing Strategy Implications**
+## Commercial & Pricing Strategy Implications
 
 ### **Cost Structure & Margin Analysis**
 The CET v22 file provides the foundation for our commercial modeling:
@@ -363,21 +285,130 @@ The quantified resource demand enables:
 - **Regional Considerations**: Managing resource availability across regions
 - **Escalation Planning**: Resource escalation costs and availability
 
-## **Implementation Safety Guidelines**
+## Key Insights for Application Development
 
-### 1. **Development Approach**
-- **Incremental Implementation**: Add features one at a time
-- **Extensive Testing**: Test each component in isolation
-- **Error Simulation**: Test error conditions proactively
+### 1. Data Import Strategy
 
-### 2. **Code Quality**
-- **Type Safety**: Strict TypeScript usage
-- **Error Boundaries**: Wrap all components with error boundaries
-- **Async Safety**: Proper async/await error handling
+#### **Primary Input Sheet**
+- **Attributes Sheet**: Main configuration input (293 rows × 7 columns)
+- **Focus**: Customer, project, and product configuration
 
-### 3. **Performance Safety**
-- **Lazy Loading**: Load components only when needed
-- **Debounced Updates**: Prevent excessive re-renders
-- **Memory Monitoring**: Track memory usage during processing
+#### **Secondary Input Sheets**
+- **Phase Demand Sheets**: Detailed resource requirements
+- **Product Configuration Sheets**: Feature and module selection
 
-This analysis ensures that CET v22 processing can be implemented safely without compromising the stability of your existing application.
+### 2. Data Validation Requirements
+
+#### **Reference Data Validation**
+- Use LookupValues sheet for standardized values
+- Validate against Reference Data sheets
+- Ensure consistency across phases
+
+#### **Cross-Sheet Validation**
+- Phase totals alignment with project summary
+- Product configuration consistency
+- Resource allocation validation
+
+### 3. Output Generation Strategy
+
+#### **Estimation File Structure**
+- Phase-based breakdown (4 phases)
+- Product-specific resource allocation
+- Role and skill mapping
+- Timeline and milestone planning
+
+#### **Template Customization**
+- Customer-specific configuration
+- Product module selection
+- Service level customization
+- Regional and language adaptation
+
+## Application Architecture Implications
+
+### 1. Data Model Design
+
+#### **Core Entities**
+- **Project**: Customer, type, region, language
+- **Phase**: 1-4 phases with timeline
+- **Product**: Encompass, Ascendon, CMA, Managed Service
+- **Resource**: Job profiles, skills, effort estimates
+- **Configuration**: Product features, service levels
+
+#### **Relationships**
+- Project → Phases (1:4)
+- Phase → Products (1:many)
+- Product → Resources (1:many)
+- Configuration → Demand (1:1)
+
+### 2. File Processing Requirements
+
+#### **Input Processing**
+- Excel file parsing (27 sheets)
+- Data validation and consistency checks
+- Cross-sheet relationship mapping
+- Reference data validation
+
+#### **Output Generation**
+- Phase-based estimation templates
+- Product-specific configurations
+- Resource allocation matrices
+- Timeline and milestone planning
+
+### 3. User Interface Design
+
+#### **Configuration Interface**
+- Project setup wizard
+- Product selection interface
+- Phase configuration
+- Resource allocation
+
+#### **Validation Interface**
+- Data consistency checks
+- Cross-reference validation
+- Error reporting and resolution
+- Preview and confirmation
+
+## Next Steps for Development
+
+### 1. Immediate Actions
+1. **Data Model Creation**: Define database schema based on identified entities
+2. **Import Engine**: Build Excel processing for 27-sheet structure
+3. **Validation Engine**: Implement cross-sheet validation rules
+4. **Template Engine**: Create phase-based estimation templates
+
+### 2. Phase 1 Development
+1. **Core Infrastructure**: Database, file processing, validation
+2. **Basic Import**: Attributes sheet processing
+3. **Data Validation**: Reference data and consistency checks
+4. **Simple Output**: Basic estimation file generation
+
+### 3. Phase 2 Development
+1. **Full Import**: All 27 sheets processing
+2. **Advanced Validation**: Cross-sheet relationships
+3. **Template Customization**: Product and phase-specific templates
+4. **User Interface**: Configuration and validation interfaces
+
+### 4. Phase 3 Development
+1. **Advanced Features**: Timeline planning, resource allocation
+2. **Reporting**: Phase summaries, cost analysis
+3. **Integration**: External system connectivity
+4. **Performance**: Large file optimization
+
+## Conclusion
+
+The CET v22 file represents a comprehensive **demand planning and resource quantification system** that is critical to our software vendor delivery methodology and commercial success. With 27 interconnected sheets covering project configuration, product setup, resource allocation, and phase-based planning, this file serves as the foundation for:
+
+### **Business Value & Strategic Importance**
+1. **Presales Excellence**: Accurate resource demand planning for competitive proposals
+2. **Commercial Modeling**: Foundation for cost structure, margin analysis, and pricing strategy
+3. **Risk Management**: Comprehensive resource planning reducing project delivery risks
+4. **Competitive Positioning**: Optimized resource allocation for market competitiveness
+
+### **Technical Capabilities Required**
+1. **Process Complex Excel Files**: Handle 27-sheet structures with 10,000+ rows
+2. **Maintain Data Integrity**: Validate cross-sheet relationships and reference data
+3. **Generate Commercial Outputs**: Create pricing models and resource allocation matrices
+4. **Support Traceability**: Link Specsync requirements to quantified delivery efforts
+
+### **Strategic Integration**
+The modular architecture of the file (phases, products, services) aligns perfectly with our traceability system requirements, enabling seamless mapping from Specsync requirements through detailed resource demand planning to final commercial proposals. This integration is essential for maintaining our competitive position in telecommunications transformation programs while ensuring profitable delivery execution.
