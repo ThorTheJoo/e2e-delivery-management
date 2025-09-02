@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.25.0] - 2025-09-02
 
+## [1.26.0] - 2025-09-02
+
+### Added
+- Build info endpoint `GET /api/build-info` returning version, branch, commit, commit date, build time, Node and Next versions.
+- Main header now displays build/version details (version, branch@commit, build time).
+
+### Changed
+- README updated with v1.26 highlights and upgrade notes.
+- Ongoing lint/type hygiene: enumerated all warnings; next pass will replace remaining `any` and unused vars.
+
+### Notes
+- Lint runs clean of errors; warnings remain listed for transparency.
+
 ### Fixed
 - Prevent SSR/localStorage access in ADO service during server render.
 - Resolve temporal dead zone error by declaring `updateRequirementCounts` before effects.
