@@ -282,3 +282,302 @@ export interface SpecSyncState {
   items: SpecSyncItem[];
   selectedCapabilityIds: string[];
 }
+
+// CET v22.0 Types for Service Design
+export interface CETv22Data {
+  project: CETv22Project;
+  phases: CETv22Phase[];
+  products: CETv22Product[];
+  jobProfiles: CETv22JobProfile[];
+  resourceDemands: CETv22ResourceDemand[];
+  lookupValues: CETv22LookupValue[];
+  dealTypes: CETv22DealType[];
+}
+
+export interface CETv22Project {
+  customerName: string;
+  projectName: string;
+  digitalTelco: string;
+  region: string;
+  language: string;
+  sfdcType: string;
+  createdDate: string;
+  status: string;
+}
+
+export interface CETv22Phase {
+  phaseNumber: number;
+  phaseName: string;
+  startWeek: number;
+  endWeek: number;
+  totalEffort: number;
+  resourceCount: number;
+  complexityLevel: 'Low' | 'Medium' | 'High';
+  deliverables: string[];
+}
+
+export interface CETv22Product {
+  name: string;
+  type: string;
+  totalEffort: number;
+  resourceCount: number;
+  complexityLevel: 'Low' | 'Medium' | 'High';
+  phases: number[];
+}
+
+export interface CETv22JobProfile {
+  id: string;
+  productService: string;
+  projectTeam: string;
+  projectRole: string;
+  salesRegion: string;
+  salesTerritory: string;
+  supervisoryOrganization: string;
+  workdayJobProfile: string;
+  resourceLevel: string;
+  resourceCostRegion: string;
+  demandLocationCountryCode: string;
+  workerType: string;
+  hourlyRate: number;
+  availability: number;
+}
+
+export interface CETv22ResourceDemand {
+  weekNumber: number;
+  weekDate: string;
+  jobProfile: string;
+  effortHours: number;
+  resourceCount: number;
+  productType: string;
+  phaseNumber: number;
+  complexityLevel?: string;
+}
+
+export interface CETv22LookupValue {
+  key: string;
+  value: string;
+  category: string;
+  description?: string;
+}
+
+export interface CETv22DealType {
+  id: string;
+  name: string;
+  description: string;
+  commercialModel: string;
+  riskFactors: string[];
+}
+
+// CET v22.0 Analysis Types
+export interface CETv22AnalysisResult {
+  project: CETv22ProjectAnalysis;
+  resources: CETv22ResourceAnalysis;
+  effort: CETv22EffortAnalysis;
+  phases: CETv22PhaseAnalysis[];
+  products: CETv22ProductAnalysis[];
+  risks: CETv22RiskAnalysis[];
+  metadata: CETv22AnalysisMetadata;
+}
+
+export interface CETv22ProjectAnalysis {
+  customerName: string;
+  projectName: string;
+  digitalTelco: string;
+  region: string;
+  language: string;
+  sfdcType: string;
+  createdDate: string;
+  status: string;
+  complexity: 'Low' | 'Medium' | 'High';
+  riskFactors: string[];
+}
+
+export interface CETv22ResourceAnalysis {
+  totalEffort: number;
+  peakResources: number;
+  averageResources: number;
+  resourceUtilization: number;
+  roleBreakdown: CETv22RoleEffort[];
+  timelineAnalysis: CETv22TimelineData[];
+}
+
+export interface CETv22RoleEffort {
+  role: string;
+  effort: number;
+  percentage: number;
+}
+
+export interface CETv22TimelineData {
+  weekNumber: number;
+  totalEffort: number;
+  resourceCount: number;
+  date: string;
+}
+
+export interface CETv22EffortAnalysis {
+  phaseBreakdown: CETv22PhaseEffort[];
+  weeklyBreakdown: CETv22WeeklyEffort[];
+  totalEffort: number;
+  effortTrends: CETv22EffortTrend[];
+}
+
+export interface CETv22PhaseEffort {
+  phaseNumber: number;
+  totalEffort: number;
+  percentage: number;
+}
+
+export interface CETv22WeeklyEffort {
+  weekNumber: number;
+  totalEffort: number;
+}
+
+export interface CETv22EffortTrend {
+  week: number;
+  effort: number;
+  trend: 'increasing' | 'decreasing' | 'stable';
+}
+
+export interface CETv22PhaseAnalysis {
+  phaseNumber: number;
+  phaseName: string;
+  totalEffort: number;
+  resourceCount: number;
+  duration: number;
+  complexity: 'Low' | 'Medium' | 'High';
+  deliverables: string[];
+  riskFactors: string[];
+}
+
+export interface CETv22ProductAnalysis {
+  name: string;
+  type: string;
+  totalEffort: number;
+  resourceCount: number;
+  complexity: 'Low' | 'Medium' | 'High';
+  phases: number[];
+  riskFactors: string[];
+}
+
+export interface CETv22RiskAnalysis {
+  source: string;
+  riskName: string;
+  probability: 'Low' | 'Medium' | 'High';
+  impact: 'Low' | 'Medium' | 'High';
+  mitigation: string;
+}
+
+export interface CETv22AnalysisMetadata {
+  analyzedAt: string;
+  analysisTime: number;
+  confidence: number;
+  dataQuality: 'Poor' | 'Fair' | 'Good' | 'Excellent';
+}
+
+// CET v22.0 Integration Types
+export interface CETv22IntegrationMappings {
+  toWorkPackages: CETv22WorkPackageMapping[];
+  toMilestones: CETv22MilestoneMapping[];
+  toResources: CETv22ResourceMapping[];
+  toRisks: CETv22RiskMapping[];
+  confidence: CETv22MappingConfidence;
+}
+
+export interface CETv22WorkPackageMapping {
+  cetProduct: string;
+  workPackageName: string;
+  estimatedEffort: EffortBreakdown;
+  confidence: 'Low' | 'Medium' | 'High';
+  dependencies: string[];
+  milestones: string[];
+}
+
+export interface CETv22MilestoneMapping {
+  cetPhase: number;
+  milestoneName: string;
+  estimatedDate: string;
+  deliverables: string[];
+  dependencies: string[];
+}
+
+export interface CETv22ResourceMapping {
+  cetJobProfile: string;
+  resourceRole: string;
+  skillLevel: string;
+  costCenter: string;
+  availability: number;
+}
+
+export interface CETv22RiskMapping {
+  cetSource: string;
+  riskName: string;
+  probability: 'Low' | 'Medium' | 'High';
+  impact: 'Low' | 'Medium' | 'High';
+  mitigation: string;
+}
+
+export interface CETv22MappingConfidence {
+  overall: number;
+  workPackages: number;
+  milestones: number;
+  resources: number;
+  risks: number;
+}
+
+// CET v22.0 UI Component Props
+export interface CETv22FileUploadProps {
+  onFileProcessed: (data: CETv22Data) => void;
+  onError: (error: Error) => void;
+  maxFileSize?: number;
+  allowedTypes?: string[];
+  dragAndDrop?: boolean;
+}
+
+export interface CETv22AnalysisDashboardProps {
+  analysisResult: CETv22AnalysisResult;
+  onIntegrationRequest: (options: CETv22IntegrationOptions) => void;
+  onExportRequest: (format: 'json' | 'csv' | 'excel') => void;
+}
+
+export interface CETv22IntegrationOptions {
+  createWorkPackages: boolean;
+  createMilestones: boolean;
+  allocateResources: boolean;
+  identifyRisks: boolean;
+  updateExisting: boolean;
+  createDraft: boolean;
+  validateOnly: boolean;
+}
+
+// CET v22.0 Error Types
+export class CETv22Error extends Error {
+  constructor(
+    message: string,
+    public code: string,
+    public details?: any
+  ) {
+    super(message);
+    this.name = 'CETv22Error';
+  }
+}
+
+export class CETv22ParsingError extends CETv22Error {
+  constructor(message: string, public originalError?: Error) {
+    super(message, 'PARSING_ERROR', { originalError });
+    this.name = 'CETv22ParsingError';
+  }
+}
+
+export class CETv22AnalysisError extends CETv22Error {
+  constructor(message: string, public originalError?: Error) {
+    super(message, 'ANALYSIS_ERROR', { originalError });
+    this.name = 'CETv22AnalysisError';
+  }
+}
+
+export class CETv22IntegrationError extends CETv22Error {
+  constructor(message: string, public originalError?: Error) {
+    super(message, 'INTEGRATION_ERROR', { originalError });
+    this.name = 'CETv22IntegrationError';
+  }
+}
