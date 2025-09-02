@@ -7,7 +7,6 @@
 
 #### ForceGraph2D configuration (baseline)
 - `nodeId="id"`
-- `linkSource="source"`, `linkTarget="target"` (sources resolved to node objects in transform)
 - `cooldownTicks={100}` for faster stabilization
 - `width/height` responsive to container
 - Physics tuning: conservative `d3AlphaDecay`, `d3VelocityDecay` to keep layout stable
@@ -29,11 +28,8 @@
 - Mirror the shape path using solid opaque fill so clicks match visual shape.
 
 #### Link painting (`linkCanvasObject`)
-- Style: set line dash for `dashed`/`dotted` (`ctx.setLineDash([6/scale,6/scale])`, `[2/scale,4/scale]`)
-- Width: `link.width` (>=3)
-- Color: `link.color`
-- Path: straight line from `source` to `target`
-- Label: draw mid-point label with background; prefer `relationshipName` (fallback `type`)
+- Use built-in `linkColor`/`linkWidth` for strokes; custom painter only draws labels and custom dashed/dotted when endpoints are resolved (guards x/y access).
+- Label: draw mid-point label with background; prefer `relationshipName` (fallback `type`).
 
 #### Arrows (directionality)
 - Use props: `linkDirectionalArrowLength={8}`, `linkDirectionalArrowRelPos={0.5..0.9}`

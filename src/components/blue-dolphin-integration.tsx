@@ -92,7 +92,6 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
   const clearObjects = () => {
     setObjects([]);
     setObjectCount(0);
-    setObjectCount(0);
     setObjectTotal(0);
     setError(null);
     setWorkspaceFilter('');
@@ -500,7 +499,7 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
                 placeholder="e.g., Definition eq 'Application Component'"
               />
               <div className="text-xs text-gray-500 mt-1">
-                Valid OData syntax: Definition eq 'Business Process', contains(Title, 'Customer')
+                Valid OData syntax: Definition eq &apos;Business Process&apos;, contains(Title, &apos;Customer&apos;)
               </div>
             </div>
           </div>
@@ -637,7 +636,7 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
                 variant="outline" 
                 size="sm"
               >
-                Title Contains 'Customer'
+                Title Contains &apos;Customer&apos;
               </Button>
               <Button 
                 onClick={() => {
