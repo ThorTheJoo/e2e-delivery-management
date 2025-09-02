@@ -15,6 +15,12 @@ export const CETv22ResourceDashboard: React.FC<CETv22ResourceDashboardProps> = (
   resourceAnalysis,
   jobProfiles
 }) => {
+  // Debug logging
+  console.log('CETv22ResourceDashboard - Props received:', { resourceAnalysis, jobProfiles });
+  console.log('CETv22ResourceDashboard - resourceAnalysis.domainBreakdown:', resourceAnalysis?.domainBreakdown);
+  console.log('CETv22ResourceDashboard - resourceAnalysis.domainBreakdown length:', resourceAnalysis?.domainBreakdown?.length);
+  console.log('CETv22ResourceDashboard - resourceAnalysis keys:', Object.keys(resourceAnalysis || {}));
+
   return (
     <div className="space-y-6">
       {/* Resource Summary Cards */}
@@ -96,6 +102,80 @@ export const CETv22ResourceDashboard: React.FC<CETv22ResourceDashboardProps> = (
           </div>
         </CardContent>
       </Card>
+
+      {/* Domain Breakdown */}
+      {resourceAnalysis.domainBreakdown && resourceAnalysis.domainBreakdown.length > 0 ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Domain Breakdown & Total Mandate Effort</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {resourceAnalysis.domainBreakdown.map((domain, index) => (
+                <div key={index} className="p-4 border rounded-lg">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-lg font-medium">{domain.domain}</h3>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-blue-600">
+                        {domain.totalEffort.toLocaleString()}
+                      </div>
+                      <div className="text-sm text-muted-foreground">Total Hours</div>
+                    </div>
+                  </div>
+                  
+                  <div className="mb-3">
+                    <div className="flex items-center justify-between text-sm text-muted-foreground mb-1">
+                      <span>Domain Share</span>
+                      <span>{domain.percentage.toFixed(1)}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div 
+                        className="bg-blue-600 h-2 rounded-full" 
+                        style={{ width: `${domain.percentage}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-sm text-gray-700">Role Breakdown:</h4>
+                    {domain.roleBreakdown.map((role, roleIndex) => (
+                      <div key={roleIndex} className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">{role.role}</span>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-gray-500">{role.effort.toLocaleString()}h</span>
+                          <Badge variant="secondary" className="text-xs">
+                            {role.percentage.toFixed(1)}%
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>Domain Breakdown & Total Mandate Effort</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-8 text-muted-foreground">
+              <p>No domain breakdown data available.</p>
+              <p className="text-sm mt-2">
+                This section requires Ph1Demand worksheet data with domain (Column M) and total mandate effort (Column O) information.
+              </p>
+              <div className="mt-4 p-4 bg-gray-50 rounded-lg text-left text-sm">
+                <p><strong>Debug Info:</strong></p>
+                <p>• resourceAnalysis.domainBreakdown: {JSON.stringify(resourceAnalysis.domainBreakdown)}</p>
+                <p>• resourceAnalysis.domainBreakdown length: {resourceAnalysis.domainBreakdown?.length || 0}</p>
+                <p>• resourceAnalysis keys: {Object.keys(resourceAnalysis).join(', ')}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Job Profiles */}
       <Card>

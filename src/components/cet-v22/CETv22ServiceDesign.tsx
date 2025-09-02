@@ -38,6 +38,7 @@ export const CETv22ServiceDesign: React.FC<CETv22ServiceDesignProps> = ({
   const [progress, setProgress] = useState(0);
   const [cetData, setCetData] = useState<CETv22Data | null>(null);
   const [analysisResult, setAnalysisResult] = useState<CETv22AnalysisResult | null>(null);
+  const [, setIntegrationMappings] = useState<CETv22IntegrationMappings | null>(null);
   const [error, setError] = useState<string | null>(null);
 
 

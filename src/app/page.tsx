@@ -560,21 +560,26 @@ export default function HomePage() {
               <Network className="h-8 w-8" />
               <div>
                 <h1 className="text-2xl font-bold">CSG Delivery Orchestrator</h1>
-                <p className="text-tmf-100">v1.0 - ODA 2025 Compliant</p>
+                <p className="text-tmf-100">v1.25.0 - ODA 2025 Compliant</p>
               </div>
             </div>
             <div className="flex items-center space-x-6">
               <div className="text-right">
                 <div className="text-sm text-tmf-100">Project</div>
-                <div className="font-semibold">{project.name}</div>
+                <div className="font-semibold">Mobily BSS Transformation</div>
               </div>
               <div className="text-right">
                 <div className="text-sm text-tmf-100">Status</div>
-                <div className="font-semibold">{project.status}</div>
+                <div className="font-semibold">Pre-CR</div>
               </div>
               <div className="text-right">
                 <div className="text-sm text-tmf-100">Customer</div>
-                <div className="font-semibold">{project.customer}</div>
+                <div className="font-semibold">Mobily</div>
+              </div>
+              <div className="text-right">
+                <div className="text-sm text-tmf-100">Build</div>
+                <div className="font-semibold">main@c07df8f</div>
+                <div className="text-xs text-tmf-200">9/2/2025, 9:58:28 PM</div>
               </div>
             </div>
           </div>

@@ -13,7 +13,8 @@ import {
   CETv22PhaseEffort,
   CETv22WeeklyEffort,
   CETv22EffortTrend,
-  CETv22AnalysisError
+  CETv22AnalysisError,
+  CETv22DomainEffort
 } from '@/types';
 
 export class CETv22AnalyzerService {
@@ -74,7 +75,8 @@ export class CETv22AnalyzerService {
       averageResources: Math.round(avgResources),
       resourceUtilization: this.calculateResourceUtilization(demands),
       roleBreakdown: this.analyzeRoleBreakdown(demands, jobProfiles),
-      timelineAnalysis: this.analyzeResourceTimeline(demands)
+      timelineAnalysis: this.analyzeResourceTimeline(demands),
+      domainBreakdown: this.analyzeDomainBreakdown(demands)
     };
   }
 
@@ -332,6 +334,68 @@ export class CETv22AnalyzerService {
     }
 
     return trends;
+  }
+
+  private analyzeDomainBreakdown(demands: any[]): CETv22DomainEffort[] {
+    console.log('analyzeDomainBreakdown - Input demands:', demands);
+    console.log('analyzeDomainBreakdown - Total demands count:', demands.length);
+    
+    // Debug: Log first few demands to see their structure
+    console.log('analyzeDomainBreakdown - First 3 demands:', demands.slice(0, 3));
+    
+    const domainMap = new Map<string, { totalEffort: number; roleEfforts: Map<string, number> }>();
+    
+    // Filter only Ph1Demand data for domain analysis
+    const ph1Demands = demands.filter(d => d.phaseNumber === 1 && d.domain && d.totalMandateEffort);
+    console.log('analyzeDomainBreakdown - Ph1Demand filtered:', ph1Demands);
+    console.log('analyzeDomainBreakdown - Ph1Demand with domain:', ph1Demands.filter(d => d.domain));
+    console.log('analyzeDomainBreakdown - Ph1Demand with totalMandateEffort:', ph1Demands.filter(d => d.totalMandateEffort));
+    
+    // Debug: Check what's being filtered out
+    const phase1Demands = demands.filter(d => d.phaseNumber === 1);
+    console.log('analyzeDomainBreakdown - All phase 1 demands:', phase1Demands.length);
+    console.log('analyzeDomainBreakdown - Phase 1 demands with domain:', phase1Demands.filter(d => d.domain).length);
+    console.log('analyzeDomainBreakdown - Phase 1 demands with totalMandateEffort:', phase1Demands.filter(d => d.totalMandateEffort).length);
+    
+    ph1Demands.forEach(demand => {
+      const domain = demand.domain || 'Unknown';
+      const effort = demand.totalMandateEffort || 0;
+      
+      if (!domainMap.has(domain)) {
+        domainMap.set(domain, { totalEffort: 0, roleEfforts: new Map() });
+      }
+      
+      const domainData = domainMap.get(domain)!;
+      domainData.totalEffort += effort;
+      
+      const role = demand.jobProfile || 'Unknown';
+      if (!domainData.roleEfforts.has(role)) {
+        domainData.roleEfforts.set(role, 0);
+      }
+      domainData.roleEfforts.set(role, domainData.roleEfforts.get(role)! + effort);
+    });
+    
+    console.log('analyzeDomainBreakdown - Domain map:', domainMap);
+    
+    const totalEffort = Array.from(domainMap.values()).reduce((sum, data) => sum + data.totalEffort, 0);
+    
+    const result: CETv22DomainEffort[] = Array.from(domainMap.entries()).map(([domain, data]) => {
+      const roleBreakdown: CETv22RoleEffort[] = Array.from(data.roleEfforts.entries()).map(([role, effort]) => ({
+        role,
+        effort,
+        percentage: totalEffort > 0 ? (effort / totalEffort) * 100 : 0
+      }));
+      
+      return {
+        domain,
+        totalEffort: data.totalEffort,
+        percentage: totalEffort > 0 ? (data.totalEffort / totalEffort) * 100 : 0,
+        roleBreakdown
+      };
+    });
+    
+    console.log('analyzeDomainBreakdown - Final result:', result);
+    return result;
   }
 
   private calculatePhaseComplexity(totalEffort: number, resourceCount: number, duration: number): 'Low' | 'Medium' | 'High' {
