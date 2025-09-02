@@ -255,6 +255,11 @@ Our command-line testing has confirmed:
 - 📊 Performance impact is measurable but acceptable for the data richness gained
 - 🔍 Business Process objects show the most comprehensive enhanced field set
 
+### Export CSV (Objects + Relations) Cross-Reference
+- UI spec: `BLUE-DOLPHIN-EXPORT-CSV-UI.md`
+- API spec: `BLUE-DOLPHIN-EXPORT-CSV-API.md`
+- Data Dictionary: `BLUE-DOLPHIN-EXPORT-CSV-DATA-DICTIONARY.md`
+
 ## Core OData Endpoints
 
 ### 1. Domain Management

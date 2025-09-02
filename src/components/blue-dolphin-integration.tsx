@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { BlueDolphinConfig, BlueDolphinObjectEnhanced } from '@/types/blue-dolphin';
 
+
 interface BlueDolphinIntegrationProps {
   config: BlueDolphinConfig;
 }
@@ -172,6 +173,13 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
     if (relType) parts.push(`Type eq '${relType}'`);
     if (relName) parts.push(`Name eq '${relName}'`);
     if (relRawFilter) parts.push(`(${relRawFilter})`);
+    
+    // Add workspace filter to ensure consistency with object loading
+    if (workspaceFilter && workspaceFilter !== 'all') {
+      const workspaceCondition = `(BlueDolphinObjectWorkspaceName eq '${workspaceFilter}' or RelatedBlueDolphinObjectWorkspaceName eq '${workspaceFilter}')`;
+      parts.push(workspaceCondition);
+    }
+    
     return parts.join(' and ');
   };
 
@@ -229,6 +237,202 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
     'RR'
   ];
   const uniqueTgtWs = Array.from(new Set([...baseWorkspaces, ...additionalWorkspaces])).sort();
+
+  // ------------------------------
+  // Export (Objects + Relations CSV)
+  // ------------------------------
+  type WorkspaceScope = 'both' | 'either';
+
+  interface JoinedExportRow {
+    relation: BlueDolphinRelation;
+    source: BlueDolphinObjectEnhanced;
+    target: BlueDolphinObjectEnhanced;
+  }
+
+  const [exportLoading, setExportLoading] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+  const [exportLimit, setExportLimit] = useState(200);
+  const [exportRelationType, setExportRelationType] = useState('');
+  const [exportObjectDefinition, setExportObjectDefinition] = useState('');
+  const [exportWorkspaceScope, setExportWorkspaceScope] = useState<WorkspaceScope>('either');
+  const [exportRows, setExportRows] = useState<JoinedExportRow[]>([]);
+  const [exportQueries, setExportQueries] = useState<{ objects: string; relations: string } | null>(null);
+
+  const buildObjectsFilterForExport = (): string => {
+    const parts: string[] = [];
+    if (workspaceFilter && workspaceFilter !== 'all') {
+      parts.push(`Workspace eq '${workspaceFilter}'`);
+    }
+    if (exportObjectDefinition) {
+      parts.push(`Definition eq '${exportObjectDefinition}'`);
+    }
+    return parts.join(' and ');
+  };
+
+  const buildRelationsFilterForExport = (): string => {
+    const parts: string[] = [];
+    if (workspaceFilter && workspaceFilter !== 'all') {
+      const both = `(BlueDolphinObjectWorkspaceName eq '${workspaceFilter}' and RelatedBlueDolphinObjectWorkspaceName eq '${workspaceFilter}')`;
+      const either = `(BlueDolphinObjectWorkspaceName eq '${workspaceFilter}' or RelatedBlueDolphinObjectWorkspaceName eq '${workspaceFilter}')`;
+      parts.push(exportWorkspaceScope === 'both' ? both : either);
+    }
+    if (exportRelationType) parts.push(`Type eq '${exportRelationType}'`);
+    if (exportObjectDefinition) {
+      parts.push(`(BlueDolphinObjectDefinitionName eq '${exportObjectDefinition}' or RelatedBlueDolphinObjectDefinitionName eq '${exportObjectDefinition}')`);
+    }
+    return parts.join(' and ');
+  };
+
+  const joinRelationsWithObjects = (rels: BlueDolphinRelation[], objs: BlueDolphinObjectEnhanced[]): JoinedExportRow[] => {
+    const map = new Map<string, BlueDolphinObjectEnhanced>();
+    for (const o of objs) {
+      if (o.ID) map.set(String(o.ID), o);
+    }
+    const rows: JoinedExportRow[] = [];
+    for (const r of rels) {
+      const s = map.get(String(r.BlueDolphinObjectItemId));
+      const t = map.get(String(r.RelatedBlueDolphinObjectItemId));
+      if (s && t) rows.push({ relation: r, source: s, target: t });
+    }
+    return rows;
+  };
+
+  const loadExportDataset = useCallback(async () => {
+    if (!config.odataUrl) {
+      setExportError('OData URL not configured');
+      return;
+    }
+    if (!workspaceFilter) {
+      setExportError('Select a Workspace to scope the export');
+      return;
+    }
+
+    setExportLoading(true);
+    setExportError(null);
+    try {
+      // Objects request
+      const objectsFilter = buildObjectsFilterForExport();
+      const objectsQuery = `/Objects?${objectsFilter ? `$filter=${encodeURIComponent(objectsFilter)}&` : ''}MoreColumns=true&$top=${exportLimit}`;
+      // Relations request
+      const relationsFilter = buildRelationsFilterForExport();
+      const relationsQuery = `/Relations?${relationsFilter ? `$filter=${encodeURIComponent(relationsFilter)}&` : ''}MoreColumns=true&$top=${exportLimit}`;
+      setExportQueries({ objects: objectsQuery, relations: relationsQuery });
+
+      // Fetch objects (v4)
+      const objReqBody = {
+        action: 'get-objects-enhanced',
+        config: config,
+        data: {
+          endpoint: '/Objects',
+          filter: objectsFilter,
+          top: exportLimit,
+          orderby: 'Title asc',
+          moreColumns: true
+        }
+      };
+
+      // Fetch relations (v2 semantics supported by same route)
+      const relReqBody = {
+        action: 'get-objects-enhanced',
+        config: config,
+        data: {
+          endpoint: '/Relations',
+          filter: relationsFilter,
+          top: exportLimit,
+          moreColumns: true
+        }
+      };
+
+      console.log('Export fetch — Objects:', objReqBody);
+      const [objRes, relRes] = await Promise.all([
+        fetch('/api/blue-dolphin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(objReqBody) }),
+        fetch('/api/blue-dolphin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(relReqBody) })
+      ]);
+
+      const objJson = await objRes.json();
+      const relJson = await relRes.json();
+
+      if (!objJson.success) throw new Error(objJson.error || 'Failed to load objects for export');
+      if (!relJson.success) throw new Error(relJson.error || 'Failed to load relations for export');
+
+      const joined = joinRelationsWithObjects((relJson.data || []) as BlueDolphinRelation[], (objJson.data || []) as BlueDolphinObjectEnhanced[]);
+      setExportRows(joined);
+      console.log(`Joined ${joined.length} relation-object rows (out of ${relJson.data?.length || 0} relations)`);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Unknown export error';
+      setExportError(msg);
+      console.error('❌ Export dataset load error:', e);
+    } finally {
+      setExportLoading(false);
+    }
+  }, [config, workspaceFilter, exportRelationType, exportObjectDefinition, exportWorkspaceScope, exportLimit]);
+
+  function isEnhancedKey(key: string): boolean {
+    return key.startsWith('Object_Properties_') ||
+           key.startsWith('Deliverable_Object_Status_') ||
+           key.startsWith('Ameff_properties_') ||
+           key.startsWith('Resource_x26_Rate_') ||
+           key.startsWith('External_Design_');
+  }
+
+  const buildCsvAndDownload = () => {
+    if (exportRows.length === 0) return;
+
+    const standardSourceFields = ['ID', 'Title', 'Definition', 'Status', 'Workspace', 'CreatedOn', 'ChangedOn', 'Category', 'ArchimateType', 'ObjectLifecycleState'];
+    const enhancedFieldSet = new Set<string>();
+    for (const row of exportRows) {
+      Object.keys(row.source).forEach(k => { if (isEnhancedKey(k)) enhancedFieldSet.add(k); });
+      Object.keys(row.target).forEach(k => { if (isEnhancedKey(k)) enhancedFieldSet.add(k); });
+    }
+    const enhancedFields = Array.from(enhancedFieldSet).sort();
+
+    const relHeaders = ['rel_relationshipId','rel_type','rel_name','rel_definitionName','rel_isDirectionAlternative','rel_sourceWorkspace','rel_targetWorkspace'];
+    const srcHeaders = standardSourceFields.map(f => `source_${f}`);
+    const tgtHeaders = standardSourceFields.map(f => `target_${f}`);
+    const srcEnhancedHeaders = enhancedFields.map(f => `source_${f}`);
+    const tgtEnhancedHeaders = enhancedFields.map(f => `target_${f}`);
+
+    const header = [...relHeaders, ...srcHeaders, ...srcEnhancedHeaders, ...tgtHeaders, ...tgtEnhancedHeaders];
+
+    const escapeCsv = (val: any) => {
+      if (val === null || val === undefined) return '';
+      const s = String(val);
+      if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+      return s;
+    };
+
+    const lines: string[] = [];
+    lines.push('\uFEFF' + header.join(','));
+    for (const row of exportRows) {
+      const rel = row.relation;
+      const src = row.source as any;
+      const tgt = row.target as any;
+      const relVals = [
+        rel.RelationshipId,
+        rel.Type || '',
+        rel.Name || '',
+        rel.RelationshipDefinitionName || '',
+        typeof rel.IsRelationshipDirectionAlternative === 'boolean' ? String(rel.IsRelationshipDirectionAlternative) : '',
+        rel.BlueDolphinObjectWorkspaceName || '',
+        rel.RelatedBlueDolphinObjectWorkspaceName || ''
+      ];
+      const srcVals = standardSourceFields.map(f => src[f] ?? '');
+      const srcEnhVals = enhancedFields.map(f => src[f] ?? '');
+      const tgtVals = standardSourceFields.map(f => tgt[f] ?? '');
+      const tgtEnhVals = enhancedFields.map(f => tgt[f] ?? '');
+      const rowVals = [...relVals, ...srcVals, ...srcEnhVals, ...tgtVals, ...tgtEnhVals].map(escapeCsv);
+      lines.push(rowVals.join(','));
+    }
+
+    const blob = new Blob([lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const fname = `blue-dolphin-export-${(workspaceFilter || 'workspace').replace(/\s+/g,'-').toLowerCase()}.csv`;
+    a.href = url;
+    a.download = fname;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="space-y-6">
@@ -448,6 +652,8 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
               </Button>
             </div>
           </div>
+
+          
         </CardContent>
       </Card>
 
@@ -860,6 +1066,186 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
           )}
         </CardContent>
       </Card>
+
+      {/* ------------------------------ */}
+      {/* Export Model (Objects + Relations CSV) */}
+      {/* ------------------------------ */}
+      <Card>
+        <CardHeader 
+          className="cursor-pointer hover:bg-gray-50 transition-colors"
+          onClick={() => toggleSection('export-csv')}
+        >
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-sm">Export Model (Objects + Relations CSV)</CardTitle>
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+              {expandedSections.has('export-csv') ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+            </Button>
+          </div>
+        </CardHeader>
+        {expandedSections.has('export-csv') && (
+          <CardContent className="pt-0 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <Label>Workspace (required)</Label>
+                <Select value={workspaceFilter || 'all'} onValueChange={(value) => setWorkspaceFilter(value === 'all' ? '' : value)}>
+                  <SelectTrigger><SelectValue placeholder="Select Workspace" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All (disabled)</SelectItem>
+                    <SelectItem value="CSG International">CSG International</SelectItem>
+                    <SelectItem value="Product Architecture">Product Architecture</SelectItem>
+                    <SelectItem value="Customer Q">Customer Q</SelectItem>
+                    <SelectItem value="Simulated Case Study">Simulated Case Study</SelectItem>
+                    <SelectItem value="RR">RR</SelectItem>
+                  </SelectContent>
+                </Select>
+                <div className="text-xs text-gray-500 mt-1">Applied to Objects and Relations</div>
+              </div>
+              <div>
+                <Label>Object Type (Definition)</Label>
+                <Select value={exportObjectDefinition || 'all'} onValueChange={(v) => setExportObjectDefinition(v === 'all' ? '' : v)}>
+                  <SelectTrigger><SelectValue placeholder="All" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    {uniqueDefinitions.map(def => (
+                      <SelectItem key={def} value={def}>{def}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Relationship Type</Label>
+                <Select value={exportRelationType || 'all'} onValueChange={(v) => setExportRelationType(v === 'all' ? '' : v)}>
+                  <SelectTrigger><SelectValue placeholder="All" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="composition">composition</SelectItem>
+                    <SelectItem value="flow">flow</SelectItem>
+                    <SelectItem value="association">association</SelectItem>
+                    <SelectItem value="realization">realization</SelectItem>
+                    <SelectItem value="access">access</SelectItem>
+                    <SelectItem value="usedby">usedby</SelectItem>
+                    {uniqueRelTypes.filter(t => !['composition','flow','association','realization','access','usedby'].includes(t)).map(t => (
+                      <SelectItem key={t} value={t}>{t}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Workspace Scope (Relations)</Label>
+                <Select value={exportWorkspaceScope} onValueChange={(v) => setExportWorkspaceScope((v as WorkspaceScope))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="both">Both endpoints in workspace</SelectItem>
+                    <SelectItem value="either">Either endpoint in workspace</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label>Export Page Size</Label>
+                <Select value={exportLimit.toString()} onValueChange={(v) => setExportLimit(parseInt(v))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="50">50</SelectItem>
+                    <SelectItem value="100">100</SelectItem>
+                    <SelectItem value="200">200</SelectItem>
+                    <SelectItem value="500">500</SelectItem>
+                  </SelectContent>
+                </Select>
+                <div className="text-xs text-gray-500 mt-1">Used for both Objects and Relations</div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button onClick={loadExportDataset} disabled={exportLoading || !workspaceFilter}>
+                {exportLoading ? 'Loading...' : 'Load Export Dataset'}
+              </Button>
+              <Button variant="outline" onClick={() => { setExportRows([]); setExportError(null); }}>Clear</Button>
+            </div>
+
+            {exportError && (
+              <div className="text-red-600 text-sm">{exportError}</div>
+            )}
+
+            {(exportQueries || exportRows.length > 0) && (
+              <Card>
+                <CardHeader 
+                  className="cursor-pointer hover:bg-gray-50 transition-colors"
+                  onClick={() => toggleSection('export-csv-preview')}
+                >
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-sm">Preview & Debug</CardTitle>
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                      {expandedSections.has('export-csv-preview') ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </CardHeader>
+                {expandedSections.has('export-csv-preview') && (
+                  <CardContent className="pt-0 space-y-3 text-xs">
+                    {exportQueries && (
+                      <div className="grid grid-cols-1 md-grid-cols-2 gap-2">
+                        <div>
+                          <div className="font-semibold">Objects Query (constructed):</div>
+                          <div className="p-2 bg-gray-100 rounded font-mono overflow-auto">{exportQueries.objects}</div>
+                        </div>
+                        <div>
+                          <div className="font-semibold">Relations Query (constructed):</div>
+                          <div className="p-2 bg-gray-100 rounded font-mono overflow-auto">{exportQueries.relations}</div>
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-3">
+                      <Badge variant="secondary">Joined Rows: {exportRows.length}</Badge>
+                      <Badge variant="outline">Workspace: {workspaceFilter || 'N/A'}</Badge>
+                      {exportRelationType && (<Badge variant="outline">Type: {exportRelationType}</Badge>)}
+                      {exportObjectDefinition && (<Badge variant="outline">Object: {exportObjectDefinition}</Badge>)}
+                    </div>
+                    {exportRows.length > 0 && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {exportRows.slice(0, 4).map((row, idx) => (
+                          <Card key={`preview-${idx}`}>
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-xs flex items-center justify-between">
+                                <span>{row.relation.RelationshipDefinitionName || row.relation.Type || 'Relation'}</span>
+                                <Badge variant="outline" className="text-2xs">{row.relation.Name || '—'}</Badge>
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-2 text-2xs">
+                              <div className="text-2xs"><strong>RelationshipId:</strong> {row.relation.RelationshipId}</div>
+                              <div className="border-t pt-2">
+                                <div className="font-semibold">Source (non-empty)</div>
+                                <div className="space-y-1">
+                                  {Object.keys(row.source).filter(k => (row.source as any)[k] !== '' && (row.source as any)[k] !== null && (row.source as any)[k] !== undefined).slice(0, 15).map(k => (
+                                    <div key={k} className="flex justify-between gap-2"><span className="font-mono">{k}</span><span className="truncate">{String((row.source as any)[k])}</span></div>
+                                  ))}
+                                </div>
+                              </div>
+                              <div className="border-t pt-2">
+                                <div className="font-semibold">Target (non-empty)</div>
+                                <div className="space-y-1">
+                                  {Object.keys(row.target).filter(k => (row.target as any)[k] !== '' && (row.target as any)[k] !== null && (row.target as any)[k] !== undefined).slice(0, 15).map(k => (
+                                    <div key={k} className="flex justify-between gap-2"><span className="font-mono">{k}</span><span className="truncate">{String((row.target as any)[k])}</span></div>
+                                  ))}
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2">
+                      <Button onClick={buildCsvAndDownload} disabled={exportRows.length === 0}>Export CSV</Button>
+                    </div>
+                  </CardContent>
+                )}
+              </Card>
+            )}
+          </CardContent>
+        )}
+      </Card>
+
     </div>
   );
 }

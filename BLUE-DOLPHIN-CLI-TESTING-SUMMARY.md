@@ -245,6 +245,11 @@ These findings provide a solid foundation for implementing enhanced object retri
 3. **Medium-term**: Add UI components for enhanced field display and filtering
 4. **Long-term**: Optimize performance and add advanced field management features
 
+### Export CSV (Objects + Relations) Cross-Reference
+- UI spec: `BLUE-DOLPHIN-EXPORT-CSV-UI.md`
+- API spec: `BLUE-DOLPHIN-EXPORT-CSV-API.md`
+- Data Dictionary: `BLUE-DOLPHIN-EXPORT-CSV-DATA-DICTIONARY.md`
+
 ---
 
 ## Relations Table CLI Testing (New)
