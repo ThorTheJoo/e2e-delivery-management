@@ -10,7 +10,7 @@ export interface MiroBoardConfig {
 export interface MiroCardConfig {
   title: string;
   description?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   position?: { x: number; y: number };
   geometry?: { width: number; height: number };
   style?: {
@@ -39,7 +39,7 @@ export class MiroService {
     }
   }
 
-  private async callMiroAPI(action: string, data: any): Promise<any> {
+  private async callMiroAPI(action: string, data: Record<string, unknown>): Promise<Record<string, unknown>> {
     // Check if we have a valid access token
     const accessToken = miroAuthService.getAccessToken();
     
@@ -681,12 +681,12 @@ export class MiroService {
     }
   }
 
-  public async getBoard(boardId: string): Promise<any> {
+  public async getBoard(_boardId: string): Promise<Record<string, unknown>> {
     // This would need a separate API endpoint for getting board details
     throw new Error('getBoard not implemented yet');
   }
 
-  public async deleteBoard(boardId: string): Promise<void> {
+  public async deleteBoard(_boardId: string): Promise<void> {
     // This would need a separate API endpoint for deleting boards
     throw new Error('deleteBoard not implemented yet');
   }

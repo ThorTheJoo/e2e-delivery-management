@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Palette, Save, RefreshCw, ArrowRight, AlertTriangle, CheckCircle, Settings } from 'lucide-react';
+import { Palette, Save, RefreshCw, ArrowRight, AlertTriangle, Settings } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
 
 interface MiroConfig {
@@ -120,7 +120,7 @@ export function MiroConfiguration() {
     }
   };
 
-  const loadSavedConfig = () => {
+  const loadSavedConfig = useCallback(() => {
     const saved = localStorage.getItem('miroConfig');
     if (saved) {
       try {
@@ -140,7 +140,7 @@ export function MiroConfiguration() {
         localStorage.removeItem('miroConfig');
       }
     }
-  };
+  }, []);
 
   const clearMiroConfig = () => {
     localStorage.removeItem('miroConfig');
@@ -159,7 +159,7 @@ export function MiroConfiguration() {
   useEffect(() => {
     loadSavedConfig();
     checkConnectionStatus();
-  }, []);
+  }, [loadSavedConfig]);
 
   return (
     <div className="space-y-6">
@@ -308,7 +308,7 @@ export function MiroConfiguration() {
               <div className="bg-white border border-orange-200 rounded p-3 mt-3">
                 <h5 className="font-medium text-orange-800 mb-2">OAuth Flow Information</h5>
                 <div className="text-xs text-orange-700 space-y-1">
-                  <div><strong>Step 1:</strong> Click "Connect to Miro" → Redirects to Miro OAuth</div>
+                  <div><strong>Step 1:</strong> Click &quot;Connect to Miro&quot; → Redirects to Miro OAuth</div>
                   <div><strong>Step 2:</strong> Miro redirects back to: <code className="bg-orange-100 px-1 rounded">{config.redirectUri}</code></div>
                   <div><strong>Step 3:</strong> Callback exchanges code for access token</div>
                   <div><strong>Step 4:</strong> Token stored securely for API access</div>

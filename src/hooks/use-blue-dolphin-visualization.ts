@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import type { BlueDolphinConfig, BlueDolphinObjectEnhanced } from '@/types/blue-dolphin';
-import type { BlueDolphinVisualLink, BlueDolphinVisualNode, VisualizationFilters, VisualizationViewMode } from '@/types/blue-dolphin-visualization';
+import type { BlueDolphinVisualLink, BlueDolphinVisualNode, VisualizationFilters } from '@/types/blue-dolphin-visualization';
 import { transformObjectsToNodes, transformRelationsToLinks, resolveLinkEndpoints, uniqueSorted, type BlueDolphinRelation } from '@/lib/blue-dolphin-visualization-utils';
 
 interface BlueDolphinApiResponse<T = unknown> {
@@ -158,7 +158,7 @@ export function useBlueDolphinVisualization(config: BlueDolphinConfig): UseBlueD
     const sourceDefinitions = uniqueSorted(snap.relations.map((r) => String(r.BlueDolphinObjectDefinitionName || '')));
     const targetDefinitions = uniqueSorted(snap.relations.map((r) => String(r.RelatedBlueDolphinObjectDefinitionName || '')));
     return { workspaces, relationTypes, relationNames, sourceDefinitions, targetDefinitions };
-  }, [nodes, links]);
+  }, []);
 
   // Preload options on first hook usage (persist filter lists before user clicks Load)
   // Use a light call to fetch a small objects sample and relations to populate dropdowns.

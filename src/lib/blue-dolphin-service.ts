@@ -13,6 +13,7 @@ import {
   SyncResult,
   SyncOperation
 } from '@/types/blue-dolphin';
+import { TMFOdaDomain, TMFOdaCapability, SpecSyncItem } from '@/types';
 
 export abstract class BlueDolphinBaseService {
   protected baseUrl: string;
@@ -67,7 +68,7 @@ export abstract class BlueDolphinBaseService {
     return response.json();
   }
 
-  protected buildQueryParams(params: Record<string, any>): string {
+  protected buildQueryParams(params: Record<string, string | number | boolean | undefined>): string {
     const searchParams = new URLSearchParams();
     
     Object.entries(params).forEach(([key, value]) => {
@@ -399,7 +400,14 @@ export class BlueDolphinODataService extends BlueDolphinBaseService {
     return this.odataRequest<number>(endpoint);
   }
 
-  private buildODataQueryParams(options: Record<string, any>): string {
+  private buildODataQueryParams(options: {
+    filter?: string;
+    select?: string[];
+    orderby?: string;
+    top?: number;
+    skip?: number;
+    expand?: string[];
+  }): string {
     const params: string[] = [];
 
     if (options.filter) params.push(`$filter=${encodeURIComponent(options.filter)}`);
@@ -425,7 +433,7 @@ export class BlueDolphinSyncService {
   }
 
   // Sync TMF domains from E2E to Blue Dolphin
-  async syncDomainsToBlueDolphin(domains: any[]): Promise<SyncResult> {
+  async syncDomainsToBlueDolphin(domains: TMFOdaDomain[]): Promise<SyncResult> {
     const operations: SyncOperation[] = [];
     const errors: string[] = [];
     let syncedCount = 0;
@@ -479,7 +487,7 @@ export class BlueDolphinSyncService {
   // Sync capabilities from E2E to Blue Dolphin
   async syncCapabilitiesToBlueDolphin(
     domainId: string,
-    capabilities: any[]
+    capabilities: TMFOdaCapability[]
   ): Promise<SyncResult> {
     const operations: SyncOperation[] = [];
     const errors: string[] = [];
@@ -537,7 +545,7 @@ export class BlueDolphinSyncService {
 
   // Sync requirements from SpecSync to Blue Dolphin
   async syncRequirementsToBlueDolphin(
-    requirements: any[]
+    requirements: SpecSyncItem[]
   ): Promise<SyncResult> {
     const operations: SyncOperation[] = [];
     const errors: string[] = [];
@@ -592,7 +600,7 @@ export class BlueDolphinSyncService {
   }
 
   // Get domains from Blue Dolphin and map to E2E format
-  async getDomainsFromBlueDolphin(): Promise<any[]> {
+  async getDomainsFromBlueDolphin(): Promise<TMFOdaDomain[]> {
     const response = await this.odataService.getDomains({
       filter: "Type eq 'TMF_ODA_DOMAIN' and Status eq 'ACTIVE'",
       expand: ['Capabilities'],
@@ -602,19 +610,18 @@ export class BlueDolphinSyncService {
       id: domain.id,
       name: domain.name,
       description: domain.description,
-      capabilities: (domain as any).Capabilities?.map((cap: any) => ({
+      capabilities: ((domain as BlueDolphinDomain & { Capabilities?: BlueDolphinCapability[] }).Capabilities?.map((cap: BlueDolphinCapability) => ({
         id: cap.id,
         name: cap.name,
         description: cap.description,
-        segments: [],
-        baseEffort: {
-          businessAnalyst: 5,
-          solutionArchitect: 3,
-          developer: 10,
-          qaEngineer: 2,
-        },
-        complexityFactors: {},
-      })) || [],
+        domainId: cap.domainId,
+        isSelected: false,
+        createdAt: cap.createdAt,
+        updatedAt: cap.updatedAt,
+      })) || []) as TMFOdaCapability[],
+      isSelected: false,
+      createdAt: domain.createdAt,
+      updatedAt: domain.updatedAt,
     }));
   }
 }

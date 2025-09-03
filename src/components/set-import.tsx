@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Loader2, ChevronDown, ChevronRight } from 'lucide-react';
+import { Upload, FileSpreadsheet, CheckCircle, Loader2, ChevronDown, ChevronRight } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
 
 interface SETComponent {
@@ -18,16 +18,20 @@ interface SETComponent {
   template_effort: number | null;
 }
 
+interface WorkPackageMatch {
+  workPackages: string[];
+}
+
 interface SETImportState {
   isExpanded: boolean;
   isProcessing: boolean;
   data: SETComponent[] | null;
   domainEfforts: Record<string, number>;
-  matchedWorkPackages: Record<string, any>;
+  matchedWorkPackages: Record<string, WorkPackageMatch>;
 }
 
 interface SETImportProps {
-  onDataLoaded: (domainEfforts: Record<string, number>, matchedWorkPackages: Record<string, any>) => void;
+  onDataLoaded: (domainEfforts: Record<string, number>, matchedWorkPackages: Record<string, WorkPackageMatch>) => void;
 }
 
 export function SETImport({ onDataLoaded }: SETImportProps) {
@@ -107,8 +111,8 @@ export function SETImport({ onDataLoaded }: SETImportProps) {
     return domainEfforts;
   };
 
-  const matchWorkPackages = (domainEfforts: Record<string, number>): Record<string, any> => {
-    const matches: Record<string, any> = {};
+  const matchWorkPackages = (domainEfforts: Record<string, number>): Record<string, WorkPackageMatch> => {
+    const matches: Record<string, WorkPackageMatch> = {};
     
     // Define mapping between SET domains and work package names
     const domainMapping: Record<string, string[]> = {

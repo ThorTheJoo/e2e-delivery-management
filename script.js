@@ -145,7 +145,7 @@
     }
 
     // Tabs
-    function initTabs(){
+    function _initTabs(){
         const buttons = Array.from(document.querySelectorAll('.top-tabs-section .tab-btn'));
         const panes = Array.from(document.querySelectorAll('.tab-content-area .tab-content'));
         if(!buttons.length || !panes.length) return;
@@ -405,7 +405,7 @@ function resolveCapabilityIdFromText(text){
     return null;
 }
 
-function mapSpecSyncToCapabilities(items) {
+function _mapSpecSyncToCapabilities(items) {
     const countsByCapability = {};
     const assignments = [];
     let unmapped = 0;
@@ -466,7 +466,7 @@ function mapSpecSyncByImportedCapabilities(items){
         const capName = normalize(item.capability); // now equal to AF L2
         const af2Name = normalize(item.afLevel2);
         const funcName = normalize(item.functionName);
-        const domain = normalize(item.domain);
+        const _domain = normalize(item.domain);
 
         let capId = null;
         // Prefer exact label matches first
@@ -782,7 +782,7 @@ function saveSpecSyncData(state){
     }catch(err){ console.warn('Failed saving SpecSync data', err); }
 }
 
-function loadSpecSyncData(){
+function _loadSpecSyncData(){
     try{
         const raw = localStorage.getItem('specsync-data');
         return raw ? JSON.parse(raw) : null;
@@ -875,7 +875,7 @@ function initializeSpecSyncIntegration(){
     const fileInput = document.getElementById('specSyncFile');
     const summary = document.getElementById('specSyncSummary');
 
-    function setSummaryText(text){ /* no-op: suppress header summary text */ if(summary) summary.textContent = ''; }
+    function setSummaryText(_text){ /* no-op: suppress header summary text */ if(summary) summary.textContent = ''; }
 
     // Ensure delegated fallback binding (survives DOM replacements)
     bindSpecSyncDelegatedHandlers();
@@ -1186,7 +1186,7 @@ function expandMappedDomainGroups(countsByCapability){
     });
 }
 
-function applyTemplateData(templateData) {
+function _applyTemplateData(templateData) {
     // Apply capabilities
     templateData.capabilities.forEach(capability => {
         const checkbox = document.getElementById(capability) || document.getElementById(`capability-${capability}`);
@@ -1219,7 +1219,7 @@ function applyTemplateData(templateData) {
 }
 
 // Dashboard Updates
-function updateDashboardMetrics() {
+function _updateDashboardMetrics() {
     // Simulate real-time metric updates
     const metricValues = document.querySelectorAll('.metric-value');
     
@@ -1283,7 +1283,7 @@ function showNotification(message, type = 'info') {
 }
 
 // Initial Data Loading
-function loadInitialData() {
+function _loadInitialData() {
     // Load initial estimates
     updateEstimates();
     
@@ -1360,7 +1360,7 @@ style.textContent = `
 document.head.appendChild(style);
 
 // BOM Functionality
-function setupBOMFunctionality() {
+function _setupBOMFunctionality() {
     // BOM generation button
     const generateBOMBtn = document.getElementById('generateBOM');
     if (generateBOMBtn) {
@@ -1650,8 +1650,8 @@ function generateBOMCSV(bomData) {
     let resourceId = 1;
     bomData.resourceSpecs.forEach(resource => {
         const rate = resource.rate.replace(/[$,]/g, '');
-        const isDailyRate = resource.rate.includes('/day');
-        const isLicensed = resource.availability === 'Licensed';
+        const _isDailyRate = resource.rate.includes('/day');
+        const _isLicensed = resource.availability === 'Licensed';
         
         // Generate resource details based on type
         let skillsRequired = '';
@@ -1785,7 +1785,7 @@ function generateBOMCSV(bomData) {
     csv += 'Cost Category,Subcategory,Amount (USD),Percentage,Cost Type,Billing Frequency,Payment Terms\n';
     
     const totalCost = bomData.serviceSpecs.reduce((sum, s) => sum + (parseInt(s.cost.replace(/[$,]/g, '')) || 0), 0);
-    const totalResourceCost = bomData.resourceSpecs.reduce((sum, r) => {
+    const _totalResourceCost = bomData.resourceSpecs.reduce((sum, r) => {
         const rate = parseInt(r.rate.replace(/[$,]/g, '')) || 0;
         return sum + rate;
     }, 0);
@@ -2044,7 +2044,7 @@ function initializeBOM() {
 }
 
 // Output Panel BOM Integration
-function setupOutputPanelBOM() {
+function _setupOutputPanelBOM() {
     const downloadBOMBtn = document.getElementById('downloadBOM');
     if (downloadBOMBtn) {
         downloadBOMBtn.addEventListener('click', () => {
@@ -2057,7 +2057,7 @@ function setupOutputPanelBOM() {
 }
 
 // UI Toggle Functionality
-function setupUIToggle() {
+function _setupUIToggle() {
     const toggleBtn = document.getElementById('uiToggle');
     
     if (toggleBtn) {
@@ -2076,7 +2076,7 @@ function setupUIToggle() {
 }
 
 // ADO Integration Functionality
-function setupADOIntegration() {
+function _setupADOIntegration() {
     // ADO work item generation button
     const generateADOItemsBtn = document.getElementById('generateADOItems');
     if (generateADOItemsBtn) {
@@ -2197,7 +2197,7 @@ function generateWorkItemsFromBOM(bomData) {
     workItems.push(epic);
     
     // Generate Features from CFS Services
-    bomData.serviceSpecs.forEach((service, index) => {
+    bomData.serviceSpecs.forEach((service, _index) => {
         if (service.type === 'cfs') {
             const feature = {
                 type: 'feature',
@@ -2227,7 +2227,7 @@ function generateWorkItemsFromBOM(bomData) {
     });
     
     // Generate User Stories from RFS Services
-    bomData.serviceSpecs.forEach((service, index) => {
+    bomData.serviceSpecs.forEach((service, _index) => {
         if (service.type === 'rfs') {
             const userStory = {
                 type: 'userstory',
@@ -2257,7 +2257,7 @@ function generateWorkItemsFromBOM(bomData) {
     });
     
     // Generate Tasks from Resource Specifications
-    bomData.resourceSpecs.forEach((resource, index) => {
+    bomData.resourceSpecs.forEach((resource, _index) => {
         const task = {
             type: 'task',
             title: resource.name,
@@ -2800,7 +2800,7 @@ function initializeWorkflowTabs() {
     }, 500);
 }
 
-function initializeWorkflowControls() {
+function _initializeWorkflowControls() {
     const updateProgressBtn = document.getElementById('updateProgress');
     const resetWorkflowBtn = document.getElementById('resetWorkflow');
     
@@ -2817,7 +2817,7 @@ function initializeWorkflowControls() {
     }
 }
 
-function initializeWorkflowProgress() {
+function _initializeWorkflowProgress() {
     const updateProjectStatusBtn = document.getElementById('updateProjectStatus');
     
     if (updateProjectStatusBtn) {

@@ -4,7 +4,26 @@ import React, { useMemo, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import type { BlueDolphinVisualLink, BlueDolphinVisualNode, VisualizationViewMode } from '@/types/blue-dolphin-visualization';
 
-const ForceGraph2D = dynamic(() => import('react-force-graph-2d'), { ssr: false }) as unknown as React.ComponentType<any>;
+interface ForceGraphProps {
+  graphData: {
+    nodes: BlueDolphinVisualNode[];
+    links: BlueDolphinVisualLink[];
+  };
+  nodeAutoColorBy: string;
+  nodeColor: (node: BlueDolphinVisualNode) => string;
+  nodeLabel: (node: BlueDolphinVisualNode) => string;
+  nodeVal: (node: BlueDolphinVisualNode) => number;
+  linkColor: () => string;
+  linkWidth: (link: BlueDolphinVisualLink) => number;
+  linkLabel: (link: BlueDolphinVisualLink) => string;
+  onNodeClick: (node: BlueDolphinVisualNode) => void;
+  onLinkClick: (link: BlueDolphinVisualLink) => void;
+  cooldownTicks: number;
+  d3AlphaDecay: number;
+  d3VelocityDecay: number;
+}
+
+const ForceGraph2D = dynamic(() => import('react-force-graph-2d'), { ssr: false }) as unknown as React.ComponentType<ForceGraphProps>;
 
 interface BlueDolphinGraphProps {
   nodes: BlueDolphinVisualNode[];
@@ -14,13 +33,13 @@ interface BlueDolphinGraphProps {
   onLinkClick?: (l: BlueDolphinVisualLink) => void;
 }
 
-export function BlueDolphinGraph({ nodes, links, viewMode, onNodeClick, onLinkClick }: BlueDolphinGraphProps) {
-  const fgRef = useRef<unknown>();
+export function BlueDolphinGraph({ nodes, links, _viewMode, onNodeClick, onLinkClick }: BlueDolphinGraphProps) {
+  const fgRef = useRef<React.ComponentRef<typeof ForceGraph2D>>(null);
 
   const graphData = useMemo(() => ({ nodes, links }), [nodes, links]);
 
   const nodeCanvasObject = useMemo(() => {
-    return (node: any, ctx: CanvasRenderingContext2D, scale: number) => {
+    return (node: BlueDolphinVisualNode & { x: number; y: number }, ctx: CanvasRenderingContext2D, scale: number) => {
       const n = node as BlueDolphinVisualNode & { x: number; y: number };
       const size = Math.max(15, (n.val ?? 4) * 4);
       // shape
@@ -67,7 +86,7 @@ export function BlueDolphinGraph({ nodes, links, viewMode, onNodeClick, onLinkCl
   }, []);
 
   const nodePointerAreaPaint = useMemo(() => {
-    return (node: any, color: string, ctx: CanvasRenderingContext2D) => {
+    return (node: BlueDolphinVisualNode & { x: number; y: number }, color: string, ctx: CanvasRenderingContext2D) => {
       const n = node as BlueDolphinVisualNode & { x: number; y: number };
       const size = Math.max(15, (n.val ?? 4) * 4);
       ctx.beginPath();
@@ -96,8 +115,8 @@ export function BlueDolphinGraph({ nodes, links, viewMode, onNodeClick, onLinkCl
   }, []);
 
   const linkCanvasObject = useMemo(() => {
-    return (link: any, ctx: CanvasRenderingContext2D, scale: number) => {
-      const l = link as BlueDolphinVisualLink & { source: any; target: any };
+    return (link: BlueDolphinVisualLink & { source: BlueDolphinVisualNode & { x: number; y: number }; target: BlueDolphinVisualNode & { x: number; y: number } }, ctx: CanvasRenderingContext2D, scale: number) => {
+      const l = link as BlueDolphinVisualLink & { source: BlueDolphinVisualNode & { x: number; y: number }; target: BlueDolphinVisualNode & { x: number; y: number } };
       const src = typeof l.source === 'object' ? l.source : null;
       const tgt = typeof l.target === 'object' ? l.target : null;
       if (!src || !tgt) return; // built-in renderer draws the line; we only draw the label when positions exist
@@ -130,13 +149,13 @@ export function BlueDolphinGraph({ nodes, links, viewMode, onNodeClick, onLinkCl
         nodePointerAreaPaint={nodePointerAreaPaint}
         linkCanvasObject={linkCanvasObject}
         linkCanvasObjectMode={() => 'after'}
-        linkColor={(l: any) => l.color}
-        linkWidth={(l: any) => l.width || 3}
+        linkColor={(l: BlueDolphinVisualLink) => l.color}
+        linkWidth={(l: BlueDolphinVisualLink) => l.width || 3}
         linkDirectionalArrowLength={6}
         linkDirectionalArrowRelPos={0.6}
-        linkDirectionalArrowColor={(l: any) => l.color}
-        onNodeClick={(n: any) => onNodeClick && onNodeClick(n)}
-        onLinkClick={(l: any) => onLinkClick && onLinkClick(l)}
+        linkDirectionalArrowColor={(l: BlueDolphinVisualLink) => l.color}
+        onNodeClick={(n: BlueDolphinVisualNode) => onNodeClick && onNodeClick(n)}
+        onLinkClick={(l: BlueDolphinVisualLink) => onLinkClick && onLinkClick(l)}
       />
     </div>
   );

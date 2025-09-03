@@ -164,7 +164,7 @@ export interface ADOWorkItemMapping {
   targetType: ADOWorkItemTypeName;
   targetTitle: string;
   targetDescription: string;
-  targetFields: Record<string, any>;
+  targetFields: Record<string, string | number | boolean | null>;
   relationships: string[];
   estimatedEffort?: number;
   storyPoints?: number;

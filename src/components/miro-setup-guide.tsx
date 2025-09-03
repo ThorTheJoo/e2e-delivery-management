@@ -180,7 +180,7 @@ export function MiroSetupGuide() {
               <div className="space-y-3">
                 <div className="flex items-center space-x-2">
                   <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>Go to "Configurations" → "Miro Configuration" in the navigation</span>
+                  <span>Go to &quot;Configurations&quot; → &quot;Miro Configuration&quot; in the navigation</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <CheckCircle className="w-5 h-5 text-green-600" />
@@ -192,7 +192,7 @@ export function MiroSetupGuide() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>Click "Save Configuration" to store settings</span>
+                  <span>Click &quot;Save Configuration&quot; to store settings</span>
                 </div>
               </div>
             </div>
@@ -224,7 +224,7 @@ export function MiroSetupGuide() {
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <h4 className="font-medium text-blue-900 mb-2">Ready to Test!</h4>
             <p className="text-sm text-blue-800 mb-3">
-              Now that you've configured everything, let's test the connection:
+              Now that you&apos;ve configured everything, let&apos;s test the connection:
             </p>
             
             <div className="space-y-3">
@@ -250,7 +250,7 @@ export function MiroSetupGuide() {
           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
             <h4 className="font-medium text-green-900 mb-2">🎉 Success Indicators</h4>
             <div className="text-sm text-green-800 space-y-1">
-              <div>• Configuration shows "Configured" status</div>
+              <div>• Configuration shows &quot;Configured&quot; status</div>
               <div>• You can create TMF Architecture boards successfully</div>
               <div>• You can create SpecSync Requirements boards successfully</div>
               <div>• No configuration or authentication errors</div>
@@ -349,21 +349,21 @@ export function MiroSetupGuide() {
         <CardContent className="space-y-4">
           <div className="space-y-3">
             <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-              <h4 className="font-medium text-red-900 mb-1">❌ "Miro configuration missing" Error</h4>
+              <h4 className="font-medium text-red-900 mb-1">❌ &quot;Miro configuration missing&quot; Error</h4>
               <p className="text-sm text-red-800">
-                <strong>Solution:</strong> Ensure you have saved your Miro configuration in the "Miro Configuration" tab. The configuration must be saved and synced with the server before attempting to connect.
+                <strong>Solution:</strong> Ensure you have saved your Miro configuration in the &quot;Miro Configuration&quot; tab. The configuration must be saved and synced with the server before attempting to connect.
               </p>
             </div>
             
             <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-              <h4 className="font-medium text-red-900 mb-1">❌ "Invalid redirect URI" Error</h4>
+              <h4 className="font-medium text-red-900 mb-1">❌ &quot;Invalid redirect URI&quot; Error</h4>
               <p className="text-sm text-red-800">
                 <strong>Solution:</strong> Verify the redirect URI in your Miro app settings exactly matches <code className="bg-white px-1 py-0.5 rounded text-xs">http://localhost:3000/api/auth/miro/callback</code>
               </p>
             </div>
             
             <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-              <h4 className="font-medium text-red-900 mb-1">❌ "Invalid client" Error</h4>
+              <h4 className="font-medium text-red-900 mb-1">❌ &quot;Invalid client&quot; Error</h4>
               <p className="text-sm text-red-800">
                 <strong>Solution:</strong> Double-check your Client ID and Client Secret are copied correctly from the Miro Developer Platform and saved in the application configuration.
               </p>
@@ -372,7 +372,7 @@ export function MiroSetupGuide() {
             <div className="bg-red-50 border border-red-200 rounded-lg p-3">
               <h4 className="font-medium text-red-900 mb-1">❌ Configuration Not Saving</h4>
               <p className="text-sm text-red-800">
-                <strong>Solution:</strong> Ensure you click "Save Configuration" after entering your credentials. Check the browser console for any error messages during the save process.
+                <strong>Solution:</strong> Ensure you click &quot;Save Configuration&quot; after entering your credentials. Check the browser console for any error messages during the save process.
               </p>
             </div>
             

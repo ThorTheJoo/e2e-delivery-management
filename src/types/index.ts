@@ -234,7 +234,7 @@ export interface FormField {
   type: 'text' | 'number' | 'select' | 'textarea' | 'date' | 'checkbox';
   required?: boolean;
   options?: { value: string; label: string }[];
-  validation?: any;
+  validation?: unknown;
 }
 
 // API Response types

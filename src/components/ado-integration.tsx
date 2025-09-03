@@ -5,7 +5,7 @@ import { ADOWorkItemMapping, ADOValidationResult, ADOPreviewData, ADOExportStatu
 import { Project, TMFOdaDomain, SpecSyncItem } from '@/types';
 import { adoService } from '@/lib/ado-service';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -23,20 +23,12 @@ import {
   Network,
   Users,
   Settings,
-  Play,
-  Square,
   BarChart3,
   ChevronDown,
   ChevronRight,
-  ExternalLink,
   Copy,
-  RefreshCw,
-  Filter,
   Search,
   Layers,
-  GitBranch,
-  Calendar,
-  Clock,
   Target,
   Zap
 } from 'lucide-react';

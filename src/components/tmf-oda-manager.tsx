@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Trash2, Edit, Check, X, ChevronDown, ChevronRight, Upload, FileSpreadsheet } from 'lucide-react';
+import { Plus, Trash2, Edit, ChevronDown, ChevronRight, FileSpreadsheet } from 'lucide-react';
 import { TMFOdaDomain, TMFOdaCapability, TMFOdaState } from '@/types';
 import { SpecSyncImport } from './specsync-import';
 import { SpecSyncState } from '@/types';
@@ -186,7 +186,7 @@ export function TMFOdaManager({ onStateChange, initialState }: TMFOdaManagerProp
         domains: mockDomains
       }));
     }
-  }, [initialState]);
+  }, [initialState, state.domains.length]);
 
   // Notify parent of state changes
   useEffect(() => {
@@ -848,7 +848,7 @@ export function TMFOdaManager({ onStateChange, initialState }: TMFOdaManagerProp
                   <CardContent className="text-center py-12">
                     <div className="text-gray-500">
                       <p className="text-lg font-medium mb-2">No TMF ODA domains added yet</p>
-                      <p className="text-sm">Click "Add Domain" to get started with TMF ODA management</p>
+                      <p className="text-sm">Click &quot;Add Domain&quot; to get started with TMF ODA management</p>
                     </div>
                   </CardContent>
                 </Card>

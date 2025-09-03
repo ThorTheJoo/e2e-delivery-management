@@ -19,7 +19,7 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
   const [objects, setObjects] = useState<BlueDolphinObjectEnhanced[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [objectCount, setObjectCount] = useState(0);
+  const [_objectCount, setObjectCount] = useState(0);
   const [objectTotal, setObjectTotal] = useState(0);
   const [selectedEndpoint, setSelectedEndpoint] = useState('/Objects');
   const [filter, setFilter] = useState('');
@@ -87,7 +87,7 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
     } finally {
       setLoading(false);
     }
-  }, [config, selectedEndpoint, filter, objectDefinitionFilter, workspaceFilter, useEnhancedFields, resultsLimit]);
+  }, [config, selectedEndpoint, filter, workspaceFilter, useEnhancedFields, resultsLimit]);
 
   const clearObjects = () => {
     setObjects([]);
@@ -146,7 +146,7 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
     Type?: string;
     Name?: string;
     IsRelationshipDirectionAlternative?: boolean;
-    [key: string]: any;
+    [key: string]: unknown;
   }
 
   const [relations, setRelations] = useState<BlueDolphinRelation[]>([]);
@@ -163,7 +163,7 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
   const [relName, setRelName] = useState('');
   const [relRawFilter, setRelRawFilter] = useState('');
 
-  const buildRelationsFilter = (): string => {
+  const buildRelationsFilter = useCallback((): string => {
     const parts: string[] = [];
     if (relDefName) parts.push(`RelationshipDefinitionName eq '${relDefName}'`);
     if (relSrcDef) parts.push(`BlueDolphinObjectDefinitionName eq '${relSrcDef}'`);
@@ -172,15 +172,15 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
     if (relType) parts.push(`Type eq '${relType}'`);
     if (relName) parts.push(`Name eq '${relName}'`);
     if (relRawFilter) parts.push(`(${relRawFilter})`);
-    
+
     // Add workspace filter to ensure consistency with object loading
     if (workspaceFilter && workspaceFilter !== 'all') {
       const workspaceCondition = `(BlueDolphinObjectWorkspaceName eq '${workspaceFilter}' or RelatedBlueDolphinObjectWorkspaceName eq '${workspaceFilter}')`;
       parts.push(workspaceCondition);
     }
-    
+
     return parts.join(' and ');
-  };
+  }, [relDefName, relSrcDef, relTgtWs, relTgtDef, relType, relName, relRawFilter, workspaceFilter]);
 
   const loadRelations = useCallback(async () => {
     if (!config.odataUrl) {
@@ -217,7 +217,7 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
     } finally {
       setRelationsLoading(false);
     }
-  }, [config, relDefName, relSrcDef, relTgtWs, relTgtDef, relType, relName, relRawFilter, relationsTop]);
+  }, [config, relationsTop, buildRelationsFilter]);
 
   const unique = (arr: (string | undefined)[]) => Array.from(new Set(arr.filter(Boolean) as string[])).sort();
   const uniqueRelTypes = unique(relations.map(r => r.Type));
@@ -257,7 +257,7 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
   const [exportRows, setExportRows] = useState<JoinedExportRow[]>([]);
   const [exportQueries, setExportQueries] = useState<{ objects: string; relations: string } | null>(null);
 
-  const buildObjectsFilterForExport = (): string => {
+  const buildObjectsFilterForExport = useCallback((): string => {
     const parts: string[] = [];
     if (workspaceFilter && workspaceFilter !== 'all') {
       parts.push(`Workspace eq '${workspaceFilter}'`);
@@ -266,9 +266,9 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
       parts.push(`Definition eq '${exportObjectDefinition}'`);
     }
     return parts.join(' and ');
-  };
+  }, [workspaceFilter, exportObjectDefinition]);
 
-  const buildRelationsFilterForExport = (): string => {
+  const buildRelationsFilterForExport = useCallback((): string => {
     const parts: string[] = [];
     if (workspaceFilter && workspaceFilter !== 'all') {
       const both = `(BlueDolphinObjectWorkspaceName eq '${workspaceFilter}' and RelatedBlueDolphinObjectWorkspaceName eq '${workspaceFilter}')`;
@@ -280,9 +280,9 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
       parts.push(`(BlueDolphinObjectDefinitionName eq '${exportObjectDefinition}' or RelatedBlueDolphinObjectDefinitionName eq '${exportObjectDefinition}')`);
     }
     return parts.join(' and ');
-  };
+  }, [workspaceFilter, exportWorkspaceScope, exportRelationType, exportObjectDefinition]);
 
-  const joinRelationsWithObjects = (rels: BlueDolphinRelation[], objs: BlueDolphinObjectEnhanced[]): JoinedExportRow[] => {
+  const joinRelationsWithObjects = useCallback((rels: BlueDolphinRelation[], objs: BlueDolphinObjectEnhanced[]): JoinedExportRow[] => {
     const map = new Map<string, BlueDolphinObjectEnhanced>();
     for (const o of objs) {
       if (o.ID) map.set(String(o.ID), o);
@@ -294,7 +294,7 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
       if (s && t) rows.push({ relation: r, source: s, target: t });
     }
     return rows;
-  };
+  }, []);
 
   const loadExportDataset = useCallback(async () => {
     if (!config.odataUrl) {
@@ -364,7 +364,7 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
     } finally {
       setExportLoading(false);
     }
-  }, [config, workspaceFilter, exportRelationType, exportObjectDefinition, exportWorkspaceScope, exportLimit]);
+  }, [config, workspaceFilter, exportLimit, buildObjectsFilterForExport, buildRelationsFilterForExport, joinRelationsWithObjects]);
 
   function isEnhancedKey(key: string): boolean {
     return key.startsWith('Object_Properties_') ||
@@ -393,7 +393,7 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
 
     const header = [...relHeaders, ...srcHeaders, ...srcEnhancedHeaders, ...tgtHeaders, ...tgtEnhancedHeaders];
 
-    const escapeCsv = (val: any) => {
+    const escapeCsv = (val: unknown) => {
       if (val === null || val === undefined) return '';
       const s = String(val);
       if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
@@ -404,8 +404,8 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
     lines.push('\uFEFF' + header.join(','));
     for (const row of exportRows) {
       const rel = row.relation;
-      const src = row.source as any;
-      const tgt = row.target as any;
+      const src = row.source;
+      const tgt = row.target;
       const relVals = [
         rel.RelationshipId,
         rel.Type || '',
@@ -1236,16 +1236,16 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
                               <div className="border-t pt-2">
                                 <div className="font-semibold">Source (non-empty)</div>
                                 <div className="space-y-1">
-                                  {Object.keys(row.source).filter(k => (row.source as any)[k] !== '' && (row.source as any)[k] !== null && (row.source as any)[k] !== undefined).slice(0, 15).map(k => (
-                                    <div key={k} className="flex justify-between gap-2"><span className="font-mono">{k}</span><span className="truncate">{String((row.source as any)[k])}</span></div>
+                                  {Object.keys(row.source).filter(k => row.source[k as keyof typeof row.source] !== '' && row.source[k as keyof typeof row.source] !== null && row.source[k as keyof typeof row.source] !== undefined).slice(0, 15).map(k => (
+                                    <div key={k} className="flex justify-between gap-2"><span className="font-mono">{k}</span><span className="truncate">{String(row.source[k as keyof typeof row.source])}</span></div>
                                   ))}
                                 </div>
                               </div>
                               <div className="border-t pt-2">
                                 <div className="font-semibold">Target (non-empty)</div>
                                 <div className="space-y-1">
-                                  {Object.keys(row.target).filter(k => (row.target as any)[k] !== '' && (row.target as any)[k] !== null && (row.target as any)[k] !== undefined).slice(0, 15).map(k => (
-                                    <div key={k} className="flex justify-between gap-2"><span className="font-mono">{k}</span><span className="truncate">{String((row.target as any)[k])}</span></div>
+                                  {Object.keys(row.target).filter(k => row.target[k as keyof typeof row.target] !== '' && row.target[k as keyof typeof row.target] !== null && row.target[k as keyof typeof row.target] !== undefined).slice(0, 15).map(k => (
+                                    <div key={k} className="flex justify-between gap-2"><span className="font-mono">{k}</span><span className="truncate">{String(row.target[k as keyof typeof row.target])}</span></div>
                                   ))}
                                 </div>
                               </div>

@@ -1,23 +1,64 @@
-import { 
-  Project, 
-  TMFCapability, 
-  ETOMProcess, 
-  WorkPackage, 
-  Milestone, 
-  Risk, 
-  Dependency, 
+import {
+  Project,
+  TMFCapability,
+  ETOMProcess,
+  WorkPackage,
+  Milestone,
+  Risk,
+  Dependency,
   Document,
-  Estimation,
-  Schedule,
-  CommercialModel
+  Estimation
 } from '@/types';
+
+// Define interfaces for demo data structure
+interface DemoETOMProcess {
+  id: string;
+  name: string;
+  description: string;
+  complexityMultiplier?: number;
+  dependencies?: string[];
+  outputs?: string[];
+}
+
+interface DemoRisk {
+  id: string;
+  description: string;
+  probability: string;
+  impact: string;
+  mitigation: string;
+  owner: string;
+}
+
+interface DemoDependency {
+  id: string;
+  name: string;
+  description: string;
+  impact: string;
+  status: string;
+}
+
+interface DemoData {
+  project: Project;
+  tmfCapabilities: Record<string, TMFCapability>;
+  etomProcesses: Record<string, DemoETOMProcess>;
+  risks: {
+    high: DemoRisk[];
+    medium: DemoRisk[];
+    low: DemoRisk[];
+  };
+  dependencies: {
+    system: DemoDependency[];
+    data: DemoDependency[];
+    infrastructure: DemoDependency[];
+  };
+}
 
 // Import demo data
 import demoData from '../../demo-data.json';
 
 class DataService {
   private static instance: DataService;
-  private data: any;
+  private data: DemoData;
 
   private constructor() {
     this.data = demoData;
@@ -59,7 +100,7 @@ class DataService {
     const processes: ETOMProcess[] = [];
     
     // Transform the demo data to match the expected ETOMProcess interface
-    Object.values(this.data.etomProcesses).forEach((process: any) => {
+    Object.values(this.data.etomProcesses).forEach((process: DemoETOMProcess) => {
       // Create a base effort based on the complexity multiplier and standard effort
       const baseEffort = {
         businessAnalyst: Math.round(10 * (process.complexityMultiplier || 1)),
@@ -200,7 +241,7 @@ class DataService {
     
     // Transform high risks
     if (this.data.risks?.high) {
-      this.data.risks.high.forEach((risk: any) => {
+      this.data.risks.high.forEach((risk: DemoRisk) => {
         risks.push({
           id: risk.id,
           name: risk.description,
@@ -217,7 +258,7 @@ class DataService {
     
     // Transform medium risks
     if (this.data.risks?.medium) {
-      this.data.risks.medium.forEach((risk: any) => {
+      this.data.risks.medium.forEach((risk: DemoRisk) => {
         risks.push({
           id: risk.id,
           name: risk.description,
@@ -234,7 +275,7 @@ class DataService {
     
     // Transform low risks
     if (this.data.risks?.low) {
-      this.data.risks.low.forEach((risk: any) => {
+      this.data.risks.low.forEach((risk: DemoRisk) => {
         risks.push({
           id: risk.id,
           name: risk.description,
@@ -267,7 +308,7 @@ class DataService {
     
     // Transform system dependencies
     if (this.data.dependencies?.system) {
-      this.data.dependencies.system.forEach((dep: any) => {
+      this.data.dependencies.system.forEach((dep: DemoDependency) => {
         dependencies.push({
           id: dep.id,
           name: dep.name,
@@ -283,7 +324,7 @@ class DataService {
     
     // Transform data dependencies
     if (this.data.dependencies?.data) {
-      this.data.dependencies.data.forEach((dep: any) => {
+      this.data.dependencies.data.forEach((dep: DemoDependency) => {
         dependencies.push({
           id: dep.id,
           name: dep.name,
@@ -299,7 +340,7 @@ class DataService {
     
     // Transform infrastructure dependencies
     if (this.data.dependencies?.infrastructure) {
-      this.data.dependencies.infrastructure.forEach((dep: any) => {
+      this.data.dependencies.infrastructure.forEach((dep: DemoDependency) => {
         dependencies.push({
           id: dep.id,
           name: dep.name,
