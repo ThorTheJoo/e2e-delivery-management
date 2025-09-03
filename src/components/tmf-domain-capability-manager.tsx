@@ -1,15 +1,15 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Trash2, Edit, ChevronDown, ChevronRight, Search, CheckCircle, Circle } from 'lucide-react';
+import { Plus, Trash2, ChevronDown, ChevronRight, Search, CheckCircle, Circle } from 'lucide-react';
 import { TMFReferenceService, TMFReferenceDomain, TMFReferenceCapability } from '@/lib/tmf-reference-service';
 
 interface UserDomain {
@@ -36,7 +36,7 @@ interface UserCapability {
 interface TMFDomainCapabilityManagerProps {
   onStateChange?: (domains: UserDomain[]) => void;
   initialState?: UserDomain[];
-  specSyncData?: any; // SpecSync data for requirement mapping
+  specSyncData?: SpecSyncItem[]; // SpecSync data for requirement mapping
 }
 
 export function TMFDomainCapabilityManager({ onStateChange, initialState, specSyncData }: TMFDomainCapabilityManagerProps) {
@@ -74,7 +74,7 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
     };
 
     loadReferenceData();
-  }, []);
+  }, [domains.length, initializeSampleData]);
 
   // Process SpecSync data after domains are initialized
   useEffect(() => {
@@ -90,17 +90,17 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
       // Use setTimeout to break the synchronous update cycle
       setTimeout(processSpecSyncData, 0);
     }
-  }, [specSyncData?.items, loading, domains.length]); // Only depend on domains.length, not the full domains array
+  }, [specSyncData?.items, loading, domains.length, autoSelectMatchingDomainsAndCapabilities, updateRequirementCounts]); // Only depend on domains.length, not the full domains array
 
   // Handle onStateChange callback when domains change (but not during SpecSync processing)
   useEffect(() => {
     if (domains.length > 0 && !loading && !isProcessingSpecSync.current) {
       onStateChange?.(domains);
     }
-  }, [domains, loading]); // Remove onStateChange from dependencies to prevent infinite loop
+  }, [domains, loading, onStateChange]); // Remove onStateChange from dependencies to prevent infinite loop
 
   // Initialize sample data
-  const initializeSampleData = (referenceDomains: TMFReferenceDomain[], referenceCapabilities: TMFReferenceCapability[]) => {
+  const initializeSampleData = useCallback((referenceDomains: TMFReferenceDomain[], referenceCapabilities: TMFReferenceCapability[]) => {
     const sampleDomains: UserDomain[] = referenceDomains.map((refDomain, index) => {
       const domainCapabilities = referenceCapabilities.filter(cap => cap.domain_id === refDomain.id);
       
@@ -126,16 +126,16 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
 
     setDomains(sampleDomains);
     onStateChange?.(sampleDomains);
-  };
+  }, [onStateChange]);
 
 
 
-  const autoSelectMatchingDomainsAndCapabilities = (specSyncItems: any[]) => {
+  const autoSelectMatchingDomainsAndCapabilities = useCallback((specSyncItems: SpecSyncItem[]) => {
     // Extract unique domains and capabilities from SpecSync data
     const importedDomains = new Set<string>();
     const importedCapabilities = new Set<string>();
-    
-    specSyncItems.forEach((item: any) => {
+
+    specSyncItems.forEach((item: SpecSyncItem) => {
       if (item.domain) {
         importedDomains.add(item.domain.toString().trim());
       }
@@ -225,13 +225,13 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
     const allDomains = [...updatedDomains, ...newDomains];
     
     setDomains(allDomains);
-  };
+  }, [domains]);
 
-  const updateRequirementCounts = (specSyncItems: any[]) => {
+  const updateRequirementCounts = useCallback((specSyncItems: SpecSyncItem[]) => {
     const updatedDomains = domains.map(domain => {
       const domainCapabilities = domain.capabilities.map(capability => {
         // Count requirements that match this capability
-        const requirementCount = specSyncItems.filter((item: any) => {
+        const requirementCount = specSyncItems.filter((item: SpecSyncItem) => {
           const itemCapability = (item.capability || item.afLevel2 || '').toString().toLowerCase();
           const itemDomain = (item.domain || '').toString().toLowerCase();
           const capabilityName = capability.name.toLowerCase();
@@ -260,7 +260,7 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
     });
 
     setDomains(updatedDomains);
-  };
+  }, [domains]);
 
   const addDomain = (domainData: { name: string; description: string; referenceDomainId?: string }) => {
     const newDomain: UserDomain = {

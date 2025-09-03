@@ -1,5 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+interface MiroConfig {
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+  scopes: string[];
+}
+
+// Global declaration for Miro configuration
+// Using const for global augmentation as required by ESLint
+declare global {
+  const miroConfig: MiroConfig | undefined;
+}
+
 export async function GET(request: NextRequest) {
   console.log('=== MIRO CALLBACK DEBUG ===');
   const searchParams = request.nextUrl.searchParams;
@@ -34,7 +47,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // Read configuration from server-side storage (set by /api/miro/config)
-    const serverConfig = (global as any).miroConfig;
+    const serverConfig = global.miroConfig;
     
     if (!serverConfig) {
       console.error('No Miro configuration found on server. Please save configuration in the UI first.');

@@ -1,16 +1,12 @@
-import { 
-  ADOConfiguration, 
-  ADOWorkItem, 
-  ADOWorkItemMapping, 
-  ADOValidationResult, 
+import {
+  ADOConfiguration,
+  ADOWorkItemMapping,
+  ADOValidationResult,
   ADOExportStatus,
   ADOPreviewData,
   ADOApiResponse,
   ADOWorkItemResponse,
   ADOProject,
-  ADOWorkItemTypeName,
-  ADOAreaPath,
-  ADOIterationPath,
   ADOAuthStatus,
   ADOIntegrationLogEntry,
   ADONotification
@@ -45,7 +41,7 @@ export class ADOService {
         return this.configuration;
       }
     } catch (error) {
-      this.log('error', 'Failed to load configuration', error);
+      this.log('error', 'Failed to load configuration', error as Error);
     }
     return null;
   }
@@ -63,7 +59,7 @@ export class ADOService {
         await this.testConnection();
       }
     } catch (error) {
-      this.log('error', 'Failed to save configuration', error);
+      this.log('error', 'Failed to save configuration', error as Error);
       throw error;
     }
   }
@@ -112,7 +108,7 @@ export class ADOService {
         return false;
       }
     } catch (error) {
-      this.log('error', 'ADO connection test failed', error);
+      this.log('error', 'ADO connection test failed', error as Error);
       this.addNotification('error', 'Connection Failed', 'Failed to connect to Azure DevOps');
       return false;
     }
@@ -174,7 +170,7 @@ export class ADOService {
       });
 
     } catch (error) {
-      this.log('error', 'Failed to generate work item mappings', error);
+      this.log('error', 'Failed to generate work item mappings', error as Error);
     }
 
     return mappings;
@@ -314,7 +310,7 @@ export class ADOService {
     return domain.capabilities.reduce((total, capability) => total + this.calculateCapabilityEffort(capability), 0);
   }
 
-  private calculateCapabilityEffort(capability: TMFOdaCapability): number {
+  private calculateCapabilityEffort(_capability: TMFOdaCapability): number {
     // Default effort calculation - can be enhanced with actual effort data
     return 5; // 5 days per capability
   }
@@ -414,7 +410,7 @@ export class ADOService {
       });
 
     } catch (error) {
-      this.log('error', 'Validation failed', error);
+      this.log('error', 'Validation failed', error as Error);
       errors.push('Validation process failed');
     }
 
@@ -524,7 +520,7 @@ export class ADOService {
     } catch (error) {
       exportStatus.status = 'failed';
       exportStatus.errors.push('Export process failed');
-      this.log('error', 'ADO export failed', error);
+      this.log('error', 'ADO export failed', error as Error);
     }
 
     return exportStatus;
@@ -558,7 +554,7 @@ export class ADOService {
   }
 
   private async createWorkItem(mapping: ADOWorkItemMapping): Promise<ADOWorkItemResponse> {
-    const fields: any[] = [];
+    const fields: Array<{ op: string; path: string; value: unknown }> = [];
     
     // Convert mapping fields to ADO format
     Object.entries(mapping.targetFields).forEach(([path, value]) => {
@@ -588,7 +584,7 @@ export class ADOService {
   }
 
   // Logging and Notifications
-  private log(level: 'info' | 'warning' | 'error' | 'debug', message: string, details?: any): void {
+  private log(level: 'info' | 'warning' | 'error' | 'debug', message: string, details?: unknown): void {
     const logEntry: ADOIntegrationLogEntry = {
       id: Date.now().toString(),
       timestamp: new Date().toISOString(),
@@ -602,7 +598,7 @@ export class ADOService {
     console.log(`[ADO Service] ${level.toUpperCase()}: ${message}`, details || '');
   }
 
-  private addNotification(type: 'success' | 'warning' | 'error' | 'info', title: string, message: string, details?: any): void {
+  private addNotification(type: 'success' | 'warning' | 'error' | 'info', title: string, message: string, details?: unknown): void {
     const notification: ADONotification = {
       id: Date.now().toString(),
       type,

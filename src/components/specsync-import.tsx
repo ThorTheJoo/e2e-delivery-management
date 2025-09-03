@@ -2,9 +2,9 @@
 
 import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+
 import { Badge } from '@/components/ui/badge';
-import { Upload, FileSpreadsheet, X, CheckCircle, AlertCircle, Edit, Save, X as Cancel } from 'lucide-react';
+import { Upload, X, CheckCircle, AlertCircle, Edit, Save, X as Cancel } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { useEffect } from 'react';
 
@@ -51,7 +51,7 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
 
     return lines.slice(1).map((line, index) => {
       const values = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
-      const row: any = {};
+      const row: Record<string, string> = {};
       headers.forEach((header, index) => {
         row[header] = values[index] || '';
       });
@@ -82,7 +82,7 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
     const ws = workbook.Sheets[preferred];
     const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
     
-    return json.map((r: any, index: number) => {
+    return json.map((r: Record<string, unknown>, index: number) => {
       const fn = r['Rephrased Function Name'] || r['Function Name'] || r['Function'] || '';
       const af2 = r['Rephrased AF Lev.2'] || r['Rephrased AF Lev. 2'] || r['AF Lev.2'] || r['AF Level 2'] || r['Architecture Framework Level 2'] || '';
       const rc = r['Reference Capability'] || r['Capability'] || '';

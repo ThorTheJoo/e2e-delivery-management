@@ -1,9 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(request: NextRequest) {
+interface MiroConfig {
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+  scopes: string[];
+}
+
+// Global declaration for Miro configuration
+// Using const for global augmentation as required by ESLint
+declare global {
+  const miroConfig: MiroConfig | undefined;
+}
+
+export async function GET(_request: NextRequest) {
   try {
     // This endpoint shows the current server-side configuration status
-    const serverConfig = (global as any).miroConfig;
+    const serverConfig = global.miroConfig;
     
     return NextResponse.json({
       message: 'Miro configuration endpoint status',
@@ -53,7 +66,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    (global as any).miroConfig = {
+    global.miroConfig = {
       clientId: config.clientId,
       clientSecret: config.clientSecret,
       redirectUri: config.redirectUri,

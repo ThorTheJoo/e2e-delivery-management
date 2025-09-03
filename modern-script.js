@@ -163,13 +163,13 @@ function setupCapabilitySelection() {
 
 // Canvas Interactions
 function setupCanvasInteractions() {
-    const canvasArea = document.querySelector('.canvas-area');
+    const _canvasArea = document.querySelector('.canvas-area');
     const canvasGrid = document.querySelector('.canvas-grid');
     const toolbarButtons = document.querySelectorAll('.btn-toolbar');
     const capabilityCards = document.querySelectorAll('.capability-card');
     
-    let canvasMode = 'select';
-    let canvasView = 'business';
+    const _canvasMode = 'select';
+    const _canvasView = 'business';
     
     // Toolbar mode switching
     toolbarButtons.forEach(button => {
@@ -280,7 +280,7 @@ function addCapabilityToCanvas(capabilityId, x, y) {
 }
 
 // Remove canvas node
-function removeCanvasNode(button) {
+function _removeCanvasNode(button) {
     const node = button.closest('.canvas-node');
     if (node) {
         node.remove();
@@ -306,7 +306,7 @@ function removeCanvasNode(button) {
 function updateCanvasStatus() {
     const canvasGrid = document.querySelector('.canvas-grid');
     const nodes = canvasGrid ? canvasGrid.querySelectorAll('.canvas-node') : [];
-    const selectedCapabilities = document.querySelectorAll('.capability-card input[type="checkbox"]:checked');
+    const _selectedCapabilities = document.querySelectorAll('.capability-card input[type="checkbox"]:checked');
     
     const statusItems = document.querySelectorAll('.status-item');
     
@@ -592,7 +592,7 @@ function setupKeyboardShortcuts() {
 }
 
 // Utility Functions
-function showNotification(message, type = 'info') {
+function _showNotification(message, type = 'info') {
     // Create notification element
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;

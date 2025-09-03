@@ -5,6 +5,20 @@ export interface MiroConfig {
   scopes: string[];
 }
 
+export interface MiroDebugInfo {
+  isConfigured: boolean;
+  config: {
+    clientId: string;
+    clientSecret: string;
+    redirectUri: string;
+    scopes: string[];
+  } | null;
+  localStorage: {
+    miroConfig: string | null;
+    allKeys: string[];
+  } | 'Not available (server-side)';
+}
+
 class MiroConfigService {
   private static instance: MiroConfigService;
   private config: MiroConfig | null = null;
@@ -40,7 +54,7 @@ class MiroConfigService {
     }
   }
 
-  private validateConfig(config: any): config is MiroConfig {
+  private validateConfig(config: unknown): config is MiroConfig {
     return (
       config &&
       typeof config === 'object' &&
@@ -105,7 +119,7 @@ class MiroConfigService {
     }
   }
 
-  public getDebugInfo(): any {
+  public getDebugInfo(): MiroDebugInfo {
     return {
       isConfigured: this.isConfigured(),
       config: this.config ? {

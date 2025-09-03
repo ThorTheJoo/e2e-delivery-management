@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+
 import { GraphControls } from '@/components/graph-controls';
 import { BlueDolphinGraph } from '@/components/blue-dolphin-graph';
 import { ObjectDetailsPanel } from '@/components/object-details-panel';
@@ -38,14 +38,14 @@ export function BlueDolphinVisualization({ config }: BlueDolphinVisualizationPro
             nodes={nodes}
             links={links}
             viewMode={filters.viewMode}
-            onNodeClick={(n) => { setSelectedLink(null); setSelectedNode(n as any); }}
-            onLinkClick={(l) => { setSelectedNode(null); setSelectedLink(l as any); }}
+            onNodeClick={(n) => { setSelectedLink(null); setSelectedNode(n); }}
+            onLinkClick={(l) => { setSelectedNode(null); setSelectedLink(l); }}
           />
         </CardContent>
       </Card>
 
       {(selectedNode || selectedLink) && (
-        <ObjectDetailsPanel node={selectedNode as any} link={selectedLink as any} />
+        <ObjectDetailsPanel node={selectedNode} link={selectedLink} />
       )}
     </div>
   );

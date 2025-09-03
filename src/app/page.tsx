@@ -494,13 +494,13 @@ export default function HomePage() {
     toast.showInfo('🗑️ SpecSync data cleared successfully');
   };
 
-  const handleTmfStateChange = useCallback((domains: any[]) => {
+  const handleTmfStateChange = useCallback((domains: TMFOdaDomain[]) => {
     // Convert UserDomain[] to TMFOdaDomain[] for MiroBoardCreator
     const tmfDomains: TMFOdaDomain[] = domains.map(domain => ({
       id: domain.id,
       name: domain.name,
       description: domain.description,
-      capabilities: domain.capabilities.map((cap: any) => ({
+      capabilities: domain.capabilities.map((cap: TMFOdaCapability) => ({
         id: cap.id,
         name: cap.name,
         description: cap.description,

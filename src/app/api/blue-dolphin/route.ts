@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createBlueDolphinService } from '@/lib/blue-dolphin-service';
+import { createBlueDolphinService, BlueDolphinRestService, BlueDolphinODataService, BlueDolphinSyncService } from '@/lib/blue-dolphin-service';
+
+type BlueDolphinService = BlueDolphinRestService | BlueDolphinODataService | {
+  rest: BlueDolphinRestService;
+  odata: BlueDolphinODataService;
+  sync: BlueDolphinSyncService;
+};
 
 function encodeBasicAuth(username: string, password: string): string {
   return Buffer.from(`${username}:${password}`).toString('base64');
@@ -20,7 +26,7 @@ export async function POST(request: NextRequest) {
     console.log('Blue Dolphin API request:', { action, protocol: config.protocol });
     console.log('Full configuration:', JSON.stringify(config, null, 2));
 
-    let service;
+    let service: BlueDolphinService;
     try {
       service = createBlueDolphinService(config);
       console.log('✅ Blue Dolphin service created successfully');
@@ -198,7 +204,7 @@ export async function POST(request: NextRequest) {
             
           } else if (config.protocol === 'REST') {
             console.log('=== TESTING REST CONNECTION ===');
-            const restService = service as any;
+            const restService = service as BlueDolphinRestService;
             await restService.getDomains({ page: 1, size: 1 });
             console.log('✅ REST connection test successful');
           } else if (config.protocol === 'HYBRID') {
@@ -238,11 +244,11 @@ export async function POST(request: NextRequest) {
             const response = await service.rest.getDomains(data?.params || {});
             domains = response.data;
           } else if (config.protocol === 'REST') {
-            const restService = service as any;
+            const restService = service as BlueDolphinRestService;
             const response = await restService.getDomains(data?.params || {});
             domains = response.data;
           } else if (config.protocol === 'ODATA') {
-            const odataService = service as any;
+            const odataService = service as BlueDolphinODataService;
             const response = await odataService.getDomains(data?.options || {});
             domains = response.value;
           }
@@ -263,7 +269,7 @@ export async function POST(request: NextRequest) {
           if (config.protocol === 'HYBRID' && 'rest' in service) {
             domain = await service.rest.createDomain(data);
           } else if (config.protocol === 'REST') {
-            const restService = service as any;
+            const restService = service as BlueDolphinRestService;
             domain = await restService.createDomain(data);
           } else {
             throw new Error('Domain creation not supported in OData mode');
@@ -282,9 +288,9 @@ export async function POST(request: NextRequest) {
            let requirement;
            if (config.protocol === 'HYBRID' && 'rest' in service) {
              requirement = await service.rest.createRequirement(data);
-           } else if (config.protocol === 'REST') {
-             const restService = service as any;
-             requirement = await restService.createRequirement(data);
+                     } else if (config.protocol === 'REST') {
+            const restService = service as BlueDolphinRestService;
+            requirement = await restService.createRequirement(data);
            } else {
              throw new Error('Requirement creation not supported in OData mode');
            }
@@ -462,7 +468,11 @@ export async function POST(request: NextRequest) {
              throw new Error('Function testing only available for OData protocol');
            }
 
-           const testResults: any = {
+           const testResults: {
+             supportedFunctions: string[];
+             failedFunctions: string[];
+             sampleData: Record<string, unknown>;
+           } = {
              supportedFunctions: [],
              failedFunctions: [],
              sampleData: {}
@@ -534,7 +544,13 @@ export async function POST(request: NextRequest) {
              throw new Error('Investigation only available for OData protocol');
            }
 
-           const investigationResults: any = {
+           const investigationResults: {
+             serviceRoot: string;
+             availableEndpoints: string[];
+             businessUnits: unknown[];
+             projects: unknown[];
+             sampleData: Record<string, unknown>;
+           } = {
              serviceRoot: config.odataUrl,
              availableEndpoints: [],
              businessUnits: [],
@@ -964,7 +980,7 @@ export async function POST(request: NextRequest) {
             });
             
                             // Validate filter parameter to prevent injection
-                let sanitizedFilter = filter;
+                const sanitizedFilter = filter;
                 if (filter && typeof filter === 'string') {
                   // More permissive validation for OData filters
                   // Allow OData operators: eq, ne, gt, lt, ge, le, and, or, not, contains, startswith, endswith

@@ -42,7 +42,11 @@ export async function POST(request: NextRequest) {
         const boardInstance = await miroClient.getBoard(data.boardId);
         
         // Create card on the board with minimal required parameters
-        const cardData: any = {
+        const cardData: {
+          data: { title: string };
+          position?: { x: number; y: number };
+          geometry?: { width: number; height: number };
+        } = {
           data: {
             title: data.title || 'Untitled Card'
           }
@@ -73,7 +77,11 @@ export async function POST(request: NextRequest) {
       case 'createShape':
         const boardForShape = await miroClient.getBoard(data.boardId);
         
-        const shapeData: any = {
+        const shapeData: {
+          data: { shape: string; content: string };
+          position: { x: number; y: number };
+          geometry: { width: number; height: number };
+        } = {
           data: {
             shape: data.shape || 'rectangle',
             content: data.content || ''
@@ -115,7 +123,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ id: frame.id });
 
       case 'getBoard':
-        const boardToGet = await miroClient.getBoard(data.boardId);
+        const _boardToGet = await miroClient.getBoard(data.boardId);
         
         return NextResponse.json({
           id: data.boardId,

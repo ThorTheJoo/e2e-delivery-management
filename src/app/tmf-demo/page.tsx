@@ -5,7 +5,7 @@ import { TMFOdaManager } from '@/components/tmf-oda-manager';
 import { TMFOdaState } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { ArrowLeft, Download, Upload } from 'lucide-react';
+import { ArrowLeft, Download } from 'lucide-react';
 import Link from 'next/link';
 
 export default function TMFOdaDemoPage() {
