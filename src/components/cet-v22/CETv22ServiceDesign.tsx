@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -16,7 +16,7 @@ import { CETv22AnalyzerService } from '@/services/cet-v22-analyzer';
 import { CETv22FileUpload } from './CETv22FileUpload';
 import { CETv22ProjectOverview } from './CETv22ProjectOverview';
 import { CETv22ResourceDashboard } from './CETv22ResourceDashboard';
-import { CETv22EffortAnalysis } from './CETv22EffortAnalysis';
+import { CETv22EffortAnalysisComponent } from './CETv22EffortAnalysis';
 import { CETv22PhaseTimeline } from './CETv22PhaseTimeline';
 import { CETv22RiskAssessment } from './CETv22RiskAssessment';
 import { CETv22IntegrationPanel } from './CETv22IntegrationPanel';
@@ -41,7 +41,25 @@ export const CETv22ServiceDesign: React.FC<CETv22ServiceDesignProps> = ({
   const [, setIntegrationMappings] = useState<CETv22IntegrationMappings | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-
+  // Load data from local storage on component mount
+  useEffect(() => {
+    try {
+      const savedData = localStorage.getItem('cetv22Data');
+      const savedAnalysis = localStorage.getItem('cetv22Analysis');
+      
+      if (savedData && savedAnalysis) {
+        const parsedData = JSON.parse(savedData);
+        const parsedAnalysis = JSON.parse(savedAnalysis);
+        
+        setCetData(parsedData);
+        setAnalysisResult(parsedAnalysis);
+        setProcessingState('completed');
+        setActiveTab('overview');
+      }
+    } catch (err) {
+      console.warn('Failed to load CETv22 data from local storage:', err);
+    }
+  }, []);
 
   // File processing handler
   const handleFileProcessed = useCallback(async (data: CETv22Data) => {
@@ -58,6 +76,10 @@ export const CETv22ServiceDesign: React.FC<CETv22ServiceDesignProps> = ({
       setProcessingState('completed');
       setProgress(100);
       setActiveTab('overview');
+
+      // Save to local storage for persistence across page navigation
+      localStorage.setItem('cetv22Data', JSON.stringify(data));
+      localStorage.setItem('cetv22Analysis', JSON.stringify(analysis));
 
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Unknown error occurred');
@@ -90,6 +112,10 @@ export const CETv22ServiceDesign: React.FC<CETv22ServiceDesignProps> = ({
     setProgress(0);
     setError(null);
     setActiveTab('upload');
+    
+    // Clear local storage
+    localStorage.removeItem('cetv22Data');
+    localStorage.removeItem('cetv22Analysis');
   }, []);
 
   // Get processing status display
@@ -223,10 +249,8 @@ export const CETv22ServiceDesign: React.FC<CETv22ServiceDesignProps> = ({
         {/* Effort Tab */}
         <TabsContent value="effort" className="space-y-6">
           {analysisResult && (
-            <CETv22EffortAnalysis
+            <CETv22EffortAnalysisComponent
               effortAnalysis={analysisResult.effort}
-              phases={cetData?.phases || []}
-              products={cetData?.products || []}
             />
           )}
         </TabsContent>
@@ -257,7 +281,6 @@ export const CETv22ServiceDesign: React.FC<CETv22ServiceDesignProps> = ({
           {analysisResult && (
             <CETv22RiskAssessment
               riskAnalysis={analysisResult.risks}
-              projectAnalysis={analysisResult.project}
             />
           )}
         </TabsContent>

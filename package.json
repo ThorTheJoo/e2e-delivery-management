@@ -1,14 +1,16 @@
 {
   "name": "e2e-delivery-management",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "E2E Delivery Management System - TMF Scoping & Architecture Orchestrator",
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/build-info.js",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "build-info": "node scripts/build-info.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.0",

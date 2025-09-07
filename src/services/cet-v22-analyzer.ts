@@ -343,7 +343,14 @@ export class CETv22AnalyzerService {
     // Debug: Log first few demands to see their structure
     console.log('analyzeDomainBreakdown - First 3 demands:', demands.slice(0, 3));
     
-    const domainMap = new Map<string, { totalEffort: number; roleEfforts: Map<string, number> }>();
+    interface DomainData {
+      totalEffort: number;
+      roleEfforts: Map<string, number>;
+      resourceCount: number;
+      phases: Set<number>;
+    }
+    
+    const domainMap = new Map<string, DomainData>();
     
     // Filter only Ph1Demand data for domain analysis
     const ph1Demands = demands.filter(d => d.phaseNumber === 1 && d.domain && d.totalMandateEffort);
@@ -362,11 +369,18 @@ export class CETv22AnalyzerService {
       const effort = demand.totalMandateEffort || 0;
       
       if (!domainMap.has(domain)) {
-        domainMap.set(domain, { totalEffort: 0, roleEfforts: new Map() });
+        domainMap.set(domain, { 
+          totalEffort: 0, 
+          roleEfforts: new Map(),
+          resourceCount: 0,
+          phases: new Set()
+        });
       }
       
       const domainData = domainMap.get(domain)!;
       domainData.totalEffort += effort;
+      domainData.resourceCount = Math.max(domainData.resourceCount, demand.resourceCount || 0);
+      domainData.phases.add(demand.phaseNumber || 1);
       
       const role = demand.jobProfile || 'Unknown';
       if (!domainData.roleEfforts.has(role)) {
@@ -389,8 +403,10 @@ export class CETv22AnalyzerService {
       return {
         domain,
         totalEffort: data.totalEffort,
+        resourceCount: data.resourceCount,
         percentage: totalEffort > 0 ? (data.totalEffort / totalEffort) * 100 : 0,
-        roleBreakdown
+        roleBreakdown,
+        phases: Array.from(data.phases)
       };
     });
     

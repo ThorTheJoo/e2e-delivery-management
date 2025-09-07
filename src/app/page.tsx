@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Project, TMFCapability, ETOMProcess, WorkPackage, Milestone, Risk, Dependency, Document, TMFOdaDomain, SpecSyncItem } from '@/types';
 import { dataService } from '@/lib/data-service';
 import { formatDate, calculateEffortTotal, getStatusColor, getSeverityColor } from '@/lib/utils';
+import { getBuildInfo } from '@/lib/build-info';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -23,6 +24,7 @@ import { MiroSetupGuide } from '@/components/miro-setup-guide';
 import { ADOConfigurationComponent } from '@/components/ado-configuration';
 import { ADOIntegration } from '@/components/ado-integration';
 import { CETv22ServiceDesign } from '@/components/cet-v22/CETv22ServiceDesign';
+import { BillOfMaterials } from '@/components/bill-of-materials';
 import { useToast, ToastContainer } from '@/components/ui/toast';
 import { mapSpecSyncToCapabilities, calculateUseCaseCountsByCapability, saveSpecSyncData, loadSpecSyncData, clearSpecSyncData } from '@/lib/specsync-utils';
 import { 
@@ -97,6 +99,7 @@ export default function HomePage() {
   const [solutionModelSections, setSolutionModelSections] = useState<Set<string>>(new Set(['domain-management', 'capabilities', 'requirements-sync', 'object-data', 'visualization']));
   const [setDomainEfforts, setSetDomainEfforts] = useState<Record<string, number>>({});
   const [setMatchedWorkPackages, setSetMatchedWorkPackages] = useState<Record<string, any>>({});
+  const [cetv22Data, setCetv22Data] = useState<any>(null);
   const [tmfDomains, setTmfDomains] = useState<TMFOdaDomain[]>([]);
   const [specSyncItems, setSpecSyncItems] = useState<SpecSyncItem[]>([]);
   
@@ -208,6 +211,34 @@ export default function HomePage() {
         }
 
         console.log('All data loading attempts completed');
+        
+        // Load CETv22 data from local storage if available
+        try {
+          const savedCetv22Data = localStorage.getItem('cetv22Data');
+          const savedCetv22Analysis = localStorage.getItem('cetv22Analysis');
+          
+          if (savedCetv22Data) {
+            const parsedData = JSON.parse(savedCetv22Data);
+            console.log('CETv22 data loaded from local storage:', parsedData);
+            setCetv22Data(parsedData);
+          }
+          
+          if (savedCetv22Analysis) {
+            const parsedAnalysis = JSON.parse(savedCetv22Analysis);
+            console.log('CETv22 analysis loaded from local storage:', parsedAnalysis);
+            // Merge analysis data with the main data
+            if (savedCetv22Data) {
+              const parsedData = JSON.parse(savedCetv22Data);
+              const mergedData = {
+                ...parsedData,
+                analysis: parsedAnalysis
+              };
+              setCetv22Data(mergedData);
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to load CETv22 data from local storage:', e);
+        }
       } catch (error) {
         console.error('Error loading data:', error);
         
@@ -553,37 +584,40 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-tmf-50 via-white to-etom-50">
       {/* Header */}
-      <header className="bg-gradient-to-r from-tmf-600 to-etom-600 text-white shadow-lg">
+      <header className="bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Network className="h-8 w-8" />
+              <div className="flex items-center justify-center w-10 h-10 bg-white/20 rounded-lg">
+                <Network className="h-6 w-6 text-white" />
+              </div>
               <div>
                 <h1 className="text-2xl font-bold">CSG Delivery Orchestrator</h1>
-                <p className="text-tmf-100">v1.25.0 - ODA 2025 Compliant</p>
+                <p className="text-white/90">v{getBuildInfo().version} - {getBuildInfo().compliance}</p>
               </div>
             </div>
             <div className="flex items-center space-x-6">
               <div className="text-right">
-                <div className="text-sm text-tmf-100">Project</div>
-                <div className="font-semibold">Mobily BSS Transformation</div>
+                <div className="text-sm text-white/80">Project</div>
+                <div className="font-semibold">{project.name}</div>
               </div>
               <div className="text-right">
-                <div className="text-sm text-tmf-100">Status</div>
-                <div className="font-semibold">Pre-CR</div>
+                <div className="text-sm text-white/80">Status</div>
+                <div className="font-semibold">{project.status}</div>
               </div>
               <div className="text-right">
-                <div className="text-sm text-tmf-100">Customer</div>
-                <div className="font-semibold">Mobily</div>
+                <div className="text-sm text-white/80">Customer</div>
+                <div className="font-semibold">{project.customer}</div>
               </div>
               <div className="text-right">
-                <div className="text-sm text-tmf-100">Build</div>
-                <div className="font-semibold">main@c07df8f</div>
-                <div className="text-xs text-tmf-200">9/2/2025, 9:58:28 PM</div>
+                <div className="text-sm text-white/80">Build</div>
+                <div className="font-semibold">{getBuildInfo().buildHash}</div>
+                <div className="text-xs text-white/70">{getBuildInfo().buildTimestamp}</div>
               </div>
             </div>
           </div>
         </div>
+        <div className="h-px bg-white/20"></div>
       </header>
 
       {/* Main Content with Sidebar */}
@@ -597,7 +631,7 @@ export default function HomePage() {
         {/* Main Content Area */}
         <main className="flex-1 overflow-y-auto p-6">
         <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-9">
+          <TabsList className="grid w-full grid-cols-10">
             <TabsTrigger value="dashboard" className="flex items-center space-x-2">
               <BarChart3 className="h-4 w-4" />
               <span className="hidden sm:inline">Dashboard</span>
@@ -618,6 +652,10 @@ export default function HomePage() {
             <TabsTrigger value="service-design" className="flex items-center space-x-2">
               <PencilRuler className="h-4 w-4" />
               <span className="hidden sm:inline">Service Design</span>
+            </TabsTrigger>
+            <TabsTrigger value="bill-of-materials" className="flex items-center space-x-2">
+              <FileText className="h-4 w-4" />
+              <span className="hidden sm:inline">Bill of Materials</span>
             </TabsTrigger>
             <TabsTrigger value="scheduling" className="flex items-center space-x-2">
               <Calendar className="h-4 w-4" />
@@ -1262,14 +1300,24 @@ export default function HomePage() {
           {/* Service Design Tab */}
           <TabsContent value="service-design" className="space-y-6">
             <CETv22ServiceDesign
-              onIntegrationComplete={(result) => {
-                console.log('CET v22.0 integration completed:', result);
+              onIntegrationComplete={() => {
+                console.log('CET v22.0 integration completed');
                 toast.showSuccess('CET v22.0 integration completed successfully!');
               }}
               onError={(error) => {
                 console.error('CET v22.0 error:', error);
                 toast.showError(`CET v22.0 Error: ${error.message}`);
               }}
+            />
+          </TabsContent>
+
+          {/* Bill of Materials Tab */}
+          <TabsContent value="bill-of-materials" className="space-y-6">
+            <BillOfMaterials
+              specSyncState={specSyncState}
+              setDomainEfforts={setDomainEfforts}
+              setMatchedWorkPackages={setMatchedWorkPackages}
+              cetv22Data={cetv22Data}
             />
           </TabsContent>
 

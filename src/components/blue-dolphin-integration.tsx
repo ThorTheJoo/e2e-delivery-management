@@ -21,6 +21,8 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
   const [error, setError] = useState<string | null>(null);
   const [objectCount, setObjectCount] = useState(0);
   const [objectTotal, setObjectTotal] = useState(0);
+  const [lastDataUpdate, setLastDataUpdate] = useState<Date | null>(null);
+  const [lastApiResponse, setLastApiResponse] = useState<any>(null);
   const [selectedEndpoint, setSelectedEndpoint] = useState('/Objects');
   const [filter, setFilter] = useState('');
   const [objectDefinitionFilter, setObjectDefinitionFilter] = useState('');
@@ -29,6 +31,7 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
   const [showEnhancedFields, setShowEnhancedFields] = useState(true);
   const [resultsLimit, setResultsLimit] = useState(10);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['debug', 'raw-data', 'enhanced-analysis']));
+  const [bypassCache, setBypassCache] = useState(false);
 
   const loadObjects = useCallback(async () => {
     if (!config.odataUrl) {
@@ -75,7 +78,11 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
         setObjects(result.data || []);
         setObjectCount(result.count || 0);
         setObjectTotal(result.total || 0);
+        setLastDataUpdate(new Date());
+        setLastApiResponse(result);
         console.log(`✅ Loaded ${result.count} objects with enhanced fields:`, result.enhancedFields);
+        console.log(`🕒 Data last updated: ${new Date().toISOString()}`);
+        console.log(`📊 API Response:`, result);
       } else {
         setError(result.error || 'Failed to load objects');
         console.error('❌ Failed to load objects:', result.error);
@@ -434,6 +441,12 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
     URL.revokeObjectURL(url);
   };
 
+  const forceRefresh = useCallback(async () => {
+    setBypassCache(true); // Force bypass cache
+    await loadObjects(); // Re-fetch objects
+    setBypassCache(false); // Reset bypass cache
+  }, [loadObjects]);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -594,11 +607,24 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
               />
               <Label htmlFor="showEnhancedFields">Show Enhanced Fields in Cards</Label>
             </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="bypassCache"
+                checked={bypassCache}
+                onChange={(e) => setBypassCache(e.target.checked)}
+                className="rounded"
+              />
+              <Label htmlFor="bypassCache">Bypass Cache (Force Fresh Data)</Label>
+            </div>
           </div>
 
-          <div className="flex space-x-2">
+          <div className="flex space-x-4">
             <Button onClick={loadObjects} disabled={loading}>
               {loading ? 'Loading...' : 'Load Objects'}
+            </Button>
+            <Button onClick={forceRefresh} disabled={loading} variant="outline">
+              {loading ? 'Loading...' : '🔄 Force Refresh'}
             </Button>
             <Button onClick={clearObjects} variant="outline">
               Clear
@@ -726,7 +752,15 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
                 onClick={() => toggleSection('raw-data')}
               >
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm">Raw Data Preview (First Object)</CardTitle>
+                  <div>
+                    <CardTitle className="text-sm">Raw Data Preview (First Object)</CardTitle>
+                    {lastDataUpdate && (
+                      <div className="text-xs text-gray-500 mt-1">
+                        Last updated: {lastDataUpdate.toLocaleString()} 
+                        {bypassCache && <span className="ml-2 text-orange-600 font-semibold">(Cache Bypassed)</span>}
+                      </div>
+                    )}
+                  </div>
                   <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
                     {expandedSections.has('raw-data') ? (
                       <ChevronDown className="h-4 w-4" />
@@ -745,12 +779,65 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
               )}
             </Card>
 
+            {/* API Response Debug */}
+            {lastApiResponse && (
+              <Card className="mb-4">
+                <CardHeader 
+                  className="cursor-pointer hover:bg-gray-50 transition-colors"
+                  onClick={() => toggleSection('api-debug')}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-sm">API Response Debug</CardTitle>
+                      <div className="text-xs text-gray-500 mt-1">
+                        Last API call: {lastDataUpdate?.toLocaleString()}
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                      {expandedSections.has('api-debug') ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                </CardHeader>
+                {expandedSections.has('api-debug') && (
+                  <CardContent className="pt-0">
+                    <div className="p-3 bg-green-50 rounded-md text-xs">
+                      <div className="font-semibold mb-2">API Response Metadata:</div>
+                      <div className="space-y-1">
+                        <div><strong>Success:</strong> {lastApiResponse.success ? '✅' : '❌'}</div>
+                        <div><strong>Count:</strong> {lastApiResponse.count}</div>
+                        <div><strong>Total:</strong> {lastApiResponse.total}</div>
+                        <div><strong>Endpoint:</strong> {lastApiResponse.endpoint}</div>
+                        <div><strong>Filter:</strong> {lastApiResponse.filter || 'None'}</div>
+                        <div><strong>Query:</strong> {lastApiResponse.query}</div>
+                        <div><strong>MoreColumns:</strong> {lastApiResponse.moreColumns ? '✅ Enabled' : '❌ Disabled'}</div>
+                        <div><strong>Enhanced Fields:</strong> {lastApiResponse.enhancedFields}</div>
+                      </div>
+                      {lastApiResponse.data && lastApiResponse.data.length > 0 && (
+                        <div className="mt-3">
+                          <div className="font-semibold mb-2">First Object ObjectLifecycleState from API:</div>
+                          <div className="p-2 bg-white rounded border">
+                            <div className="font-mono text-xs">
+                              ObjectLifecycleState: "{lastApiResponse.data[0].ObjectLifecycleState || 'NOT FOUND'}"
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                )}
+              </Card>
+            )}
+
             {/* Section Control Buttons */}
             <div className="mb-4 flex gap-2">
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => setExpandedSections(new Set(['debug', 'raw-data', 'enhanced-analysis']))}
+                onClick={() => setExpandedSections(new Set(['debug', 'raw-data', 'enhanced-analysis', 'api-debug']))}
               >
                 Expand All
               </Button>
@@ -771,7 +858,15 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
                   onClick={() => toggleSection('enhanced-analysis')}
                 >
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-sm">Enhanced Fields Analysis (First Object)</CardTitle>
+                    <div>
+                      <CardTitle className="text-sm">Enhanced Fields Analysis (First Object)</CardTitle>
+                      {lastDataUpdate && (
+                        <div className="text-xs text-gray-500 mt-1">
+                          Last updated: {lastDataUpdate.toLocaleString()} 
+                          {bypassCache && <span className="ml-2 text-orange-600 font-semibold">(Cache Bypassed)</span>}
+                        </div>
+                      )}
+                    </div>
                     <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
                       {expandedSections.has('enhanced-analysis') ? (
                         <ChevronDown className="h-4 w-4" />
@@ -793,15 +888,39 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
                                            field.startsWith('Ameff_properties_') ||
                                            field.startsWith('Resource_x26_Rate_') ||
                                            field.startsWith('External_Design_');
+                          const isObjectLifecycleState = field === 'ObjectLifecycleState';
                           return (
-                            <div key={field} className={`p-1 rounded ${isEnhanced ? 'bg-blue-100' : 'bg-gray-100'}`}>
-                              <div className="font-mono text-xs">{field}</div>
-                              <div className="text-xs text-gray-600">
+                            <div key={field} className={`p-1 rounded ${
+                              isObjectLifecycleState ? 'bg-yellow-200 border-2 border-yellow-400' :
+                              isEnhanced ? 'bg-blue-100' : 'bg-gray-100'
+                            }`}>
+                              <div className="font-mono text-xs">
+                                {field}
+                                {isObjectLifecycleState && <span className="ml-1 text-yellow-700 font-bold">⚠️</span>}
+                              </div>
+                              <div className={`text-xs ${isObjectLifecycleState ? 'text-yellow-800 font-bold' : 'text-gray-600'}`}>
                                 {value === '' ? 'EMPTY' : value === null ? 'NULL' : value === undefined ? 'UNDEFINED' : `"${value}"`}
                               </div>
                             </div>
                           );
                         })}
+                      </div>
+                      
+                      {/* ObjectLifecycleState Validation */}
+                      <div className="mt-3 p-2 bg-yellow-100 rounded border border-yellow-300">
+                        <div className="font-semibold mb-1 text-yellow-800">🔍 ObjectLifecycleState Validation:</div>
+                        <div className="text-xs text-yellow-700">
+                          <div><strong>Current Value:</strong> "{objects[0].ObjectLifecycleState || 'NOT FOUND'}"</div>
+                          <div><strong>Expected Value:</strong> "Future" (from source data)</div>
+                          <div><strong>Status:</strong> 
+                            <span className={`ml-1 font-bold ${
+                              objects[0].ObjectLifecycleState === 'Future' ? 'text-green-600' : 'text-red-600'
+                            }`}>
+                              {objects[0].ObjectLifecycleState === 'Future' ? '✅ MATCH' : '❌ MISMATCH'}
+                            </span>
+                          </div>
+                          <div><strong>Data Source:</strong> {bypassCache ? 'Fresh from Blue Dolphin (Cache Bypassed)' : 'Potentially Cached Data'}</div>
+                        </div>
                       </div>
                       
                       {/* Enhanced Fields Summary */}

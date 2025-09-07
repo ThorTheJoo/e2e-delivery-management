@@ -10,7 +10,7 @@ interface CETv22EffortAnalysisProps {
   effortAnalysis: CETv22EffortAnalysis;
 }
 
-export const CETv22EffortAnalysis: React.FC<CETv22EffortAnalysisProps> = ({
+export const CETv22EffortAnalysisComponent: React.FC<CETv22EffortAnalysisProps> = ({
   effortAnalysis
 }) => {
   return (

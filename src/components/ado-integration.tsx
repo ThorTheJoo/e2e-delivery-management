@@ -136,19 +136,94 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
       return;
     }
 
-    setIsExporting(true);
+          console.log('🚀 Starting ADO export with mappings:', workItemMappings);
+      console.log('📊 Mapping details:', workItemMappings.map(m => ({
+        type: m.targetType,
+        title: m.targetTitle,
+        source: m.sourceType
+      })));
+      setIsExporting(true);
+    
     try {
+      // First, check if ADO is configured
+      const config = adoService.getConfiguration();
+      if (!config) {
+        toast.showError('ADO not configured. Please configure ADO first.');
+        return;
+      }
+
+      console.log('🔍 ADO Configuration found:', config);
+      
+      // Check if authenticated
+      const authStatus = adoService.getAuthStatus();
+      console.log('🔐 ADO Authentication status check:', authStatus);
+      
+      if (!authStatus?.isAuthenticated) {
+        console.log('❌ ADO not authenticated - stopping export');
+        toast.showError('ADO not authenticated. Please test connection first.');
+        return;
+      }
+
+      console.log('🔐 ADO Authentication status:', authStatus);
+      
+      // Test basic connection first
+      console.log('🔗 Testing basic ADO connection...');
+      try {
+        const connectionTest = await adoService.testConnection();
+        console.log('🔗 Connection test result:', connectionTest);
+        if (!connectionTest) {
+          console.log('❌ Connection test failed - stopping export');
+          toast.showError('ADO connection test failed. Please check your configuration.');
+          return;
+        }
+      } catch (error) {
+        console.error('❌ Connection test error:', error);
+        toast.showError('ADO connection test failed');
+        return;
+      }
+      
+      // First, let's check what work item types are available
+      console.log('🔍 Starting work item type check...');
+      try {
+        const availableTypes = await adoService.getAvailableWorkItemTypes();
+        console.log('📋 Available work item types:', availableTypes);
+      } catch (error) {
+        console.error('❌ Failed to get available work item types:', error);
+        toast.showError('Failed to get available work item types');
+        return;
+      }
+      
+      // Validate work item types
+      console.log('✅ Starting work item type validation...');
+      try {
+        const validation = await adoService.validateWorkItemTypes();
+        console.log('🔍 Work item type validation:', validation);
+      } catch (error) {
+        console.error('❌ Failed to validate work item types:', error);
+        toast.showError('Failed to validate work item types');
+        return;
+      }
+      
+      // Now proceed with export
+      console.log('📤 Proceeding with export...');
       const status = await adoService.exportToADO(workItemMappings);
+      console.log('📊 Export status received:', status);
+      
       setExportStatus(status);
       
       if (status.status === 'completed') {
         toast.showSuccess(`Successfully exported ${status.processedItems} work items to ADO`);
+        console.log('🎉 Export completed successfully!');
+      } else if (status.status === 'completed_with_errors') {
+        toast.showWarning(`Export completed with ${status.errors.length} errors. ${status.processedItems} items exported.`);
+        console.log('⚠️ Export completed with errors:', status.errors);
       } else {
         toast.showError(`Export failed: ${status.errors.join(', ')}`);
+        console.log('❌ Export failed:', status.errors);
       }
     } catch (error) {
-      console.error('Failed to export to ADO:', error);
-      toast.showError('Failed to export to ADO');
+      console.error('💥 Failed to export to ADO:', error);
+      toast.showError(`Failed to export to ADO: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsExporting(false);
     }
@@ -175,7 +250,7 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
     switch (type) {
       case 'epic': return <Target className="h-4 w-4" />;
       case 'feature': return <Layers className="h-4 w-4" />;
-      case 'userstory': return <Users className="h-4 w-4" />;
+      case 'User Story': return <Users className="h-4 w-4" />;
       case 'task': return <Settings className="h-4 w-4" />;
       default: return <FileText className="h-4 w-4" />;
     }
@@ -185,7 +260,7 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
     switch (type) {
       case 'epic': return 'bg-purple-100 text-purple-800';
       case 'feature': return 'bg-blue-100 text-blue-800';
-      case 'userstory': return 'bg-green-100 text-green-800';
+      case 'User Story': return 'bg-green-100 text-green-800';
       case 'task': return 'bg-orange-100 text-orange-800';
       default: return 'bg-gray-100 text-gray-800';
     }
@@ -760,22 +835,68 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
                   {exportStatus.processedItems} / {exportStatus.totalItems} items
                 </span>
               </div>
+              
+              {/* Progress Bar */}
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div 
                   className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${exportStatus.progress}%` }}
                 ></div>
               </div>
+              
+              {/* Status Details */}
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="font-medium">Total Items:</span> {exportStatus.totalItems}
+                </div>
+                <div>
+                  <span className="font-medium">Processed:</span> {exportStatus.processedItems}
+                </div>
+                <div>
+                  <span className="font-medium">Exported:</span> {exportStatus.exportedItems.length}
+                </div>
+                <div>
+                  <span className="font-medium">Errors:</span> {exportStatus.errors.length}
+                </div>
+              </div>
+              
+              {/* Success Items */}
+              {exportStatus.exportedItems.length > 0 && (
+                <div>
+                  <h4 className="font-medium text-green-700 mb-2">Successfully Exported Items</h4>
+                  <div className="space-y-1 max-h-32 overflow-y-auto">
+                    {exportStatus.exportedItems.map((item, index) => (
+                      <div key={index} className="text-sm text-green-600 bg-green-50 p-2 rounded">
+                        ID: {item.id} - {item.fields['System.Title'] || 'Untitled'}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Errors */}
               {exportStatus.errors.length > 0 && (
                 <div>
                   <h4 className="font-medium text-red-700 mb-2">Export Errors</h4>
                   <div className="space-y-1">
                     {exportStatus.errors.map((error, index) => (
-                      <div key={index} className="text-sm text-red-600">{error}</div>
+                      <div key={index} className="text-sm text-red-600 bg-red-50 p-2 rounded">
+                        {error}
+                      </div>
                     ))}
                   </div>
                 </div>
               )}
+              
+              {/* Debug Info */}
+              <details className="mt-4">
+                <summary className="cursor-pointer text-sm font-medium text-gray-600">
+                  Debug Information
+                </summary>
+                <pre className="mt-2 text-xs bg-gray-100 p-2 rounded overflow-x-auto">
+                  {JSON.stringify(exportStatus, null, 2)}
+                </pre>
+              </details>
             </div>
           </CardContent>
         </Card>

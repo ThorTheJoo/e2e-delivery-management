@@ -174,6 +174,13 @@ export function NavigationSidebar({ activeTab, onTabChange, onScrollToSection }:
       icon: <Lightbulb className="h-4 w-4" />,
       children: [
         {
+          id: 'bill-of-materials',
+          label: 'Bill of Materials',
+          icon: <FileText className="h-4 w-4" />,
+          action: 'tab',
+          target: 'bill-of-materials'
+        },
+        {
           id: 'solution-design',
           label: 'Solution Design',
           icon: <PencilRuler className="h-4 w-4" />,

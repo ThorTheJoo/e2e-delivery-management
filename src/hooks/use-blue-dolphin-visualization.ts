@@ -62,11 +62,18 @@ export function useBlueDolphinVisualization(config: BlueDolphinConfig): UseBlueD
   const fetchWithCache = useCallback(async (key: string, body: any) => {
     const now = Date.now();
     const cached = cacheRef.current.get(key);
-    if (cached && now - cached.timestamp < 5 * 60 * 1000) return cached.data;
+    // Reduce cache TTL from 5 minutes to 1 minute to ensure fresher data
+    if (cached && now - cached.timestamp < 1 * 60 * 1000) return cached.data;
     const res = await fetch('/api/blue-dolphin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     const json = await res.json();
     cacheRef.current.set(key, { timestamp: now, data: json });
     return json;
+  }, []);
+
+  // Add cache invalidation function
+  const invalidateCache = useCallback(() => {
+    cacheRef.current.clear();
+    console.log('[BD Viz] Cache invalidated');
   }, []);
 
   const loadData = useCallback(async () => {
@@ -134,6 +141,12 @@ export function useBlueDolphinVisualization(config: BlueDolphinConfig): UseBlueD
     }
   }, [config, filters.resultsTop, buildObjectsFilter, buildRelationsFilter, fetchWithCache]);
 
+  // Add function to force refresh data
+  const forceRefresh = useCallback(async () => {
+    invalidateCache();
+    await loadData();
+  }, [invalidateCache, loadData]);
+
   const available = useMemo(() => {
     const snap = dataSnapshotRef.current;
     if (!snap) return { workspaces: [], relationTypes: [], relationNames: [], sourceDefinitions: [], targetDefinitions: [] };
@@ -183,7 +196,7 @@ export function useBlueDolphinVisualization(config: BlueDolphinConfig): UseBlueD
     })();
   }
 
-  return { nodes, links, loading, error, filters, setFilters, loadData, available };
+  return { nodes, links, loading, error, filters, setFilters, loadData, forceRefresh, available };
 }
 
 

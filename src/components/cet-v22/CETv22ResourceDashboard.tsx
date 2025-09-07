@@ -3,6 +3,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Collapsible } from '@/components/ui/collapsible';
 import { Users, TrendingUp, Clock, DollarSign } from 'lucide-react';
 import { CETv22ResourceAnalysis, CETv22JobProfile } from '@/types';
 
@@ -75,39 +76,38 @@ export const CETv22ResourceDashboard: React.FC<CETv22ResourceDashboardProps> = (
       </div>
 
       {/* Role Breakdown */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Resource Role Breakdown</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {resourceAnalysis.roleBreakdown.map((role, index) => (
-              <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <Users className="h-4 w-4 text-blue-600" />
-                  </div>
-                  <div>
-                    <div className="font-medium">{role.role}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {role.effort.toLocaleString()} hours
-                    </div>
+      <Collapsible 
+        title="Resource Role Breakdown" 
+        defaultCollapsed={true}
+        className="border-0 shadow-none"
+      >
+        <div className="space-y-4">
+          {resourceAnalysis.roleBreakdown.map((role, index) => (
+            <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <Users className="h-4 w-4 text-blue-600" />
+                </div>
+                <div>
+                  <div className="font-medium">{role.role}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {role.effort.toLocaleString()} hours
                   </div>
                 </div>
-                <Badge variant="secondary">
-                  {role.percentage.toFixed(1)}%
-                </Badge>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              <Badge variant="secondary">
+                {role.percentage.toFixed(1)}%
+              </Badge>
+            </div>
+          ))}
+        </div>
+      </Collapsible>
 
       {/* Domain Breakdown */}
       {resourceAnalysis.domainBreakdown && resourceAnalysis.domainBreakdown.length > 0 ? (
         <Card>
           <CardHeader>
-            <CardTitle>Domain Breakdown & Total Mandate Effort</CardTitle>
+            <CardTitle>Domain Breakdown & Total Manday Effort</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -158,13 +158,13 @@ export const CETv22ResourceDashboard: React.FC<CETv22ResourceDashboardProps> = (
       ) : (
         <Card>
           <CardHeader>
-            <CardTitle>Domain Breakdown & Total Mandate Effort</CardTitle>
+            <CardTitle>Domain Breakdown & Total Manday Effort</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-center py-8 text-muted-foreground">
               <p>No domain breakdown data available.</p>
               <p className="text-sm mt-2">
-                This section requires Ph1Demand worksheet data with domain (Column M) and total mandate effort (Column O) information.
+                This section requires Ph1Demand worksheet data with domain (Column M) and total manday effort (Column O) information.
               </p>
               <div className="mt-4 p-4 bg-gray-50 rounded-lg text-left text-sm">
                 <p><strong>Debug Info:</strong></p>

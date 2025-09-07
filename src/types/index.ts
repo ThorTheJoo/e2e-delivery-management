@@ -351,8 +351,6 @@ export interface CETv22ResourceDemand {
   productType: string;
   phaseNumber: number;
   complexityLevel?: string;
-  domain?: string; // Column M from Ph1Demand
-  totalMandateEffort?: number; // Column O from Ph1Demand
 }
 
 export interface CETv22LookupValue {
@@ -401,7 +399,7 @@ export interface CETv22ResourceAnalysis {
   resourceUtilization: number;
   roleBreakdown: CETv22RoleEffort[];
   timelineAnalysis: CETv22TimelineData[];
-  domainBreakdown: CETv22DomainEffort[]; // New field for domain aggregation
+  domainBreakdown?: CETv22DomainEffort[];
 }
 
 export interface CETv22RoleEffort {
@@ -410,12 +408,13 @@ export interface CETv22RoleEffort {
   percentage: number;
 }
 
-// New interface for domain effort breakdown
 export interface CETv22DomainEffort {
   domain: string;
   totalEffort: number;
-  roleBreakdown: CETv22RoleEffort[];
+  resourceCount: number;
   percentage: number;
+  roleBreakdown: CETv22RoleEffort[];
+  phases: number[];
 }
 
 export interface CETv22TimelineData {
@@ -542,12 +541,22 @@ export interface CETv22FileUploadProps {
   maxFileSize?: number;
   allowedTypes?: string[];
   dragAndDrop?: boolean;
+  disabled?: boolean;
 }
 
 export interface CETv22AnalysisDashboardProps {
   analysisResult: CETv22AnalysisResult;
   onIntegrationRequest: (options: CETv22IntegrationOptions) => void;
   onExportRequest: (format: 'json' | 'csv' | 'excel') => void;
+}
+
+export interface CETv22EffortAnalysisProps {
+  effortAnalysis: CETv22EffortAnalysis;
+}
+
+export interface CETv22RiskAssessmentProps {
+  riskAnalysis: CETv22RiskAnalysis[];
+  projectAnalysis: CETv22ProjectAnalysis;
 }
 
 export interface CETv22IntegrationOptions {
@@ -591,4 +600,88 @@ export class CETv22IntegrationError extends CETv22Error {
     super(message, 'INTEGRATION_ERROR', { originalError });
     this.name = 'CETv22IntegrationError';
   }
+}
+
+// Bill of Materials (BOM) Types
+export interface BOMItem {
+  id: string;
+  tmfDomain: string;
+  capability: string;
+  requirement: string;
+  applicationComponent?: string;
+  useCase?: string;
+  cutEffort?: number; // CUT effort in mandays
+  resourceDomain?: string;
+  resourceBreakdown?: ResourceBreakdown;
+  serviceDeliveryServices: ServiceDeliveryService[];
+  priority: 'Low' | 'Medium' | 'High' | 'Critical';
+  status: 'Identified' | 'In Progress' | 'Completed' | 'On Hold';
+  source: 'SpecSync' | 'SET' | 'CETv22' | 'Manual';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ResourceBreakdown {
+  businessAnalyst: number;
+  solutionArchitect: number;
+  developer: number;
+  qaEngineer: number;
+  projectManager: number;
+  totalEffort: number;
+}
+
+export interface ServiceDeliveryService {
+  id: string;
+  name: string;
+  category: ServiceDeliveryCategory;
+  effort: number;
+  cost: number;
+  isIncluded: boolean;
+  description?: string;
+}
+
+export type ServiceDeliveryCategory = 
+  | 'Migration'
+  | 'Training'
+  | 'Development'
+  | 'Build'
+  | 'Test'
+  | 'Release'
+  | 'Project Management'
+  | 'Program Management'
+  | 'Stakeholder Management'
+  | 'Governance'
+  | 'Architecture'
+  | 'Design'
+  | 'Integration'
+  | 'Platform Engineering'
+  | 'Platform Architecture'
+  | 'Environments'
+  | 'Release Deployment'
+  | 'Production Cutover'
+  | 'Warranty'
+  | 'Hypercare';
+
+export interface BOMState {
+  items: BOMItem[];
+  filters: BOMFilters;
+  summary: BOMSummary;
+  lastUpdated: string;
+}
+
+export interface BOMFilters {
+  domains: string[];
+  capabilities: string[];
+  priorities: string[];
+  sources: string[];
+  statuses: string[];
+}
+
+export interface BOMSummary {
+  totalItems: number;
+  totalEffort: number;
+  totalCost: number;
+  domainBreakdown: Record<string, number>;
+  capabilityBreakdown: Record<string, number>;
+  serviceBreakdown: Record<ServiceDeliveryCategory, number>;
 }

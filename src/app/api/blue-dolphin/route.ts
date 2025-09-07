@@ -952,7 +952,7 @@ export async function POST(request: NextRequest) {
           try {
             console.log('🔍 [Blue Dolphin] Enhanced object retrieval requested');
             
-            const { endpoint, filter, top = 10, skip = 0, orderby, moreColumns = true } = data || {};
+            const { endpoint, filter, top = 10, skip = 0, orderby, moreColumns = true, bypassCache = false, timestamp } = data || {};
             
             console.log('📋 [Blue Dolphin] Request parameters:', {
               endpoint,
@@ -960,10 +960,12 @@ export async function POST(request: NextRequest) {
               top,
               skip,
               orderby,
-              moreColumns
+              moreColumns,
+              bypassCache,
+              timestamp
             });
             
-                            // Validate filter parameter to prevent injection
+            // Validate filter parameter to prevent injection
                 let sanitizedFilter = filter;
                 if (filter && typeof filter === 'string') {
                   // More permissive validation for OData filters
@@ -984,6 +986,12 @@ export async function POST(request: NextRequest) {
               // NOTE: Do NOT add $select when MoreColumns=true
             }
             
+            // Add cache busting parameter if bypassCache is enabled
+            if (bypassCache && timestamp) {
+              queryParams.append('_t', timestamp.toString());
+              console.log('🔄 [Blue Dolphin] Cache bypass enabled with timestamp:', timestamp);
+            }
+            
             if (sanitizedFilter) queryParams.append('$filter', sanitizedFilter);
             if (orderby) queryParams.append('$orderby', orderby);
             if (top) queryParams.append('$top', top.toString());
@@ -1002,6 +1010,14 @@ export async function POST(request: NextRequest) {
               'OData-MaxVersion': '4.0',
               'OData-Version': '4.0'
             };
+
+            // Add cache control headers if bypassCache is enabled
+            if (bypassCache) {
+              headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+              headers['Pragma'] = 'no-cache';
+              headers['Expires'] = '0';
+              console.log('🔄 [Blue Dolphin] Cache control headers added for bypass');
+            }
 
             // Add authentication - API Key takes precedence
             if (config.apiKey) {
