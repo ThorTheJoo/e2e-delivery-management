@@ -16,35 +16,38 @@ export async function GET(request: NextRequest) {
   console.log('- State:', state);
   console.log('- Error:', error);
   console.log('- All params:', Object.fromEntries(searchParams.entries()));
-  console.log(`Processing OAuth callback on port ${currentPort} with code: ${code ? 'present' : 'missing'}`);
+  console.log(
+    `Processing OAuth callback on port ${currentPort} with code: ${code ? 'present' : 'missing'}`,
+  );
 
   if (error) {
     console.error('OAuth error received:', error);
-    return NextResponse.redirect(
-      new URL(`/?error=${encodeURIComponent(error)}`, request.url)
-    );
+    return NextResponse.redirect(new URL(`/?error=${encodeURIComponent(error)}`, request.url));
   }
 
   if (!code) {
     console.error('No authorization code received');
-    return NextResponse.redirect(
-      new URL('/?error=No authorization code received', request.url)
-    );
+    return NextResponse.redirect(new URL('/?error=No authorization code received', request.url));
   }
 
   try {
     // Read configuration from server-side storage (set by /api/miro/config)
     const serverConfig = (global as any).miroConfig;
-    
+
     if (!serverConfig) {
-      console.error('No Miro configuration found on server. Please save configuration in the UI first.');
+      console.error(
+        'No Miro configuration found on server. Please save configuration in the UI first.',
+      );
       return NextResponse.redirect(
-        new URL('/?error=Miro configuration not found on server - Please save configuration first', request.url)
+        new URL(
+          '/?error=Miro configuration not found on server - Please save configuration first',
+          request.url,
+        ),
       );
     }
 
     const { clientId, clientSecret, redirectUri } = serverConfig;
-    
+
     console.log('Using server-side configuration:');
     console.log('- Client ID:', clientId);
     console.log('- Client Secret:', clientSecret ? '***SET***' : 'NOT SET');
@@ -53,12 +56,12 @@ export async function GET(request: NextRequest) {
     if (!clientId || !clientSecret || !redirectUri) {
       console.error('Incomplete Miro configuration on server');
       return NextResponse.redirect(
-        new URL('/?error=Incomplete Miro configuration on server', request.url)
+        new URL('/?error=Incomplete Miro configuration on server', request.url),
       );
     }
 
     console.log('Exchanging authorization code for access token...');
-    
+
     // Log the request details being sent to Miro
     const requestBody = new URLSearchParams({
       grant_type: 'authorization_code',
@@ -67,7 +70,7 @@ export async function GET(request: NextRequest) {
       code: code,
       redirect_uri: redirectUri,
     });
-    
+
     console.log('=== TOKEN EXCHANGE REQUEST DEBUG ===');
     console.log('Request URL:', 'https://api.miro.com/v1/oauth/token');
     console.log('Request method: POST');
@@ -75,7 +78,10 @@ export async function GET(request: NextRequest) {
     console.log('Request body params:');
     console.log('- grant_type:', 'authorization_code');
     console.log('- client_id:', clientId);
-    console.log('- client_secret:', clientSecret === 'YOUR_MIRO_CLIENT_SECRET_HERE' ? 'PLACEHOLDER_VALUE' : '***SET***');
+    console.log(
+      '- client_secret:',
+      clientSecret === 'YOUR_MIRO_CLIENT_SECRET_HERE' ? 'PLACEHOLDER_VALUE' : '***SET***',
+    );
     console.log('- code:', code);
     console.log('- redirect_uri:', redirectUri);
     console.log('=== END REQUEST DEBUG ===');
@@ -101,7 +107,7 @@ export async function GET(request: NextRequest) {
       console.error('Status Text:', tokenResponse.statusText);
       console.error('Response Headers:', Object.fromEntries(tokenResponse.headers.entries()));
       console.error('Response Body:', errorData);
-      
+
       // Try to parse error response for better error messages
       let errorMessage = 'Failed to exchange authorization code';
       try {
@@ -119,11 +125,11 @@ export async function GET(request: NextRequest) {
         // If we can't parse the error, use the raw text
         errorMessage = `Token exchange failed: ${errorData}`;
       }
-      
+
       console.log('=== END RESPONSE DEBUG ===');
-      
+
       return NextResponse.redirect(
-        new URL(`/?error=${encodeURIComponent(errorMessage)}`, request.url)
+        new URL(`/?error=${encodeURIComponent(errorMessage)}`, request.url),
       );
     }
 
@@ -134,7 +140,7 @@ export async function GET(request: NextRequest) {
       access_token: tokenData.access_token ? '***PRESENT***' : 'missing',
       token_type: tokenData.token_type,
       expires_in: tokenData.expires_in,
-      refresh_token: tokenData.refresh_token ? '***PRESENT***' : 'missing'
+      refresh_token: tokenData.refresh_token ? '***PRESENT***' : 'missing',
     });
     console.log('=== END RESPONSE DEBUG ===');
     console.log('=== END MIRO CALLBACK DEBUG ===');
@@ -142,13 +148,10 @@ export async function GET(request: NextRequest) {
     // Store the access token in a secure way (in production, use a database or secure session)
     // For now, we'll redirect with the token as a query parameter (not secure for production)
     return NextResponse.redirect(
-      new URL(`/?token=${encodeURIComponent(tokenData.access_token)}&success=true`, request.url)
+      new URL(`/?token=${encodeURIComponent(tokenData.access_token)}&success=true`, request.url),
     );
-
   } catch (error) {
     console.error('OAuth callback error:', error);
-    return NextResponse.redirect(
-      new URL('/?error=OAuth callback processing failed', request.url)
-    );
+    return NextResponse.redirect(new URL('/?error=OAuth callback processing failed', request.url));
   }
 }

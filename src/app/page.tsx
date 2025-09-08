@@ -1,12 +1,30 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Project, TMFCapability, ETOMProcess, WorkPackage, Milestone, Risk, Dependency, Document, TMFOdaDomain, SpecSyncItem } from '@/types';
+import {
+  Project,
+  TMFCapability,
+  ETOMProcess,
+  WorkPackage,
+  Milestone,
+  Risk,
+  Dependency,
+  Document,
+  TMFOdaDomain,
+  SpecSyncItem,
+} from '@/types';
 import { dataService } from '@/lib/data-service';
 import { formatDate, calculateEffortTotal, getStatusColor, getSeverityColor } from '@/lib/utils';
 import { getBuildInfo } from '@/lib/build-info';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { SpecSyncImport } from '@/components/specsync-import';
@@ -26,26 +44,30 @@ import { ADOIntegration } from '@/components/ado-integration';
 import { CETv22ServiceDesign } from '@/components/cet-v22/CETv22ServiceDesign';
 import { BillOfMaterials } from '@/components/bill-of-materials';
 import { useToast, ToastContainer } from '@/components/ui/toast';
-import { mapSpecSyncToCapabilities, calculateUseCaseCountsByCapability, saveSpecSyncData, loadSpecSyncData, clearSpecSyncData } from '@/lib/specsync-utils';
-import { 
-  Network, 
-  Lightbulb, 
-  Route, 
-  Calculator, 
-  Calendar, 
-  DollarSign, 
-  FileText, 
+import {
+  mapSpecSyncToCapabilities,
+  calculateUseCaseCountsByCapability,
+  saveSpecSyncData,
+  loadSpecSyncData,
+  clearSpecSyncData,
+} from '@/lib/specsync-utils';
+import {
+  Network,
+  Route,
+  Calculator,
+  Calendar,
+  DollarSign,
+  FileText,
   AlertTriangle,
   Flag,
-  Users,
-  Clock,
+  
   TrendingUp,
   BarChart3,
   ChevronDown,
   ChevronRight,
   Layout,
   PencilRuler,
-  Server
+  Server,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -59,14 +81,14 @@ export default function HomePage() {
     endDate: '2025-07-15',
     duration: '6 months',
     teamSize: 4,
-    workingDaysPerMonth: 20
+    workingDaysPerMonth: 20,
   });
   const [tmfCapabilities, setTmfCapabilities] = useState<TMFCapability[]>([]);
   const [etomProcesses, setEtomProcesses] = useState<ETOMProcess[]>([]);
   const [workPackages, setWorkPackages] = useState<WorkPackage[]>([]);
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [risks, setRisks] = useState<Risk[]>([]);
-  const [dependencies, setDependencies] = useState<Dependency[]>([]);
+  const [ignored, setDependencies] = useState<Dependency[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [loading, setLoading] = useState(true);
@@ -96,13 +118,21 @@ export default function HomePage() {
   const [isSpecSyncExpanded, setIsSpecSyncExpanded] = useState(false);
   const [isTmfManagerExpanded, setIsTmfManagerExpanded] = useState(false);
   const [isTmfCapabilitiesExpanded, setIsTmfCapabilitiesExpanded] = useState(false);
-  const [solutionModelSections, setSolutionModelSections] = useState<Set<string>>(new Set(['domain-management', 'capabilities', 'requirements-sync', 'object-data', 'visualization']));
+  const [solutionModelSections, setSolutionModelSections] = useState<Set<string>>(
+    new Set([
+      'domain-management',
+      'capabilities',
+      'requirements-sync',
+      'object-data',
+      'visualization',
+    ]),
+  );
   const [setDomainEfforts, setSetDomainEfforts] = useState<Record<string, number>>({});
   const [setMatchedWorkPackages, setSetMatchedWorkPackages] = useState<Record<string, any>>({});
   const [cetv22Data, setCetv22Data] = useState<any>(null);
   const [tmfDomains, setTmfDomains] = useState<TMFOdaDomain[]>([]);
   const [specSyncItems, setSpecSyncItems] = useState<SpecSyncItem[]>([]);
-  
+
   const toast = useToast();
 
   // Check for error messages in URL parameters (for Miro auth errors)
@@ -110,13 +140,13 @@ export default function HomePage() {
     const urlParams = new URLSearchParams(window.location.search);
     const error = urlParams.get('error');
     const success = urlParams.get('success');
-    
+
     if (error) {
       toast.showError(`Miro Authentication Error: ${error}`);
       // Clean up the URL
       window.history.replaceState({}, document.title, window.location.pathname);
     }
-    
+
     if (success) {
       toast.showSuccess('Miro authentication successful!');
       // Clean up the URL
@@ -126,27 +156,27 @@ export default function HomePage() {
 
   useEffect(() => {
     console.log('useEffect triggered, starting data loading process...');
-    
+
     const loadData = async () => {
       try {
         console.log('Starting data load...');
-        
+
         // Test data service initialization
         console.log('Data service instance:', dataService);
-        
+
         // Load project data first to ensure we have basic data
         console.log('Attempting to load project data...');
         const projectData = await dataService.getProject();
         console.log('Project loaded successfully:', projectData);
         setProject(projectData);
-        
+
         // Set loading to false immediately after project is loaded
         console.log('Setting loading to false...');
         setLoading(false);
-        
+
         // Load other data in parallel with individual error handling
         console.log('Loading additional data...');
-        
+
         try {
           const tmfData = await dataService.getTMFCapabilities();
           console.log('TMF capabilities loaded:', tmfData?.length || 0);
@@ -155,7 +185,7 @@ export default function HomePage() {
           console.error('Error loading TMF capabilities:', e);
           setTmfCapabilities([]);
         }
-        
+
         try {
           const etomData = await dataService.getETOMProcesses();
           console.log('eTOM processes loaded:', etomData?.length || 0);
@@ -164,7 +194,7 @@ export default function HomePage() {
           console.error('Error loading eTOM processes:', e);
           setEtomProcesses([]);
         }
-        
+
         try {
           const workPackagesData = await dataService.getWorkPackages();
           console.log('Work packages loaded:', workPackagesData?.length || 0);
@@ -173,7 +203,7 @@ export default function HomePage() {
           console.error('Error loading work packages:', e);
           setWorkPackages([]);
         }
-        
+
         try {
           const milestonesData = await dataService.getMilestones();
           console.log('Milestones loaded:', milestonesData?.length || 0);
@@ -182,7 +212,7 @@ export default function HomePage() {
           console.error('Error loading milestones:', e);
           setMilestones([]);
         }
-        
+
         try {
           const risksData = await dataService.getRisks();
           console.log('Risks loaded:', risksData?.length || 0);
@@ -191,7 +221,7 @@ export default function HomePage() {
           console.error('Error loading risks:', e);
           setRisks([]);
         }
-        
+
         try {
           const dependenciesData = await dataService.getDependencies();
           console.log('Dependencies loaded:', dependenciesData?.length || 0);
@@ -200,7 +230,7 @@ export default function HomePage() {
           console.error('Error loading dependencies:', e);
           setDependencies([]);
         }
-        
+
         try {
           const documentsData = await dataService.getDocuments();
           console.log('Documents loaded:', documentsData?.length || 0);
@@ -211,18 +241,18 @@ export default function HomePage() {
         }
 
         console.log('All data loading attempts completed');
-        
+
         // Load CETv22 data from local storage if available
         try {
           const savedCetv22Data = localStorage.getItem('cetv22Data');
           const savedCetv22Analysis = localStorage.getItem('cetv22Analysis');
-          
+
           if (savedCetv22Data) {
             const parsedData = JSON.parse(savedCetv22Data);
             console.log('CETv22 data loaded from local storage:', parsedData);
             setCetv22Data(parsedData);
           }
-          
+
           if (savedCetv22Analysis) {
             const parsedAnalysis = JSON.parse(savedCetv22Analysis);
             console.log('CETv22 analysis loaded from local storage:', parsedAnalysis);
@@ -231,7 +261,7 @@ export default function HomePage() {
               const parsedData = JSON.parse(savedCetv22Data);
               const mergedData = {
                 ...parsedData,
-                analysis: parsedAnalysis
+                analysis: parsedAnalysis,
               };
               setCetv22Data(mergedData);
             }
@@ -241,7 +271,7 @@ export default function HomePage() {
         }
       } catch (error) {
         console.error('Error loading data:', error);
-        
+
         // Fallback data if data service fails
         console.log('Using fallback data...');
         const fallbackProject: Project = {
@@ -253,9 +283,9 @@ export default function HomePage() {
           endDate: '2025-07-15',
           duration: '6 months',
           teamSize: 4,
-          workingDaysPerMonth: 20
+          workingDaysPerMonth: 20,
         };
-        
+
         setProject(fallbackProject);
         setTmfCapabilities([]);
         setEtomProcesses([]);
@@ -264,7 +294,7 @@ export default function HomePage() {
         setRisks([]);
         setDependencies([]);
         setDocuments([]);
-        
+
         console.log('Fallback data set, setting loading to false...');
         setLoading(false);
       }
@@ -273,7 +303,7 @@ export default function HomePage() {
     // Start loading immediately
     console.log('Calling loadData function...');
     loadData();
-    
+
     // Immediate fallback timeout to prevent infinite loading
     const timeoutId = setTimeout(() => {
       console.log('Loading timeout reached, forcing loading to false');
@@ -307,7 +337,7 @@ export default function HomePage() {
             usecase1: 'Customer Onboarding',
             description: 'System shall manage customer information across all segments',
             priority: 'High',
-            status: 'In Progress'
+            status: 'In Progress',
           },
           {
             id: 'req-002',
@@ -322,7 +352,7 @@ export default function HomePage() {
             usecase1: 'Product Creation',
             description: 'System shall support end-to-end product lifecycle management',
             priority: 'High',
-            status: 'In Progress'
+            status: 'In Progress',
           },
           {
             id: 'req-003',
@@ -337,8 +367,8 @@ export default function HomePage() {
             usecase1: 'Invoice Generation',
             description: 'System shall provide comprehensive billing and revenue management',
             priority: 'High',
-            status: 'In Progress'
-          }
+            status: 'In Progress',
+          },
         ];
         setSpecSyncItems(defaultSpecSyncItems);
       }
@@ -359,14 +389,16 @@ export default function HomePage() {
           usecase1: 'Customer Onboarding',
           description: 'System shall manage customer information across all segments',
           priority: 'High',
-          status: 'In Progress'
-        }
+          status: 'In Progress',
+        },
       ];
       setSpecSyncItems(defaultSpecSyncItems);
     }
   }, []);
 
   // Update requirement counts when tmfCapabilities are loaded
+  // Intentionally exclude updateRequirementCounts from deps to avoid rebind loops
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (specSyncState && tmfCapabilities.length > 0) {
       updateRequirementCounts(specSyncState);
@@ -374,6 +406,8 @@ export default function HomePage() {
   }, [tmfCapabilities, specSyncState]);
 
   // Initialize default TMF domains if none exist
+  // Intentionally only on mount to seed defaults
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (tmfDomains.length === 0) {
       const defaultTmfDomains: TMFOdaDomain[] = [
@@ -389,7 +423,7 @@ export default function HomePage() {
               domainId: 'customer-management',
               isSelected: true,
               createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString()
+              updatedAt: new Date().toISOString(),
             },
             {
               id: 'customer-relationship-management',
@@ -398,12 +432,12 @@ export default function HomePage() {
               domainId: 'customer-management',
               isSelected: true,
               createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString()
-            }
+              updatedAt: new Date().toISOString(),
+            },
           ],
           isSelected: true,
           createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
         },
         {
           id: 'product-management',
@@ -417,7 +451,7 @@ export default function HomePage() {
               domainId: 'product-management',
               isSelected: true,
               createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString()
+              updatedAt: new Date().toISOString(),
             },
             {
               id: 'offer-management',
@@ -426,12 +460,12 @@ export default function HomePage() {
               domainId: 'product-management',
               isSelected: true,
               createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString()
-            }
+              updatedAt: new Date().toISOString(),
+            },
           ],
           isSelected: true,
           createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
         },
         {
           id: 'revenue-management',
@@ -445,7 +479,7 @@ export default function HomePage() {
               domainId: 'revenue-management',
               isSelected: true,
               createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString()
+              updatedAt: new Date().toISOString(),
             },
             {
               id: 'payment-management',
@@ -454,13 +488,13 @@ export default function HomePage() {
               domainId: 'revenue-management',
               isSelected: true,
               createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString()
-            }
+              updatedAt: new Date().toISOString(),
+            },
           ],
           isSelected: true,
           createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        }
+          updatedAt: new Date().toISOString(),
+        },
       ];
       setTmfDomains(defaultTmfDomains);
     }
@@ -472,18 +506,18 @@ export default function HomePage() {
     setSpecSyncItems(state.items); // Update specSyncItems for MiroBoardCreator
     updateRequirementCounts(state);
     saveSpecSyncData(state);
-    
+
     const mapping = mapSpecSyncToCapabilities(state.items, tmfCapabilities);
     const topCaps = Object.entries(mapping.countsByCapability)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 2)
       .map(([k, v]) => `${k}(${v})`)
       .join(', ');
-    
+
     // Enhanced success notification
     toast.showSuccess(
       '🎉 SpecSync Import Successful!',
-      `Successfully imported ${state.items.length} requirements from ${Object.keys(state.counts.domains).length} domains. ${topCaps ? `Top capabilities: ${topCaps}` : ''}`
+      `Successfully imported ${state.items.length} requirements from ${Object.keys(state.counts.domains).length} domains. ${topCaps ? `Top capabilities: ${topCaps}` : ''}`,
     );
   };
 
@@ -498,7 +532,7 @@ export default function HomePage() {
 
   const handleTmfStateChange = useCallback((domains: any[]) => {
     // Convert UserDomain[] to TMFOdaDomain[] for MiroBoardCreator
-    const tmfDomains: TMFOdaDomain[] = domains.map(domain => ({
+    const tmfDomains: TMFOdaDomain[] = domains.map((domain) => ({
       id: domain.id,
       name: domain.name,
       description: domain.description,
@@ -509,11 +543,11 @@ export default function HomePage() {
         domainId: domain.id,
         isSelected: cap.isSelected,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       })),
       isSelected: domain.isSelected,
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     }));
     setTmfDomains(tmfDomains);
   }, []);
@@ -523,13 +557,16 @@ export default function HomePage() {
     if (tmfCapabilities.length > 0) {
       const mapping = mapSpecSyncToCapabilities(state.items, tmfCapabilities);
       setRequirementCounts(mapping.countsByCapability);
-      
+
       const useCaseMapping = calculateUseCaseCountsByCapability(state.items, tmfCapabilities);
       setUseCaseCounts(useCaseMapping);
     }
   };
 
-  const handleSETDataLoaded = (domainEfforts: Record<string, number>, matchedWorkPackages: Record<string, any>) => {
+  const handleSETDataLoaded = (
+    domainEfforts: Record<string, number>,
+    matchedWorkPackages: Record<string, any>,
+  ) => {
     setSetDomainEfforts(domainEfforts);
     setSetMatchedWorkPackages(matchedWorkPackages);
   };
@@ -537,17 +574,21 @@ export default function HomePage() {
   if (loading) {
     console.log('Rendering loading screen, loading state:', loading);
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-lg text-muted-foreground">Loading E2E Delivery Management System...</p>
-          <p className="mt-2 text-sm text-muted-foreground">If this takes too long, please refresh the page</p>
-          <button 
+          <div className="mx-auto h-32 w-32 animate-spin rounded-full border-b-2 border-primary"></div>
+          <p className="mt-4 text-lg text-muted-foreground">
+            Loading E2E Delivery Management System...
+          </p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            If this takes too long, please refresh the page
+          </p>
+          <button
             onClick={() => {
               console.log('Manual refresh button clicked');
               setLoading(false);
-            }} 
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            }}
+            className="mt-4 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
           >
             Skip Loading
           </button>
@@ -558,13 +599,13 @@ export default function HomePage() {
 
   if (!project) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-destructive">Error Loading Project</h1>
           <p className="mt-2 text-muted-foreground">Unable to load project data</p>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
           >
             Retry
           </button>
@@ -577,9 +618,10 @@ export default function HomePage() {
     return sum + calculateEffortTotal(capability.baseEffort);
   }, 0);
 
-  const completedWorkPackages = workPackages.filter(wp => wp.status === 'Completed').length;
+  const completedWorkPackages = workPackages.filter((wp) => wp.status === 'Completed').length;
   const totalWorkPackages = workPackages.length;
-  const progressPercentage = totalWorkPackages > 0 ? (completedWorkPackages / totalWorkPackages) * 100 : 0;
+  const progressPercentage =
+    totalWorkPackages > 0 ? (completedWorkPackages / totalWorkPackages) * 100 : 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-tmf-50 via-white to-etom-50">
@@ -588,12 +630,14 @@ export default function HomePage() {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="flex items-center justify-center w-10 h-10 bg-white/20 rounded-lg">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/20">
                 <Network className="h-6 w-6 text-white" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold">CSG Delivery Orchestrator</h1>
-                <p className="text-white/90">v{getBuildInfo().version} - {getBuildInfo().compliance}</p>
+                <p className="text-white/90">
+                  v{getBuildInfo().version} - {getBuildInfo().compliance}
+                </p>
               </div>
             </div>
             <div className="flex items-center space-x-6">
@@ -623,896 +667,972 @@ export default function HomePage() {
       {/* Main Content with Sidebar */}
       <div className="flex h-[calc(100vh-120px)]">
         {/* Navigation Sidebar */}
-        <NavigationSidebar 
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-        />
-        
+        <NavigationSidebar activeTab={activeTab} onTabChange={handleTabChange} />
+
         {/* Main Content Area */}
         <main className="flex-1 overflow-y-auto p-6">
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-10">
-            <TabsTrigger value="dashboard" className="flex items-center space-x-2">
-              <BarChart3 className="h-4 w-4" />
-              <span className="hidden sm:inline">Dashboard</span>
-            </TabsTrigger>
-            <TabsTrigger value="tmf" className="flex items-center space-x-2">
-              <Network className="h-4 w-4" />
-              <span className="hidden sm:inline">TMF</span>
-            </TabsTrigger>
-            <TabsTrigger value="solution-model" className="flex items-center space-x-2">
-              <PencilRuler className="h-4 w-4" />
-              <span className="hidden sm:inline">Solution Model</span>
-            </TabsTrigger>
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
+            <TabsList className="grid w-full grid-cols-10">
+              <TabsTrigger value="dashboard" className="flex items-center space-x-2">
+                <BarChart3 className="h-4 w-4" />
+                <span className="hidden sm:inline">Dashboard</span>
+              </TabsTrigger>
+              <TabsTrigger value="tmf" className="flex items-center space-x-2">
+                <Network className="h-4 w-4" />
+                <span className="hidden sm:inline">TMF</span>
+              </TabsTrigger>
+              <TabsTrigger value="solution-model" className="flex items-center space-x-2">
+                <PencilRuler className="h-4 w-4" />
+                <span className="hidden sm:inline">Solution Model</span>
+              </TabsTrigger>
 
-            <TabsTrigger value="estimation" className="flex items-center space-x-2">
-              <Calculator className="h-4 w-4" />
-              <span className="hidden sm:inline">Estimation</span>
-            </TabsTrigger>
-            <TabsTrigger value="service-design" className="flex items-center space-x-2">
-              <PencilRuler className="h-4 w-4" />
-              <span className="hidden sm:inline">Service Design</span>
-            </TabsTrigger>
-            <TabsTrigger value="bill-of-materials" className="flex items-center space-x-2">
-              <FileText className="h-4 w-4" />
-              <span className="hidden sm:inline">Bill of Materials</span>
-            </TabsTrigger>
-            <TabsTrigger value="scheduling" className="flex items-center space-x-2">
-              <Calendar className="h-4 w-4" />
-              <span className="hidden sm:inline">Scheduling</span>
-            </TabsTrigger>
-            <TabsTrigger value="commercial" className="flex items-center space-x-2">
-              <DollarSign className="h-4 w-4" />
-              <span className="hidden sm:inline">Commercial</span>
-            </TabsTrigger>
-            <TabsTrigger value="visual-mapping" className="flex items-center space-x-2">
-              <Layout className="h-4 w-4" />
-              <span className="hidden sm:inline">Visual Mapping</span>
-            </TabsTrigger>
-            <TabsTrigger value="ado" className="flex items-center space-x-2">
-              <Server className="h-4 w-4" />
-              <span className="hidden sm:inline">ADO Integration</span>
-            </TabsTrigger>
-          </TabsList>
+              <TabsTrigger value="estimation" className="flex items-center space-x-2">
+                <Calculator className="h-4 w-4" />
+                <span className="hidden sm:inline">Estimation</span>
+              </TabsTrigger>
+              <TabsTrigger value="service-design" className="flex items-center space-x-2">
+                <PencilRuler className="h-4 w-4" />
+                <span className="hidden sm:inline">Service Design</span>
+              </TabsTrigger>
+              <TabsTrigger value="bill-of-materials" className="flex items-center space-x-2">
+                <FileText className="h-4 w-4" />
+                <span className="hidden sm:inline">Bill of Materials</span>
+              </TabsTrigger>
+              <TabsTrigger value="scheduling" className="flex items-center space-x-2">
+                <Calendar className="h-4 w-4" />
+                <span className="hidden sm:inline">Scheduling</span>
+              </TabsTrigger>
+              <TabsTrigger value="commercial" className="flex items-center space-x-2">
+                <DollarSign className="h-4 w-4" />
+                <span className="hidden sm:inline">Commercial</span>
+              </TabsTrigger>
+              <TabsTrigger value="visual-mapping" className="flex items-center space-x-2">
+                <Layout className="h-4 w-4" />
+                <span className="hidden sm:inline">Visual Mapping</span>
+              </TabsTrigger>
+              <TabsTrigger value="ado" className="flex items-center space-x-2">
+                <Server className="h-4 w-4" />
+                <span className="hidden sm:inline">ADO Integration</span>
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Dashboard Tab */}
-          <TabsContent value="dashboard" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card className="metric-card">
-                <div className="metric-value">{totalEffort}</div>
-                <div className="metric-label">Total Effort (Days)</div>
-              </Card>
-              <Card className="metric-card">
-                <div className="metric-value">{tmfCapabilities.length}</div>
-                <div className="metric-label">TMF Capabilities</div>
-              </Card>
-              <Card className="metric-card">
-                <div className="metric-value">{etomProcesses.length}</div>
-                <div className="metric-label">eTOM Processes</div>
-              </Card>
-              <Card className="metric-card">
-                <div className="metric-value">{progressPercentage.toFixed(0)}%</div>
-                <div className="metric-label">Progress</div>
-              </Card>
-            </div>
+            {/* Dashboard Tab */}
+            <TabsContent value="dashboard" className="space-y-6">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+                <Card className="metric-card">
+                  <div className="metric-value">{totalEffort}</div>
+                  <div className="metric-label">Total Effort (Days)</div>
+                </Card>
+                <Card className="metric-card">
+                  <div className="metric-value">{tmfCapabilities.length}</div>
+                  <div className="metric-label">TMF Capabilities</div>
+                </Card>
+                <Card className="metric-card">
+                  <div className="metric-value">{etomProcesses.length}</div>
+                  <div className="metric-label">eTOM Processes</div>
+                </Card>
+                <Card className="metric-card">
+                  <div className="metric-value">{progressPercentage.toFixed(0)}%</div>
+                  <div className="metric-label">Progress</div>
+                </Card>
+              </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <TrendingUp className="h-5 w-5" />
-                    <span>Project Overview</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <div className="text-sm text-muted-foreground">Duration</div>
-                      <div className="font-semibold">{project.duration}</div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-muted-foreground">Team Size</div>
-                      <div className="font-semibold">{project.teamSize} people</div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-muted-foreground">Start Date</div>
-                      <div className="font-semibold">{formatDate(project.startDate)}</div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-muted-foreground">End Date</div>
-                      <div className="font-semibold">{formatDate(project.endDate)}</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <AlertTriangle className="h-5 w-5" />
-                    <span>Risks & Issues</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {risks.slice(0, 3).map((risk) => (
-                      <div key={risk.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                        <div>
-                          <div className="font-medium">{risk.name}</div>
-                          <div className="text-sm text-muted-foreground">{risk.description}</div>
-                        </div>
-                        <div className={`status-badge ${getSeverityColor(risk.severity)}`}>
-                          {risk.severity}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* eTOM Processes Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Route className="h-5 w-5" />
-                  <span>eTOM Processes</span>
-                </CardTitle>
-                <CardDescription>Enterprise Tomography Operations Map processes and effort breakdowns</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {etomProcesses.map((process) => (
-                    <div key={process.id} className="p-4 border rounded-lg">
-                      <div className="mb-3">
-                        <h3 className="font-semibold text-lg">Level {process.level}: {process.name}</h3>
-                        <p className="text-sm text-muted-foreground">{process.description}</p>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <div className="text-sm font-medium mb-2">Effort Breakdown</div>
-                          <div className="space-y-2">
-                            <div className="flex justify-between">
-                              <span className="text-sm">Business Analyst:</span>
-                              <span className="font-medium">{process.baseEffort.businessAnalyst}d</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-sm">Solution Architect:</span>
-                              <span className="font-medium">{process.baseEffort.solutionArchitect}d</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-sm">Developer:</span>
-                              <span className="font-medium">{process.baseEffort.developer}d</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-sm">QA Engineer:</span>
-                              <span className="font-medium">{process.baseEffort.qaEngineer}d</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-sm font-medium mb-2">Complexity Factors</div>
-                          <div className="space-y-2">
-                            {Object.entries(process.complexityFactors).map(([key, value]) => (
-                              <div key={key} className="flex justify-between">
-                                <span className="text-sm capitalize">{key.replace(/([A-Z])/g, ' $1')}:</span>
-                                <span className="font-medium">{value}x</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* TMF Capabilities Tab */}
-          <TabsContent value="tmf" className="space-y-6">
-            {/* TMF ODA Management Section */}
-            <Card>
-              <CardHeader>
-                                 <CardTitle className="flex items-center space-x-2">
-                   <Network className="h-5 w-5" />
-                   <span>TMF Domain and Capability Management</span>
-                 </CardTitle>
-                 <CardDescription>
-                   Manage TMF ODA domains and capabilities with imported requirements
-                 </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* TMF Capabilities Overview - Collapsible */}
-                <div className="border-b pb-6">
-                  <div 
-                    className="flex items-center justify-between mb-4 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors"
-                    onClick={() => setIsTmfCapabilitiesExpanded(!isTmfCapabilitiesExpanded)}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className="flex items-center justify-center w-8 h-8 bg-purple-100 rounded-lg border-2 border-purple-200">
-                        {isTmfCapabilitiesExpanded ? (
-                          <ChevronDown className="w-5 h-5 text-purple-700" />
-                        ) : (
-                          <ChevronRight className="w-5 h-5 text-purple-700" />
-                        )}
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <TrendingUp className="h-5 w-5" />
+                      <span>Project Overview</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <div className="text-sm text-muted-foreground">Duration</div>
+                        <div className="font-semibold">{project.duration}</div>
                       </div>
                       <div>
-                        <h3 className="text-base font-semibold flex items-center space-x-2">
-                          <Network className="h-4 w-4" />
-                          <span>TMF Capabilities Overview</span>
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          View TMF capabilities with requirement counts from imported SpecSync data
-                        </p>
+                        <div className="text-sm text-muted-foreground">Team Size</div>
+                        <div className="font-semibold">{project.teamSize} people</div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-muted-foreground">Start Date</div>
+                        <div className="font-semibold">{formatDate(project.startDate)}</div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-muted-foreground">End Date</div>
+                        <div className="font-semibold">{formatDate(project.endDate)}</div>
                       </div>
                     </div>
-                    {specSyncState && (
-                      <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
-                        <Badge variant="secondary">
-                          {specSyncState.items.length} requirements mapped
-                        </Badge>
-                      </div>
-                    )}
-                  </div>
-                  {isTmfCapabilitiesExpanded && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {tmfCapabilities.map((capability) => (
-                        <Card key={capability.id} className="effort-card hover-lift">
-                          <CardHeader className="pb-3">
-                            <CardTitle className="text-base flex items-center justify-between">
-                              <span className="truncate">{capability.name}</span>
-                              <RequirementBadge count={requirementCounts[capability.id] || 0} />
-                            </CardTitle>
-                            <CardDescription className="text-xs line-clamp-2">{capability.description}</CardDescription>
-                          </CardHeader>
-                          <CardContent className="pt-0">
-                            <div className="space-y-3">
-                              <div className="grid grid-cols-2 gap-2 text-xs">
-                                <div className="flex justify-between">
-                                  <span className="text-muted-foreground">BA:</span>
-                                  <span className="font-medium">{capability.baseEffort.businessAnalyst}d</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-muted-foreground">SA:</span>
-                                  <span className="font-medium">{capability.baseEffort.solutionArchitect}d</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-muted-foreground">Dev:</span>
-                                  <span className="font-medium">{capability.baseEffort.developer}d</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-muted-foreground">QA:</span>
-                                  <span className="font-medium">{capability.baseEffort.qaEngineer}d</span>
-                                </div>
-                              </div>
-                              <div className="pt-2 border-t">
-                                <div className="text-xs text-muted-foreground mb-1">Segments</div>
-                                <div className="flex flex-wrap gap-1">
-                                  {capability.segments.slice(0, 3).map((segment) => (
-                                    <span key={segment} className="px-1.5 py-0.5 bg-tmf-100 text-tmf-800 text-xs rounded">
-                                      {segment}
-                                    </span>
-                                  ))}
-                                  {capability.segments.length > 3 && (
-                                    <span className="px-1.5 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">
-                                      +{capability.segments.length - 3}
-                                    </span>
-                                  )}
-                                </div>
-                                {useCaseCounts[capability.id] > 0 && (
-                                  <div className="pt-2 border-t">
-                                    <div className="text-xs text-muted-foreground mb-1">Use Cases</div>
-                                    <div className="flex items-center gap-1">
-                                      <span className="px-1.5 py-0.5 bg-orange-100 text-orange-800 text-xs rounded font-medium">
-                                        {useCaseCounts[capability.id]} unique use cases
-                                      </span>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </CardContent>
-                          <CardFooter className="pt-0">
-                            <div className="w-full text-center">
-                              <div className="text-xs text-muted-foreground mb-1">Total Effort</div>
-                              <div className="text-lg font-bold text-tmf-600">
-                                {calculateEffortTotal(capability.baseEffort)} days
-                              </div>
-                            </div>
-                          </CardFooter>
-                        </Card>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <AlertTriangle className="h-5 w-5" />
+                      <span>Risks & Issues</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {risks.slice(0, 3).map((risk) => (
+                        <div
+                          key={risk.id}
+                          className="flex items-center justify-between rounded-lg bg-muted/50 p-3"
+                        >
+                          <div>
+                            <div className="font-medium">{risk.name}</div>
+                            <div className="text-sm text-muted-foreground">{risk.description}</div>
+                          </div>
+                          <div className={`status-badge ${getSeverityColor(risk.severity)}`}>
+                            {risk.severity}
+                          </div>
+                        </div>
                       ))}
                     </div>
-                  )}
-                </div>
-
-                {/* SpecSync Import - Collapsible */}
-                <div className="border-b pb-6">
-                  <div 
-                    className="flex items-center justify-between mb-4 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors"
-                    onClick={() => setIsSpecSyncExpanded(!isSpecSyncExpanded)}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-lg border-2 border-blue-200">
-                        {isSpecSyncExpanded ? (
-                          <ChevronDown className="w-5 h-5 text-blue-700" />
-                        ) : (
-                          <ChevronRight className="w-5 h-5 text-blue-700" />
-                        )}
-                      </div>
-                      <div>
-                        <h3 className="text-base font-semibold flex items-center space-x-2">
-                          <FileText className="h-4 w-4" />
-                          <span>SpecSync Import</span>
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          Import requirements and map to TMF capabilities
-                        </p>
-                      </div>
-                    </div>
-                    {specSyncState && (
-                      <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
-                        <Badge variant="secondary">
-                          {specSyncState.items.length} requirements loaded
-                        </Badge>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={handleSpecSyncClear}
-                        >
-                          Clear
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                  {isSpecSyncExpanded && (
-                    <SpecSyncImport
-                      onImport={handleSpecSyncImport}
-                      onClear={handleSpecSyncClear}
-                      currentState={specSyncState}
-                    />
-                  )}
-                </div>
-
-                {/* TMF Domain and Capability Manager - Collapsible */}
-                <div className="border-b pb-6">
-                  <div 
-                    className="flex items-center justify-between mb-4 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors"
-                    onClick={() => setIsTmfManagerExpanded(!isTmfManagerExpanded)}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-lg border-2 border-green-200">
-                        {isTmfManagerExpanded ? (
-                          <ChevronDown className="w-5 h-5 text-green-700" />
-                        ) : (
-                          <ChevronRight className="w-5 h-5 text-green-700" />
-                        )}
-                      </div>
-                      <div>
-                        <h3 className="text-base font-semibold flex items-center space-x-2">
-                          <Network className="h-4 w-4" />
-                          <span>TMF Domain and Capability Manager</span>
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          Manage TMF ODA domains and capabilities with imported requirements
-                        </p>
-                      </div>
-                    </div>
-                    {specSyncState && (
-                      <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
-                        <Badge variant="secondary">
-                          {specSyncState.items.length} requirements available
-                        </Badge>
-                      </div>
-                    )}
-                  </div>
-                  {isTmfManagerExpanded && (
-                    <TMFDomainCapabilityManager 
-                      specSyncData={specSyncState}
-                      onStateChange={handleTmfStateChange}
-                    />
-                  )}
-                </div>
-
-
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* TMF Demo Tab */}
-          <TabsContent value="tmf-demo" className="space-y-6">
-            <div className="text-center py-12">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">TMF ODA Management Demo</h2>
-              <p className="text-gray-600 mb-6">
-                Experience the interactive TMF ODA domain and capability management system in a dedicated demo environment
-              </p>
-              <div className="flex justify-center space-x-4">
-                <Link 
-                  href="/tmf-demo" 
-                  className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <Network className="w-5 h-5 mr-2" />
-                  Launch TMF ODA Demo
-                </Link>
-                <Button 
-                  variant="outline"
-                  onClick={() => setActiveTab('tmf')}
-                  className="inline-flex items-center px-6 py-3"
-                >
-                  <Network className="w-5 h-5 mr-2" />
-                  Go to Main TMF Section
-                </Button>
+                  </CardContent>
+                </Card>
               </div>
-            </div>
-          </TabsContent>
 
-          {/* Solution Model Tab */}
-          <TabsContent value="solution-model" className="space-y-6">
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Solution Model - Blue Dolphin Integration</h2>
-              <p className="text-gray-600">
-                Create and manage your solution model in Blue Dolphin. Import domains, capabilities, and requirements from SpecSync and TMF data.
-              </p>
-              
-              {/* Section Control Buttons */}
-              <div className="mt-4 flex gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => setSolutionModelSections(new Set(['domain-management', 'capabilities', 'requirements-sync', 'object-data', 'visualization']))}
-                >
-                  Expand All
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => setSolutionModelSections(new Set())}
-                >
-                  Collapse All
-                </Button>
-              </div>
-            </div>
-            
-            {/* Domain Management Section */}
-            <Card>
-              <CardHeader 
-                className="cursor-pointer hover:bg-gray-50 transition-colors"
-                onClick={() => toggleSolutionModelSection('domain-management')}
-              >
-                <CardTitle className="flex items-center justify-between">
-                  <span>Domain Management</span>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                    {solutionModelSections.has('domain-management') ? (
-                      <ChevronDown className="h-4 w-4" />
-                    ) : (
-                      <ChevronRight className="h-4 w-4" />
-                    )}
-                  </Button>
-                </CardTitle>
-                <CardDescription>Manage TMF ODA domains and capabilities</CardDescription>
-              </CardHeader>
-              {solutionModelSections.has('domain-management') && (
-                <CardContent>
-                  <p className="text-sm text-gray-600">Domain management functionality will be implemented here.</p>
-                </CardContent>
-              )}
-            </Card>
-
-            {/* Capabilities Section */}
-            <Card>
-              <CardHeader 
-                className="cursor-pointer hover:bg-gray-50 transition-colors"
-                onClick={() => toggleSolutionModelSection('capabilities')}
-              >
-                <CardTitle className="flex items-center justify-between">
-                  <span>Capabilities</span>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                    {solutionModelSections.has('capabilities') ? (
-                      <ChevronDown className="h-4 w-4" />
-                    ) : (
-                      <ChevronRight className="h-4 w-4" />
-                    )}
-                  </Button>
-                </CardTitle>
-                <CardDescription>Manage TMF ODA capabilities within domains</CardDescription>
-              </CardHeader>
-              {solutionModelSections.has('capabilities') && (
-                <CardContent>
-                  <p className="text-sm text-gray-600">Capability management functionality will be implemented here.</p>
-                </CardContent>
-              )}
-            </Card>
-
-            {/* Requirements Synchronization Section */}
-            <Card>
-              <CardHeader 
-                className="cursor-pointer hover:bg-gray-50 transition-colors"
-                onClick={() => toggleSolutionModelSection('requirements-sync')}
-              >
-                <CardTitle className="flex items-center justify-between">
-                  <span>Requirements Synchronization</span>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                    {solutionModelSections.has('requirements-sync') ? (
-                      <ChevronDown className="h-4 w-4" />
-                    ) : (
-                      <ChevronRight className="h-4 w-4" />
-                    )}
-                  </Button>
-                </CardTitle>
-                <CardDescription>Synchronize requirements between systems</CardDescription>
-              </CardHeader>
-              {solutionModelSections.has('requirements-sync') && (
-                <CardContent>
-                  <p className="text-sm text-gray-600">Requirements synchronization functionality will be implemented here.</p>
-                </CardContent>
-              )}
-            </Card>
-
-            {/* Object Data Section */}
-            <Card>
-              <CardHeader 
-                className="cursor-pointer hover:bg-gray-50 transition-colors"
-                onClick={() => toggleSolutionModelSection('object-data')}
-              >
-                <CardTitle className="flex items-center justify-between">
-                  <span>Object Data</span>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                    {solutionModelSections.has('object-data') ? (
-                      <ChevronDown className="h-4 w-4" />
-                    ) : (
-                      <ChevronRight className="h-4 w-4" />
-                    )}
-                  </Button>
-                </CardTitle>
-                <CardDescription>Retrieve and manage Blue Dolphin objects with enhanced metadata</CardDescription>
-              </CardHeader>
-              {solutionModelSections.has('object-data') && (
-                <CardContent>
-                  <BlueDolphinIntegration 
-                    config={{
-                      protocol: 'ODATA',
-                      apiUrl: 'https://csgipoc.odata.bluedolphin.app',
-                      odataUrl: 'https://csgipoc.odata.bluedolphin.app',
-                      apiKey: '',
-                      username: 'csgipoc',
-                      password: 'ef498b94-732b-46c8-a24c-65fbd27c1482'
-                    }}
-                  />
-                </CardContent>
-              )}
-            </Card>
-
-            {/* Visualization (Blue Dolphin Graph) */}
-            <Card>
-              <CardHeader 
-                className="cursor-pointer hover:bg-gray-50 transition-colors"
-                onClick={() => toggleSolutionModelSection('visualization')}
-              >
-                <CardTitle className="flex items-center justify-between">
-                  <span>Visualization (Blue Dolphin Graph)</span>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                    {solutionModelSections.has('visualization') ? (
-                      <ChevronDown className="h-4 w-4" />
-                    ) : (
-                      <ChevronRight className="h-4 w-4" />
-                    )}
-                  </Button>
-                </CardTitle>
-                <CardDescription>Explore objects as nodes and relationships as links with dedicated visualization filters</CardDescription>
-              </CardHeader>
-              {solutionModelSections.has('visualization') && (
-                <CardContent>
-                  <BlueDolphinVisualization 
-                    config={{
-                      protocol: 'ODATA',
-                      apiUrl: 'https://csgipoc.odata.bluedolphin.app',
-                      odataUrl: 'https://csgipoc.odata.bluedolphin.app',
-                      apiKey: '',
-                      username: 'csgipoc',
-                      password: 'ef498b94-732b-46c8-a24c-65fbd27c1482'
-                    }}
-                  />
-                </CardContent>
-              )}
-            </Card>
-          </TabsContent>
-
-
-
-          {/* Estimation Tab */}
-          <TabsContent value="estimation" className="space-y-6">
-            <SETImport onDataLoaded={handleSETDataLoaded} />
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Work Package Estimation</CardTitle>
-                <CardDescription>Calculate effort estimates for work packages</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {workPackages.map((workPackage) => {
-                    // Check if this work package has SET data updates
-                    const setMatch = Object.entries(setMatchedWorkPackages).find(([domain, match]) => 
-                      match.workPackages.includes(workPackage.name)
-                    );
-                    
-                    const setEffort = setMatch ? setMatch[1].effort : null;
-                    const setDomain = setMatch ? setMatch[0] : null;
-                    
-                    return (
-                      <div key={workPackage.id} className="p-4 border rounded-lg">
-                        <div className="flex items-center justify-between mb-3">
-                          <h3 className="font-semibold">{workPackage.name}</h3>
-                          <div className="flex items-center space-x-2">
-                            {setEffort && (
-                              <Badge variant="secondary" className="text-xs">
-                                SET: {setEffort}d
-                              </Badge>
-                            )}
-                            <div className={`status-badge ${getStatusColor(workPackage.status)}`}>
-                              {workPackage.status}
-                            </div>
-                          </div>
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-3">{workPackage.description}</p>
-                        {setDomain && (
-                          <p className="text-xs text-blue-600 mb-2">
-                            📊 SET Domain: {setDomain} | Total Effort: {setEffort}d
-                          </p>
-                        )}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                          <div>
-                            <div className="text-muted-foreground">BA Effort</div>
-                            <div className="font-medium">{workPackage.effort.businessAnalyst}d</div>
-                          </div>
-                          <div>
-                            <div className="text-muted-foreground">SA Effort</div>
-                            <div className="font-medium">{workPackage.effort.solutionArchitect}d</div>
-                          </div>
-                          <div>
-                            <div className="text-muted-foreground">Dev Effort</div>
-                            <div className="font-medium">{workPackage.effort.developer}d</div>
-                          </div>
-                          <div>
-                            <div className="text-muted-foreground">QA Effort</div>
-                            <div className="font-medium">{workPackage.effort.qaEngineer}d</div>
-                          </div>
-                        </div>
-                        {setEffort && (
-                          <div className="mt-3 pt-3 border-t">
-                            <div className="text-sm font-medium text-green-600">
-                              SET Total Effort: {setEffort}d
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              Original Total: {workPackage.effort.businessAnalyst + workPackage.effort.solutionArchitect + workPackage.effort.developer + workPackage.effort.qaEngineer}d
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Service Design Tab */}
-          <TabsContent value="service-design" className="space-y-6">
-            <CETv22ServiceDesign
-              onIntegrationComplete={() => {
-                console.log('CET v22.0 integration completed');
-                toast.showSuccess('CET v22.0 integration completed successfully!');
-              }}
-              onError={(error) => {
-                console.error('CET v22.0 error:', error);
-                toast.showError(`CET v22.0 Error: ${error.message}`);
-              }}
-            />
-          </TabsContent>
-
-          {/* Bill of Materials Tab */}
-          <TabsContent value="bill-of-materials" className="space-y-6">
-            <BillOfMaterials
-              specSyncState={specSyncState}
-              setDomainEfforts={setDomainEfforts}
-              setMatchedWorkPackages={setMatchedWorkPackages}
-              cetv22Data={cetv22Data}
-            />
-          </TabsContent>
-
-          {/* Scheduling Tab */}
-          <TabsContent value="scheduling" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* eTOM Processes Section */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
-                    <Calendar className="h-5 w-5" />
-                    <span>Project Timeline</span>
+                    <Route className="h-5 w-5" />
+                    <span>eTOM Processes</span>
                   </CardTitle>
+                  <CardDescription>
+                    Enterprise Tomography Operations Map processes and effort breakdowns
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">Start Date</span>
-                      <span className="font-medium">{formatDate(project.startDate)}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">End Date</span>
-                      <span className="font-medium">{formatDate(project.endDate)}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">Duration</span>
-                      <span className="font-medium">{project.duration}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">Working Days/Month</span>
-                      <span className="font-medium">{project.workingDaysPerMonth}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Flag className="h-5 w-5" />
-                    <span>Milestones</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {milestones.map((milestone) => (
-                      <div key={milestone.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                        <div>
-                          <div className="font-medium">{milestone.name}</div>
-                          <div className="text-sm text-muted-foreground">{milestone.date}</div>
+                    {etomProcesses.map((process) => (
+                      <div key={process.id} className="rounded-lg border p-4">
+                        <div className="mb-3">
+                          <h3 className="text-lg font-semibold">
+                            Level {process.level}: {process.name}
+                          </h3>
+                          <p className="text-sm text-muted-foreground">{process.description}</p>
                         </div>
-                        <div className={`status-badge ${getStatusColor(milestone.status)}`}>
-                          {milestone.status}
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                          <div>
+                            <div className="mb-2 text-sm font-medium">Effort Breakdown</div>
+                            <div className="space-y-2">
+                              <div className="flex justify-between">
+                                <span className="text-sm">Business Analyst:</span>
+                                <span className="font-medium">
+                                  {process.baseEffort.businessAnalyst}d
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-sm">Solution Architect:</span>
+                                <span className="font-medium">
+                                  {process.baseEffort.solutionArchitect}d
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-sm">Developer:</span>
+                                <span className="font-medium">{process.baseEffort.developer}d</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-sm">QA Engineer:</span>
+                                <span className="font-medium">
+                                  {process.baseEffort.qaEngineer}d
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div>
+                            <div className="mb-2 text-sm font-medium">Complexity Factors</div>
+                            <div className="space-y-2">
+                              {Object.entries(process.complexityFactors).map(([key, value]) => (
+                                <div key={key} className="flex justify-between">
+                                  <span className="text-sm capitalize">
+                                    {key.replace(/([A-Z])/g, ' $1')}:
+                                  </span>
+                                  <span className="font-medium">{value}x</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     ))}
                   </div>
                 </CardContent>
               </Card>
-            </div>
-          </TabsContent>
+            </TabsContent>
 
-          {/* Commercial Tab */}
-          <TabsContent value="commercial" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <DollarSign className="h-5 w-5" />
-                  <span>Commercial Model</span>
-                </CardTitle>
-                <CardDescription>Project financial overview and cost structure</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">Cost Structure</h3>
-                    <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span>Base Cost:</span>
-                        <span className="font-medium">$0</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Risk Contingency:</span>
-                        <span className="font-medium">$0</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Profit Margin:</span>
-                        <span className="font-medium">$0</span>
-                      </div>
-                      <div className="border-t pt-2 font-semibold">
-                        <div className="flex justify-between">
-                          <span>Total Cost:</span>
-                          <span>$0</span>
+            {/* TMF Capabilities Tab */}
+            <TabsContent value="tmf" className="space-y-6">
+              {/* TMF ODA Management Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Network className="h-5 w-5" />
+                    <span>TMF Domain and Capability Management</span>
+                  </CardTitle>
+                  <CardDescription>
+                    Manage TMF ODA domains and capabilities with imported requirements
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* TMF Capabilities Overview - Collapsible */}
+                  <div className="border-b pb-6">
+                    <div
+                      className="mb-4 flex cursor-pointer items-center justify-between rounded-lg p-2 transition-colors hover:bg-muted/50"
+                      onClick={() => setIsTmfCapabilitiesExpanded(!isTmfCapabilitiesExpanded)}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-purple-200 bg-purple-100">
+                          {isTmfCapabilitiesExpanded ? (
+                            <ChevronDown className="h-5 w-5 text-purple-700" />
+                          ) : (
+                            <ChevronRight className="h-5 w-5 text-purple-700" />
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="flex items-center space-x-2 text-base font-semibold">
+                            <Network className="h-4 w-4" />
+                            <span>TMF Capabilities Overview</span>
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            View TMF capabilities with requirement counts from imported SpecSync
+                            data
+                          </p>
                         </div>
                       </div>
+                      {specSyncState && (
+                        <div
+                          className="flex items-center space-x-2"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Badge variant="secondary">
+                            {specSyncState.items.length} requirements mapped
+                          </Badge>
+                        </div>
+                      )}
                     </div>
+                    {isTmfCapabilitiesExpanded && (
+                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        {tmfCapabilities.map((capability) => (
+                          <Card key={capability.id} className="effort-card hover-lift">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="flex items-center justify-between text-base">
+                                <span className="truncate">{capability.name}</span>
+                                <RequirementBadge count={requirementCounts[capability.id] || 0} />
+                              </CardTitle>
+                              <CardDescription className="line-clamp-2 text-xs">
+                                {capability.description}
+                              </CardDescription>
+                            </CardHeader>
+                            <CardContent className="pt-0">
+                              <div className="space-y-3">
+                                <div className="grid grid-cols-2 gap-2 text-xs">
+                                  <div className="flex justify-between">
+                                    <span className="text-muted-foreground">BA:</span>
+                                    <span className="font-medium">
+                                      {capability.baseEffort.businessAnalyst}d
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-muted-foreground">SA:</span>
+                                    <span className="font-medium">
+                                      {capability.baseEffort.solutionArchitect}d
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Dev:</span>
+                                    <span className="font-medium">
+                                      {capability.baseEffort.developer}d
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-muted-foreground">QA:</span>
+                                    <span className="font-medium">
+                                      {capability.baseEffort.qaEngineer}d
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="border-t pt-2">
+                                  <div className="mb-1 text-xs text-muted-foreground">Segments</div>
+                                  <div className="flex flex-wrap gap-1">
+                                    {capability.segments.slice(0, 3).map((segment) => (
+                                      <span
+                                        key={segment}
+                                        className="rounded bg-tmf-100 px-1.5 py-0.5 text-xs text-tmf-800"
+                                      >
+                                        {segment}
+                                      </span>
+                                    ))}
+                                    {capability.segments.length > 3 && (
+                                      <span className="rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-600">
+                                        +{capability.segments.length - 3}
+                                      </span>
+                                    )}
+                                  </div>
+                                  {useCaseCounts[capability.id] > 0 && (
+                                    <div className="border-t pt-2">
+                                      <div className="mb-1 text-xs text-muted-foreground">
+                                        Use Cases
+                                      </div>
+                                      <div className="flex items-center gap-1">
+                                        <span className="rounded bg-orange-100 px-1.5 py-0.5 text-xs font-medium text-orange-800">
+                                          {useCaseCounts[capability.id]} unique use cases
+                                        </span>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </CardContent>
+                            <CardFooter className="pt-0">
+                              <div className="w-full text-center">
+                                <div className="mb-1 text-xs text-muted-foreground">
+                                  Total Effort
+                                </div>
+                                <div className="text-lg font-bold text-tmf-600">
+                                  {calculateEffortTotal(capability.baseEffort)} days
+                                </div>
+                              </div>
+                            </CardFooter>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
                   </div>
+
+                  {/* SpecSync Import - Collapsible */}
+                  <div className="border-b pb-6">
+                    <div
+                      className="mb-4 flex cursor-pointer items-center justify-between rounded-lg p-2 transition-colors hover:bg-muted/50"
+                      onClick={() => setIsSpecSyncExpanded(!isSpecSyncExpanded)}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-blue-200 bg-blue-100">
+                          {isSpecSyncExpanded ? (
+                            <ChevronDown className="h-5 w-5 text-blue-700" />
+                          ) : (
+                            <ChevronRight className="h-5 w-5 text-blue-700" />
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="flex items-center space-x-2 text-base font-semibold">
+                            <FileText className="h-4 w-4" />
+                            <span>SpecSync Import</span>
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            Import requirements and map to TMF capabilities
+                          </p>
+                        </div>
+                      </div>
+                      {specSyncState && (
+                        <div
+                          className="flex items-center space-x-2"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Badge variant="secondary">
+                            {specSyncState.items.length} requirements loaded
+                          </Badge>
+                          <Button variant="outline" size="sm" onClick={handleSpecSyncClear}>
+                            Clear
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                    {isSpecSyncExpanded && (
+                      <SpecSyncImport
+                        onImport={handleSpecSyncImport}
+                        onClear={handleSpecSyncClear}
+                        currentState={specSyncState}
+                      />
+                    )}
+                  </div>
+
+                  {/* TMF Domain and Capability Manager - Collapsible */}
+                  <div className="border-b pb-6">
+                    <div
+                      className="mb-4 flex cursor-pointer items-center justify-between rounded-lg p-2 transition-colors hover:bg-muted/50"
+                      onClick={() => setIsTmfManagerExpanded(!isTmfManagerExpanded)}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-green-200 bg-green-100">
+                          {isTmfManagerExpanded ? (
+                            <ChevronDown className="h-5 w-5 text-green-700" />
+                          ) : (
+                            <ChevronRight className="h-5 w-5 text-green-700" />
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="flex items-center space-x-2 text-base font-semibold">
+                            <Network className="h-4 w-4" />
+                            <span>TMF Domain and Capability Manager</span>
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            Manage TMF ODA domains and capabilities with imported requirements
+                          </p>
+                        </div>
+                      </div>
+                      {specSyncState && (
+                        <div
+                          className="flex items-center space-x-2"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Badge variant="secondary">
+                            {specSyncState.items.length} requirements available
+                          </Badge>
+                        </div>
+                      )}
+                    </div>
+                    {isTmfManagerExpanded && (
+                      <TMFDomainCapabilityManager
+                        specSyncData={specSyncState}
+                        onStateChange={handleTmfStateChange}
+                      />
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* TMF Demo Tab */}
+            <TabsContent value="tmf-demo" className="space-y-6">
+              <div className="py-12 text-center">
+                <h2 className="mb-4 text-2xl font-bold text-gray-900">TMF ODA Management Demo</h2>
+                <p className="mb-6 text-gray-600">
+                  Experience the interactive TMF ODA domain and capability management system in a
+                  dedicated demo environment
+                </p>
+                <div className="flex justify-center space-x-4">
+                  <Link
+                    href="/tmf-demo"
+                    className="inline-flex items-center rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-700"
+                  >
+                    <Network className="mr-2 h-5 w-5" />
+                    Launch TMF ODA Demo
+                  </Link>
+                  <Button
+                    variant="outline"
+                    onClick={() => setActiveTab('tmf')}
+                    className="inline-flex items-center px-6 py-3"
+                  >
+                    <Network className="mr-2 h-5 w-5" />
+                    Go to Main TMF Section
+                  </Button>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Solution Model Tab */}
+            <TabsContent value="solution-model" className="space-y-6">
+              <div className="mb-6">
+                <h2 className="mb-2 text-2xl font-bold text-gray-900">
+                  Solution Model - Blue Dolphin Integration
+                </h2>
+                <p className="text-gray-600">
+                  Create and manage your solution model in Blue Dolphin. Import domains,
+                  capabilities, and requirements from SpecSync and TMF data.
+                </p>
+
+                {/* Section Control Buttons */}
+                <div className="mt-4 flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setSolutionModelSections(
+                        new Set([
+                          'domain-management',
+                          'capabilities',
+                          'requirements-sync',
+                          'object-data',
+                          'visualization',
+                        ]),
+                      )
+                    }
+                  >
+                    Expand All
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSolutionModelSections(new Set())}
+                  >
+                    Collapse All
+                  </Button>
+                </div>
+              </div>
+
+              {/* Domain Management Section */}
+              <Card>
+                <CardHeader
+                  className="cursor-pointer transition-colors hover:bg-gray-50"
+                  onClick={() => toggleSolutionModelSection('domain-management')}
+                >
+                  <CardTitle className="flex items-center justify-between">
+                    <span>Domain Management</span>
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                      {solutionModelSections.has('domain-management') ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </CardTitle>
+                  <CardDescription>Manage TMF ODA domains and capabilities</CardDescription>
+                </CardHeader>
+                {solutionModelSections.has('domain-management') && (
+                  <CardContent>
+                    <p className="text-sm text-gray-600">
+                      Domain management functionality will be implemented here.
+                    </p>
+                  </CardContent>
+                )}
+              </Card>
+
+              {/* Capabilities Section */}
+              <Card>
+                <CardHeader
+                  className="cursor-pointer transition-colors hover:bg-gray-50"
+                  onClick={() => toggleSolutionModelSection('capabilities')}
+                >
+                  <CardTitle className="flex items-center justify-between">
+                    <span>Capabilities</span>
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                      {solutionModelSections.has('capabilities') ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </CardTitle>
+                  <CardDescription>Manage TMF ODA capabilities within domains</CardDescription>
+                </CardHeader>
+                {solutionModelSections.has('capabilities') && (
+                  <CardContent>
+                    <p className="text-sm text-gray-600">
+                      Capability management functionality will be implemented here.
+                    </p>
+                  </CardContent>
+                )}
+              </Card>
+
+              {/* Requirements Synchronization Section */}
+              <Card>
+                <CardHeader
+                  className="cursor-pointer transition-colors hover:bg-gray-50"
+                  onClick={() => toggleSolutionModelSection('requirements-sync')}
+                >
+                  <CardTitle className="flex items-center justify-between">
+                    <span>Requirements Synchronization</span>
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                      {solutionModelSections.has('requirements-sync') ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </CardTitle>
+                  <CardDescription>Synchronize requirements between systems</CardDescription>
+                </CardHeader>
+                {solutionModelSections.has('requirements-sync') && (
+                  <CardContent>
+                    <p className="text-sm text-gray-600">
+                      Requirements synchronization functionality will be implemented here.
+                    </p>
+                  </CardContent>
+                )}
+              </Card>
+
+              {/* Object Data Section */}
+              <Card>
+                <CardHeader
+                  className="cursor-pointer transition-colors hover:bg-gray-50"
+                  onClick={() => toggleSolutionModelSection('object-data')}
+                >
+                  <CardTitle className="flex items-center justify-between">
+                    <span>Object Data</span>
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                      {solutionModelSections.has('object-data') ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </CardTitle>
+                  <CardDescription>
+                    Retrieve and manage Blue Dolphin objects with enhanced metadata
+                  </CardDescription>
+                </CardHeader>
+                {solutionModelSections.has('object-data') && (
+                  <CardContent>
+                    <BlueDolphinIntegration
+                      config={{
+                        protocol: 'ODATA',
+                        apiUrl: 'https://csgipoc.odata.bluedolphin.app',
+                        odataUrl: 'https://csgipoc.odata.bluedolphin.app',
+                        apiKey: '',
+                        username: 'csgipoc',
+                        password: 'ef498b94-732b-46c8-a24c-65fbd27c1482',
+                      }}
+                    />
+                  </CardContent>
+                )}
+              </Card>
+
+              {/* Visualization (Blue Dolphin Graph) */}
+              <Card>
+                <CardHeader
+                  className="cursor-pointer transition-colors hover:bg-gray-50"
+                  onClick={() => toggleSolutionModelSection('visualization')}
+                >
+                  <CardTitle className="flex items-center justify-between">
+                    <span>Visualization (Blue Dolphin Graph)</span>
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                      {solutionModelSections.has('visualization') ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </CardTitle>
+                  <CardDescription>
+                    Explore objects as nodes and relationships as links with dedicated visualization
+                    filters
+                  </CardDescription>
+                </CardHeader>
+                {solutionModelSections.has('visualization') && (
+                  <CardContent>
+                    <BlueDolphinVisualization
+                      config={{
+                        protocol: 'ODATA',
+                        apiUrl: 'https://csgipoc.odata.bluedolphin.app',
+                        odataUrl: 'https://csgipoc.odata.bluedolphin.app',
+                        apiKey: '',
+                        username: 'csgipoc',
+                        password: 'ef498b94-732b-46c8-a24c-65fbd27c1482',
+                      }}
+                    />
+                  </CardContent>
+                )}
+              </Card>
+            </TabsContent>
+
+            {/* Estimation Tab */}
+            <TabsContent value="estimation" className="space-y-6">
+              <SETImport onDataLoaded={handleSETDataLoaded} />
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Work Package Estimation</CardTitle>
+                  <CardDescription>Calculate effort estimates for work packages</CardDescription>
+                </CardHeader>
+                <CardContent>
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">Resource Allocation</h3>
-                    <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span>Team Size:</span>
-                        <span className="font-medium">{project.teamSize} people</span>
+                    {workPackages.map((workPackage) => {
+                      // Check if this work package has SET data updates
+                      const setMatch = Object.entries(setMatchedWorkPackages).find(
+                        ([ignored, match]) => match.workPackages.includes(workPackage.name),
+                      );
+
+                      const setEffort = setMatch ? setMatch[1].effort : null;
+                      const setDomain = setMatch ? setMatch[0] : null;
+
+                      return (
+                        <div key={workPackage.id} className="rounded-lg border p-4">
+                          <div className="mb-3 flex items-center justify-between">
+                            <h3 className="font-semibold">{workPackage.name}</h3>
+                            <div className="flex items-center space-x-2">
+                              {setEffort && (
+                                <Badge variant="secondary" className="text-xs">
+                                  SET: {setEffort}d
+                                </Badge>
+                              )}
+                              <div className={`status-badge ${getStatusColor(workPackage.status)}`}>
+                                {workPackage.status}
+                              </div>
+                            </div>
+                          </div>
+                          <p className="mb-3 text-sm text-muted-foreground">
+                            {workPackage.description}
+                          </p>
+                          {setDomain && (
+                            <p className="mb-2 text-xs text-blue-600">
+                              📊 SET Domain: {setDomain} | Total Effort: {setEffort}d
+                            </p>
+                          )}
+                          <div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
+                            <div>
+                              <div className="text-muted-foreground">BA Effort</div>
+                              <div className="font-medium">
+                                {workPackage.effort.businessAnalyst}d
+                              </div>
+                            </div>
+                            <div>
+                              <div className="text-muted-foreground">SA Effort</div>
+                              <div className="font-medium">
+                                {workPackage.effort.solutionArchitect}d
+                              </div>
+                            </div>
+                            <div>
+                              <div className="text-muted-foreground">Dev Effort</div>
+                              <div className="font-medium">{workPackage.effort.developer}d</div>
+                            </div>
+                            <div>
+                              <div className="text-muted-foreground">QA Effort</div>
+                              <div className="font-medium">{workPackage.effort.qaEngineer}d</div>
+                            </div>
+                          </div>
+                          {setEffort && (
+                            <div className="mt-3 border-t pt-3">
+                              <div className="text-sm font-medium text-green-600">
+                                SET Total Effort: {setEffort}d
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                Original Total:{' '}
+                                {workPackage.effort.businessAnalyst +
+                                  workPackage.effort.solutionArchitect +
+                                  workPackage.effort.developer +
+                                  workPackage.effort.qaEngineer}
+                                d
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Service Design Tab */}
+            <TabsContent value="service-design" className="space-y-6">
+              <CETv22ServiceDesign
+                onIntegrationComplete={() => {
+                  console.log('CET v22.0 integration completed');
+                  toast.showSuccess('CET v22.0 integration completed successfully!');
+                }}
+                onError={(error) => {
+                  console.error('CET v22.0 error:', error);
+                  toast.showError(`CET v22.0 Error: ${error.message}`);
+                }}
+              />
+            </TabsContent>
+
+            {/* Bill of Materials Tab */}
+            <TabsContent value="bill-of-materials" className="space-y-6">
+              <BillOfMaterials
+                specSyncState={specSyncState}
+                setDomainEfforts={setDomainEfforts}
+                setMatchedWorkPackages={setMatchedWorkPackages}
+                cetv22Data={cetv22Data}
+              />
+            </TabsContent>
+
+            {/* Scheduling Tab */}
+            <TabsContent value="scheduling" className="space-y-6">
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Calendar className="h-5 w-5" />
+                      <span>Project Timeline</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Start Date</span>
+                        <span className="font-medium">{formatDate(project.startDate)}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span>Total Effort:</span>
-                        <span className="font-medium">{totalEffort} days</span>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">End Date</span>
+                        <span className="font-medium">{formatDate(project.endDate)}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span>Duration:</span>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Duration</span>
                         <span className="font-medium">{project.duration}</span>
                       </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Working Days/Month</span>
+                        <span className="font-medium">{project.workingDaysPerMonth}</span>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                  </CardContent>
+                </Card>
 
-          {/* Documents Tab */}
-          <TabsContent value="documents" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <FileText className="h-5 w-5" />
-                  <span>Project Documents</span>
-                </CardTitle>
-                <CardDescription>Manage project documentation and deliverables</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {documents.map((document) => (
-                    <div key={document.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <FileText className="h-5 w-5 text-muted-foreground" />
-                        <div>
-                          <div className="font-medium">{document.name}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {document.type} • v{document.version} • {formatDate(document.lastModified)}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Flag className="h-5 w-5" />
+                      <span>Milestones</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {milestones.map((milestone) => (
+                        <div
+                          key={milestone.id}
+                          className="flex items-center justify-between rounded-lg bg-muted/50 p-3"
+                        >
+                          <div>
+                            <div className="font-medium">{milestone.name}</div>
+                            <div className="text-sm text-muted-foreground">{milestone.date}</div>
+                          </div>
+                          <div className={`status-badge ${getStatusColor(milestone.status)}`}>
+                            {milestone.status}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            {/* Commercial Tab */}
+            <TabsContent value="commercial" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <DollarSign className="h-5 w-5" />
+                    <span>Commercial Model</span>
+                  </CardTitle>
+                  <CardDescription>Project financial overview and cost structure</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold">Cost Structure</h3>
+                      <div className="space-y-3">
+                        <div className="flex justify-between">
+                          <span>Base Cost:</span>
+                          <span className="font-medium">$0</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Risk Contingency:</span>
+                          <span className="font-medium">$0</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Profit Margin:</span>
+                          <span className="font-medium">$0</span>
+                        </div>
+                        <div className="border-t pt-2 font-semibold">
+                          <div className="flex justify-between">
+                            <span>Total Cost:</span>
+                            <span>$0</span>
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <div className={`status-badge ${getStatusColor(document.status)}`}>
-                          {document.status}
+                    </div>
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold">Resource Allocation</h3>
+                      <div className="space-y-3">
+                        <div className="flex justify-between">
+                          <span>Team Size:</span>
+                          <span className="font-medium">{project.teamSize} people</span>
                         </div>
-                        <Button variant="outline" size="sm">View</Button>
+                        <div className="flex justify-between">
+                          <span>Total Effort:</span>
+                          <span className="font-medium">{totalEffort} days</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Duration:</span>
+                          <span className="font-medium">{project.duration}</span>
+                        </div>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
 
-                     {/* Visual Mapping Tab */}
-           <TabsContent value="visual-mapping" className="space-y-6">
-             <MiroBoardCreator 
-               project={project}
-               tmfDomains={tmfDomains}
-               specSyncItems={specSyncItems}
-             />
-           </TabsContent>
+            {/* Documents Tab */}
+            <TabsContent value="documents" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <FileText className="h-5 w-5" />
+                    <span>Project Documents</span>
+                  </CardTitle>
+                  <CardDescription>Manage project documentation and deliverables</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {documents.map((document) => (
+                      <div
+                        key={document.id}
+                        className="flex items-center justify-between rounded-lg border p-4"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <FileText className="h-5 w-5 text-muted-foreground" />
+                          <div>
+                            <div className="font-medium">{document.name}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {document.type} • v{document.version} •{' '}
+                              {formatDate(document.lastModified)}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <div className={`status-badge ${getStatusColor(document.status)}`}>
+                            {document.status}
+                          </div>
+                          <Button variant="outline" size="sm">
+                            View
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
 
-           {/* ADO Integration Tab */}
-           <TabsContent value="ado" className="space-y-6">
-             <ADOIntegration 
-               project={project}
-               tmfDomains={tmfDomains}
-               specSyncItems={specSyncItems}
-             />
-           </TabsContent>
+            {/* Visual Mapping Tab */}
+            <TabsContent value="visual-mapping" className="space-y-6">
+              <MiroBoardCreator
+                project={project}
+                tmfDomains={tmfDomains}
+                specSyncItems={specSyncItems}
+              />
+            </TabsContent>
 
-           {/* Blue Dolphin Configuration Tab */}
-           <TabsContent value="blue-dolphin-config" className="space-y-6">
-             <BlueDolphinConfiguration />
-           </TabsContent>
+            {/* ADO Integration Tab */}
+            <TabsContent value="ado" className="space-y-6">
+              <ADOIntegration
+                project={project}
+                tmfDomains={tmfDomains}
+                specSyncItems={specSyncItems}
+              />
+            </TabsContent>
 
-                     {/* Miro Configuration Tab */}
-          <TabsContent value="miro-config" className="space-y-6">
-            <MiroConfiguration />
-          </TabsContent>
+            {/* Blue Dolphin Configuration Tab */}
+            <TabsContent value="blue-dolphin-config" className="space-y-6">
+              <BlueDolphinConfiguration />
+            </TabsContent>
 
-          {/* Miro Setup Guide Tab */}
-          <TabsContent value="miro-setup" className="space-y-6">
-            <MiroSetupGuide />
-          </TabsContent>
+            {/* Miro Configuration Tab */}
+            <TabsContent value="miro-config" className="space-y-6">
+              <MiroConfiguration />
+            </TabsContent>
 
-          {/* ADO Configuration Tab */}
-          <TabsContent value="ado-config" className="space-y-6">
-            <ADOConfigurationComponent />
-          </TabsContent>
-        </Tabs>
-      </main>
+            {/* Miro Setup Guide Tab */}
+            <TabsContent value="miro-setup" className="space-y-6">
+              <MiroSetupGuide />
+            </TabsContent>
+
+            {/* ADO Configuration Tab */}
+            <TabsContent value="ado-config" className="space-y-6">
+              <ADOConfigurationComponent />
+            </TabsContent>
+          </Tabs>
+        </main>
       </div>
-      
+
       <ToastContainer toasts={toast.toasts} onRemove={toast.removeToast} />
     </div>
   );

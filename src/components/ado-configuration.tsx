@@ -4,31 +4,43 @@ import { useState, useEffect } from 'react';
 import { ADOConfiguration, ADOAuthStatus } from '@/types/ado';
 import { adoService } from '@/lib/ado-service';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/toast';
-import { 
-  Settings, 
-  TestTube, 
-  Save, 
-  RefreshCw, 
-  Eye, 
-  EyeOff, 
-  CheckCircle, 
-  XCircle, 
+import {
+  Settings,
+  TestTube,
+  Save,
+  RefreshCw,
+  Eye,
+  EyeOff,
+  CheckCircle,
+  XCircle,
   AlertTriangle,
   Info,
   Database,
   Shield,
   Link,
   FileText,
-  Code,
   Terminal,
-  Activity
+  Activity,
 } from 'lucide-react';
 
 export function ADOConfigurationComponent() {
@@ -41,13 +53,13 @@ export function ADOConfigurationComponent() {
       type: 'PAT',
       token: '',
       clientId: '',
-      clientSecret: ''
+      clientSecret: '',
     },
     mapping: {
       epicTemplate: '',
       featureTemplate: '',
       userStoryTemplate: '',
-      taskTemplate: ''
+      taskTemplate: '',
     },
     customFields: {
       tmfLevel: 'Custom.TMFLevel',
@@ -55,8 +67,8 @@ export function ADOConfigurationComponent() {
       capabilityId: 'Custom.CapabilityId',
       requirementId: 'Custom.RequirementId',
       projectId: 'Custom.ProjectId',
-      customer: 'Custom.Customer'
-    }
+      customer: 'Custom.Customer',
+    },
   });
 
   const [authStatus, setAuthStatus] = useState<ADOAuthStatus | null>(null);
@@ -66,7 +78,7 @@ export function ADOConfigurationComponent() {
   const [logs, setLogs] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState('general');
-  
+
   const toast = useToast();
 
   useEffect(() => {
@@ -103,7 +115,7 @@ export function ADOConfigurationComponent() {
     try {
       await adoService.saveConfiguration(configuration);
       toast.showSuccess('Configuration saved successfully');
-      
+
       // Test connection if token is provided
       if (configuration.authentication.token) {
         await testConnection();
@@ -122,13 +134,13 @@ export function ADOConfigurationComponent() {
       const isConnected = await adoService.testConnection();
       const status = adoService.getAuthStatus();
       setAuthStatus(status);
-      
+
       if (isConnected) {
         toast.showSuccess('Connection test successful');
       } else {
         toast.showError('Connection test failed');
       }
-      
+
       // Refresh logs and notifications
       loadLogs();
       loadNotifications();
@@ -154,9 +166,11 @@ export function ADOConfigurationComponent() {
 
   const getStatusIcon = () => {
     if (!authStatus) return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
-    return authStatus.isAuthenticated 
-      ? <CheckCircle className="h-4 w-4 text-green-500" />
-      : <XCircle className="h-4 w-4 text-red-500" />;
+    return authStatus.isAuthenticated ? (
+      <CheckCircle className="h-4 w-4 text-green-500" />
+    ) : (
+      <XCircle className="h-4 w-4 text-red-500" />
+    );
   };
 
   const getStatusText = () => {
@@ -180,9 +194,7 @@ export function ADOConfigurationComponent() {
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
             {getStatusIcon()}
-            <Badge className={getStatusColor()}>
-              {getStatusText()}
-            </Badge>
+            <Badge className={getStatusColor()}>{getStatusText()}</Badge>
           </div>
           <Button
             onClick={testConnection}
@@ -228,17 +240,19 @@ export function ADOConfigurationComponent() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="organization">Organization</Label>
                   <Input
                     id="organization"
                     placeholder="your-organization"
                     value={configuration.organization}
-                    onChange={(e) => setConfiguration({
-                      ...configuration,
-                      organization: e.target.value
-                    })}
+                    onChange={(e) =>
+                      setConfiguration({
+                        ...configuration,
+                        organization: e.target.value,
+                      })
+                    }
                   />
                   <p className="text-xs text-gray-500">
                     Your Azure DevOps organization name (e.g., contoso)
@@ -250,27 +264,29 @@ export function ADOConfigurationComponent() {
                     id="project"
                     placeholder="your-project"
                     value={configuration.project}
-                    onChange={(e) => setConfiguration({
-                      ...configuration,
-                      project: e.target.value
-                    })}
+                    onChange={(e) =>
+                      setConfiguration({
+                        ...configuration,
+                        project: e.target.value,
+                      })
+                    }
                   />
-                  <p className="text-xs text-gray-500">
-                    Your Azure DevOps project name
-                  </p>
+                  <p className="text-xs text-gray-500">Your Azure DevOps project name</p>
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="areaPath">Area Path</Label>
                   <Input
                     id="areaPath"
                     placeholder="Project\\Area"
                     value={configuration.areaPath}
-                    onChange={(e) => setConfiguration({
-                      ...configuration,
-                      areaPath: e.target.value
-                    })}
+                    onChange={(e) =>
+                      setConfiguration({
+                        ...configuration,
+                        areaPath: e.target.value,
+                      })
+                    }
                   />
                   <p className="text-xs text-gray-500">
                     Default area path for work items (e.g., Project\\BSS)
@@ -282,10 +298,12 @@ export function ADOConfigurationComponent() {
                     id="iterationPath"
                     placeholder="Project\\Iteration"
                     value={configuration.iterationPath}
-                    onChange={(e) => setConfiguration({
-                      ...configuration,
-                      iterationPath: e.target.value
-                    })}
+                    onChange={(e) =>
+                      setConfiguration({
+                        ...configuration,
+                        iterationPath: e.target.value,
+                      })
+                    }
                   />
                   <p className="text-xs text-gray-500">
                     Default iteration path for work items (e.g., Project\\Sprint 1)
@@ -313,13 +331,15 @@ export function ADOConfigurationComponent() {
                 <Label htmlFor="authType">Authentication Type</Label>
                 <Select
                   value={configuration.authentication.type}
-                  onValueChange={(value: 'PAT' | 'OAuth') => setConfiguration({
-                    ...configuration,
-                    authentication: {
-                      ...configuration.authentication,
-                      type: value
-                    }
-                  })}
+                  onValueChange={(value: 'PAT' | 'OAuth') =>
+                    setConfiguration({
+                      ...configuration,
+                      authentication: {
+                        ...configuration.authentication,
+                        type: value,
+                      },
+                    })
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -340,13 +360,15 @@ export function ADOConfigurationComponent() {
                       type={showToken ? 'text' : 'password'}
                       placeholder="Enter your PAT token"
                       value={configuration.authentication.token || ''}
-                      onChange={(e) => setConfiguration({
-                        ...configuration,
-                        authentication: {
-                          ...configuration.authentication,
-                          token: e.target.value
-                        }
-                      })}
+                      onChange={(e) =>
+                        setConfiguration({
+                          ...configuration,
+                          authentication: {
+                            ...configuration.authentication,
+                            token: e.target.value,
+                          },
+                        })
+                      }
                     />
                     <Button
                       type="button"
@@ -363,20 +385,22 @@ export function ADOConfigurationComponent() {
                   </p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="clientId">Client ID</Label>
                     <Input
                       id="clientId"
                       placeholder="Enter OAuth Client ID"
                       value={configuration.authentication.clientId || ''}
-                      onChange={(e) => setConfiguration({
-                        ...configuration,
-                        authentication: {
-                          ...configuration.authentication,
-                          clientId: e.target.value
-                        }
-                      })}
+                      onChange={(e) =>
+                        setConfiguration({
+                          ...configuration,
+                          authentication: {
+                            ...configuration.authentication,
+                            clientId: e.target.value,
+                          },
+                        })
+                      }
                     />
                   </div>
                   <div className="space-y-2">
@@ -386,21 +410,23 @@ export function ADOConfigurationComponent() {
                       type="password"
                       placeholder="Enter OAuth Client Secret"
                       value={configuration.authentication.clientSecret || ''}
-                      onChange={(e) => setConfiguration({
-                        ...configuration,
-                        authentication: {
-                          ...configuration.authentication,
-                          clientSecret: e.target.value
-                        }
-                      })}
+                      onChange={(e) =>
+                        setConfiguration({
+                          ...configuration,
+                          authentication: {
+                            ...configuration.authentication,
+                            clientSecret: e.target.value,
+                          },
+                        })
+                      }
                     />
                   </div>
                 </div>
               )}
 
               {authStatus && (
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <h4 className="font-medium mb-2">Connection Status</h4>
+                <div className="rounded-lg bg-gray-50 p-4">
+                  <h4 className="mb-2 font-medium">Connection Status</h4>
                   <div className="space-y-1 text-sm">
                     <div>Organization: {authStatus.organization}</div>
                     <div>Project: {authStatus.project}</div>
@@ -427,20 +453,22 @@ export function ADOConfigurationComponent() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="tmfLevel">TMF Level Field</Label>
                   <Input
                     id="tmfLevel"
                     placeholder="Custom.TMFLevel"
                     value={configuration.customFields.tmfLevel}
-                    onChange={(e) => setConfiguration({
-                      ...configuration,
-                      customFields: {
-                        ...configuration.customFields,
-                        tmfLevel: e.target.value
-                      }
-                    })}
+                    onChange={(e) =>
+                      setConfiguration({
+                        ...configuration,
+                        customFields: {
+                          ...configuration.customFields,
+                          tmfLevel: e.target.value,
+                        },
+                      })
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -449,13 +477,15 @@ export function ADOConfigurationComponent() {
                     id="domainId"
                     placeholder="Custom.DomainId"
                     value={configuration.customFields.domainId}
-                    onChange={(e) => setConfiguration({
-                      ...configuration,
-                      customFields: {
-                        ...configuration.customFields,
-                        domainId: e.target.value
-                      }
-                    })}
+                    onChange={(e) =>
+                      setConfiguration({
+                        ...configuration,
+                        customFields: {
+                          ...configuration.customFields,
+                          domainId: e.target.value,
+                        },
+                      })
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -464,13 +494,15 @@ export function ADOConfigurationComponent() {
                     id="capabilityId"
                     placeholder="Custom.CapabilityId"
                     value={configuration.customFields.capabilityId}
-                    onChange={(e) => setConfiguration({
-                      ...configuration,
-                      customFields: {
-                        ...configuration.customFields,
-                        capabilityId: e.target.value
-                      }
-                    })}
+                    onChange={(e) =>
+                      setConfiguration({
+                        ...configuration,
+                        customFields: {
+                          ...configuration.customFields,
+                          capabilityId: e.target.value,
+                        },
+                      })
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -479,13 +511,15 @@ export function ADOConfigurationComponent() {
                     id="requirementId"
                     placeholder="Custom.RequirementId"
                     value={configuration.customFields.requirementId}
-                    onChange={(e) => setConfiguration({
-                      ...configuration,
-                      customFields: {
-                        ...configuration.customFields,
-                        requirementId: e.target.value
-                      }
-                    })}
+                    onChange={(e) =>
+                      setConfiguration({
+                        ...configuration,
+                        customFields: {
+                          ...configuration.customFields,
+                          requirementId: e.target.value,
+                        },
+                      })
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -494,13 +528,15 @@ export function ADOConfigurationComponent() {
                     id="projectId"
                     placeholder="Custom.ProjectId"
                     value={configuration.customFields.projectId}
-                    onChange={(e) => setConfiguration({
-                      ...configuration,
-                      customFields: {
-                        ...configuration.customFields,
-                        projectId: e.target.value
-                      }
-                    })}
+                    onChange={(e) =>
+                      setConfiguration({
+                        ...configuration,
+                        customFields: {
+                          ...configuration.customFields,
+                          projectId: e.target.value,
+                        },
+                      })
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -509,13 +545,15 @@ export function ADOConfigurationComponent() {
                     id="customer"
                     placeholder="Custom.Customer"
                     value={configuration.customFields.customer}
-                    onChange={(e) => setConfiguration({
-                      ...configuration,
-                      customFields: {
-                        ...configuration.customFields,
-                        customer: e.target.value
-                      }
-                    })}
+                    onChange={(e) =>
+                      setConfiguration({
+                        ...configuration,
+                        customFields: {
+                          ...configuration.customFields,
+                          customer: e.target.value,
+                        },
+                      })
+                    }
                   />
                 </div>
               </div>
@@ -528,25 +566,25 @@ export function ADOConfigurationComponent() {
                 <FileText className="h-5 w-5" />
                 <span>Template Settings</span>
               </CardTitle>
-              <CardDescription>
-                Configure work item templates for different types
-              </CardDescription>
+              <CardDescription>Configure work item templates for different types</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="epicTemplate">Epic Template</Label>
                   <Input
                     id="epicTemplate"
                     placeholder="Epic template name"
                     value={configuration.mapping.epicTemplate}
-                    onChange={(e) => setConfiguration({
-                      ...configuration,
-                      mapping: {
-                        ...configuration.mapping,
-                        epicTemplate: e.target.value
-                      }
-                    })}
+                    onChange={(e) =>
+                      setConfiguration({
+                        ...configuration,
+                        mapping: {
+                          ...configuration.mapping,
+                          epicTemplate: e.target.value,
+                        },
+                      })
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -555,13 +593,15 @@ export function ADOConfigurationComponent() {
                     id="featureTemplate"
                     placeholder="Feature template name"
                     value={configuration.mapping.featureTemplate}
-                    onChange={(e) => setConfiguration({
-                      ...configuration,
-                      mapping: {
-                        ...configuration.mapping,
-                        featureTemplate: e.target.value
-                      }
-                    })}
+                    onChange={(e) =>
+                      setConfiguration({
+                        ...configuration,
+                        mapping: {
+                          ...configuration.mapping,
+                          featureTemplate: e.target.value,
+                        },
+                      })
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -570,13 +610,15 @@ export function ADOConfigurationComponent() {
                     id="userStoryTemplate"
                     placeholder="User Story template name"
                     value={configuration.mapping.userStoryTemplate}
-                    onChange={(e) => setConfiguration({
-                      ...configuration,
-                      mapping: {
-                        ...configuration.mapping,
-                        userStoryTemplate: e.target.value
-                      }
-                    })}
+                    onChange={(e) =>
+                      setConfiguration({
+                        ...configuration,
+                        mapping: {
+                          ...configuration.mapping,
+                          userStoryTemplate: e.target.value,
+                        },
+                      })
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -585,13 +627,15 @@ export function ADOConfigurationComponent() {
                     id="taskTemplate"
                     placeholder="Task template name"
                     value={configuration.mapping.taskTemplate}
-                    onChange={(e) => setConfiguration({
-                      ...configuration,
-                      mapping: {
-                        ...configuration.mapping,
-                        taskTemplate: e.target.value
-                      }
-                    })}
+                    onChange={(e) =>
+                      setConfiguration({
+                        ...configuration,
+                        mapping: {
+                          ...configuration.mapping,
+                          taskTemplate: e.target.value,
+                        },
+                      })
+                    }
                   />
                 </div>
               </div>
@@ -625,31 +669,44 @@ export function ADOConfigurationComponent() {
                     <span>Clear Logs</span>
                   </Button>
                 </div>
-                <div className="max-h-64 overflow-y-auto space-y-2">
+                <div className="max-h-64 space-y-2 overflow-y-auto">
                   {logs.length === 0 ? (
-                    <p className="text-gray-500 text-sm">No logs available</p>
+                    <p className="text-sm text-gray-500">No logs available</p>
                   ) : (
-                    logs.slice(-20).reverse().map((log) => (
-                      <div key={log.id} className="p-2 bg-gray-50 rounded text-sm">
-                        <div className="flex items-center justify-between">
-                          <span className="font-mono text-xs text-gray-500">
-                            {new Date(log.timestamp).toLocaleTimeString()}
-                          </span>
-                          <Badge variant={log.level === 'error' ? 'destructive' : log.level === 'warning' ? 'secondary' : 'default'}>
-                            {log.level.toUpperCase()}
-                          </Badge>
+                    logs
+                      .slice(-20)
+                      .reverse()
+                      .map((log) => (
+                        <div key={log.id} className="rounded bg-gray-50 p-2 text-sm">
+                          <div className="flex items-center justify-between">
+                            <span className="font-mono text-xs text-gray-500">
+                              {new Date(log.timestamp).toLocaleTimeString()}
+                            </span>
+                            <Badge
+                              variant={
+                                log.level === 'error'
+                                  ? 'destructive'
+                                  : log.level === 'warning'
+                                    ? 'secondary'
+                                    : 'default'
+                              }
+                            >
+                              {log.level.toUpperCase()}
+                            </Badge>
+                          </div>
+                          <div className="mt-1">{log.message}</div>
+                          {log.details && (
+                            <details className="mt-1">
+                              <summary className="cursor-pointer text-xs text-gray-600">
+                                Details
+                              </summary>
+                              <pre className="mt-1 overflow-x-auto rounded bg-gray-100 p-2 text-xs">
+                                {JSON.stringify(log.details, null, 2)}
+                              </pre>
+                            </details>
+                          )}
                         </div>
-                        <div className="mt-1">{log.message}</div>
-                        {log.details && (
-                          <details className="mt-1">
-                            <summary className="cursor-pointer text-xs text-gray-600">Details</summary>
-                            <pre className="mt-1 text-xs bg-gray-100 p-2 rounded overflow-x-auto">
-                              {JSON.stringify(log.details, null, 2)}
-                            </pre>
-                          </details>
-                        )}
-                      </div>
-                    ))
+                      ))
                   )}
                 </div>
               </div>
@@ -662,9 +719,7 @@ export function ADOConfigurationComponent() {
                 <Activity className="h-5 w-5" />
                 <span>Notifications</span>
               </CardTitle>
-              <CardDescription>
-                View system notifications and alerts
-              </CardDescription>
+              <CardDescription>View system notifications and alerts</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -680,26 +735,35 @@ export function ADOConfigurationComponent() {
                     <span>Clear Notifications</span>
                   </Button>
                 </div>
-                <div className="max-h-64 overflow-y-auto space-y-2">
+                <div className="max-h-64 space-y-2 overflow-y-auto">
                   {notifications.length === 0 ? (
-                    <p className="text-gray-500 text-sm">No notifications available</p>
+                    <p className="text-sm text-gray-500">No notifications available</p>
                   ) : (
-                    notifications.slice(-10).reverse().map((notification) => (
-                      <div key={notification.id} className={`p-3 rounded border-l-4 ${
-                        notification.type === 'error' ? 'border-red-500 bg-red-50' :
-                        notification.type === 'warning' ? 'border-yellow-500 bg-yellow-50' :
-                        notification.type === 'success' ? 'border-green-500 bg-green-50' :
-                        'border-blue-500 bg-blue-50'
-                      }`}>
-                        <div className="flex items-center justify-between">
-                          <h5 className="font-medium">{notification.title}</h5>
-                          <span className="text-xs text-gray-500">
-                            {new Date(notification.timestamp).toLocaleTimeString()}
-                          </span>
+                    notifications
+                      .slice(-10)
+                      .reverse()
+                      .map((notification) => (
+                        <div
+                          key={notification.id}
+                          className={`rounded border-l-4 p-3 ${
+                            notification.type === 'error'
+                              ? 'border-red-500 bg-red-50'
+                              : notification.type === 'warning'
+                                ? 'border-yellow-500 bg-yellow-50'
+                                : notification.type === 'success'
+                                  ? 'border-green-500 bg-green-50'
+                                  : 'border-blue-500 bg-blue-50'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <h5 className="font-medium">{notification.title}</h5>
+                            <span className="text-xs text-gray-500">
+                              {new Date(notification.timestamp).toLocaleTimeString()}
+                            </span>
+                          </div>
+                          <p className="mt-1 text-sm">{notification.message}</p>
                         </div>
-                        <p className="text-sm mt-1">{notification.message}</p>
-                      </div>
-                    ))
+                      ))
                   )}
                 </div>
               </div>

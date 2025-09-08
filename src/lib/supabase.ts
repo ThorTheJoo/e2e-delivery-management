@@ -10,5 +10,5 @@ export const TABLES = {
   TMF_REFERENCE_DOMAINS: 'tmf_reference_domains',
   TMF_REFERENCE_CAPABILITIES: 'tmf_reference_capabilities',
   USER_DOMAINS: 'user_domains',
-  USER_CAPABILITIES: 'user_capabilities'
+  USER_CAPABILITIES: 'user_capabilities',
 } as const;

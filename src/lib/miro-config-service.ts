@@ -108,16 +108,21 @@ class MiroConfigService {
   public getDebugInfo(): any {
     return {
       isConfigured: this.isConfigured(),
-      config: this.config ? {
-        clientId: this.config.clientId,
-        clientSecret: this.config.clientSecret ? '***SET***' : 'NOT SET',
-        redirectUri: this.config.redirectUri,
-        scopes: this.config.scopes
-      } : null,
-      localStorage: typeof window !== 'undefined' ? {
-        miroConfig: localStorage.getItem('miroConfig'),
-        allKeys: Object.keys(localStorage)
-      } : 'Not available (server-side)'
+      config: this.config
+        ? {
+            clientId: this.config.clientId,
+            clientSecret: this.config.clientSecret ? '***SET***' : 'NOT SET',
+            redirectUri: this.config.redirectUri,
+            scopes: this.config.scopes,
+          }
+        : null,
+      localStorage:
+        typeof window !== 'undefined'
+          ? {
+              miroConfig: localStorage.getItem('miroConfig'),
+              allKeys: Object.keys(localStorage),
+            }
+          : 'Not available (server-side)',
     };
   }
 }

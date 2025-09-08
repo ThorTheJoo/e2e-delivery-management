@@ -115,10 +115,10 @@ export interface BlueDolphinObjectEnhanced extends BlueDolphinObject {
   Object_Properties_Supplied_By?: string;
   Object_Properties_Questions?: string;
   Object_Properties_Action_Items?: string;
-  
+
   // Deliverable Status Properties
   Deliverable_Object_Status_Architectural_Decision_Log?: string;
-  
+
   // AMEFF Properties (25+ fields confirmed)
   Ameff_properties_Reportx3AModelx3ACoverx3ABackground?: string;
   Ameff_properties_Reportx3AModelx3AHeaderx3ABackground?: string;

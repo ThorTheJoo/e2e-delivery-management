@@ -15,14 +15,17 @@ This document summarizes our command-line testing of the Blue Dolphin OData serv
 ## Test Scenarios
 
 ### Test 1: Standard Query (Baseline)
+
 **Purpose**: Establish baseline response structure without enhancements
 
-**URL**: 
+**URL**:
+
 ```
 https://csgipoc.odata.bluedolphin.app/Objects?$top=2&$select=Id,Title,Definition,Status
 ```
 
-**Result**: 
+**Result**:
+
 ```json
 {
   "@odata.context": "http://csgipoc.odata.bluedolphin.app/$metadata#Objects(ID,Title,Definition,Status)",
@@ -47,9 +50,11 @@ https://csgipoc.odata.bluedolphin.app/Objects?$top=2&$select=Id,Title,Definition
 **Response Size**: Small, efficient
 
 ### Test 2: MoreColumns=true with Select Fields
+
 **Purpose**: Test if MoreColumns parameter works when combined with $select
 
-**URL**: 
+**URL**:
+
 ```
 https://csgipoc.odata.bluedolphin.app/Objects?$top=2&$select=Id,Title,Definition,Status&MoreColumns=true
 ```
@@ -59,9 +64,11 @@ https://csgipoc.odata.bluedolphin.app/Objects?$top=2&$select=Id,Title,Definition
 **Key Finding**: ⚠️ **CRITICAL DISCOVERY** - When using `$select` parameter, `MoreColumns=true` is ignored by the Blue Dolphin service.
 
 ### Test 3: MoreColumns=true without Select Fields
+
 **Purpose**: Test MoreColumns parameter without field restrictions
 
-**URL**: 
+**URL**:
+
 ```
 https://csgoc.odata.bluedolphin.app/Objects?$top=2&MoreColumns=true
 ```
@@ -69,15 +76,18 @@ https://csgoc.odata.bluedolphin.app/Objects?$top=2&MoreColumns=true
 **Result**: **Significantly enhanced response with 30+ additional fields**
 
 **Fields Returned**: 45+ fields including:
+
 - Standard fields: Id, Title, Definition, Status, CreatedOn, ChangedOn, Workspace, etc.
-- Enhanced fields: Object_Properties_*, Deliverable_Object_Status_*, Ameff_properties_*
+- Enhanced fields: Object*Properties*_, Deliverable*Object_Status*_, Ameff*properties*\*
 
 **Response Size**: Large, comprehensive
 
 ### Test 4: MoreColumns=true with Object Type Filter
+
 **Purpose**: Test enhanced fields with specific object type filtering
 
-**URL**: 
+**URL**:
+
 ```
 https://csgipoc.odata.bluedolphin.app/Objects?$filter=Definition eq 'Business Process'&$top=2&MoreColumns=true
 ```
@@ -89,19 +99,23 @@ https://csgipoc.odata.bluedolphin.app/Objects?$filter=Definition eq 'Business Pr
 ## Key Discoveries
 
 ### ✅ **MoreColumns Parameter Works**
+
 - Parameter is accepted by Blue Dolphin OData service
 - Significantly expands available fields beyond standard ones
 - Provides access to enterprise metadata and business context
 
 ### ⚠️ **Critical Field Selection Conflict**
+
 - **Cannot use `$select` parameter with `MoreColumns=true`**
 - `$select` parameter overrides and ignores `MoreColumns=true`
 - Must choose between field selection OR enhanced metadata, not both
 
 ### 📊 **Enhanced Field Availability**
+
 We successfully retrieved these additional fields that match the Excel Power Query capabilities:
 
 #### Object Properties (9 fields)
+
 - `Object_Properties_Name`
 - `Object_Properties_AMEFF_Import_Identifier`
 - `Object_Properties_Deliverable_Object_Status`
@@ -113,10 +127,12 @@ We successfully retrieved these additional fields that match the Excel Power Que
 - `Object_Properties_Action_Items`
 
 #### Deliverable Status Properties (2 fields)
+
 - `Deliverable_Object_Status_Status`
 - `Deliverable_Object_Status_Architectural_Decision_Log`
 
 #### AMEFF Properties (25+ fields)
+
 - `Ameff_properties_Reportx3AModelx3ACoverx3ABackground`
 - `Ameff_properties_Reportx3AModelx3AHeaderx3ABackground`
 - `Ameff_properties_Reportx3AModelx3AHidex3AApplication`
@@ -144,18 +160,21 @@ We successfully retrieved these additional fields that match the Excel Power Que
 - `Ameff_properties_Compliance`
 
 ### 🔍 **Object Type Variation**
+
 - **Business Process Objects**: Show the most comprehensive enhanced field set (45+ fields)
 - **Application Component Objects**: Show fewer enhanced fields
 - **Business Actor Objects**: Show basic enhanced fields
 - **Data Object Objects**: Show moderate enhanced fields
 
 ### 📈 **Performance Impact**
+
 - **Response Size**: Increases significantly with MoreColumns=true
 - **Field Count**: From ~15 standard fields to 45+ enhanced fields
 - **Network Overhead**: Larger responses but single request (vs. multiple requests)
 - **Performance**: Acceptable for the data richness gained
 
 ### ⚠️ **Data Quality Observations**
+
 - **Field Availability**: Enhanced fields are available but many are empty strings (`""`)
 - **Data Population**: Enhanced fields appear to be populated based on specific object configurations
 - **Empty Fields**: Most enhanced fields are empty, suggesting they're available for population
@@ -189,17 +208,20 @@ $response.Content | ConvertFrom-Json | ConvertTo-Json -Depth 10
 ## Implementation Implications
 
 ### ✅ **What Works**
+
 - `MoreColumns=true` parameter is fully functional
 - Enhanced fields are available and accessible
 - Object type filtering works with enhanced fields
 - Performance is acceptable for enhanced queries
 
 ### ⚠️ **What Doesn't Work**
+
 - `$select` parameter conflicts with `MoreColumns=true`
 - Cannot selectively choose enhanced fields
 - Must retrieve all fields when using MoreColumns
 
 ### 🔧 **Implementation Requirements**
+
 1. **Smart Field Handling**: Implement logic to choose between field selection OR enhanced metadata
 2. **Field Filtering**: Add client-side field filtering since server-side selection isn't possible
 3. **Performance Optimization**: Implement caching and pagination for large enhanced responses
@@ -209,18 +231,21 @@ $response.Content | ConvertFrom-Json | ConvertTo-Json -Depth 10
 ## Recommendations
 
 ### For Development
+
 1. **Start with Business Process objects** - they provide the most comprehensive enhanced field set
 2. **Implement field filtering on the client side** - since server-side selection isn't possible
 3. **Add field population indicators** - show which fields have data vs. empty
 4. **Implement smart caching** - cache enhanced field responses to improve performance
 
 ### For Testing
+
 1. **Test with different object types** - verify enhanced field availability across object types
 2. **Test performance with larger datasets** - measure response times and sizes
 3. **Test field population** - identify which objects have populated enhanced fields
 4. **Test error scenarios** - verify handling of missing or invalid enhanced fields
 
 ### For Production
+
 1. **Implement field selection UI** - allow users to choose which enhanced fields to display
 2. **Add performance monitoring** - track response times and sizes
 3. **Implement progressive loading** - load basic fields first, then enhanced fields
@@ -246,6 +271,7 @@ These findings provide a solid foundation for implementing enhanced object retri
 4. **Long-term**: Optimize performance and add advanced field management features
 
 ### Export CSV (Objects + Relations) Cross-Reference
+
 - UI spec: `BLUE-DOLPHIN-EXPORT-CSV-UI.md`
 - API spec: `BLUE-DOLPHIN-EXPORT-CSV-API.md`
 - Data Dictionary: `BLUE-DOLPHIN-EXPORT-CSV-DATA-DICTIONARY.md`
@@ -282,6 +308,7 @@ We validated access to the Blue Dolphin relations dataset (Excel `Relations_tabl
 ### Bidirectional Pattern
 
 Each logical relationship often appears as a pair of records (forward/backward):
+
 - Example: `Name = composed of` (forward) and `Name = composed in` (reverse) with the same `RelationshipId` and swapped object IDs.
 
 ### ArchiMate Mapping Insights

@@ -14,7 +14,7 @@ import {
   Users,
   AlertTriangle,
   CheckCircle,
-  Clock
+  Clock,
 } from 'lucide-react';
 import { CETv22Project, CETv22AnalysisResult } from '@/types';
 
@@ -25,24 +25,33 @@ interface CETv22ProjectOverviewProps {
 
 export const CETv22ProjectOverview: React.FC<CETv22ProjectOverviewProps> = ({
   projectData,
-  analysisData
+  analysisData,
 }) => {
   const getComplexityColor = (complexity: string) => {
     switch (complexity) {
-      case 'High': return 'destructive';
-      case 'Medium': return 'secondary';
-      case 'Low': return 'default';
-      default: return 'secondary';
+      case 'High':
+        return 'destructive';
+      case 'Medium':
+        return 'secondary';
+      case 'Low':
+        return 'default';
+      default:
+        return 'secondary';
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'completed': return 'default';
-      case 'in progress': return 'secondary';
-      case 'draft': return 'outline';
-      case 'on hold': return 'destructive';
-      default: return 'secondary';
+      case 'completed':
+        return 'default';
+      case 'in progress':
+        return 'secondary';
+      case 'draft':
+        return 'outline';
+      case 'on hold':
+        return 'destructive';
+      default:
+        return 'secondary';
     }
   };
 
@@ -54,13 +63,11 @@ export const CETv22ProjectOverview: React.FC<CETv22ProjectOverviewProps> = ({
           <CardTitle className="flex items-center space-x-2">
             <Building className="h-5 w-5" />
             <span>{projectData.projectName}</span>
-            <Badge variant={getStatusColor(projectData.status)}>
-              {projectData.status}
-            </Badge>
+            <Badge variant={getStatusColor(projectData.status)}>{projectData.status}</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
             <div className="flex items-center space-x-2">
               <Building className="h-4 w-4 text-muted-foreground" />
               <div>
@@ -105,21 +112,21 @@ export const CETv22ProjectOverview: React.FC<CETv22ProjectOverviewProps> = ({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <div className="text-2xl font-bold text-blue-600 mb-1">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div className="rounded-lg bg-blue-50 p-4 text-center">
+                  <div className="mb-1 text-2xl font-bold text-blue-600">
                     {analysisData.project.complexity}
                   </div>
                   <div className="text-sm text-muted-foreground">Complexity Level</div>
                 </div>
-                <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <div className="text-2xl font-bold text-green-600 mb-1">
+                <div className="rounded-lg bg-green-50 p-4 text-center">
+                  <div className="mb-1 text-2xl font-bold text-green-600">
                     {Math.round(analysisData.metadata.confidence)}%
                   </div>
                   <div className="text-sm text-muted-foreground">Data Confidence</div>
                 </div>
-                <div className="text-center p-4 bg-purple-50 rounded-lg">
-                  <div className="text-2xl font-bold text-purple-600 mb-1">
+                <div className="rounded-lg bg-purple-50 p-4 text-center">
+                  <div className="mb-1 text-2xl font-bold text-purple-600">
                     {analysisData.metadata.dataQuality}
                   </div>
                   <div className="text-sm text-muted-foreground">Data Quality</div>
@@ -128,8 +135,8 @@ export const CETv22ProjectOverview: React.FC<CETv22ProjectOverviewProps> = ({
 
               {analysisData.project.riskFactors.length > 0 && (
                 <div className="mt-4">
-                  <h4 className="text-sm font-medium text-muted-foreground mb-2 flex items-center">
-                    <AlertTriangle className="h-4 w-4 mr-1" />
+                  <h4 className="mb-2 flex items-center text-sm font-medium text-muted-foreground">
+                    <AlertTriangle className="mr-1 h-4 w-4" />
                     Project Risk Factors
                   </h4>
                   <div className="flex flex-wrap gap-2">
@@ -153,27 +160,27 @@ export const CETv22ProjectOverview: React.FC<CETv22ProjectOverviewProps> = ({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <div className="text-2xl font-bold text-blue-600 mb-1">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <div className="rounded-lg bg-blue-50 p-4 text-center">
+                  <div className="mb-1 text-2xl font-bold text-blue-600">
                     {analysisData.resources.totalEffort.toLocaleString()}
                   </div>
                   <div className="text-sm text-muted-foreground">Total Hours</div>
                 </div>
-                <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <div className="text-2xl font-bold text-green-600 mb-1">
+                <div className="rounded-lg bg-green-50 p-4 text-center">
+                  <div className="mb-1 text-2xl font-bold text-green-600">
                     {analysisData.resources.peakResources}
                   </div>
                   <div className="text-sm text-muted-foreground">Peak Resources</div>
                 </div>
-                <div className="text-center p-4 bg-orange-50 rounded-lg">
-                  <div className="text-2xl font-bold text-orange-600 mb-1">
+                <div className="rounded-lg bg-orange-50 p-4 text-center">
+                  <div className="mb-1 text-2xl font-bold text-orange-600">
                     {Math.round(analysisData.resources.resourceUtilization)}%
                   </div>
                   <div className="text-sm text-muted-foreground">Utilization</div>
                 </div>
-                <div className="text-center p-4 bg-purple-50 rounded-lg">
-                  <div className="text-2xl font-bold text-purple-600 mb-1">
+                <div className="rounded-lg bg-purple-50 p-4 text-center">
+                  <div className="mb-1 text-2xl font-bold text-purple-600">
                     {analysisData.resources.averageResources}
                   </div>
                   <div className="text-sm text-muted-foreground">Avg Resources</div>
@@ -192,14 +199,14 @@ export const CETv22ProjectOverview: React.FC<CETv22ProjectOverviewProps> = ({
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
-                    <h4 className="text-sm font-medium text-muted-foreground mb-3">By Phase</h4>
+                    <h4 className="mb-3 text-sm font-medium text-muted-foreground">By Phase</h4>
                     <div className="space-y-2">
                       {analysisData.effort.phaseBreakdown.map((phase) => (
                         <div key={phase.phaseNumber} className="flex items-center justify-between">
                           <div className="flex items-center space-x-2">
-                            <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                            <div className="h-3 w-3 rounded-full bg-blue-500"></div>
                             <span className="text-sm">Phase {phase.phaseNumber}</span>
                           </div>
                           <div className="text-sm font-medium">
@@ -210,13 +217,13 @@ export const CETv22ProjectOverview: React.FC<CETv22ProjectOverviewProps> = ({
                     </div>
                   </div>
                   <div>
-                    <h4 className="text-sm font-medium text-muted-foreground mb-3">By Role</h4>
+                    <h4 className="mb-3 text-sm font-medium text-muted-foreground">By Role</h4>
                     <div className="space-y-2">
                       {analysisData.resources.roleBreakdown.slice(0, 5).map((role) => (
                         <div key={role.role} className="flex items-center justify-between">
                           <div className="flex items-center space-x-2">
-                            <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                            <span className="text-sm truncate">{role.role}</span>
+                            <div className="h-3 w-3 rounded-full bg-green-500"></div>
+                            <span className="truncate text-sm">{role.role}</span>
                           </div>
                           <div className="text-sm font-medium">
                             {role.effort.toLocaleString()}h ({role.percentage.toFixed(1)}%)
@@ -229,20 +236,20 @@ export const CETv22ProjectOverview: React.FC<CETv22ProjectOverviewProps> = ({
 
                 <Separator />
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                  <div className="p-3 bg-gray-50 rounded-lg">
+                <div className="grid grid-cols-1 gap-4 text-center md:grid-cols-3">
+                  <div className="rounded-lg bg-gray-50 p-3">
                     <div className="text-lg font-bold text-gray-900">
                       {analysisData.phases.length}
                     </div>
                     <div className="text-sm text-muted-foreground">Total Phases</div>
                   </div>
-                  <div className="p-3 bg-gray-50 rounded-lg">
+                  <div className="rounded-lg bg-gray-50 p-3">
                     <div className="text-lg font-bold text-gray-900">
                       {analysisData.products.length}
                     </div>
                     <div className="text-sm text-muted-foreground">Products</div>
                   </div>
-                  <div className="p-3 bg-gray-50 rounded-lg">
+                  <div className="rounded-lg bg-gray-50 p-3">
                     <div className="text-lg font-bold text-gray-900">
                       {analysisData.risks.length}
                     </div>
@@ -264,9 +271,9 @@ export const CETv22ProjectOverview: React.FC<CETv22ProjectOverviewProps> = ({
             <CardContent>
               <div className="space-y-4">
                 {analysisData.phases.map((phase) => (
-                  <div key={phase.phaseNumber} className="p-4 border rounded-lg">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-semibold text-lg">{phase.phaseName}</h3>
+                  <div key={phase.phaseNumber} className="rounded-lg border p-4">
+                    <div className="mb-3 flex items-center justify-between">
+                      <h3 className="text-lg font-semibold">{phase.phaseName}</h3>
                       <div className="flex items-center space-x-2">
                         <Badge variant={getComplexityColor(phase.complexity)}>
                           {phase.complexity}
@@ -277,10 +284,12 @@ export const CETv22ProjectOverview: React.FC<CETv22ProjectOverviewProps> = ({
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
+                    <div className="mb-3 grid grid-cols-1 gap-4 md:grid-cols-3">
                       <div>
                         <div className="text-sm text-muted-foreground">Effort</div>
-                        <div className="font-medium">{phase.totalEffort.toLocaleString()} hours</div>
+                        <div className="font-medium">
+                          {phase.totalEffort.toLocaleString()} hours
+                        </div>
                       </div>
                       <div>
                         <div className="text-sm text-muted-foreground">Resources</div>
@@ -294,7 +303,7 @@ export const CETv22ProjectOverview: React.FC<CETv22ProjectOverviewProps> = ({
 
                     {phase.deliverables.length > 0 && (
                       <div>
-                        <div className="text-sm text-muted-foreground mb-2">Key Deliverables</div>
+                        <div className="mb-2 text-sm text-muted-foreground">Key Deliverables</div>
                         <div className="flex flex-wrap gap-1">
                           {phase.deliverables.slice(0, 3).map((deliverable, index) => (
                             <Badge key={index} variant="outline" className="text-xs">
@@ -312,13 +321,17 @@ export const CETv22ProjectOverview: React.FC<CETv22ProjectOverviewProps> = ({
 
                     {phase.riskFactors.length > 0 && (
                       <div className="mt-3">
-                        <div className="text-sm text-muted-foreground mb-2 flex items-center">
-                          <AlertTriangle className="h-3 w-3 mr-1" />
+                        <div className="mb-2 flex items-center text-sm text-muted-foreground">
+                          <AlertTriangle className="mr-1 h-3 w-3" />
                           Phase Risks
                         </div>
                         <div className="flex flex-wrap gap-1">
                           {phase.riskFactors.map((risk, index) => (
-                            <Badge key={index} variant="outline" className="text-xs text-orange-600">
+                            <Badge
+                              key={index}
+                              variant="outline"
+                              className="text-xs text-orange-600"
+                            >
                               {risk}
                             </Badge>
                           ))}
@@ -337,7 +350,7 @@ export const CETv22ProjectOverview: React.FC<CETv22ProjectOverviewProps> = ({
               <CardTitle>Analysis Details</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="flex items-center space-x-2">
                   <CheckCircle className="h-4 w-4 text-green-500" />
                   <div>

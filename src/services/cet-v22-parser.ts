@@ -8,7 +8,7 @@ import {
   CETv22DealType,
   CETv22Phase,
   CETv22Product,
-  CETv22ParsingError
+  CETv22ParsingError,
 } from '@/types';
 
 export class CETv22ParserService {
@@ -24,12 +24,12 @@ export class CETv22ParserService {
         phases: this.extractPhases(sheets),
         products: this.extractProducts(sheets),
         lookupValues: this.extractLookupValues(sheets),
-        dealTypes: this.extractDealTypes(sheets)
+        dealTypes: this.extractDealTypes(sheets),
       };
     } catch (error) {
       throw new CETv22ParsingError(
         `Failed to parse CET v22.0 Excel file: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        error instanceof Error ? error : undefined
+        error instanceof Error ? error : undefined,
       );
     }
   }
@@ -37,7 +37,7 @@ export class CETv22ParserService {
   private extractSheets(workbook: XLSX.WorkBook): Record<string, any[][]> {
     const sheets: Record<string, any[][]> = {};
 
-    workbook.SheetNames.forEach(sheetName => {
+    workbook.SheetNames.forEach((sheetName) => {
       const worksheet = workbook.Sheets[sheetName];
       sheets[sheetName] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
     });
@@ -59,8 +59,10 @@ export class CETv22ParserService {
         region: this.findCellValue(attributesSheet, 'Region') || 'Global',
         language: this.findCellValue(attributesSheet, 'Language') || 'English',
         sfdcType: this.findCellValue(attributesSheet, 'SFDC Type') || 'New Business',
-        createdDate: this.findCellValue(attributesSheet, 'Created Date') || new Date().toISOString().split('T')[0],
-        status: this.findCellValue(attributesSheet, 'Status') || 'Draft'
+        createdDate:
+          this.findCellValue(attributesSheet, 'Created Date') ||
+          new Date().toISOString().split('T')[0],
+        status: this.findCellValue(attributesSheet, 'Status') || 'Draft',
       };
     } catch (error) {
       console.warn('Error extracting project info:', error);
@@ -73,16 +75,25 @@ export class CETv22ParserService {
         language: 'English',
         sfdcType: 'New Business',
         createdDate: new Date().toISOString().split('T')[0],
-        status: 'Draft'
+        status: 'Draft',
       };
     }
   }
 
   private extractResourceDemands(sheets: Record<string, any[][]>): CETv22ResourceDemand[] {
     const demands: CETv22ResourceDemand[] = [];
-    const demandSheets = ['Ph1Demand', 'Ph2Demand', 'Ph3Demand', 'Ph4Demand', 'GovDemand', 'ENCDemand', 'ASCDemand', 'CMADemand'];
+    const demandSheets = [
+      'Ph1Demand',
+      'Ph2Demand',
+      'Ph3Demand',
+      'Ph4Demand',
+      'GovDemand',
+      'ENCDemand',
+      'ASCDemand',
+      'CMADemand',
+    ];
 
-    demandSheets.forEach(sheetName => {
+    demandSheets.forEach((sheetName) => {
       if (sheets[sheetName]) {
         const sheetDemands = this.processDemandSheet(sheets[sheetName], sheetName);
         demands.push(...sheetDemands);
@@ -100,7 +111,7 @@ export class CETv22ParserService {
     // For Ph1Demand sheet, headers are in row 3 (index 2), data starts from row 6 (index 5)
     const headers = sheetName === 'Ph1Demand' ? sheetData[2] : sheetData[0];
     const startRowIndex = sheetName === 'Ph1Demand' ? 5 : 1; // Start from row 6 for Ph1Demand
-    
+
     // Debug: Log the headers for Ph1Demand sheet
     if (sheetName === 'Ph1Demand') {
       console.log('processDemandSheet - Ph1Demand headers:', headers);
@@ -108,7 +119,7 @@ export class CETv22ParserService {
       headers.forEach((header, index) => {
         console.log(`processDemandSheet - Header ${index}: "${header}"`);
       });
-      
+
       // Also log first few data rows to see the structure
       for (let i = startRowIndex; i < Math.min(startRowIndex + 3, sheetData.length); i++) {
         console.log(`processDemandSheet - Ph1Demand data row ${i}:`, sheetData[i]);
@@ -128,12 +139,16 @@ export class CETv22ParserService {
     return demands;
   }
 
-  private createResourceDemand(row: any[], headers: string[], sheetName: string): CETv22ResourceDemand | null {
+  private createResourceDemand(
+    row: any[],
+    headers: string[],
+    sheetName: string,
+  ): CETv22ResourceDemand | null {
     try {
       let weekNumber: number;
       let effortHours: number;
       let resourceCount: number;
-      
+
       if (sheetName === 'Ph1Demand') {
         // For Ph1Demand, we don't have weekly breakdown, so use default values
         weekNumber = 1; // Default to week 1
@@ -150,50 +165,53 @@ export class CETv22ParserService {
         return null;
       }
 
-        // Extract domain and total mandate effort for Ph1Demand sheet
-        let domain: string | undefined;
-        let totalMandateEffort: number | undefined;
-        
-        if (sheetName === 'Ph1Demand') {
-          console.log('createResourceDemand - Processing Ph1Demand sheet');
-          console.log('createResourceDemand - Row data:', row);
-          console.log('createResourceDemand - Headers:', headers);
-          console.log('createResourceDemand - Row length:', row.length);
-          console.log('createResourceDemand - Column M (index 12):', row[12]);
-          console.log('createResourceDemand - Column O (index 14):', row[14]);
-          
-          // Use direct index access since we know the exact positions
-          domain = this.getCellValueByIndex(row, 12); // Column M (index 12)
-          const totalEffortStr = this.getCellValueByIndex(row, 14); // Column O (index 14)
-          totalMandateEffort = parseFloat(totalEffortStr) || undefined;
-          
-          console.log('createResourceDemand - Extracted domain:', domain);
-          console.log('createResourceDemand - Extracted totalEffortStr:', totalEffortStr);
-          console.log('createResourceDemand - Parsed totalMandateEffort:', totalMandateEffort);
-        }
+      // Extract domain and total mandate effort for Ph1Demand sheet
+      let domain: string | undefined;
+      let totalMandateEffort: number | undefined;
 
-                        const demand = {
-                  weekNumber,
-                  weekDate: this.getCellValue(row, headers, 'Week Date') || '',
-                  jobProfile: sheetName === 'Ph1Demand' ? this.getCellValueByIndex(row, 0) : (this.getCellValue(row, headers, 'Job Profile') || 'Unknown'),
-                  effortHours,
-                  resourceCount,
-                  productType: this.getProductTypeFromSheet(sheetName),
-                  phaseNumber: this.getPhaseFromSheet(sheetName),
-                  complexityLevel: this.getCellValue(row, headers, 'Complexity Level'),
-                  domain,
-                  totalMandateEffort
-                };
+      if (sheetName === 'Ph1Demand') {
+        console.log('createResourceDemand - Processing Ph1Demand sheet');
+        console.log('createResourceDemand - Row data:', row);
+        console.log('createResourceDemand - Headers:', headers);
+        console.log('createResourceDemand - Row length:', row.length);
+        console.log('createResourceDemand - Column M (index 12):', row[12]);
+        console.log('createResourceDemand - Column O (index 14):', row[14]);
 
-                // Debug logging for Ph1Demand
-                if (sheetName === 'Ph1Demand') {
-                  console.log('createResourceDemand - Final demand object:', demand);
-                  console.log('createResourceDemand - domain field:', demand.domain);
-                  console.log('createResourceDemand - totalMandateEffort field:', demand.totalMandateEffort);
-                  console.log('createResourceDemand - phaseNumber field:', demand.phaseNumber);
-                }
+        // Use direct index access since we know the exact positions
+        domain = this.getCellValueByIndex(row, 12); // Column M (index 12)
+        const totalEffortStr = this.getCellValueByIndex(row, 14); // Column O (index 14)
+        totalMandateEffort = parseFloat(totalEffortStr) || undefined;
 
-                return demand;
+        console.log('createResourceDemand - Extracted domain:', domain);
+        console.log('createResourceDemand - Extracted totalEffortStr:', totalEffortStr);
+        console.log('createResourceDemand - Parsed totalMandateEffort:', totalMandateEffort);
+      }
+
+      const demand = {
+        weekNumber,
+        weekDate: this.getCellValue(row, headers, 'Week Date') || '',
+        jobProfile:
+          sheetName === 'Ph1Demand'
+            ? this.getCellValueByIndex(row, 0)
+            : this.getCellValue(row, headers, 'Job Profile') || 'Unknown',
+        effortHours,
+        resourceCount,
+        productType: this.getProductTypeFromSheet(sheetName),
+        phaseNumber: this.getPhaseFromSheet(sheetName),
+        complexityLevel: this.getCellValue(row, headers, 'Complexity Level'),
+        domain,
+        totalMandateEffort,
+      };
+
+      // Debug logging for Ph1Demand
+      if (sheetName === 'Ph1Demand') {
+        console.log('createResourceDemand - Final demand object:', demand);
+        console.log('createResourceDemand - domain field:', demand.domain);
+        console.log('createResourceDemand - totalMandateEffort field:', demand.totalMandateEffort);
+        console.log('createResourceDemand - phaseNumber field:', demand.phaseNumber);
+      }
+
+      return demand;
     } catch (error) {
       console.warn('Error creating resource demand:', error);
       return null;
@@ -232,14 +250,16 @@ export class CETv22ParserService {
         projectRole: this.getCellValue(row, headers, 'Project Role') || 'Unknown',
         salesRegion: this.getCellValue(row, headers, 'Sales Region') || 'Global',
         salesTerritory: this.getCellValue(row, headers, 'Sales Territory') || 'Global',
-        supervisoryOrganization: this.getCellValue(row, headers, 'Supervisory Organization') || 'Unknown',
+        supervisoryOrganization:
+          this.getCellValue(row, headers, 'Supervisory Organization') || 'Unknown',
         workdayJobProfile: this.getCellValue(row, headers, 'Workday Job Profile') || 'Unknown',
         resourceLevel: this.getCellValue(row, headers, 'Resource Level') || 'Mid',
         resourceCostRegion: this.getCellValue(row, headers, 'Resource Cost Region') || 'Global',
-        demandLocationCountryCode: this.getCellValue(row, headers, 'Demand Location Country Code') || 'US',
+        demandLocationCountryCode:
+          this.getCellValue(row, headers, 'Demand Location Country Code') || 'US',
         workerType: this.getCellValue(row, headers, 'Worker Type') || 'Full-Time',
         hourlyRate: parseFloat(this.getCellValue(row, headers, 'Hourly Rate') || '100'),
-        availability: parseFloat(this.getCellValue(row, headers, 'Availability') || '40')
+        availability: parseFloat(this.getCellValue(row, headers, 'Availability') || '40'),
       };
     } catch (error) {
       console.warn('Error creating job profile:', error);
@@ -252,7 +272,12 @@ export class CETv22ParserService {
 
     // Create default phases based on demand sheets
     const phaseSheets = ['Ph1Demand', 'Ph2Demand', 'Ph3Demand', 'Ph4Demand'];
-    const phaseNames = ['Requirements & Analysis', 'Design & Architecture', 'Implementation', 'Testing & Deployment'];
+    const phaseNames = [
+      'Requirements & Analysis',
+      'Design & Architecture',
+      'Implementation',
+      'Testing & Deployment',
+    ];
 
     phaseSheets.forEach((sheetName, index) => {
       if (sheets[sheetName]) {
@@ -267,7 +292,7 @@ export class CETv22ParserService {
           totalEffort: phaseData.totalEffort,
           resourceCount: phaseData.resourceCount,
           complexityLevel: this.calculateComplexityLevel(phaseData.totalEffort),
-          deliverables: this.getPhaseDeliverables(phaseNumber)
+          deliverables: this.getPhaseDeliverables(phaseNumber),
         });
       }
     });
@@ -275,7 +300,10 @@ export class CETv22ParserService {
     return phases;
   }
 
-  private analyzePhaseData(sheetData: any[][], phaseNumber: number): { startWeek: number; endWeek: number; totalEffort: number; resourceCount: number } {
+  private analyzePhaseData(
+    sheetData: any[][],
+    phaseNumber: number,
+  ): { startWeek: number; endWeek: number; totalEffort: number; resourceCount: number } {
     if (sheetData.length < 2) {
       return { startWeek: 1, endWeek: 4, totalEffort: 0, resourceCount: 0 };
     }
@@ -304,7 +332,7 @@ export class CETv22ParserService {
       startWeek: startWeek === Infinity ? 1 : startWeek,
       endWeek: endWeek === 0 ? 4 : endWeek,
       totalEffort,
-      resourceCount: maxResourceCount
+      resourceCount: maxResourceCount,
     };
   }
 
@@ -323,7 +351,7 @@ export class CETv22ParserService {
           totalEffort: productData.totalEffort,
           resourceCount: productData.resourceCount,
           complexityLevel: this.calculateComplexityLevel(productData.totalEffort),
-          phases: [1, 2, 3, 4] // All products span all phases
+          phases: [1, 2, 3, 4], // All products span all phases
         });
       }
     });
@@ -356,9 +384,15 @@ export class CETv22ParserService {
     const lookupValues: CETv22LookupValue[] = [];
 
     // Extract from various reference sheets
-    const referenceSheets = ['LookupValues', 'GovRefData', 'ENCRefData', 'ASCRefData', 'CMARefData'];
+    const referenceSheets = [
+      'LookupValues',
+      'GovRefData',
+      'ENCRefData',
+      'ASCRefData',
+      'CMARefData',
+    ];
 
-    referenceSheets.forEach(sheetName => {
+    referenceSheets.forEach((sheetName) => {
       if (sheets[sheetName]) {
         const sheetLookups = this.processLookupSheet(sheets[sheetName], sheetName);
         lookupValues.push(...sheetLookups);
@@ -386,10 +420,15 @@ export class CETv22ParserService {
     return lookups;
   }
 
-  private createLookupValue(row: any[], headers: string[], category: string): CETv22LookupValue | null {
+  private createLookupValue(
+    row: any[],
+    headers: string[],
+    category: string,
+  ): CETv22LookupValue | null {
     try {
       const key = this.getCellValue(row, headers, 'Key') || this.getCellValue(row, headers, 'Code');
-      const value = this.getCellValue(row, headers, 'Value') || this.getCellValue(row, headers, 'Name');
+      const value =
+        this.getCellValue(row, headers, 'Value') || this.getCellValue(row, headers, 'Name');
       const description = this.getCellValue(row, headers, 'Description');
 
       if (!key || !value) return null;
@@ -398,7 +437,7 @@ export class CETv22ParserService {
         key,
         value,
         category,
-        description
+        description,
       };
     } catch (error) {
       console.warn('Error creating lookup value:', error);
@@ -437,7 +476,7 @@ export class CETv22ParserService {
         name,
         description: this.getCellValue(row, headers, 'Description') || '',
         commercialModel: this.getCellValue(row, headers, 'Commercial Model') || 'Fixed Price',
-        riskFactors: this.getCellValue(row, headers, 'Risk Factors')?.split(',') || []
+        riskFactors: this.getCellValue(row, headers, 'Risk Factors')?.split(',') || [],
       };
     } catch (error) {
       console.warn('Error creating deal type:', error);
@@ -462,8 +501,10 @@ export class CETv22ParserService {
   }
 
   private getCellValue(row: any[], headers: string[], columnName: string): string {
-    const index = headers.findIndex(header =>
-      String(header || '').toLowerCase().includes(columnName.toLowerCase())
+    const index = headers.findIndex((header) =>
+      String(header || '')
+        .toLowerCase()
+        .includes(columnName.toLowerCase()),
     );
     return index !== -1 && row[index] ? String(row[index]) : '';
   }
@@ -478,14 +519,22 @@ export class CETv22ParserService {
       // Check if we have a valid domain (column M, index 12) and total effort (column O, index 14)
       const domain = String(row[12] || '').trim();
       const totalEffort = parseFloat(String(row[14] || ''));
-      
+
       // Valid if we have a domain and some effort value
       return domain.length > 0 && !isNaN(totalEffort) && totalEffort > 0;
     }
-    
+
     // For other sheets, use the original logic
-    const weekIndex = headers.findIndex(h => String(h || '').toLowerCase().includes('week number'));
-    const effortIndex = headers.findIndex(h => String(h || '').toLowerCase().includes('effort hours'));
+    const weekIndex = headers.findIndex((h) =>
+      String(h || '')
+        .toLowerCase()
+        .includes('week number'),
+    );
+    const effortIndex = headers.findIndex((h) =>
+      String(h || '')
+        .toLowerCase()
+        .includes('effort hours'),
+    );
 
     if (weekIndex === -1 || effortIndex === -1) return false;
 
@@ -497,14 +546,14 @@ export class CETv22ParserService {
 
   private getProductTypeFromSheet(sheetName: string): string {
     const mapping: Record<string, string> = {
-      'Ph1Demand': 'Phase 1',
-      'Ph2Demand': 'Phase 2',
-      'Ph3Demand': 'Phase 3',
-      'Ph4Demand': 'Phase 4',
-      'GovDemand': 'Governance',
-      'ENCDemand': 'Encompass',
-      'ASCDemand': 'Ascendon',
-      'CMADemand': 'CMA'
+      Ph1Demand: 'Phase 1',
+      Ph2Demand: 'Phase 2',
+      Ph3Demand: 'Phase 3',
+      Ph4Demand: 'Phase 4',
+      GovDemand: 'Governance',
+      ENCDemand: 'Encompass',
+      ASCDemand: 'Ascendon',
+      CMADemand: 'CMA',
     };
     return mapping[sheetName] || sheetName;
   }
@@ -528,7 +577,12 @@ export class CETv22ParserService {
       1: ['Requirements Document', 'Project Charter', 'Team Setup', 'Initial Architecture'],
       2: ['Technical Design', 'Architecture Document', 'Development Plan', 'Test Strategy'],
       3: ['Core Implementation', 'Unit Tests', 'Integration Tests', 'User Documentation'],
-      4: ['System Testing', 'User Acceptance Testing', 'Go-Live Preparation', 'Production Deployment']
+      4: [
+        'System Testing',
+        'User Acceptance Testing',
+        'Go-Live Preparation',
+        'Production Deployment',
+      ],
     };
     return deliverables[phaseNumber] || [`Phase ${phaseNumber} Deliverables`];
   }

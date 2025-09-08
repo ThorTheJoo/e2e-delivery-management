@@ -1,9 +1,11 @@
 # SpecSync Requirements to Domain/Capability Mapping Guide
 
 ## Overview
+
 This document outlines how the E2E Delivery Management application processes SpecSync input files to automatically map business requirements to TMF domains and capabilities. The mapping system provides intelligent categorization, effort estimation, and integration with the broader delivery management workflow.
 
 ### Recent Enhancements (Latest Update)
+
 - **Badge Counts**: Real-time display of requirement and use case counts for each domain and capability
 - **Modifiable Preview Panel**: Inline editing capabilities for imported SpecSync data
 - **Enhanced Domain Summary**: Visual grid showing domain-level statistics with badge counts
@@ -13,14 +15,17 @@ This document outlines how the E2E Delivery Management application processes Spe
 ## Input File Format & Structure
 
 ### Supported File Types
+
 - **CSV**: Primary format with comma-separated values
 - **Excel**: .xlsx and .xls files (converted to CSV internally)
 - **JSON**: Structured data format (planned)
 
 ### Core Data Fields
+
 The system maps the following key fields from SpecSync input files:
 
 #### **Requirement Identification**
+
 - `Rephrased Requirement ID`: Unique identifier for atomic requirements
 - `Source Requirement ID`: Original requirement identifier
 - `Source`: Origin system identifier
@@ -28,6 +33,7 @@ The system maps the following key fields from SpecSync input files:
 - `Source Sub-Category`: Detailed classification
 
 #### **Domain & Architecture Classification**
+
 - `Rephrased Domain`: Primary business domain (e.g., Product, Resource, Partner, Enterprise, Integration)
 - `Rephrased Vertical`: Business vertical (e.g., Billing, CRM, Order Management)
 - `Rephrased AF Lev.1`: Architecture Framework Level 1 (e.g., Rating and Follow up)
@@ -35,11 +41,13 @@ The system maps the following key fields from SpecSync input files:
 - `Rephrased Function Name`: Specific function name (e.g., Price and Discount Calculation)
 
 #### **Capability Mapping**
+
 - `Reference Capability Category`: High-level capability grouping
 - `Reference Capability`: Specific capability name
 - `Reference Capability Description`: Detailed capability description
 
 #### **Additional Metadata**
+
 - `Estimate`: Numeric effort estimation
 - `Matching Feature`: Feature mapping
 - `Matching Tags`: Tag-based categorization
@@ -55,15 +63,19 @@ The system currently implements a flexible header mapping system that can be eas
 ```typescript
 // Current header mapping implementation
 const headerMap = {
-  rephrasedRequirementId: headers.find(h => /rephrased.*requirement.*id/i.test(h)) || 'Rephrased Requirement ID',
-  sourceRequirementId: headers.find(h => /source.*requirement.*id/i.test(h)) || 'Source Requirement ID',
-  domain: headers.find(h => /rephrased.*domain/i.test(h)) || 'Rephrased Domain',
-  vertical: headers.find(h => /rephrased.*vertical/i.test(h)) || 'Rephrased Vertical',
-  functionName: headers.find(h => /rephrased.*function.*name/i.test(h)) || 'Rephrased Function Name',
-  afLevel2: headers.find(h => /rephrased.*af.*lev.*2/i.test(h)) || 'Rephrased AF Lev.2',
-  capability: headers.find(h => /reference.*capability/i.test(h)) || 'Reference Capability',
-  referenceCapability: headers.find(h => /reference.*capability/i.test(h)) || 'Reference Capability',
-  usecase1: headers.find(h => /usecase.*1/i.test(h)) || 'Usecase 1'
+  rephrasedRequirementId:
+    headers.find((h) => /rephrased.*requirement.*id/i.test(h)) || 'Rephrased Requirement ID',
+  sourceRequirementId:
+    headers.find((h) => /source.*requirement.*id/i.test(h)) || 'Source Requirement ID',
+  domain: headers.find((h) => /rephrased.*domain/i.test(h)) || 'Rephrased Domain',
+  vertical: headers.find((h) => /rephrased.*vertical/i.test(h)) || 'Rephrased Vertical',
+  functionName:
+    headers.find((h) => /rephrased.*function.*name/i.test(h)) || 'Rephrased Function Name',
+  afLevel2: headers.find((h) => /rephrased.*af.*lev.*2/i.test(h)) || 'Rephrased AF Lev.2',
+  capability: headers.find((h) => /reference.*capability/i.test(h)) || 'Reference Capability',
+  referenceCapability:
+    headers.find((h) => /reference.*capability/i.test(h)) || 'Reference Capability',
+  usecase1: headers.find((h) => /usecase.*1/i.test(h)) || 'Usecase 1',
 };
 ```
 
@@ -72,17 +84,18 @@ const headerMap = {
 To support future field additions and integrations, the system implements a configurable field mapping framework:
 
 #### **Field Definition Schema**
+
 ```typescript
 interface FieldDefinition {
-  key: string;                    // Internal field identifier
-  displayName: string;            // Human-readable field name
-  headerPatterns: string[];       // Regex patterns for header matching
+  key: string; // Internal field identifier
+  displayName: string; // Human-readable field name
+  headerPatterns: string[]; // Regex patterns for header matching
   dataType: 'string' | 'number' | 'date' | 'boolean' | 'array';
-  required: boolean;              // Whether field is required for processing
-  editable: boolean;              // Whether field can be edited in UI
-  visible: boolean;               // Whether field is shown in preview table
-  validation?: ValidationRule[];  // Field validation rules
-  mapping?: MappingRule[];        // Domain/capability mapping rules
+  required: boolean; // Whether field is required for processing
+  editable: boolean; // Whether field can be edited in UI
+  visible: boolean; // Whether field is shown in preview table
+  validation?: ValidationRule[]; // Field validation rules
+  mapping?: MappingRule[]; // Domain/capability mapping rules
   integration?: IntegrationConfig; // Integration-specific configuration
 }
 
@@ -116,6 +129,7 @@ interface IntegrationConfig {
 ```
 
 #### **Configurable Field Registry**
+
 ```typescript
 // Extensible field registry for future integrations
 const FIELD_REGISTRY: Record<string, FieldDefinition> = {
@@ -130,18 +144,18 @@ const FIELD_REGISTRY: Record<string, FieldDefinition> = {
     visible: true,
     validation: [
       { type: 'required', message: 'Requirement ID is required' },
-      { type: 'format', value: /^[A-Z0-9-]+$/, message: 'Invalid requirement ID format' }
+      { type: 'format', value: /^[A-Z0-9-]+$/, message: 'Invalid requirement ID format' },
     ],
     integration: {
       blueDolphin: {
         objectType: 'Requirement',
-        propertyMapping: { 'id': 'rephrasedRequirementId' }
+        propertyMapping: { id: 'rephrasedRequirementId' },
       },
       ado: {
         workItemType: 'Requirement',
-        fieldMapping: { 'System.Title': 'rephrasedRequirementId' }
-      }
-    }
+        fieldMapping: { 'System.Title': 'rephrasedRequirementId' },
+      },
+    },
   },
 
   // Domain classification fields
@@ -157,18 +171,23 @@ const FIELD_REGISTRY: Record<string, FieldDefinition> = {
       { type: 'exact', pattern: 'product', target: 'product-domain', priority: 1 },
       { type: 'exact', pattern: 'resource', target: 'resource-domain', priority: 1 },
       { type: 'partial', pattern: 'billing|charging', target: 'product-domain', priority: 2 },
-      { type: 'partial', pattern: 'infrastructure|network', target: 'resource-domain', priority: 2 }
+      {
+        type: 'partial',
+        pattern: 'infrastructure|network',
+        target: 'resource-domain',
+        priority: 2,
+      },
     ],
     integration: {
       blueDolphin: {
         objectType: 'Domain',
-        propertyMapping: { 'name': 'domain' }
+        propertyMapping: { name: 'domain' },
       },
       miro: {
         cardType: 'domain-frame',
-        visualProperties: { 'backgroundColor': 'domain-color-mapping' }
-      }
-    }
+        visualProperties: { backgroundColor: 'domain-color-mapping' },
+      },
+    },
   },
 
   // Extended metadata fields (for future use)
@@ -180,15 +199,13 @@ const FIELD_REGISTRY: Record<string, FieldDefinition> = {
     required: false,
     editable: true,
     visible: true,
-    validation: [
-      { type: 'format', value: /^\d+(\.\d+)?$/, message: 'Estimate must be a number' }
-    ],
+    validation: [{ type: 'format', value: /^\d+(\.\d+)?$/, message: 'Estimate must be a number' }],
     integration: {
       ado: {
         workItemType: 'Task',
-        fieldMapping: { 'Microsoft.VSTS.Scheduling.StoryPoints': 'estimate' }
-      }
-    }
+        fieldMapping: { 'Microsoft.VSTS.Scheduling.StoryPoints': 'estimate' },
+      },
+    },
   },
 
   // Integration-specific fields
@@ -203,9 +220,9 @@ const FIELD_REGISTRY: Record<string, FieldDefinition> = {
     integration: {
       blueDolphin: {
         objectType: 'Any',
-        propertyMapping: { 'id': 'blueDolphinObjectId' }
-      }
-    }
+        propertyMapping: { id: 'blueDolphinObjectId' },
+      },
+    },
   },
 
   // Custom metadata fields
@@ -220,10 +237,10 @@ const FIELD_REGISTRY: Record<string, FieldDefinition> = {
     integration: {
       miro: {
         cardType: 'requirement-card',
-        visualProperties: { 'tags': 'tags' }
-      }
-    }
-  }
+        visualProperties: { tags: 'tags' },
+      },
+    },
+  },
 };
 ```
 
@@ -242,12 +259,12 @@ class DynamicFieldProcessor {
   // Process headers and map to field definitions
   processHeaders(headers: string[]): Record<string, string> {
     const headerMap: Record<string, string> = {};
-    
+
     Object.entries(this.fieldRegistry).forEach(([fieldKey, definition]) => {
-      const matchedHeader = headers.find(header => 
-        definition.headerPatterns.some(pattern => pattern.test(header))
+      const matchedHeader = headers.find((header) =>
+        definition.headerPatterns.some((pattern) => pattern.test(header)),
       );
-      
+
       if (matchedHeader) {
         headerMap[fieldKey] = matchedHeader;
       } else if (definition.required) {
@@ -259,14 +276,18 @@ class DynamicFieldProcessor {
   }
 
   // Parse row data according to field definitions
-  parseRow(values: string[], headers: string[], headerMap: Record<string, string>): Record<string, any> {
+  parseRow(
+    values: string[],
+    headers: string[],
+    headerMap: Record<string, string>,
+  ): Record<string, any> {
     const row: Record<string, any> = {};
-    
+
     Object.entries(headerMap).forEach(([fieldKey, headerName]) => {
       const headerIndex = headers.indexOf(headerName);
       const rawValue = values[headerIndex] || '';
       const definition = this.fieldRegistry[fieldKey];
-      
+
       row[fieldKey] = this.parseValue(rawValue, definition);
     });
 
@@ -276,14 +297,14 @@ class DynamicFieldProcessor {
   // Parse value according to field data type
   private parseValue(rawValue: string, definition: FieldDefinition): any {
     const trimmedValue = rawValue.trim();
-    
+
     switch (definition.dataType) {
       case 'number':
         return trimmedValue ? parseFloat(trimmedValue) : null;
       case 'boolean':
         return /^(true|yes|1)$/i.test(trimmedValue);
       case 'array':
-        return trimmedValue ? trimmedValue.split(',').map(s => s.trim()) : [];
+        return trimmedValue ? trimmedValue.split(',').map((s) => s.trim()) : [];
       case 'date':
         return trimmedValue ? new Date(trimmedValue) : null;
       default:
@@ -294,16 +315,16 @@ class DynamicFieldProcessor {
   // Validate field values
   validateRow(row: Record<string, any>): ValidationError[] {
     const errors: ValidationError[] = [];
-    
+
     Object.entries(this.fieldRegistry).forEach(([fieldKey, definition]) => {
       const value = row[fieldKey];
-      
-      definition.validation?.forEach(rule => {
+
+      definition.validation?.forEach((rule) => {
         if (!this.validateRule(value, rule)) {
           errors.push({
             field: fieldKey,
             message: rule.message,
-            value: value
+            value: value,
           });
         }
       });
@@ -340,15 +361,15 @@ interface TableColumn {
 }
 
 // Dynamic table component that adapts to field definitions
-function DynamicSpecSyncTable({ 
-  items, 
-  fieldDefinitions, 
-  onEdit, 
-  onSave, 
-  onCancel 
+function DynamicSpecSyncTable({
+  items,
+  fieldDefinitions,
+  onEdit,
+  onSave,
+  onCancel
 }: DynamicSpecSyncTableProps) {
   const columns = generateColumnsFromFieldDefinitions(fieldDefinitions);
-  
+
   return (
     <table className="w-full text-xs border-collapse">
       <thead>
@@ -398,13 +419,13 @@ function DynamicFieldEditor({ field, value, onChange, onSave, onCancel }: FieldE
 
   const validateField = (value: any) => {
     const fieldErrors: string[] = [];
-    
+
     field.validation?.forEach(rule => {
       if (!validateRule(value, rule)) {
         fieldErrors.push(rule.message);
       }
     });
-    
+
     setErrors(fieldErrors);
     return fieldErrors.length === 0;
   };
@@ -428,7 +449,7 @@ function DynamicFieldEditor({ field, value, onChange, onSave, onCancel }: FieldE
             autoFocus
           />
         );
-      
+
       case 'boolean':
         return (
           <select
@@ -441,7 +462,7 @@ function DynamicFieldEditor({ field, value, onChange, onSave, onCancel }: FieldE
             <option value="false">No</option>
           </select>
         );
-      
+
       case 'array':
         return (
           <input
@@ -453,7 +474,7 @@ function DynamicFieldEditor({ field, value, onChange, onSave, onCancel }: FieldE
             autoFocus
           />
         );
-      
+
       case 'date':
         return (
           <input
@@ -464,7 +485,7 @@ function DynamicFieldEditor({ field, value, onChange, onSave, onCancel }: FieldE
             autoFocus
           />
         );
-      
+
       default:
         return (
           <input
@@ -555,15 +576,15 @@ class IntegrationRegistry {
   }
 
   getPluginsByCapability(capability: string): IntegrationPlugin[] {
-    return Array.from(this.plugins.values()).filter(plugin =>
-      plugin.capabilities.some(cap => cap.type === capability)
+    return Array.from(this.plugins.values()).filter((plugin) =>
+      plugin.capabilities.some((cap) => cap.type === capability),
     );
   }
 
   async processWithPlugin(
-    pluginId: string, 
-    data: SpecSyncItem[], 
-    config: any
+    pluginId: string,
+    data: SpecSyncItem[],
+    config: any,
   ): Promise<IntegrationResult> {
     const plugin = this.plugins.get(pluginId);
     if (!plugin) {
@@ -631,7 +652,7 @@ class ExtensibleBlueDolphinIntegration {
 
   async syncSpecSyncData(items: SpecSyncItem[]): Promise<SyncResult> {
     const results: SyncOperation[] = [];
-    
+
     for (const item of items) {
       const syncRule = this.findApplicableSyncRule(item);
       if (!syncRule) continue;
@@ -644,27 +665,29 @@ class ExtensibleBlueDolphinIntegration {
           type: 'error',
           itemId: item.rephrasedRequirementId,
           message: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
     }
 
     return {
-      syncedCount: results.filter(r => r.type === 'success').length,
-      errorCount: results.filter(r => r.type === 'error').length,
-      operations: results
+      syncedCount: results.filter((r) => r.type === 'success').length,
+      errorCount: results.filter((r) => r.type === 'error').length,
+      operations: results,
     };
   }
 
   private findApplicableSyncRule(item: SpecSyncItem): SyncRule | null {
-    return this.config.syncRules
-      .filter(rule => rule.condition(item))
-      .sort((a, b) => b.priority - a.priority)[0] || null;
+    return (
+      this.config.syncRules
+        .filter((rule) => rule.condition(item))
+        .sort((a, b) => b.priority - a.priority)[0] || null
+    );
   }
 
   private async executeSyncOperation(item: SpecSyncItem, rule: SyncRule): Promise<SyncOperation> {
     const mappedData = this.mapItemToBlueDolphinFormat(item);
-    
+
     switch (rule.action) {
       case 'create':
         return await this.createBlueDolphinObject(mappedData);
@@ -677,7 +700,7 @@ class ExtensibleBlueDolphinIntegration {
           type: 'skipped',
           itemId: item.rephrasedRequirementId,
           message: rule.description,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         };
       default:
         throw new Error(`Unknown sync action: ${rule.action}`);
@@ -686,7 +709,7 @@ class ExtensibleBlueDolphinIntegration {
 
   private mapItemToBlueDolphinFormat(item: SpecSyncItem): Record<string, any> {
     const mapped: Record<string, any> = {};
-    
+
     Object.entries(this.config.fieldMappings).forEach(([sourceField, mapping]) => {
       const sourceValue = item[sourceField as keyof SpecSyncItem];
       let targetValue = sourceValue;
@@ -788,10 +811,10 @@ class ExtensibleMiroIntegration {
   }
 
   async createDynamicBoard(
-    items: SpecSyncItem[], 
-    templateId: string
+    items: SpecSyncItem[],
+    templateId: string,
   ): Promise<{ boardId: string; viewLink: string }> {
-    const template = this.config.boardTemplates.find(t => t.id === templateId);
+    const template = this.config.boardTemplates.find((t) => t.id === templateId);
     if (!template) {
       throw new Error(`Board template '${templateId}' not found`);
     }
@@ -812,26 +835,32 @@ class ExtensibleMiroIntegration {
 
     return {
       boardId: board.id,
-      viewLink: board.viewLink
+      viewLink: board.viewLink,
     };
   }
 
   private async createDomainFrame(
-    boardId: string, 
-    domain: string, 
-    items: SpecSyncItem[], 
-    template: BoardTemplate
+    boardId: string,
+    domain: string,
+    items: SpecSyncItem[],
+    template: BoardTemplate,
   ): Promise<void> {
-    const frameTemplate = template.defaultObjects.find(obj => obj.type === 'frame');
+    const frameTemplate = template.defaultObjects.find((obj) => obj.type === 'frame');
     if (!frameTemplate) return;
 
-    const frameProperties = this.applyDataBinding(frameTemplate.properties, { domain, itemCount: items.length });
-    const frameStyle = this.applyVisualStyle(frameTemplate.style, { domain, itemCount: items.length });
+    const frameProperties = this.applyDataBinding(frameTemplate.properties, {
+      domain,
+      itemCount: items.length,
+    });
+    const frameStyle = this.applyVisualStyle(frameTemplate.style, {
+      domain,
+      itemCount: items.length,
+    });
 
     const frame = await this.miroService.createFrame(boardId, {
       ...frameProperties,
       ...frameStyle,
-      title: `${domain} (${items.length} requirements)`
+      title: `${domain} (${items.length} requirements)`,
     });
 
     // Create cards for each item in the domain
@@ -841,12 +870,12 @@ class ExtensibleMiroIntegration {
   }
 
   private async createItemCard(
-    boardId: string, 
-    frameId: string, 
-    item: SpecSyncItem, 
-    template: BoardTemplate
+    boardId: string,
+    frameId: string,
+    item: SpecSyncItem,
+    template: BoardTemplate,
   ): Promise<void> {
-    const cardTemplate = template.defaultObjects.find(obj => obj.type === 'card');
+    const cardTemplate = template.defaultObjects.find((obj) => obj.type === 'card');
     if (!cardTemplate) return;
 
     const cardProperties = this.applyDataBinding(cardTemplate.properties, item);
@@ -857,14 +886,11 @@ class ExtensibleMiroIntegration {
       ...cardStyle,
       parentId: frameId,
       title: item.rephrasedRequirementId,
-      description: item.functionName
+      description: item.functionName,
     });
   }
 
-  private applyDataBinding(
-    properties: Record<string, any>, 
-    data: any
-  ): Record<string, any> {
+  private applyDataBinding(properties: Record<string, any>, data: any): Record<string, any> {
     const result: Record<string, any> = {};
 
     Object.entries(properties).forEach(([key, value]) => {
@@ -889,10 +915,7 @@ class ExtensibleMiroIntegration {
     return result;
   }
 
-  private applyVisualStyle(
-    style: VisualStyleConfig, 
-    data: any
-  ): Record<string, any> {
+  private applyVisualStyle(style: VisualStyleConfig, data: any): Record<string, any> {
     const result: Record<string, any> = {};
 
     Object.entries(style).forEach(([key, value]) => {
@@ -994,22 +1017,22 @@ class LocalStorageConfigurationManager implements ConfigurationManager {
           colors: {
             requirement: '#3b82f6',
             useCase: '#f59e0b',
-            capability: '#10b981'
+            capability: '#10b981',
           },
           positions: {
             requirement: 'top-right',
             useCase: 'top-left',
-            capability: 'bottom-right'
-          }
+            capability: 'bottom-right',
+          },
         },
         theme: {
           primaryColor: '#3b82f6',
           secondaryColor: '#64748b',
           accentColor: '#f59e0b',
           backgroundColor: '#ffffff',
-          textColor: '#1f2937'
-        }
-      }
+          textColor: '#1f2937',
+        },
+      },
     };
   }
 
@@ -1059,30 +1082,35 @@ class LocalStorageConfigurationManager implements ConfigurationManager {
 The framework is designed to support the following future integrations:
 
 #### **1. Azure DevOps Integration**
+
 - Work item creation from SpecSync requirements
 - Bidirectional synchronization
 - Custom field mapping
 - Sprint planning integration
 
 #### **2. Jira Integration**
+
 - Issue creation and linking
 - Epic/Story hierarchy mapping
 - Custom field support
 - Agile board integration
 
 #### **3. Confluence Integration**
+
 - Requirement documentation generation
 - Automatic page creation
 - Template-based content generation
 - Version control integration
 
 #### **4. ServiceNow Integration**
+
 - Change request creation
 - Configuration item mapping
 - Service catalog integration
 - Workflow automation
 
 #### **5. Enterprise Architecture Tools**
+
 - Sparx Enterprise Architect
 - IBM Rational System Architect
 - BiZZdesign Enterprise Studio
@@ -1127,17 +1155,14 @@ class SpecSyncRESTAPI implements SpecSyncAPI {
     this.authToken = authToken;
   }
 
-  private async request<T>(
-    endpoint: string, 
-    options: RequestInit = {}
-  ): Promise<T> {
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
       ...options,
       headers: {
-        'Authorization': `Bearer ${this.authToken}`,
+        Authorization: `Bearer ${this.authToken}`,
         'Content-Type': 'application/json',
-        ...options.headers
-      }
+        ...options.headers,
+      },
     });
 
     if (!response.ok) {
@@ -1154,7 +1179,7 @@ class SpecSyncRESTAPI implements SpecSyncAPI {
     return this.request<ImportResult>('/api/import', {
       method: 'POST',
       body: formData,
-      headers: {} // Let browser set Content-Type for FormData
+      headers: {}, // Let browser set Content-Type for FormData
     });
   }
 
@@ -1165,7 +1190,7 @@ class SpecSyncRESTAPI implements SpecSyncAPI {
   async updateFieldDefinition(definition: FieldDefinition): Promise<void> {
     await this.request('/api/fields', {
       method: 'PUT',
-      body: JSON.stringify(definition)
+      body: JSON.stringify(definition),
     });
   }
 
@@ -1176,7 +1201,7 @@ class SpecSyncRESTAPI implements SpecSyncAPI {
   async configureIntegration(id: string, config: any): Promise<void> {
     await this.request(`/api/integrations/${id}/config`, {
       method: 'PUT',
-      body: JSON.stringify(config)
+      body: JSON.stringify(config),
     });
   }
 }
@@ -1222,8 +1247,8 @@ class SchemaManager {
           {
             type: 'add',
             field: 'usecase1',
-            description: 'Added use case field for enhanced requirement tracking'
-          }
+            description: 'Added use case field for enhanced requirement tracking',
+          },
         ],
         newFields: [
           {
@@ -1233,9 +1258,9 @@ class SchemaManager {
             dataType: 'string',
             required: false,
             editable: true,
-            visible: true
-          }
-        ]
+            visible: true,
+          },
+        ],
       },
       {
         version: '1.1.0',
@@ -1243,15 +1268,15 @@ class SchemaManager {
           {
             type: 'add',
             field: 'estimate',
-            description: 'Added effort estimation field'
+            description: 'Added effort estimation field',
           },
           {
             type: 'modify',
             field: 'capability',
             oldValue: 'string',
             newValue: 'object',
-            description: 'Enhanced capability field to support complex mappings'
-          }
+            description: 'Enhanced capability field to support complex mappings',
+          },
         ],
         newFields: [
           {
@@ -1261,16 +1286,16 @@ class SchemaManager {
             dataType: 'number',
             required: false,
             editable: true,
-            visible: true
-          }
-        ]
-      }
+            visible: true,
+          },
+        ],
+      },
     ];
   }
 
   migrateData(data: any, targetVersion: string): any {
-    const currentVersionIndex = this.versions.findIndex(v => v.version === this.currentVersion);
-    const targetVersionIndex = this.versions.findIndex(v => v.version === targetVersion);
+    const currentVersionIndex = this.versions.findIndex((v) => v.version === this.currentVersion);
+    const targetVersionIndex = this.versions.findIndex((v) => v.version === targetVersion);
 
     if (currentVersionIndex === -1 || targetVersionIndex === -1) {
       throw new Error('Invalid version specified');
@@ -1302,8 +1327,8 @@ class SchemaManager {
 
   getMigrationPath(fromVersion: string, toVersion: string): SchemaChange[] {
     const changes: SchemaChange[] = [];
-    const fromIndex = this.versions.findIndex(v => v.version === fromVersion);
-    const toIndex = this.versions.findIndex(v => v.version === toVersion);
+    const fromIndex = this.versions.findIndex((v) => v.version === fromVersion);
+    const toIndex = this.versions.findIndex((v) => v.version === toVersion);
 
     if (fromIndex === -1 || toIndex === -1) {
       throw new Error('Invalid version specified');
@@ -1335,15 +1360,19 @@ The system currently implements a flexible header mapping system that can be eas
 ```typescript
 // Current header mapping implementation
 const headerMap = {
-  rephrasedRequirementId: headers.find(h => /rephrased.*requirement.*id/i.test(h)) || 'Rephrased Requirement ID',
-  sourceRequirementId: headers.find(h => /source.*requirement.*id/i.test(h)) || 'Source Requirement ID',
-  domain: headers.find(h => /rephrased.*domain/i.test(h)) || 'Rephrased Domain',
-  vertical: headers.find(h => /rephrased.*vertical/i.test(h)) || 'Rephrased Vertical',
-  functionName: headers.find(h => /rephrased.*function.*name/i.test(h)) || 'Rephrased Function Name',
-  afLevel2: headers.find(h => /rephrased.*af.*lev.*2/i.test(h)) || 'Rephrased AF Lev.2',
-  capability: headers.find(h => /reference.*capability/i.test(h)) || 'Reference Capability',
-  referenceCapability: headers.find(h => /reference.*capability/i.test(h)) || 'Reference Capability',
-  usecase1: headers.find(h => /usecase.*1/i.test(h)) || 'Usecase 1'
+  rephrasedRequirementId:
+    headers.find((h) => /rephrased.*requirement.*id/i.test(h)) || 'Rephrased Requirement ID',
+  sourceRequirementId:
+    headers.find((h) => /source.*requirement.*id/i.test(h)) || 'Source Requirement ID',
+  domain: headers.find((h) => /rephrased.*domain/i.test(h)) || 'Rephrased Domain',
+  vertical: headers.find((h) => /rephrased.*vertical/i.test(h)) || 'Rephrased Vertical',
+  functionName:
+    headers.find((h) => /rephrased.*function.*name/i.test(h)) || 'Rephrased Function Name',
+  afLevel2: headers.find((h) => /rephrased.*af.*lev.*2/i.test(h)) || 'Rephrased AF Lev.2',
+  capability: headers.find((h) => /reference.*capability/i.test(h)) || 'Reference Capability',
+  referenceCapability:
+    headers.find((h) => /reference.*capability/i.test(h)) || 'Reference Capability',
+  usecase1: headers.find((h) => /usecase.*1/i.test(h)) || 'Usecase 1',
 };
 ```
 
@@ -1352,22 +1381,24 @@ const headerMap = {
 To support future field additions and integrations, the system implements a configurable field mapping framework:
 
 #### **Field Definition Schema**
+
 ```typescript
 interface FieldDefinition {
-  key: string;                    // Internal field identifier
-  displayName: string;            // Human-readable field name
-  headerPatterns: string[];       // Regex patterns for header matching
+  key: string; // Internal field identifier
+  displayName: string; // Human-readable field name
+  headerPatterns: string[]; // Regex patterns for header matching
   dataType: 'string' | 'number' | 'date' | 'boolean' | 'array';
-  required: boolean;              // Whether field is required for processing
-  editable: boolean;              // Whether field can be edited in UI
-  visible: boolean;               // Whether field is shown in preview table
-  validation?: ValidationRule[];  // Field validation rules
-  mapping?: MappingRule[];        // Domain/capability mapping rules
+  required: boolean; // Whether field is required for processing
+  editable: boolean; // Whether field can be edited in UI
+  visible: boolean; // Whether field is shown in preview table
+  validation?: ValidationRule[]; // Field validation rules
+  mapping?: MappingRule[]; // Domain/capability mapping rules
   integration?: IntegrationConfig; // Integration-specific configuration
 }
 ```
 
 #### **Configurable Field Registry**
+
 ```typescript
 // Extensible field registry for future integrations
 const FIELD_REGISTRY: Record<string, FieldDefinition> = {
@@ -1382,18 +1413,18 @@ const FIELD_REGISTRY: Record<string, FieldDefinition> = {
     visible: true,
     validation: [
       { type: 'required', message: 'Requirement ID is required' },
-      { type: 'format', value: /^[A-Z0-9-]+$/, message: 'Invalid requirement ID format' }
+      { type: 'format', value: /^[A-Z0-9-]+$/, message: 'Invalid requirement ID format' },
     ],
     integration: {
       blueDolphin: {
         objectType: 'Requirement',
-        propertyMapping: { 'id': 'rephrasedRequirementId' }
+        propertyMapping: { id: 'rephrasedRequirementId' },
       },
       ado: {
         workItemType: 'Requirement',
-        fieldMapping: { 'System.Title': 'rephrasedRequirementId' }
-      }
-    }
+        fieldMapping: { 'System.Title': 'rephrasedRequirementId' },
+      },
+    },
   },
 
   // Extended metadata fields (for future use)
@@ -1405,15 +1436,13 @@ const FIELD_REGISTRY: Record<string, FieldDefinition> = {
     required: false,
     editable: true,
     visible: true,
-    validation: [
-      { type: 'format', value: /^\d+(\.\d+)?$/, message: 'Estimate must be a number' }
-    ],
+    validation: [{ type: 'format', value: /^\d+(\.\d+)?$/, message: 'Estimate must be a number' }],
     integration: {
       ado: {
         workItemType: 'Task',
-        fieldMapping: { 'Microsoft.VSTS.Scheduling.StoryPoints': 'estimate' }
-      }
-    }
+        fieldMapping: { 'Microsoft.VSTS.Scheduling.StoryPoints': 'estimate' },
+      },
+    },
   },
 
   // Integration-specific fields
@@ -1428,10 +1457,10 @@ const FIELD_REGISTRY: Record<string, FieldDefinition> = {
     integration: {
       blueDolphin: {
         objectType: 'Any',
-        propertyMapping: { 'id': 'blueDolphinObjectId' }
-      }
-    }
-  }
+        propertyMapping: { id: 'blueDolphinObjectId' },
+      },
+    },
+  },
 };
 ```
 
@@ -1451,15 +1480,15 @@ interface DynamicTableConfig {
 }
 
 // Dynamic table component that adapts to field definitions
-function DynamicSpecSyncTable({ 
-  items, 
-  fieldDefinitions, 
-  onEdit, 
-  onSave, 
-  onCancel 
+function DynamicSpecSyncTable({
+  items,
+  fieldDefinitions,
+  onEdit,
+  onSave,
+  onCancel
 }: DynamicSpecSyncTableProps) {
   const columns = generateColumnsFromFieldDefinitions(fieldDefinitions);
-  
+
   return (
     <table className="w-full text-xs border-collapse">
       <thead>
@@ -1522,8 +1551,8 @@ class IntegrationRegistry {
   }
 
   getPluginsByCapability(capability: string): IntegrationPlugin[] {
-    return Array.from(this.plugins.values()).filter(plugin =>
-      plugin.capabilities.some(cap => cap.type === capability)
+    return Array.from(this.plugins.values()).filter((plugin) =>
+      plugin.capabilities.some((cap) => cap.type === capability),
     );
   }
 }
@@ -1534,30 +1563,35 @@ class IntegrationRegistry {
 The framework is designed to support the following future integrations:
 
 #### **1. Azure DevOps Integration**
+
 - Work item creation from SpecSync requirements
 - Bidirectional synchronization
 - Custom field mapping
 - Sprint planning integration
 
 #### **2. Jira Integration**
+
 - Issue creation and linking
 - Epic/Story hierarchy mapping
 - Custom field support
 - Agile board integration
 
 #### **3. Confluence Integration**
+
 - Requirement documentation generation
 - Automatic page creation
 - Template-based content generation
 - Version control integration
 
 #### **4. ServiceNow Integration**
+
 - Change request creation
 - Configuration item mapping
 - Service catalog integration
 - Workflow automation
 
 #### **5. Enterprise Architecture Tools**
+
 - Sparx Enterprise Architect
 - IBM Rational System Architect
 - BiZZdesign Enterprise Studio
@@ -1599,6 +1633,7 @@ interface ConfigurationManager {
 The enhanced SpecSync requirements-to-domain/capability mapping system provides a robust and user-friendly foundation for automatically categorizing and organizing business requirements within the TMF framework. The latest enhancements introduce significant improvements in usability and data management:
 
 ### **Key Improvements**
+
 - **Visual Feedback**: Badge counts provide immediate insight into requirement and use case distribution
 - **Data Flexibility**: Inline editing capabilities allow for real-time data refinement
 - **Enhanced Overview**: Domain summary grid offers quick statistical insights
@@ -1606,10 +1641,13 @@ The enhanced SpecSync requirements-to-domain/capability mapping system provides 
 - **Extensible Architecture**: Flexible field mapping and integration framework for future enhancements
 
 ### **Technical Foundation**
+
 By leveraging intelligent mapping algorithms, flexible field mapping, dynamic capability generation, and real-time badge count calculations, the system ensures comprehensive coverage while maintaining accuracy and performance. The modifiable preview panel enhances data quality through immediate validation and correction capabilities.
 
 ### **Future-Ready Design**
+
 The system is built with extensibility in mind, supporting:
+
 - **Dynamic Field Addition**: New fields can be added without code changes
 - **Plugin-Based Integrations**: Modular integration architecture for external systems
 - **Configuration Management**: Runtime configuration updates and persistence
@@ -1617,7 +1655,9 @@ The system is built with extensibility in mind, supporting:
 - **API-First Design**: RESTful API for external integrations
 
 ### **Workflow Integration**
+
 This enhanced mapping system serves as the foundation for the broader delivery management workflow, enabling seamless integration with:
+
 - **Estimation Engines**: Real-time effort calculations based on mapped requirements
 - **Work Item Generation**: Automated creation of development tasks
 - **Project Tracking**: Progress monitoring with visual indicators

@@ -469,7 +469,16 @@
     "Custom.ServicePhase": {
       "type": "String",
       "description": "Phase of service delivery",
-      "allowedValues": ["Presales", "Design", "Build", "Testing", "Migration", "Deployment", "Post-Deployment", "Warranty"]
+      "allowedValues": [
+        "Presales",
+        "Design",
+        "Build",
+        "Testing",
+        "Migration",
+        "Deployment",
+        "Post-Deployment",
+        "Warranty"
+      ]
     },
     "Custom.Effort": {
       "type": "String",

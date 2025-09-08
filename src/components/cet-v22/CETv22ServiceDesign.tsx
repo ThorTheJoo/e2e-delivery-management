@@ -26,11 +26,18 @@ interface CETv22ServiceDesignProps {
   onError?: (error: Error) => void;
 }
 
-type ProcessingState = 'idle' | 'uploading' | 'parsing' | 'analyzing' | 'integrating' | 'completed' | 'error';
+type ProcessingState =
+  | 'idle'
+  | 'uploading'
+  | 'parsing'
+  | 'analyzing'
+  | 'integrating'
+  | 'completed'
+  | 'error';
 
 export const CETv22ServiceDesign: React.FC<CETv22ServiceDesignProps> = ({
   onIntegrationComplete,
-  onError
+  onError,
 }) => {
   // State management
   const [activeTab, setActiveTab] = useState('upload');
@@ -46,11 +53,11 @@ export const CETv22ServiceDesign: React.FC<CETv22ServiceDesignProps> = ({
     try {
       const savedData = localStorage.getItem('cetv22Data');
       const savedAnalysis = localStorage.getItem('cetv22Analysis');
-      
+
       if (savedData && savedAnalysis) {
         const parsedData = JSON.parse(savedData);
         const parsedAnalysis = JSON.parse(savedAnalysis);
-        
+
         setCetData(parsedData);
         setAnalysisResult(parsedAnalysis);
         setProcessingState('completed');
@@ -62,46 +69,54 @@ export const CETv22ServiceDesign: React.FC<CETv22ServiceDesignProps> = ({
   }, []);
 
   // File processing handler
-  const handleFileProcessed = useCallback(async (data: CETv22Data) => {
-    try {
-      setCetData(data);
-      setProcessingState('analyzing');
-      setProgress(60);
-      setError(null);
+  const handleFileProcessed = useCallback(
+    async (data: CETv22Data) => {
+      try {
+        setCetData(data);
+        setProcessingState('analyzing');
+        setProgress(60);
+        setError(null);
 
-      // Analyze the data
-      const analyzerService = new CETv22AnalyzerService();
-      const analysis = await analyzerService.analyzeCETData(data);
-      setAnalysisResult(analysis);
-      setProcessingState('completed');
-      setProgress(100);
-      setActiveTab('overview');
+        // Analyze the data
+        const analyzerService = new CETv22AnalyzerService();
+        const analysis = await analyzerService.analyzeCETData(data);
+        setAnalysisResult(analysis);
+        setProcessingState('completed');
+        setProgress(100);
+        setActiveTab('overview');
 
-      // Save to local storage for persistence across page navigation
-      localStorage.setItem('cetv22Data', JSON.stringify(data));
-      localStorage.setItem('cetv22Analysis', JSON.stringify(analysis));
+        // Save to local storage for persistence across page navigation
+        localStorage.setItem('cetv22Data', JSON.stringify(data));
+        localStorage.setItem('cetv22Analysis', JSON.stringify(analysis));
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error('Unknown error occurred');
+        setError(error.message);
+        setProcessingState('error');
+        onError?.(error);
+      }
+    },
+    [onError],
+  );
 
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Unknown error occurred');
+  // Integration handler
+  const handleIntegrationComplete = useCallback(
+    (mappings: CETv22IntegrationMappings) => {
+      setIntegrationMappings(mappings);
+      setActiveTab('integration');
+      onIntegrationComplete?.();
+    },
+    [onIntegrationComplete],
+  );
+
+  // Error handler
+  const handleError = useCallback(
+    (error: Error) => {
       setError(error.message);
       setProcessingState('error');
       onError?.(error);
-    }
-  }, [onError]);
-
-  // Integration handler
-  const handleIntegrationComplete = useCallback((mappings: CETv22IntegrationMappings) => {
-    setIntegrationMappings(mappings);
-    setActiveTab('integration');
-    onIntegrationComplete?.();
-  }, [onIntegrationComplete]);
-
-  // Error handler
-  const handleError = useCallback((error: Error) => {
-    setError(error.message);
-    setProcessingState('error');
-    onError?.(error);
-  }, [onError]);
+    },
+    [onError],
+  );
 
   // Reset handler
   const handleReset = useCallback(() => {
@@ -112,7 +127,7 @@ export const CETv22ServiceDesign: React.FC<CETv22ServiceDesignProps> = ({
     setProgress(0);
     setError(null);
     setActiveTab('upload');
-    
+
     // Clear local storage
     localStorage.removeItem('cetv22Data');
     localStorage.removeItem('cetv22Analysis');
@@ -156,7 +171,15 @@ export const CETv22ServiceDesign: React.FC<CETv22ServiceDesignProps> = ({
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <Badge variant={status.color === 'green' ? 'default' : status.color === 'red' ? 'destructive' : 'secondary'}>
+              <Badge
+                variant={
+                  status.color === 'green'
+                    ? 'default'
+                    : status.color === 'red'
+                      ? 'destructive'
+                      : 'secondary'
+                }
+              >
                 {status.text}
               </Badge>
               {processingState !== 'idle' && (
@@ -169,7 +192,7 @@ export const CETv22ServiceDesign: React.FC<CETv22ServiceDesignProps> = ({
 
           {processingState !== 'idle' && processingState !== 'completed' && (
             <div className="mt-4">
-              <div className="flex justify-between text-sm mb-2">
+              <div className="mb-2 flex justify-between text-sm">
                 <span>Processing...</span>
                 <span>{progress}%</span>
               </div>
@@ -192,27 +215,27 @@ export const CETv22ServiceDesign: React.FC<CETv22ServiceDesignProps> = ({
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="upload" disabled={processingState === 'analyzing'}>
-            <Upload className="h-4 w-4 mr-2" />
+            <Upload className="mr-2 h-4 w-4" />
             Upload
           </TabsTrigger>
           <TabsTrigger value="overview" disabled={!cetData}>
-            <BarChart3 className="h-4 w-4 mr-2" />
+            <BarChart3 className="mr-2 h-4 w-4" />
             Overview
           </TabsTrigger>
           <TabsTrigger value="resources" disabled={!analysisResult}>
-            <Users className="h-4 w-4 mr-2" />
+            <Users className="mr-2 h-4 w-4" />
             Resources
           </TabsTrigger>
           <TabsTrigger value="effort" disabled={!analysisResult}>
-            <TrendingUp className="h-4 w-4 mr-2" />
+            <TrendingUp className="mr-2 h-4 w-4" />
             Effort
           </TabsTrigger>
           <TabsTrigger value="timeline" disabled={!analysisResult}>
-            <BarChart3 className="h-4 w-4 mr-2" />
+            <BarChart3 className="mr-2 h-4 w-4" />
             Timeline
           </TabsTrigger>
           <TabsTrigger value="integration" disabled={!analysisResult}>
-            <CheckCircle className="h-4 w-4 mr-2" />
+            <CheckCircle className="mr-2 h-4 w-4" />
             Integration
           </TabsTrigger>
         </TabsList>
@@ -229,10 +252,7 @@ export const CETv22ServiceDesign: React.FC<CETv22ServiceDesignProps> = ({
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-6">
           {cetData && (
-            <CETv22ProjectOverview
-              projectData={cetData.project}
-              analysisData={analysisResult}
-            />
+            <CETv22ProjectOverview projectData={cetData.project} analysisData={analysisResult} />
           )}
         </TabsContent>
 
@@ -249,9 +269,7 @@ export const CETv22ServiceDesign: React.FC<CETv22ServiceDesignProps> = ({
         {/* Effort Tab */}
         <TabsContent value="effort" className="space-y-6">
           {analysisResult && (
-            <CETv22EffortAnalysisComponent
-              effortAnalysis={analysisResult.effort}
-            />
+            <CETv22EffortAnalysisComponent effortAnalysis={analysisResult.effort} />
           )}
         </TabsContent>
 
@@ -278,11 +296,7 @@ export const CETv22ServiceDesign: React.FC<CETv22ServiceDesignProps> = ({
           )}
 
           {/* Risk Assessment - Always show if we have analysis */}
-          {analysisResult && (
-            <CETv22RiskAssessment
-              riskAnalysis={analysisResult.risks}
-            />
-          )}
+          {analysisResult && <CETv22RiskAssessment riskAnalysis={analysisResult.risks} />}
         </TabsContent>
       </Tabs>
 
@@ -290,7 +304,7 @@ export const CETv22ServiceDesign: React.FC<CETv22ServiceDesignProps> = ({
       {analysisResult && (
         <Card>
           <CardContent className="pt-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
+            <div className="grid grid-cols-1 gap-4 text-center md:grid-cols-4">
               <div>
                 <div className="text-2xl font-bold text-blue-600">
                   {analysisResult.resources.totalEffort.toLocaleString()}

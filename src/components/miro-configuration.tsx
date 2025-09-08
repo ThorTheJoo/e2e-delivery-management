@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Palette, Save, RefreshCw, ArrowRight, AlertTriangle, CheckCircle, Settings } from 'lucide-react';
+import { Palette, Save, RefreshCw, ArrowRight, AlertTriangle, Settings } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
 
 interface MiroConfig {
@@ -20,17 +20,18 @@ export function MiroConfiguration() {
   const [config, setConfig] = useState<MiroConfig>({
     clientId: '',
     clientSecret: '',
-    redirectUri: typeof window !== 'undefined' 
-      ? `${window.location.protocol}//${window.location.host}/api/auth/miro/callback`
-      : 'http://localhost:3000/api/auth/miro/callback',
-    scopes: ['boards:read', 'boards:write']
+    redirectUri:
+      typeof window !== 'undefined'
+        ? `${window.location.protocol}//${window.location.host}/api/auth/miro/callback`
+        : 'http://localhost:3000/api/auth/miro/callback',
+    scopes: ['boards:read', 'boards:write'],
   });
-  
+
   const [isConnected, setIsConnected] = useState(false);
   const [isConfigured, setIsConfigured] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  
+
   const toast = useToast();
 
   const handleSaveConfig = async () => {
@@ -43,7 +44,7 @@ export function MiroConfiguration() {
 
       // Save configuration to localStorage
       localStorage.setItem('miroConfig', JSON.stringify(config));
-      
+
       // Sync configuration with server
       const response = await fetch('/api/miro/config', {
         method: 'POST',
@@ -60,12 +61,14 @@ export function MiroConfiguration() {
 
       const result = await response.json();
       console.log('Configuration synced with server:', result);
-      
+
       setIsConfigured(true);
       toast.showSuccess('Configuration saved and synced successfully');
     } catch (error) {
       console.error('Failed to save configuration:', error);
-      toast.showError(`Failed to save configuration: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.showError(
+        `Failed to save configuration: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     } finally {
       setIsSaving(false);
     }
@@ -76,7 +79,7 @@ export function MiroConfiguration() {
     try {
       // Use current window location for redirect URI to ensure correct port
       const currentRedirectUri = `${window.location.protocol}//${window.location.host}/api/auth/miro/callback`;
-      
+
       // Redirect to Miro OAuth
       const authUrl = `https://miro.com/oauth/authorize?response_type=code&client_id=${config.clientId}&redirect_uri=${encodeURIComponent(currentRedirectUri)}&scope=${config.scopes.join(' ')}`;
       window.location.href = authUrl;
@@ -147,10 +150,11 @@ export function MiroConfiguration() {
     setConfig({
       clientId: '',
       clientSecret: '',
-      redirectUri: typeof window !== 'undefined' 
-        ? `${window.location.protocol}//${window.location.host}/api/auth/miro/callback`
-        : 'http://localhost:3000/api/auth/miro/callback',
-      scopes: ['boards:read', 'boards:write']
+      redirectUri:
+        typeof window !== 'undefined'
+          ? `${window.location.protocol}//${window.location.host}/api/auth/miro/callback`
+          : 'http://localhost:3000/api/auth/miro/callback',
+      scopes: ['boards:read', 'boards:write'],
     });
     setIsConfigured(false);
     toast.showSuccess('Miro configuration cleared');
@@ -164,9 +168,10 @@ export function MiroConfiguration() {
   return (
     <div className="space-y-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Miro Configuration</h2>
+        <h2 className="mb-2 text-2xl font-bold text-gray-900">Miro Configuration</h2>
         <p className="text-gray-600">
-          Configure Miro integration settings for visual mapping and board creation. Set up OAuth credentials and connection preferences.
+          Configure Miro integration settings for visual mapping and board creation. Set up OAuth
+          credentials and connection preferences.
         </p>
       </div>
 
@@ -174,26 +179,28 @@ export function MiroConfiguration() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="flex items-center justify-center w-8 h-8 bg-orange-100 rounded-lg border-2 border-orange-200">
-                <Palette className="w-5 h-5 text-orange-700" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-orange-200 bg-orange-100">
+                <Palette className="h-5 w-5 text-orange-700" />
               </div>
               <div>
                 <CardTitle className="text-base">Miro Configuration</CardTitle>
-                <CardDescription>Configure Miro OAuth settings and connection preferences</CardDescription>
+                <CardDescription>
+                  Configure Miro OAuth settings and connection preferences
+                </CardDescription>
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              <Badge variant={isConnected ? "default" : "secondary"}>
-                {isConnected ? "Connected" : "Not Connected"}
+              <Badge variant={isConnected ? 'default' : 'secondary'}>
+                {isConnected ? 'Connected' : 'Not Connected'}
               </Badge>
-              <Badge variant={isConfigured ? "default" : "secondary"}>
-                {isConfigured ? "Configured" : "Not Configured"}
+              <Badge variant={isConfigured ? 'default' : 'secondary'}>
+                {isConfigured ? 'Configured' : 'Not Configured'}
               </Badge>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="space-y-4">
               <div>
                 <Label htmlFor="clientId">Client ID</Label>
@@ -204,7 +211,7 @@ export function MiroConfiguration() {
                   placeholder="Enter Miro Client ID"
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="clientSecret">Client Secret</Label>
                 <Input
@@ -214,12 +221,12 @@ export function MiroConfiguration() {
                   onChange={(e) => setConfig({ ...config, clientSecret: e.target.value })}
                   placeholder="Enter Miro Client Secret"
                 />
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="mt-1 text-xs text-muted-foreground">
                   Your Miro application client secret for OAuth authentication.
                 </p>
               </div>
             </div>
-            
+
             <div className="space-y-4">
               <div>
                 <Label htmlFor="redirectUri">Redirect URI</Label>
@@ -229,11 +236,11 @@ export function MiroConfiguration() {
                   onChange={(e) => setConfig({ ...config, redirectUri: e.target.value })}
                   placeholder="http://localhost:3000/api/auth/miro/callback"
                 />
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="mt-1 text-xs text-muted-foreground">
                   Must match exactly with your Miro app configuration.
                 </p>
               </div>
-              
+
               <div>
                 <Label>Scopes</Label>
                 <div className="space-y-2">
@@ -247,108 +254,123 @@ export function MiroConfiguration() {
                           if (e.target.checked) {
                             setConfig({ ...config, scopes: [...config.scopes, scope] });
                           } else {
-                            setConfig({ ...config, scopes: config.scopes.filter(s => s !== scope) });
+                            setConfig({
+                              ...config,
+                              scopes: config.scopes.filter((s) => s !== scope),
+                            });
                           }
                         }}
                         className="rounded"
                       />
-                      <Label htmlFor={`scope-${index}`} className="text-sm">{scope}</Label>
+                      <Label htmlFor={`scope-${index}`} className="text-sm">
+                        {scope}
+                      </Label>
                     </div>
                   ))}
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="mt-1 text-xs text-muted-foreground">
                   Permissions required for board creation and management.
                 </p>
               </div>
             </div>
           </div>
-           
+
           {/* Configuration Preview */}
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <h4 className="font-medium text-gray-900 mb-3">Configuration Preview</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+            <h4 className="mb-3 font-medium text-gray-900">Configuration Preview</h4>
+            <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
               <div>
                 <span className="font-medium text-gray-700">Client ID:</span>
-                <span className="ml-2 font-mono bg-white px-2 py-1 rounded border">
+                <span className="ml-2 rounded border bg-white px-2 py-1 font-mono">
                   {config.clientId || 'Not set'}
                 </span>
               </div>
               <div>
                 <span className="font-medium text-gray-700">Client Secret:</span>
-                <span className="ml-2 font-mono bg-white px-2 py-1 rounded border">
+                <span className="ml-2 rounded border bg-white px-2 py-1 font-mono">
                   {config.clientSecret ? `${config.clientSecret.substring(0, 8)}...` : 'Not set'}
                 </span>
               </div>
               <div className="md:col-span-2">
                 <span className="font-medium text-gray-700">Redirect URI:</span>
-                <span className="ml-2 font-mono bg-white px-2 py-1 rounded border break-all">
+                <span className="ml-2 break-all rounded border bg-white px-2 py-1 font-mono">
                   {config.redirectUri || 'Not set'}
                 </span>
               </div>
               <div className="md:col-span-2">
                 <span className="font-medium text-gray-700">Scopes:</span>
-                <span className="ml-2 font-mono bg-white px-2 py-1 rounded border">
+                <span className="ml-2 rounded border bg-white px-2 py-1 font-mono">
                   {config.scopes.join(' ')}
                 </span>
               </div>
             </div>
           </div>
-           
+
           {!isConnected && (
-            <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-              <div className="flex items-center space-x-2 mb-2">
-                <AlertTriangle className="w-5 h-5 text-orange-600" />
+            <div className="rounded-lg border border-orange-200 bg-orange-50 p-4">
+              <div className="mb-2 flex items-center space-x-2">
+                <AlertTriangle className="h-5 w-5 text-orange-600" />
                 <span className="font-medium text-orange-800">Not Connected to Miro</span>
               </div>
-              <p className="text-orange-700 text-sm mb-3">
-                You need to connect to Miro to use the visual mapping features. Click the button below to authorize this application.
+              <p className="mb-3 text-sm text-orange-700">
+                You need to connect to Miro to use the visual mapping features. Click the button
+                below to authorize this application.
               </p>
-              
+
               {/* OAuth Flow Info */}
-              <div className="bg-white border border-orange-200 rounded p-3 mt-3">
-                <h5 className="font-medium text-orange-800 mb-2">OAuth Flow Information</h5>
-                <div className="text-xs text-orange-700 space-y-1">
-                  <div><strong>Step 1:</strong> Click "Connect to Miro" → Redirects to Miro OAuth</div>
-                  <div><strong>Step 2:</strong> Miro redirects back to: <code className="bg-orange-100 px-1 rounded">{config.redirectUri}</code></div>
-                  <div><strong>Step 3:</strong> Callback exchanges code for access token</div>
-                  <div><strong>Step 4:</strong> Token stored securely for API access</div>
+              <div className="mt-3 rounded border border-orange-200 bg-white p-3">
+                <h5 className="mb-2 font-medium text-orange-800">OAuth Flow Information</h5>
+                <div className="space-y-1 text-xs text-orange-700">
+                  <div>
+                    <strong>Step 1:</strong> Click "Connect to Miro" → Redirects to Miro OAuth
+                  </div>
+                  <div>
+                    <strong>Step 2:</strong> Miro redirects back to:{' '}
+                    <code className="rounded bg-orange-100 px-1">{config.redirectUri}</code>
+                  </div>
+                  <div>
+                    <strong>Step 3:</strong> Callback exchanges code for access token
+                  </div>
+                  <div>
+                    <strong>Step 4:</strong> Token stored securely for API access
+                  </div>
                 </div>
               </div>
             </div>
           )}
-          
-          <div className="flex items-center justify-end space-x-4 pt-4 border-t">
+
+          <div className="flex items-center justify-end space-x-4 border-t pt-4">
             <Button
               variant="outline"
               onClick={clearMiroConfig}
               className="flex items-center space-x-2"
             >
-              <Settings className="w-4 h-4" />
+              <Settings className="h-4 w-4" />
               <span>Clear Config</span>
             </Button>
-            
+
             <Button
               onClick={handleSaveConfig}
               disabled={isSaving}
               className="flex items-center space-x-2"
             >
               {isSaving ? (
-                <RefreshCw className="w-4 h-4 animate-spin" />
+                <RefreshCw className="h-4 w-4 animate-spin" />
               ) : (
-                <Save className="w-4 h-4" />
+                <Save className="h-4 w-4" />
               )}
               <span>{isSaving ? 'Saving...' : 'Save Configuration'}</span>
             </Button>
-            
+
             <Button
               onClick={handleConnectToMiro}
               disabled={isConnecting || !isConfigured}
               className="flex items-center space-x-2"
             >
               {isConnecting ? (
-                <RefreshCw className="w-4 h-4 animate-spin" />
+                <RefreshCw className="h-4 w-4 animate-spin" />
               ) : (
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="h-4 w-4" />
               )}
               <span>{isConnecting ? 'Connecting...' : 'Connect to Miro'}</span>
             </Button>

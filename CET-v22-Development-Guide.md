@@ -7,12 +7,14 @@ This guide provides everything you need to implement the CET v22.0 integration i
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js 18+ and npm
 - Next.js 14+ project setup
 - TypeScript 5.0+
 - Access to CET v22.0 Excel files for testing
 
 ### Installation
+
 ```bash
 # Install core dependencies
 npm install xlsx zod @types/xlsx
@@ -115,7 +117,7 @@ export class FileParserService {
     try {
       const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
       const sheets = this.extractSheets(workbook);
-      
+
       return {
         project: this.extractProjectInfo(sheets.Attributes),
         resourceDemands: this.extractResourceDemands(sheets),
@@ -123,7 +125,7 @@ export class FileParserService {
         phases: this.analyzePhases(sheets),
         products: this.analyzeProducts(sheets),
         lookupValues: this.extractLookupValues(sheets),
-        dealTypes: this.extractDealTypes(sheets)
+        dealTypes: this.extractDealTypes(sheets),
       };
     } catch (error) {
       throw new Error(`Failed to parse Excel file: ${error.message}`);
@@ -132,12 +134,12 @@ export class FileParserService {
 
   private extractSheets(workbook: XLSX.WorkBook): Record<string, any[][]> {
     const sheets: Record<string, any[][]> = {};
-    
-    workbook.SheetNames.forEach(sheetName => {
+
+    workbook.SheetNames.forEach((sheetName) => {
       const worksheet = workbook.Sheets[sheetName];
       sheets[sheetName] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
     });
-    
+
     return sheets;
   }
 
@@ -152,28 +154,28 @@ export class FileParserService {
       language: this.findCellValue(attributesSheet, 'Language'),
       sfdcType: this.findCellValue(attributesSheet, 'SFDC Type'),
       createdDate: this.findCellValue(attributesSheet, 'Created Date'),
-      status: this.findCellValue(attributesSheet, 'Status')
+      status: this.findCellValue(attributesSheet, 'Status'),
     };
   }
 
   private extractResourceDemands(sheets: Record<string, any[][]>): CETResourceDemand[] {
     const demands: CETResourceDemand[] = [];
     const demandSheets = ['Ph1Demand', 'Ph2Demand', 'Ph3Demand', 'Ph4Demand'];
-    
-    demandSheets.forEach(sheetName => {
+
+    demandSheets.forEach((sheetName) => {
       if (sheets[sheetName]) {
         const sheetDemands = this.processDemandSheet(sheets[sheetName], sheetName);
         demands.push(...sheetDemands);
       }
     });
-    
+
     return demands;
   }
 
   private processDemandSheet(sheetData: any[][], sheetName: string): CETResourceDemand[] {
     const demands: CETResourceDemand[] = [];
     const headers = sheetData[0];
-    
+
     for (let i = 1; i < sheetData.length; i++) {
       const row = sheetData[i];
       if (this.isValidDemandRow(row, headers)) {
@@ -184,18 +186,18 @@ export class FileParserService {
           effortHours: parseFloat(row[this.getColumnIndex(headers, 'Effort Hours')]),
           resourceCount: parseInt(row[this.getColumnIndex(headers, 'Resource Count')]),
           productType: this.getProductTypeFromSheet(sheetName),
-          phaseNumber: this.getPhaseFromSheet(sheetName)
+          phaseNumber: this.getPhaseFromSheet(sheetName),
         });
       }
     }
-    
+
     return demands;
   }
 
   private findCellValue(sheet: any[][], searchTerm: string): string {
     for (const row of sheet) {
-      const index = row.findIndex(cell => 
-        typeof cell === 'string' && cell.toLowerCase().includes(searchTerm.toLowerCase())
+      const index = row.findIndex(
+        (cell) => typeof cell === 'string' && cell.toLowerCase().includes(searchTerm.toLowerCase()),
       );
       if (index !== -1 && row[index + 1]) {
         return row[index + 1].toString();
@@ -205,31 +207,31 @@ export class FileParserService {
   }
 
   private getColumnIndex(headers: string[], columnName: string): number {
-    return headers.findIndex(header => 
-      header.toLowerCase().includes(columnName.toLowerCase())
-    );
+    return headers.findIndex((header) => header.toLowerCase().includes(columnName.toLowerCase()));
   }
 
   private isValidDemandRow(row: any[], headers: string[]): boolean {
     const weekIndex = this.getColumnIndex(headers, 'Week Number');
     const effortIndex = this.getColumnIndex(headers, 'Effort Hours');
-    
-    return weekIndex !== -1 && 
-           effortIndex !== -1 && 
-           !isNaN(parseInt(row[weekIndex])) && 
-           !isNaN(parseFloat(row[effortIndex]));
+
+    return (
+      weekIndex !== -1 &&
+      effortIndex !== -1 &&
+      !isNaN(parseInt(row[weekIndex])) &&
+      !isNaN(parseFloat(row[effortIndex]))
+    );
   }
 
   private getProductTypeFromSheet(sheetName: string): string {
     const mapping: Record<string, string> = {
-      'Ph1Demand': 'Phase 1',
-      'Ph2Demand': 'Phase 2',
-      'Ph3Demand': 'Phase 3',
-      'Ph4Demand': 'Phase 4',
-      'GovDemand': 'Governance',
-      'ENCDemand': 'Encompass',
-      'ASCDemand': 'Ascendon',
-      'CMADemand': 'CMA'
+      Ph1Demand: 'Phase 1',
+      Ph2Demand: 'Phase 2',
+      Ph3Demand: 'Phase 3',
+      Ph4Demand: 'Phase 4',
+      GovDemand: 'Governance',
+      ENCDemand: 'Encompass',
+      ASCDemand: 'Ascendon',
+      CMADemand: 'CMA',
     };
     return mapping[sheetName] || sheetName;
   }
@@ -255,16 +257,16 @@ export class DataAnalyzerService {
   async analyzeCETData(rawData: CETData): Promise<CETAnalysisResult> {
     try {
       const analysisStart = Date.now();
-      
+
       const projectAnalysis = this.analyzeProject(rawData.project);
       const resourceAnalysis = this.analyzeResources(rawData.resourceDemands);
       const effortAnalysis = this.analyzeEffort(rawData.resourceDemands);
       const phaseAnalysis = this.analyzePhases(rawData.resourceDemands);
       const productAnalysis = this.analyzeProducts(rawData.resourceDemands);
       const riskAnalysis = this.analyzeRisks(rawData.resourceDemands, rawData.jobProfiles);
-      
+
       const analysisTime = Date.now() - analysisStart;
-      
+
       return {
         project: projectAnalysis,
         resources: resourceAnalysis,
@@ -276,8 +278,8 @@ export class DataAnalyzerService {
           analyzedAt: new Date().toISOString(),
           analysisTime,
           confidence: this.calculateConfidence(rawData),
-          dataQuality: this.assessDataQuality(rawData)
-        }
+          dataQuality: this.assessDataQuality(rawData),
+        },
       };
     } catch (error) {
       throw new Error(`Failed to analyze CET data: ${error.message}`);
@@ -291,47 +293,48 @@ export class DataAnalyzerService {
       digitalTelco: projectInfo.digitalTelco,
       region: projectInfo.region,
       complexity: this.assessProjectComplexity(projectInfo),
-      riskFactors: this.identifyProjectRisks(projectInfo)
+      riskFactors: this.identifyProjectRisks(projectInfo),
     };
   }
 
   private analyzeResources(demands: any[]): any {
     const totalEffort = demands.reduce((sum, demand) => sum + demand.effortHours, 0);
-    const peakResources = Math.max(...demands.map(d => d.resourceCount));
-    const avgResources = demands.reduce((sum, demand) => sum + demand.resourceCount, 0) / demands.length;
-    
+    const peakResources = Math.max(...demands.map((d) => d.resourceCount));
+    const avgResources =
+      demands.reduce((sum, demand) => sum + demand.resourceCount, 0) / demands.length;
+
     return {
       totalEffort,
       peakResources,
       averageResources: Math.round(avgResources),
       resourceUtilization: this.calculateResourceUtilization(demands),
-      roleBreakdown: this.analyzeRoleBreakdown(demands)
+      roleBreakdown: this.analyzeRoleBreakdown(demands),
     };
   }
 
   private analyzeEffort(demands: any[]): any {
     const phaseEfforts = new Map<number, number>();
     const weeklyEfforts = new Map<number, number>();
-    
-    demands.forEach(demand => {
+
+    demands.forEach((demand) => {
       const currentPhaseEffort = phaseEfforts.get(demand.phaseNumber) || 0;
       phaseEfforts.set(demand.phaseNumber, currentPhaseEffort + demand.effortHours);
-      
+
       const currentWeeklyEffort = weeklyEfforts.get(demand.weekNumber) || 0;
       weeklyEfforts.set(demand.weekNumber, currentWeeklyEffort + demand.effortHours);
     });
-    
+
     return {
       phaseBreakdown: Array.from(phaseEfforts.entries()).map(([phase, effort]) => ({
         phaseNumber: phase,
         totalEffort: effort,
-        percentage: (effort / this.calculateTotalEffort(demands)) * 100
+        percentage: (effort / this.calculateTotalEffort(demands)) * 100,
       })),
       weeklyBreakdown: Array.from(weeklyEfforts.entries()).map(([week, effort]) => ({
         weekNumber: week,
-        totalEffort: effort
+        totalEffort: effort,
       })),
-      totalEffort: this.calculateTotalEffort(demands)
+      totalEffort: this.calculateTotalEffort(demands),
     };
   }
 
@@ -343,22 +346,22 @@ export class DataAnalyzerService {
     const totalEffort = this.calculateTotalEffort(demands);
     const totalResources = demands.reduce((sum, demand) => sum + demand.resourceCount, 0);
     const avgResources = totalResources / demands.length;
-    
+
     return totalEffort / (avgResources * 40); // Assuming 40 hours per week
   }
 
   private analyzeRoleBreakdown(demands: any[]): any {
     const roleEfforts = new Map<string, number>();
-    
-    demands.forEach(demand => {
+
+    demands.forEach((demand) => {
       const currentEffort = roleEfforts.get(demand.jobProfile) || 0;
       roleEfforts.set(demand.jobProfile, currentEffort + demand.effortHours);
     });
-    
+
     return Array.from(roleEfforts.entries()).map(([role, effort]) => ({
       role,
       effort,
-      percentage: (effort / this.calculateTotalEffort(demands)) * 100
+      percentage: (effort / this.calculateTotalEffort(demands)) * 100,
     }));
   }
 
@@ -394,20 +397,20 @@ import { CETAnalysisResult, IntegrationMappings, IntegrationResult } from '@/typ
 export class IntegrationService {
   async integrateCETData(
     analysisResult: CETAnalysisResult,
-    options: any
+    options: any,
   ): Promise<IntegrationResult> {
     try {
       const integrationStart = Date.now();
       const integrationId = this.generateIntegrationId();
-      
+
       // Generate integration mappings
       const mappings = this.generateIntegrationMappings(analysisResult);
-      
+
       // Execute integration based on options
       const results = await this.executeIntegration(mappings, options);
-      
+
       const integrationTime = Date.now() - integrationStart;
-      
+
       return {
         integrationId,
         success: true,
@@ -416,8 +419,8 @@ export class IntegrationService {
           integratedAt: new Date().toISOString(),
           integrationTime,
           options,
-          mappings
-        }
+          mappings,
+        },
       };
     } catch (error) {
       throw new Error(`Failed to integrate CET data: ${error.message}`);
@@ -430,66 +433,66 @@ export class IntegrationService {
       toMilestones: this.mapToMilestones(analysis),
       toResources: this.mapToResources(analysis),
       toRisks: this.mapToRisks(analysis),
-      confidence: this.calculateMappingConfidence(analysis)
+      confidence: this.calculateMappingConfidence(analysis),
     };
   }
 
   private mapToWorkPackages(analysis: CETAnalysisResult): any[] {
-    return analysis.products.map(product => ({
+    return analysis.products.map((product) => ({
       cetProduct: product.name,
       workPackageName: `${product.name} Implementation`,
       estimatedEffort: this.distributeEffortByRole(product.totalEffort),
       confidence: this.assessWorkPackageConfidence(product),
       dependencies: [],
-      milestones: []
+      milestones: [],
     }));
   }
 
   private mapToMilestones(analysis: CETAnalysisResult): any[] {
-    return analysis.phases.map(phase => ({
+    return analysis.phases.map((phase) => ({
       cetPhase: phase.phaseNumber,
       milestoneName: `Phase ${phase.phaseNumber} Completion`,
       estimatedDate: this.calculatePhaseEndDate(phase),
       deliverables: this.generatePhaseDeliverables(phase.phaseNumber),
-      dependencies: []
+      dependencies: [],
     }));
   }
 
   private mapToResources(analysis: CETAnalysisResult): any[] {
-    return analysis.resources.roleBreakdown.map(role => ({
+    return analysis.resources.roleBreakdown.map((role) => ({
       cetJobProfile: role.role,
       resourceRole: role.role,
       skillLevel: 'Intermediate',
       costCenter: 'Default',
-      availability: 40
+      availability: 40,
     }));
   }
 
   private mapToRisks(analysis: CETAnalysisResult): any[] {
     const risks: any[] = [];
-    
+
     // Identify risks based on effort concentration
-    analysis.products.forEach(product => {
+    analysis.products.forEach((product) => {
       if (product.totalEffort > 2000) {
         risks.push({
           source: product.name,
           riskName: `${product.name} Complexity Risk`,
           probability: 'Medium',
           impact: 'High',
-          mitigation: `Implement phased delivery approach for ${product.name}`
+          mitigation: `Implement phased delivery approach for ${product.name}`,
         });
       }
     });
-    
+
     return risks;
   }
 
   private distributeEffortByRole(totalEffort: number): any {
     return {
       businessAnalyst: Math.round(totalEffort * 0.15),
-      solutionArchitect: Math.round(totalEffort * 0.20),
-      developer: Math.round(totalEffort * 0.50),
-      qaEngineer: Math.round(totalEffort * 0.15)
+      solutionArchitect: Math.round(totalEffort * 0.2),
+      developer: Math.round(totalEffort * 0.5),
+      qaEngineer: Math.round(totalEffort * 0.15),
     };
   }
 
@@ -509,7 +512,7 @@ export class IntegrationService {
       1: ['Requirements Document', 'Project Charter', 'Team Setup'],
       2: ['Technical Design', 'Architecture Document', 'Development Plan'],
       3: ['Core Implementation', 'Unit Tests', 'Integration Tests'],
-      4: ['System Testing', 'User Acceptance Testing', 'Go-Live Preparation']
+      4: ['System Testing', 'User Acceptance Testing', 'Go-Live Preparation'],
     };
     return deliverables[phaseNumber] || [`Phase ${phaseNumber} Deliverables`];
   }
@@ -517,10 +520,10 @@ export class IntegrationService {
   private calculateMappingConfidence(analysis: CETAnalysisResult): any {
     return {
       overall: 0.85,
-      workPackages: 0.90,
+      workPackages: 0.9,
       milestones: 0.85,
-      resources: 0.80,
-      risks: 0.75
+      resources: 0.8,
+      risks: 0.75,
     };
   }
 
@@ -528,7 +531,7 @@ export class IntegrationService {
     const results = {
       created: { workPackages: 0, milestones: 0, resources: 0, risks: 0 },
       updated: { workPackages: 0, milestones: 0, resources: 0, risks: 0 },
-      skipped: { workPackages: 0, milestones: 0, resources: 0, risks: 0 }
+      skipped: { workPackages: 0, milestones: 0, resources: 0, risks: 0 },
     };
 
     if (options.createWorkPackages) {
@@ -836,28 +839,24 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File;
-    
+
     if (!file) {
-      return NextResponse.json(
-        { error: 'No file provided' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
     // Validate file type
-    if (!['.xlsx', '.xls'].includes(file.name.toLowerCase().substring(file.name.lastIndexOf('.')))) {
+    if (
+      !['.xlsx', '.xls'].includes(file.name.toLowerCase().substring(file.name.lastIndexOf('.')))
+    ) {
       return NextResponse.json(
         { error: 'Invalid file type. Only .xlsx and .xls files are supported.' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Validate file size (50MB limit)
     if (file.size > 50 * 1024 * 1024) {
-      return NextResponse.json(
-        { error: 'File too large. Maximum size is 50MB.' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'File too large. Maximum size is 50MB.' }, { status: 400 });
     }
 
     // Convert file to buffer
@@ -873,14 +872,11 @@ export async function POST(request: NextRequest) {
       data: cetData,
       fileName: file.name,
       fileSize: file.size,
-      processedAt: new Date().toISOString()
+      processedAt: new Date().toISOString(),
     });
   } catch (error) {
     console.error('File upload error:', error);
-    return NextResponse.json(
-      { error: 'Failed to process file' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to process file' }, { status: 500 });
   }
 }
 ```
@@ -896,12 +892,9 @@ import { DataAnalyzerService } from '@/services/cet-v22/DataAnalyzerService';
 export async function POST(request: NextRequest) {
   try {
     const { cetData } = await request.json();
-    
+
     if (!cetData) {
-      return NextResponse.json(
-        { error: 'No CET data provided' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No CET data provided' }, { status: 400 });
     }
 
     // Analyze the CET data
@@ -911,14 +904,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       analysis: analysisResult,
-      analyzedAt: new Date().toISOString()
+      analyzedAt: new Date().toISOString(),
     });
   } catch (error) {
     console.error('Analysis error:', error);
-    return NextResponse.json(
-      { error: 'Failed to analyze data' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to analyze data' }, { status: 500 });
   }
 }
 ```
@@ -934,12 +924,9 @@ import { IntegrationService } from '@/services/cet-v22/IntegrationService';
 export async function POST(request: NextRequest) {
   try {
     const { analysisResult, options } = await request.json();
-    
+
     if (!analysisResult) {
-      return NextResponse.json(
-        { error: 'No analysis result provided' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No analysis result provided' }, { status: 400 });
     }
 
     // Execute integration
@@ -949,14 +936,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       integration: integrationResult,
-      integratedAt: new Date().toISOString()
+      integratedAt: new Date().toISOString(),
     });
   } catch (error) {
     console.error('Integration error:', error);
-    return NextResponse.json(
-      { error: 'Failed to integrate data' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to integrate data' }, { status: 500 });
   }
 }
 ```
@@ -982,23 +966,23 @@ describe('FileParserService', () => {
     it('should parse valid Excel file', async () => {
       // Create mock Excel buffer
       const mockBuffer = Buffer.from('mock excel data');
-      
+
       // Mock XLSX.read to return test data
       jest.mock('xlsx', () => ({
         read: jest.fn().mockReturnValue({
           SheetNames: ['Attributes', 'Ph1Demand'],
           Sheets: {
             Attributes: {},
-            Ph1Demand: {}
-          }
+            Ph1Demand: {},
+          },
         }),
         utils: {
-          sheet_to_json: jest.fn().mockReturnValue([])
-        }
+          sheet_to_json: jest.fn().mockReturnValue([]),
+        },
       }));
 
       const result = await service.parseExcelFile(mockBuffer);
-      
+
       expect(result).toBeDefined();
       expect(result.project).toBeDefined();
       expect(result.resourceDemands).toBeDefined();
@@ -1006,10 +990,10 @@ describe('FileParserService', () => {
 
     it('should handle parsing errors gracefully', async () => {
       const invalidBuffer = Buffer.from('invalid data');
-      
-      await expect(service.parseExcelFile(invalidBuffer))
-        .rejects
-        .toThrow('Failed to parse Excel file');
+
+      await expect(service.parseExcelFile(invalidBuffer)).rejects.toThrow(
+        'Failed to parse Excel file',
+      );
     });
   });
 });
@@ -1027,7 +1011,7 @@ import { CETv22MainContainer } from '../CETv22MainContainer';
 describe('CETv22MainContainer', () => {
   it('should render all tabs', () => {
     render(<CETv22MainContainer />);
-    
+
     expect(screen.getByText('File Upload')).toBeInTheDocument();
     expect(screen.getByText('Analysis')).toBeInTheDocument();
     expect(screen.getByText('Integration')).toBeInTheDocument();
@@ -1036,7 +1020,7 @@ describe('CETv22MainContainer', () => {
 
   it('should start with upload tab active', () => {
     render(<CETv22MainContainer />);
-    
+
     expect(screen.getByText('Upload CET v22.0 Excel File')).toBeInTheDocument();
   });
 });
@@ -1064,16 +1048,16 @@ Update your `next.config.js`:
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    serverComponentsExternalPackages: ['xlsx']
+    serverComponentsExternalPackages: ['xlsx'],
   },
   webpack: (config) => {
     config.resolve.fallback = {
       ...config.resolve.fallback,
       fs: false,
-      path: false
+      path: false,
     };
     return config;
-  }
+  },
 };
 
 module.exports = nextConfig;
@@ -1090,6 +1074,7 @@ module.exports = nextConfig;
 ## 📚 Additional Resources
 
 ### 1. **Documentation Files**
+
 - `CET-v22-Analysis-Overview.md` - High-level overview
 - `CET-v22-Data-Structure-Analysis.md` - Detailed data analysis
 - `CET-v22-Integration-Architecture.md` - System architecture
@@ -1099,6 +1084,7 @@ module.exports = nextConfig;
 - `CET-v22-Data-Mapping-Strategy.md` - Data transformation logic
 
 ### 2. **Key Dependencies**
+
 - **XLSX.js**: Excel file processing
 - **Zod**: Data validation
 - **Radix UI**: Accessible UI components
@@ -1106,6 +1092,7 @@ module.exports = nextConfig;
 - **TypeScript**: Type safety
 
 ### 3. **Testing Strategy**
+
 - Unit tests for all services
 - Integration tests for API endpoints
 - Component tests for UI elements
@@ -1136,7 +1123,7 @@ Enable debug logging:
 
 ```typescript
 // Add to your environment
-DEBUG_CET=true
+DEBUG_CET = true;
 
 // Use in your services
 if (process.env.DEBUG_CET) {
@@ -1146,4 +1133,4 @@ if (process.env.DEBUG_CET) {
 
 ---
 
-*This development guide provides everything you need to implement the CET v22.0 integration. Follow the phases, implement the components, and test thoroughly before deployment.*
+_This development guide provides everything you need to implement the CET v22.0 integration. Follow the phases, implement the components, and test thoroughly before deployment._

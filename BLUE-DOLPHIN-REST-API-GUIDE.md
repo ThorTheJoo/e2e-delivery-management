@@ -7,24 +7,26 @@ This guide provides comprehensive documentation for integrating with Blue Dolphi
 ## Base Configuration
 
 ### API Endpoint
+
 ```
 https://public-api.eu.bluedolphin.app
 ```
 
 ### Authentication
+
 ```typescript
 // API Key Authentication (Recommended)
 const headers = {
-  'Authorization': 'Bearer YOUR_API_KEY',
+  Authorization: 'Bearer YOUR_API_KEY',
   'Content-Type': 'application/json',
-  'Accept': 'application/json'
+  Accept: 'application/json',
 };
 
 // Basic Authentication (Alternative)
 const headers = {
-  'Authorization': 'Basic ' + btoa('username:password'),
+  Authorization: 'Basic ' + btoa('username:password'),
   'Content-Type': 'application/json',
-  'Accept': 'application/json'
+  Accept: 'application/json',
 };
 ```
 
@@ -33,11 +35,13 @@ const headers = {
 ### 1. Domain Management
 
 #### Get All Domains
+
 ```typescript
-GET /api/v1/domains
+GET / api / v1 / domains;
 ```
 
 **Response:**
+
 ```json
 {
   "data": [
@@ -64,16 +68,19 @@ GET /api/v1/domains
 ```
 
 #### Get Domain by ID
+
 ```typescript
-GET /api/v1/domains/{domainId}
+GET / api / v1 / domains / { domainId };
 ```
 
 #### Create Domain
+
 ```typescript
-POST /api/v1/domains
+POST / api / v1 / domains;
 ```
 
 **Request Body:**
+
 ```json
 {
   "name": "Product Management",
@@ -88,23 +95,27 @@ POST /api/v1/domains
 ```
 
 #### Update Domain
+
 ```typescript
-PUT /api/v1/domains/{domainId}
+PUT / api / v1 / domains / { domainId };
 ```
 
 #### Delete Domain
+
 ```typescript
-DELETE /api/v1/domains/{domainId}
+DELETE / api / v1 / domains / { domainId };
 ```
 
 ### 2. Capability Management
 
 #### Get Capabilities by Domain
+
 ```typescript
-GET /api/v1/domains/{domainId}/capabilities
+GET / api / v1 / domains / { domainId } / capabilities;
 ```
 
 **Response:**
+
 ```json
 {
   "data": [
@@ -129,11 +140,13 @@ GET /api/v1/domains/{domainId}/capabilities
 ```
 
 #### Create Capability
+
 ```typescript
-POST /api/v1/domains/{domainId}/capabilities
+POST / api / v1 / domains / { domainId } / capabilities;
 ```
 
 **Request Body:**
+
 ```json
 {
   "name": "Order Management",
@@ -152,11 +165,13 @@ POST /api/v1/domains/{domainId}/capabilities
 ### 3. Requirement Management
 
 #### Get Requirements
+
 ```typescript
-GET /api/v1/requirements
+GET / api / v1 / requirements;
 ```
 
 **Query Parameters:**
+
 - `domainId`: Filter by domain
 - `capabilityId`: Filter by capability
 - `status`: Filter by status (DRAFT, ACTIVE, ARCHIVED)
@@ -164,11 +179,13 @@ GET /api/v1/requirements
 - `size`: Page size
 
 #### Create Requirement
+
 ```typescript
-POST /api/v1/requirements
+POST / api / v1 / requirements;
 ```
 
 **Request Body:**
+
 ```json
 {
   "name": "REQ-001",
@@ -189,16 +206,19 @@ POST /api/v1/requirements
 ### 4. Use Case Management
 
 #### Get Use Cases
+
 ```typescript
-GET /api/v1/usecases
+GET / api / v1 / usecases;
 ```
 
 #### Create Use Case
+
 ```typescript
-POST /api/v1/usecases
+POST / api / v1 / usecases;
 ```
 
 **Request Body:**
+
 ```json
 {
   "name": "UC001",
@@ -216,16 +236,19 @@ POST /api/v1/usecases
 ### 5. Application Function Management
 
 #### Get Application Functions
+
 ```typescript
-GET /api/v1/application-functions
+GET / api / v1 / application - functions;
 ```
 
 #### Create Application Function
+
 ```typescript
-POST /api/v1/application-functions
+POST / api / v1 / application - functions;
 ```
 
 **Request Body:**
+
 ```json
 {
   "name": "ProductCatalogService",
@@ -248,18 +271,21 @@ POST /api/v1/application-functions
 ## Advanced Querying
 
 ### Filtering
+
 ```typescript
 // Filter by multiple criteria
 GET /api/v1/domains?type=TMF_ODA_DOMAIN&status=ACTIVE&page=1&size=50
 ```
 
 ### Sorting
+
 ```typescript
 // Sort by creation date descending
-GET /api/v1/capabilities?sort=createdAt:desc
+GET / api / v1 / capabilities ? (sort = createdAt) : desc;
 ```
 
 ### Including Related Data
+
 ```typescript
 // Include capabilities with domains
 GET /api/v1/domains?include=capabilities
@@ -271,6 +297,7 @@ GET /api/v1/domains?include=capabilities,requirements,usecases
 ## Error Handling
 
 ### Standard Error Response
+
 ```json
 {
   "error": {
@@ -289,6 +316,7 @@ GET /api/v1/domains?include=capabilities,requirements,usecases
 ```
 
 ### Common Error Codes
+
 - `400`: Bad Request - Invalid input data
 - `401`: Unauthorized - Invalid or missing authentication
 - `403`: Forbidden - Insufficient permissions
@@ -301,11 +329,13 @@ GET /api/v1/domains?include=capabilities,requirements,usecases
 ## Rate Limiting
 
 ### Limits
+
 - **Standard Plan**: 1000 requests per hour
 - **Professional Plan**: 5000 requests per hour
 - **Enterprise Plan**: 20000 requests per hour
 
 ### Headers
+
 ```http
 X-RateLimit-Limit: 1000
 X-RateLimit-Remaining: 999
@@ -315,6 +345,7 @@ X-RateLimit-Reset: 1642233600
 ## Implementation Examples
 
 ### TypeScript Service Class
+
 ```typescript
 export class BlueDolphinRestService {
   private baseUrl: string;
@@ -325,21 +356,18 @@ export class BlueDolphinRestService {
     this.apiKey = apiKey;
   }
 
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<T> {
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
     const headers = {
-      'Authorization': `Bearer ${this.apiKey}`,
+      Authorization: `Bearer ${this.apiKey}`,
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      ...options.headers
+      Accept: 'application/json',
+      ...options.headers,
     };
 
     const response = await fetch(url, {
       ...options,
-      headers
+      headers,
     });
 
     if (!response.ok) {
@@ -369,20 +397,20 @@ export class BlueDolphinRestService {
   async createDomain(domain: CreateDomainRequest): Promise<Domain> {
     return this.request('/api/v1/domains', {
       method: 'POST',
-      body: JSON.stringify(domain)
+      body: JSON.stringify(domain),
     });
   }
 
   async updateDomain(id: string, domain: UpdateDomainRequest): Promise<Domain> {
     return this.request(`/api/v1/domains/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(domain)
+      body: JSON.stringify(domain),
     });
   }
 
   async deleteDomain(id: string): Promise<void> {
     return this.request(`/api/v1/domains/${id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
     });
   }
 
@@ -393,11 +421,11 @@ export class BlueDolphinRestService {
 
   async createCapability(
     domainId: string,
-    capability: CreateCapabilityRequest
+    capability: CreateCapabilityRequest,
   ): Promise<Capability> {
     return this.request(`/api/v1/domains/${domainId}/capabilities`, {
       method: 'POST',
-      body: JSON.stringify(capability)
+      body: JSON.stringify(capability),
     });
   }
 
@@ -422,13 +450,14 @@ export class BlueDolphinRestService {
   async createRequirement(requirement: CreateRequirementRequest): Promise<Requirement> {
     return this.request('/api/v1/requirements', {
       method: 'POST',
-      body: JSON.stringify(requirement)
+      body: JSON.stringify(requirement),
     });
   }
 }
 ```
 
 ### React Hook for Data Fetching
+
 ```typescript
 import { useState, useEffect } from 'react';
 import { blueDolphinService } from '@/lib/blue-dolphin-rest-service';
@@ -444,7 +473,7 @@ export function useBlueDolphinDomains() {
         setLoading(true);
         const response = await blueDolphinService.getDomains({
           type: 'TMF_ODA_DOMAIN',
-          status: 'ACTIVE'
+          status: 'ACTIVE',
         });
         setDomains(response.data);
       } catch (err) {
@@ -464,24 +493,28 @@ export function useBlueDolphinDomains() {
 ## Best Practices
 
 ### 1. Error Handling
+
 - Always check response status codes
 - Implement retry logic for transient errors
 - Log errors with request context
 - Provide user-friendly error messages
 
 ### 2. Rate Limiting
+
 - Implement exponential backoff for retries
 - Cache responses to reduce API calls
 - Use batch operations when possible
 - Monitor rate limit headers
 
 ### 3. Data Validation
+
 - Validate input data before sending requests
 - Handle partial responses gracefully
 - Implement data transformation layers
 - Use TypeScript for type safety
 
 ### 4. Performance
+
 - Implement request caching
 - Use pagination for large datasets
 - Optimize network requests
@@ -490,6 +523,7 @@ export function useBlueDolphinDomains() {
 ## Testing
 
 ### Unit Tests
+
 ```typescript
 import { BlueDolphinRestService } from '@/lib/blue-dolphin-rest-service';
 
@@ -497,17 +531,14 @@ describe('BlueDolphinRestService', () => {
   let service: BlueDolphinRestService;
 
   beforeEach(() => {
-    service = new BlueDolphinRestService(
-      'https://public-api.eu.bluedolphin.app',
-      'test-api-key'
-    );
+    service = new BlueDolphinRestService('https://public-api.eu.bluedolphin.app', 'test-api-key');
   });
 
   it('should create a domain successfully', async () => {
     const domainData = {
       name: 'Test Domain',
       description: 'Test domain description',
-      type: 'TMF_ODA_DOMAIN'
+      type: 'TMF_ODA_DOMAIN',
     };
 
     const result = await service.createDomain(domainData);
@@ -518,13 +549,14 @@ describe('BlueDolphinRestService', () => {
 ```
 
 ### Integration Tests
+
 ```typescript
 describe('Blue Dolphin Integration', () => {
   it('should sync domains from E2E to Blue Dolphin', async () => {
     // Test complete integration flow
     const e2eDomains = await getE2EDomains();
     const syncResults = await syncDomainsToBlueDolphin(e2eDomains);
-    
+
     expect(syncResults.success).toBe(true);
     expect(syncResults.syncedCount).toBe(e2eDomains.length);
   });

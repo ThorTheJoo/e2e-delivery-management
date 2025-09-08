@@ -1,6 +1,9 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { BlueDolphinVisualLink, BlueDolphinVisualNode } from '@/types/blue-dolphin-visualization';
+import type {
+  BlueDolphinVisualLink,
+  BlueDolphinVisualNode,
+} from '@/types/blue-dolphin-visualization';
 
 interface ObjectDetailsPanelProps {
   node?: BlueDolphinVisualNode | null;
@@ -17,16 +20,22 @@ export function ObjectDetailsPanel({ node, link }: ObjectDetailsPanelProps) {
         <CardHeader>
           <CardTitle>Object Details</CardTitle>
         </CardHeader>
-        <CardContent className="text-sm space-y-2">
-          <div><strong>Title:</strong> {n.title}</div>
-          <div><strong>Definition:</strong> {n.definition}</div>
-          <div><strong>Workspace:</strong> {n.workspace}</div>
-          <div><strong>Shape:</strong> {n.shape}</div>
+        <CardContent className="space-y-2 text-sm">
+          <div>
+            <strong>Title:</strong> {n.title}
+          </div>
+          <div>
+            <strong>Definition:</strong> {n.definition}
+          </div>
+          <div>
+            <strong>Workspace:</strong> {n.workspace}
+          </div>
+          <div>
+            <strong>Shape:</strong> {n.shape}
+          </div>
           <div className="border-t pt-2">
             <div className="font-semibold">Sample Fields</div>
-            <div className="text-xs text-muted-foreground break-words">
-              ID: {n.id}
-            </div>
+            <div className="break-words text-xs text-muted-foreground">ID: {n.id}</div>
           </div>
         </CardContent>
       </Card>
@@ -39,14 +48,20 @@ export function ObjectDetailsPanel({ node, link }: ObjectDetailsPanelProps) {
         <CardHeader>
           <CardTitle>Relationship Details</CardTitle>
         </CardHeader>
-        <CardContent className="text-sm space-y-2">
-          <div><strong>Name:</strong> {l.relationshipName}</div>
-          <div><strong>Type:</strong> {l.type}</div>
-          <div><strong>Style:</strong> {l.style}</div>
-          <div><strong>Width:</strong> {l.width}</div>
-          <div className="border-t pt-2 text-xs text-muted-foreground break-words">
-            ID: {l.id}
+        <CardContent className="space-y-2 text-sm">
+          <div>
+            <strong>Name:</strong> {l.relationshipName}
           </div>
+          <div>
+            <strong>Type:</strong> {l.type}
+          </div>
+          <div>
+            <strong>Style:</strong> {l.style}
+          </div>
+          <div>
+            <strong>Width:</strong> {l.width}
+          </div>
+          <div className="break-words border-t pt-2 text-xs text-muted-foreground">ID: {l.id}</div>
         </CardContent>
       </Card>
     );
@@ -55,5 +70,3 @@ export function ObjectDetailsPanel({ node, link }: ObjectDetailsPanelProps) {
 }
 
 export default ObjectDetailsPanel;
-
-

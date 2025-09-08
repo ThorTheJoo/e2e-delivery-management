@@ -86,7 +86,13 @@ export interface WorkPackage {
   status: WorkPackageStatus;
 }
 
-export type WorkPackageType = 'Analysis' | 'Design' | 'Development' | 'Testing' | 'Deployment' | 'Documentation';
+export type WorkPackageType =
+  | 'Analysis'
+  | 'Design'
+  | 'Development'
+  | 'Testing'
+  | 'Deployment'
+  | 'Documentation';
 export type WorkPackageStatus = 'Not Started' | 'In Progress' | 'Completed' | 'On Hold';
 
 // Milestones
@@ -150,7 +156,13 @@ export interface Document {
   url?: string;
 }
 
-export type DocumentType = 'Requirements' | 'Design' | 'Test Plan' | 'User Guide' | 'API Documentation' | 'Architecture';
+export type DocumentType =
+  | 'Requirements'
+  | 'Design'
+  | 'Test Plan'
+  | 'User Guide'
+  | 'API Documentation'
+  | 'Architecture';
 export type DocumentStatus = 'Draft' | 'In Review' | 'Approved' | 'Published';
 
 // Estimation
@@ -208,7 +220,11 @@ export interface CommercialModel {
   assumptions: string[];
 }
 
-export type CommercialType = 'Fixed Price' | 'Time & Materials' | 'Milestone Based' | 'Risk & Reward';
+export type CommercialType =
+  | 'Fixed Price'
+  | 'Time & Materials'
+  | 'Milestone Based'
+  | 'Risk & Reward';
 
 // Navigation and UI
 export interface NavigationItem {
@@ -574,7 +590,7 @@ export class CETv22Error extends Error {
   constructor(
     message: string,
     public code: string,
-    public details?: any
+    public details?: any,
   ) {
     super(message);
     this.name = 'CETv22Error';
@@ -582,21 +598,30 @@ export class CETv22Error extends Error {
 }
 
 export class CETv22ParsingError extends CETv22Error {
-  constructor(message: string, public originalError?: Error) {
+  constructor(
+    message: string,
+    public originalError?: Error,
+  ) {
     super(message, 'PARSING_ERROR', { originalError });
     this.name = 'CETv22ParsingError';
   }
 }
 
 export class CETv22AnalysisError extends CETv22Error {
-  constructor(message: string, public originalError?: Error) {
+  constructor(
+    message: string,
+    public originalError?: Error,
+  ) {
     super(message, 'ANALYSIS_ERROR', { originalError });
     this.name = 'CETv22AnalysisError';
   }
 }
 
 export class CETv22IntegrationError extends CETv22Error {
-  constructor(message: string, public originalError?: Error) {
+  constructor(
+    message: string,
+    public originalError?: Error,
+  ) {
     super(message, 'INTEGRATION_ERROR', { originalError });
     this.name = 'CETv22IntegrationError';
   }
@@ -640,7 +665,7 @@ export interface ServiceDeliveryService {
   description?: string;
 }
 
-export type ServiceDeliveryCategory = 
+export type ServiceDeliveryCategory =
   | 'Migration'
   | 'Training'
   | 'Development'

@@ -9,7 +9,7 @@ This document outlines the updates made to the Resources tab in the CET v22.0 Se
 Based on the user request, the Resources tab needed to be updated to:
 
 1. **Extract Domain Information**: From column M in the Ph1Demand worksheet
-2. **Extract Total Mandate Effort**: From column O in the Ph1Demand worksheet  
+2. **Extract Total Mandate Effort**: From column O in the Ph1Demand worksheet
 3. **Aggregate by Project Role**: Group data by project role within each domain
 4. **Display in Resources Tab**: Show domain breakdown with total mandate effort estimates
 
@@ -55,17 +55,17 @@ Enhanced the `createResourceDemand` method to extract domain and total mandate e
 ```typescript
 private createResourceDemand(row: any[], headers: string[], sheetName: string): CETv22ResourceDemand | null {
   // ... existing logic ...
-  
+
   // Extract domain and total mandate effort for Ph1Demand sheet
   let domain: string | undefined;
   let totalMandateEffort: number | undefined;
-  
+
   if (sheetName === 'Ph1Demand') {
     domain = this.getCellValue(row, headers, 'Domain') || this.getCellValueByIndex(row, 12); // Column M
     const totalEffortStr = this.getCellValue(row, headers, 'Total') || this.getCellValueByIndex(row, 14); // Column O
     totalMandateEffort = parseFloat(totalEffortStr) || undefined;
   }
-  
+
   return {
     // ... existing fields ...
     domain,
@@ -86,7 +86,7 @@ Added domain breakdown analysis to the `analyzeResources` method:
 ```typescript
 private analyzeResources(demands: any[], jobProfiles: any[]): CETv22ResourceAnalysis {
   // ... existing logic ...
-  
+
   return {
     // ... existing fields ...
     domainBreakdown: this.analyzeDomainBreakdown(demands)
@@ -96,19 +96,19 @@ private analyzeResources(demands: any[], jobProfiles: any[]): CETv22ResourceAnal
 // New method for domain analysis
 private analyzeDomainBreakdown(demands: any[]): CETv22DomainEffort[] {
   const domainMap = new Map<string, { totalEffort: number; roleEfforts: Map<string, number> }>();
-  
+
   // Filter only Ph1Demand data for domain analysis
   const ph1Demands = demands.filter(d => d.phaseNumber === 1 && d.domain && d.totalMandateEffort);
-  
+
   // Aggregate data by domain and role
   ph1Demands.forEach(demand => {
     const domain = demand.domain || 'Unknown';
     const totalEffort = demand.totalMandateEffort || 0;
     const role = demand.jobProfile || 'Unknown';
-    
+
     // ... aggregation logic ...
   });
-  
+
   return Array.from(domainMap.entries()).map(([domain, data]) => ({
     domain,
     totalEffort: data.totalEffort,
@@ -147,7 +147,7 @@ Added a new "Domain Breakdown & Total Mandate Effort" section to the Resources t
                 <div className="text-sm text-muted-foreground">Total Hours</div>
               </div>
             </div>
-            
+
             {/* Domain share progress bar */}
             <div className="mb-3">
               <div className="flex items-center justify-between text-sm text-muted-foreground mb-1">
@@ -155,13 +155,13 @@ Added a new "Domain Breakdown & Total Mandate Effort" section to the Resources t
                 <span>{domain.percentage.toFixed(1)}%</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  className="bg-blue-600 h-2 rounded-full" 
+                <div
+                  className="bg-blue-600 h-2 rounded-full"
                   style={{ width: `${domain.percentage}%` }}
                 ></div>
               </div>
             </div>
-            
+
             {/* Role breakdown within domain */}
             <div className="space-y-2">
               <h4 className="font-medium text-sm text-gray-700">Role Breakdown:</h4>
@@ -214,22 +214,26 @@ ResourceDashboard Component
 ## Features
 
 ### 1. **Domain Cards**
+
 - Each domain gets its own card with clear visual separation
 - Domain name prominently displayed
 - Total mandate effort shown in large, bold numbers
 
 ### 2. **Domain Share Visualization**
+
 - Progress bar showing each domain's percentage of total effort
 - Percentage values displayed numerically
 - Visual representation of effort distribution
 
 ### 3. **Role Breakdown Within Domains**
+
 - List of all roles within each domain
 - Individual role effort hours
 - Role percentage within the domain
 - Badge indicators for quick reference
 
 ### 4. **Responsive Design**
+
 - Cards adapt to different screen sizes
 - Consistent spacing and typography
 - Clear visual hierarchy

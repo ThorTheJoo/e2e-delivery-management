@@ -5,7 +5,9 @@
 This document defines the application architecture, data models, and implementation approach for building a traceability system that processes CET v22 Excel files and generates commercial outputs for our software vendor delivery methodology. The system will bridge Specsync requirements with **resource demand planning** and **commercial modeling**, enabling competitive pricing strategies and profitable project delivery.
 
 ### **Business Context: Software Vendor Commercial Excellence**
+
 The CET v22 system operates at the critical intersection of:
+
 - **Presales Resource Planning** → **Commercial Modeling** → **Pricing Strategy** → **Contract Negotiation**
 - **Requirements Traceability** → **Resource Quantification** → **Cost Structure** → **Margin Analysis**
 - **Delivery Planning** → **Risk Assessment** → **Resource Availability** → **Project Execution**
@@ -62,7 +64,7 @@ interface ResourceRateStructure {
       };
     };
   };
-  
+
   // Complexity multipliers
   complexityMultipliers: {
     technicalComplexity: number;
@@ -70,7 +72,7 @@ interface ResourceRateStructure {
     regionalComplexity: number;
     riskMultiplier: number;
   };
-  
+
   // Overhead allocation
   overheadStructure: {
     projectManagement: number;
@@ -87,14 +89,14 @@ interface CommercialModel {
     overheadCosts: number;
     infrastructureCosts: number;
   };
-  
+
   // Margin structure
   margins: {
     targetMargin: number;
     minimumMargin: number;
     regionalAdjustments: { [region: string]: number };
   };
-  
+
   // Pricing strategy
   pricingStrategy: {
     model: 'fixed' | 't&m' | 'hybrid';
@@ -119,7 +121,7 @@ erDiagram
         json tags
         date created_date
     }
-    
+
     CET_PROJECT {
         string id PK
         string project_name
@@ -131,7 +133,7 @@ erDiagram
         date created_date
         string status
     }
-    
+
     CET_PHASE {
         string id PK
         string project_id FK
@@ -142,7 +144,7 @@ erDiagram
         int duration_weeks
         string status
     }
-    
+
     CET_PRODUCT {
         string id PK
         string project_id FK
@@ -151,7 +153,7 @@ erDiagram
         json configuration
         string status
     }
-    
+
     CET_RESOURCE {
         string id PK
         string phase_id FK
@@ -162,7 +164,7 @@ erDiagram
         float effort_estimate
         string complexity_level
     }
-    
+
     ESTIMATION_TEMPLATE {
         string id PK
         string project_id FK
@@ -171,7 +173,7 @@ erDiagram
         date generated_date
         string status
     }
-    
+
     TRACEABILITY_LINK {
         string id PK
         string requirement_id FK
@@ -307,17 +309,17 @@ interface CETFileProcessor {
   // File validation and parsing
   validateFile(file: File): Promise<ValidationResult>;
   parseFile(file: File): Promise<ParsedCETData>;
-  
+
   // Sheet processing
   processAttributesSheet(sheet: any): Promise<ProjectConfiguration>;
   processPhaseSheets(sheets: any[]): Promise<PhaseData[]>;
   processProductSheets(sheets: any[]): Promise<ProductData[]>;
   processResourceSheets(sheets: any[]): Promise<ResourceData[]>;
-  
+
   // Data validation
   validateCrossSheetRelationships(data: CETData): Promise<ValidationResult>;
   validateReferenceData(data: CETData): Promise<ValidationResult>;
-  
+
   // Data transformation
   transformToInternalModel(data: CETData): Promise<InternalCETModel>;
 }
@@ -326,6 +328,7 @@ interface CETFileProcessor {
 ### 2. Sheet Processing Strategy
 
 #### **Phase 1: Core Configuration**
+
 ```typescript
 class AttributesSheetProcessor {
   async processSheet(sheet: any): Promise<ProjectConfiguration> {
@@ -333,40 +336,41 @@ class AttributesSheetProcessor {
       project: this.extractProjectInfo(sheet),
       customer: this.extractCustomerInfo(sheet),
       products: this.extractProductConfig(sheet),
-      phases: this.extractPhaseConfig(sheet)
+      phases: this.extractPhaseConfig(sheet),
     };
-    
+
     return this.validateConfiguration(config);
   }
-  
+
   private extractProjectInfo(sheet: any): ProjectInfo {
     // Extract from specific rows in Attributes sheet
     return {
-      name: this.findCellValue(sheet, "Project Name"),
-      type: this.findCellValue(sheet, "SFDC Type"),
-      region: this.findCellValue(sheet, "Region"),
-      language: this.findCellValue(sheet, "Customer Facing Language")
+      name: this.findCellValue(sheet, 'Project Name'),
+      type: this.findCellValue(sheet, 'SFDC Type'),
+      region: this.findCellValue(sheet, 'Region'),
+      language: this.findCellValue(sheet, 'Customer Facing Language'),
     };
   }
 }
 ```
 
 #### **Phase 2: Product Configuration**
+
 ```typescript
 class ProductSheetProcessor {
   async processProductSheets(sheets: any[]): Promise<ProductData[]> {
     const products = [];
-    
+
     for (const sheet of sheets) {
       if (this.isProductSheet(sheet.name)) {
         const product = await this.processProductSheet(sheet);
         products.push(product);
       }
     }
-    
+
     return this.validateProductConsistency(products);
   }
-  
+
   private isProductSheet(sheetName: string): boolean {
     const productSheets = ['Encompass', 'Ascendon', 'CMA', 'ManagedService'];
     return productSheets.includes(sheetName);
@@ -375,21 +379,22 @@ class ProductSheetProcessor {
 ```
 
 #### **Phase 3: Resource Allocation**
+
 ```typescript
 class ResourceSheetProcessor {
   async processResourceSheets(sheets: any[]): Promise<ResourceData[]> {
     const resources = [];
-    
+
     for (const sheet of sheets) {
       if (this.isResourceSheet(sheet.name)) {
         const sheetResources = await this.processResourceSheet(sheet);
         resources.push(...sheetResources);
       }
     }
-    
+
     return this.validateResourceAllocation(resources);
   }
-  
+
   private isResourceSheet(sheetName: string): boolean {
     return sheetName.includes('Demand') || sheetName === 'JobProfiles';
   }
@@ -404,11 +409,11 @@ interface CETValidationEngine {
   validatePhaseConsistency(phases: PhaseData[]): Promise<ValidationResult>;
   validateProductConfiguration(products: ProductData[]): Promise<ValidationResult>;
   validateResourceAllocation(resources: ResourceData[]): Promise<ValidationResult>;
-  
+
   // Reference data validation
   validateLookupValues(values: any[]): Promise<ValidationResult>;
   validateReferenceData(data: any[]): Promise<ValidationResult>;
-  
+
   // Business rule validation
   validateBusinessRules(data: CETData): Promise<ValidationResult>;
   validateCalculationAccuracy(data: CETData): Promise<ValidationResult>;
@@ -417,24 +422,27 @@ interface CETValidationEngine {
 class CETValidationEngineImpl implements CETValidationEngine {
   async validatePhaseConsistency(phases: PhaseData[]): Promise<ValidationResult> {
     const errors = [];
-    
+
     // Validate phase sequence
     for (let i = 0; i < phases.length - 1; i++) {
       if (phases[i].phase_number >= phases[i + 1].phase_number) {
-        errors.push(`Invalid phase sequence: ${phases[i].phase_number} >= ${phases[i + 1].phase_number}`);
+        errors.push(
+          `Invalid phase sequence: ${phases[i].phase_number} >= ${phases[i + 1].phase_number}`,
+        );
       }
     }
-    
+
     // Validate phase totals alignment
     const totalWeeks = phases.reduce((sum, phase) => sum + phase.duration_weeks, 0);
-    if (totalWeeks > 207) { // CET v22 maximum weeks
+    if (totalWeeks > 207) {
+      // CET v22 maximum weeks
       errors.push(`Total phase duration (${totalWeeks} weeks) exceeds maximum (207 weeks)`);
     }
-    
+
     return {
       isValid: errors.length === 0,
       errors,
-      warnings: []
+      warnings: [],
     };
   }
 }
@@ -447,14 +455,20 @@ class CETValidationEngineImpl implements CETValidationEngine {
 ```typescript
 interface CommercialModelEngine {
   // Commercial model generation
-  generateResourceCostModel(project: ProjectData, resources: ResourceData[]): Promise<ResourceCostModel>;
-  generatePricingStrategy(project: ProjectData, costModel: ResourceCostModel): Promise<PricingStrategy>;
+  generateResourceCostModel(
+    project: ProjectData,
+    resources: ResourceData[],
+  ): Promise<ResourceCostModel>;
+  generatePricingStrategy(
+    project: ProjectData,
+    costModel: ResourceCostModel,
+  ): Promise<PricingStrategy>;
   generateMarginAnalysis(project: ProjectData, pricing: PricingStrategy): Promise<MarginAnalysis>;
-  
+
   // Commercial customization
   customizePricingModel(model: CommercialModel, customizations: any): Promise<CommercialModel>;
   applyRegionalAdjustments(model: CommercialModel, region: string): Promise<CommercialModel>;
-  
+
   // Output generation
   generateCommercialProposal(model: CommercialModel): Promise<CommercialProposal>;
   generateResourceAllocationMatrix(resources: ResourceData[]): Promise<ResourceMatrix>;
@@ -463,8 +477,8 @@ interface CommercialModelEngine {
 
 class EstimationTemplateEngineImpl implements EstimationTemplateEngine {
   async generatePhaseTemplate(
-    phase: PhaseData, 
-    resources: ResourceData[]
+    phase: PhaseData,
+    resources: ResourceData[],
   ): Promise<GeneratedTemplate> {
     const template = {
       phase: phase,
@@ -472,18 +486,18 @@ class EstimationTemplateEngineImpl implements EstimationTemplateEngine {
       timeline: this.generateTimeline(phase),
       effortSummary: this.calculateEffortSummary(resources),
       costSummary: this.calculateCostSummary(resources),
-      dependencies: this.identifyDependencies(resources)
+      dependencies: this.identifyDependencies(resources),
     };
-    
+
     return this.applyTemplateFormatting(template);
   }
-  
+
   private generateTimeline(phase: PhaseData): TimelineData {
     return {
       startWeek: 1,
       endWeek: phase.duration_weeks,
       milestones: this.identifyMilestones(phase),
-      resourceAllocation: this.allocateResources(phase)
+      resourceAllocation: this.allocateResources(phase),
     };
   }
 }
@@ -499,14 +513,14 @@ interface TemplateCustomization {
     includeMilestones: boolean;
     includeResourceAllocation: boolean;
   };
-  
+
   // Product-specific customization
   productConfiguration: {
     includeFeatureMatrix: boolean;
     includeConfigurationOptions: boolean;
     includeServiceLevels: boolean;
   };
-  
+
   // Output customization
   outputConfiguration: {
     format: 'excel' | 'csv' | 'pdf';
@@ -584,43 +598,25 @@ GET    /api/cet/traceability/resources/:id     // Get resource traceability
 
 ```graphql
 type Query {
-  cetProjects(
-    filter: ProjectFilter
-    pagination: PaginationInput
-  ): ProjectConnection!
-  
+  cetProjects(filter: ProjectFilter, pagination: PaginationInput): ProjectConnection!
+
   cetProject(id: ID!): CETProject
-  
-  cetPhases(
-    projectId: ID!
-    filter: PhaseFilter
-  ): [CETPhase!]!
-  
-  cetProducts(
-    projectId: ID!
-    filter: ProductFilter
-  ): [CETProduct!]!
-  
-  cetResources(
-    phaseId: ID!
-    filter: ResourceFilter
-  ): [CETResource!]!
+
+  cetPhases(projectId: ID!, filter: PhaseFilter): [CETPhase!]!
+
+  cetProducts(projectId: ID!, filter: ProductFilter): [CETProduct!]!
+
+  cetResources(phaseId: ID!, filter: ResourceFilter): [CETResource!]!
 }
 
 type Mutation {
   uploadCETFile(file: Upload!): FileUploadResult!
-  
-  processCETFile(
-    input: ProcessCETInput!
-  ): CETProcessingResult!
-  
-  generateEstimationTemplate(
-    input: GenerateTemplateInput!
-  ): EstimationTemplate!
-  
-  createTraceabilityLink(
-    input: CreateLinkInput!
-  ): TraceabilityLink!
+
+  processCETFile(input: ProcessCETInput!): CETProcessingResult!
+
+  generateEstimationTemplate(input: GenerateTemplateInput!): EstimationTemplate!
+
+  createTraceabilityLink(input: CreateLinkInput!): TraceabilityLink!
 }
 
 type CETProject {
@@ -657,27 +653,27 @@ interface CETApplicationComponents {
   FileUploadComponent: React.FC<FileUploadProps>;
   FileProcessingStatus: React.FC<ProcessingStatusProps>;
   FileValidationResults: React.FC<ValidationResultsProps>;
-  
+
   // Project Configuration
   ProjectSetupWizard: React.FC<ProjectSetupProps>;
   ProjectConfigurationForm: React.FC<ProjectConfigProps>;
   PhaseConfigurationForm: React.FC<PhaseConfigProps>;
-  
+
   // Product Configuration
   ProductSelectionInterface: React.FC<ProductSelectionProps>;
   ProductConfigurationForm: React.FC<ProductConfigProps>;
   ServiceLevelConfiguration: React.FC<ServiceLevelProps>;
-  
+
   // Resource Management
   ResourceAllocationMatrix: React.FC<ResourceAllocationProps>;
   JobProfileSelector: React.FC<JobProfileProps>;
   EffortEstimationForm: React.FC<EffortEstimationProps>;
-  
+
   // Template Generation
   TemplateGenerator: React.FC<TemplateGeneratorProps>;
   TemplateCustomizationForm: React.FC<TemplateCustomizationProps>;
   TemplatePreview: React.FC<TemplatePreviewProps>;
-  
+
   // Traceability
   TraceabilityDashboard: React.FC<TraceabilityDashboardProps>;
   RequirementMappingInterface: React.FC<RequirementMappingProps>;
@@ -691,21 +687,21 @@ interface CETApplicationComponents {
 interface CETUserWorkflow {
   // Step 1: File Upload
   uploadCETFile: (file: File) => Promise<UploadResult>;
-  
+
   // Step 2: File Processing
   processCETFile: (fileId: string) => Promise<ProcessingResult>;
-  
+
   // Step 3: Configuration Review
   reviewProjectConfiguration: (config: ProjectConfiguration) => Promise<ReviewResult>;
   reviewPhaseConfiguration: (phases: PhaseData[]) => Promise<ReviewResult>;
   reviewProductConfiguration: (products: ProductData[]) => Promise<ReviewResult>;
-  
+
   // Step 4: Template Generation
   generateEstimationTemplate: (config: TemplateConfig) => Promise<TemplateResult>;
-  
+
   // Step 5: Customization
   customizeTemplate: (template: GeneratedTemplate) => Promise<CustomizedTemplate>;
-  
+
   // Step 6: Output Generation
   generateOutput: (template: CustomizedTemplate, format: OutputFormat) => Promise<GeneratedFile>;
 }
@@ -721,31 +717,31 @@ class CETFileProcessorOptimized {
   async processFileParallel(file: File): Promise<CETData> {
     const workbook = await this.loadWorkbook(file);
     const sheets = this.identifySheetTypes(workbook);
-    
+
     // Process sheets in parallel based on dependencies
     const [configSheets, productSheets, resourceSheets] = await Promise.all([
       this.processConfigurationSheets(sheets.config),
       this.processProductSheets(sheets.products),
-      this.processResourceSheets(sheets.resources)
+      this.processResourceSheets(sheets.resources),
     ]);
-    
+
     return this.assembleData(configSheets, productSheets, resourceSheets);
   }
-  
+
   // Streaming data processing for large sheets
   async processLargeSheet(sheet: any, chunkSize: number = 1000): Promise<any[]> {
     const results = [];
     const maxRow = sheet.max_row;
-    
+
     for (let startRow = 2; startRow <= maxRow; startRow += chunkSize) {
       const endRow = Math.min(startRow + chunkSize - 1, maxRow);
       const chunk = this.processRowRange(sheet, startRow, endRow);
       results.push(...chunk);
-      
+
       // Yield control to prevent blocking
       await this.yieldControl();
     }
-    
+
     return results;
   }
 }
@@ -758,11 +754,11 @@ interface CETCacheService {
   // Template caching
   cacheTemplate(templateId: string, template: GeneratedTemplate): Promise<void>;
   getCachedTemplate(templateId: string): Promise<GeneratedTemplate | null>;
-  
+
   // Configuration caching
   cacheConfiguration(configId: string, config: any): Promise<void>;
   getCachedConfiguration(configId: string): Promise<any | null>;
-  
+
   // Reference data caching
   cacheReferenceData(dataType: string, data: any[]): Promise<void>;
   getCachedReferenceData(dataType: string): Promise<any[] | null>;
@@ -781,24 +777,24 @@ class CETSecurityService {
       this.checkFileType(file),
       this.checkFileSize(file),
       this.scanForMacros(file),
-      this.validateFileContent(file)
+      this.validateFileContent(file),
     ];
-    
+
     const results = await Promise.all(checks);
     return this.aggregateSecurityResults(results);
   }
-  
+
   // Data encryption
   async encryptSensitiveData(data: any): Promise<string> {
     const sensitiveFields = ['customer_name', 'project_name', 'cost_data'];
     const encrypted = { ...data };
-    
+
     for (const field of sensitiveFields) {
       if (encrypted[field]) {
         encrypted[field] = await this.encryptValue(encrypted[field]);
       }
     }
-    
+
     return encrypted;
   }
 }
@@ -812,11 +808,11 @@ interface CETAccessControl {
   canViewProject(userId: string, projectId: string): Promise<boolean>;
   canEditProject(userId: string, projectId: string): Promise<boolean>;
   canDeleteProject(userId: string, projectId: string): Promise<boolean>;
-  
+
   // Data-level access
   canViewSensitiveData(userId: string, dataType: string): Promise<boolean>;
   canExportData(userId: string, dataType: string): Promise<boolean>;
-  
+
   // Template access
   canGenerateTemplate(userId: string, projectId: string): Promise<boolean>;
   canCustomizeTemplate(userId: string, templateId: string): Promise<boolean>;
@@ -835,7 +831,7 @@ services:
   cet-app:
     build: .
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://user:pass@postgres:5432/cet_traceability
@@ -857,12 +853,12 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - '5432:5432'
 
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis_data:/data
 
@@ -878,11 +874,11 @@ interface CETMonitoringService {
   // Performance monitoring
   trackFileProcessingTime(fileId: string, duration: number): void;
   trackTemplateGenerationTime(templateId: string, duration: number): void;
-  
+
   // Error monitoring
   trackProcessingErrors(fileId: string, error: Error): void;
   trackValidationErrors(fileId: string, errors: ValidationError[]): void;
-  
+
   // Usage analytics
   trackUserActions(userId: string, action: string, metadata: any): void;
   trackTemplateUsage(templateId: string, usage: TemplateUsage): void;
@@ -894,6 +890,7 @@ interface CETMonitoringService {
 This application architecture provides a comprehensive foundation for building the CET v22 **commercial excellence system** that is critical to our software vendor success. The modular design supports:
 
 ### **Strategic Business Capabilities**
+
 1. **Presales Resource Planning**: Accurate resource demand quantification for competitive proposals
 2. **Commercial Modeling**: Foundation for cost structure, margin analysis, and pricing strategy
 3. **Resource Management**: Regional resource rates, availability, and allocation optimization
@@ -901,6 +898,7 @@ This application architecture provides a comprehensive foundation for building t
 5. **Full Traceability**: Link Specsync requirements through resource demand to commercial outcomes
 
 ### **Technical Excellence**
+
 1. **Scalable File Processing**: Handle 27-sheet Excel files with 10,000+ rows
 2. **Flexible Data Models**: Support various project types and commercial structures
 3. **Robust Validation**: Cross-sheet consistency and commercial accuracy validation
@@ -908,7 +906,9 @@ This application architecture provides a comprehensive foundation for building t
 5. **Performance Optimization**: Fast processing for time-sensitive presales activities
 
 ### **Next Phase Focus**
+
 The next phase should focus on implementing:
+
 1. **Core File Processing Engine**: Excel processing for resource demand planning
 2. **Commercial Model Generator**: Resource cost and pricing model creation
 3. **Resource Management System**: Regional rates, availability, and allocation

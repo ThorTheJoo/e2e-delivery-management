@@ -19,7 +19,7 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
   defaultCollapsed = false,
   className,
   headerClassName,
-  contentClassName
+  contentClassName,
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
 
@@ -28,12 +28,12 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
   };
 
   return (
-    <div className={cn('border rounded-lg', className)}>
+    <div className={cn('rounded-lg border', className)}>
       <button
         onClick={handleToggle}
         className={cn(
-          'w-full flex items-center justify-between p-4 text-left hover:bg-muted/50 transition-colors cursor-pointer',
-          headerClassName
+          'flex w-full cursor-pointer items-center justify-between p-4 text-left transition-colors hover:bg-muted/50',
+          headerClassName,
         )}
         aria-expanded={!isCollapsed}
         aria-label={`${isCollapsed ? 'Expand' : 'Collapse'} ${title} section`}
@@ -47,17 +47,15 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
           )}
         </div>
       </button>
-      
+
       <div
         className={cn(
           'overflow-hidden transition-all duration-200 ease-in-out',
           isCollapsed ? 'max-h-0 opacity-0' : 'max-h-[2000px] opacity-100',
-          contentClassName
+          contentClassName,
         )}
       >
-        <div className="p-4 pt-0">
-          {children}
-        </div>
+        <div className="p-4 pt-0">{children}</div>
       </div>
     </div>
   );

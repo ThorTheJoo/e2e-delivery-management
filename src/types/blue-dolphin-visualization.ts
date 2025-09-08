@@ -42,5 +42,3 @@ export interface VisualizationFilters {
   resultsTop: number;
   viewMode: VisualizationViewMode;
 }
-
-

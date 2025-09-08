@@ -1,27 +1,33 @@
-# 🔧 ADO Permission & Required Field Issues - FIXED! 
+# 🔧 ADO Permission & Required Field Issues - FIXED!
 
 ## **Root Causes Found** 🎯
 
 ### **Issue 1: Missing Required Field** ❌
+
 ```
 TF401320: Rule Error for field External Reference ID. Error code: Required, InvalidEmpty.
 ```
+
 The Epic work item type requires an "External Reference ID" field that we weren't providing.
 
 ### **Issue 2: Permission Issues** ❌
+
 ```
 TF401289: The current user does not have permissions to create tags.
 ```
+
 Your PAT token doesn't have permission to create tags in ADO.
 
 ## **What I Fixed** ✅
 
 ### **1. Added Required External Reference ID**
+
 - ✅ Added `System.ExternalReferenceId` field for Epic work items
 - ✅ Uses the source project ID as the reference value
 - ✅ Falls back to 'EPIC-REF' if no source ID available
 
 ### **2. Removed Tags (Permission Issue)**
+
 - ✅ Removed `System.Tags` field entirely
 - ✅ This eliminates the permission error for creating tags
 - ✅ Work items will still be created with essential fields
@@ -29,11 +35,14 @@ Your PAT token doesn't have permission to create tags in ADO.
 ## **How to Fix Your Issue** 🚀
 
 ### **Step 1: The Code is Already Fixed** ✅
+
 I've updated the code to:
+
 - Add the required External Reference ID for Epics
 - Remove the problematic Tags field
 
 ### **Step 2: Try Export Again**
+
 1. **Refresh your browser** (Ctrl + F5) to get the updated code
 2. **Click "Export to ADO"** again
 3. **Watch console for success messages**
@@ -64,6 +73,7 @@ I've updated the code to:
 ## **What the Fix Does** 🔧
 
 ### **Before (Broken):**
+
 ```typescript
 // Missing required field for Epic
 // No External Reference ID
@@ -73,6 +83,7 @@ I've updated the code to:
 ```
 
 ### **After (Fixed):**
+
 ```typescript
 // Added required field for Epic
 'System.ExternalReferenceId': 'MOB-2025-001'
@@ -97,13 +108,17 @@ I've updated the code to:
 ## **If Still Getting Errors** 🆘
 
 ### **Error 1: "External Reference ID Required"**
+
 **Solution**: This should be fixed now - Epic work items include the required field
 
 ### **Error 2: "Permission to create tags"**
+
 **Solution**: This should be fixed now - Tags field removed entirely
 
 ### **Error 3: "Other permission issues"**
+
 **Solution**: Check your PAT token permissions in ADO:
+
 1. Go to ADO → User Settings → Personal Access Tokens
 2. Ensure your token has "Work Items (Read & Write)" permissions
 3. Ensure your token has access to the ADOSandBox project
@@ -111,6 +126,7 @@ I've updated the code to:
 ## **Verification** ✅
 
 After the fix, you should see:
+
 - ✅ **No more "External Reference ID" errors**
 - ✅ **No more "Permission to create tags" errors**
 - ✅ **Work items created successfully in ADO**
@@ -121,9 +137,10 @@ After the fix, you should see:
 ## **Quick Test** 🧪
 
 After refreshing, run this in console:
+
 ```javascript
 // Test with minimal fields
-adoService.testConnection().then(result => {
+adoService.testConnection().then((result) => {
   console.log('Connection test:', result);
   if (result) {
     console.log('✅ Ready to export!');

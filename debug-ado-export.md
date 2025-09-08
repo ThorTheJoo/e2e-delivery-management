@@ -1,14 +1,16 @@
 # 🔍 ADO Export Debugging Guide
 
 ## **Current Issue** ❌
+
 - Validation passed ✅
-- 10 work items generated ✅  
+- 10 work items generated ✅
 - No items created in ADO ❌
 - Export status not showing ❌
 
 ## **Debugging Steps** 🧪
 
 ### **Step 1: Check Browser Console**
+
 1. Open Developer Tools (F12)
 2. Go to Console tab
 3. Click "Export to ADO" button
@@ -25,6 +27,7 @@
 ```
 
 ### **Step 2: Check ADO Configuration Logs**
+
 1. Go to ADO Configuration tab
 2. Click "Logs & Debug" tab
 3. Look for recent logs about:
@@ -34,32 +37,36 @@
    - Error messages
 
 ### **Step 3: Verify Work Item Types**
+
 Your ADO project might not have these work item types:
-- ❌ `epic` 
+
+- ❌ `epic`
 - ❌ `feature`
-- ❌ `userstory` 
+- ❌ `userstory`
 - ❌ `task`
 
 **Common alternatives:**
+
 - ✅ `Requirement`
-- ✅ `Issue` 
+- ✅ `Issue`
 - ✅ `Bug`
 - ✅ `User Story`
 
 ## **Quick Test Commands** 💻
 
 ### **In Browser Console:**
+
 ```javascript
 // Check if ADO service is available
 console.log('ADO Service:', adoService);
 
 // Check available work item types
-adoService.getAvailableWorkItemTypes().then(types => {
+adoService.getAvailableWorkItemTypes().then((types) => {
   console.log('Available types:', types);
 });
 
 // Validate specific types
-adoService.validateWorkItemTypes().then(validation => {
+adoService.validateWorkItemTypes().then((validation) => {
   console.log('Validation:', validation);
 });
 
@@ -70,6 +77,7 @@ console.log('Current config:', adoService.getConfiguration());
 ## **Expected Results** 📊
 
 ### **If Work Item Types Don't Exist:**
+
 ```
 📋 Available work item types: ["Requirement", "Issue", "Bug"]
 🔍 Work item type validation: {epic: false, feature: false, userstory: false, task: false}
@@ -77,6 +85,7 @@ console.log('Current config:', adoService.getConfiguration());
 ```
 
 ### **If Export Succeeds:**
+
 ```
 🎉 Export completed successfully!
 📊 Export status: {status: "completed", processedItems: 10, exportedItems: [...]}
@@ -85,21 +94,26 @@ console.log('Current config:', adoService.getConfiguration());
 ## **Common Issues & Solutions** 🔧
 
 ### **Issue 1: No Work Item Types Available**
+
 **Solution:** Update work item mappings to use available types
+
 ```typescript
 // Instead of 'epic', use 'Requirement'
-// Instead of 'feature', use 'Issue'  
+// Instead of 'feature', use 'Issue'
 // Instead of 'userstory', use 'User Story'
 // Instead of 'task', use 'Requirement'
 ```
 
 ### **Issue 2: Authentication Failed**
+
 **Solution:** Re-test connection in ADO Configuration
 
 ### **Issue 3: Area/Iteration Path Invalid**
+
 **Solution:** Check if paths exist in your ADO project
 
 ### **Issue 4: Custom Fields Missing**
+
 **Solution:** Create custom fields or remove them from mappings
 
 ## **Next Steps** 🚀

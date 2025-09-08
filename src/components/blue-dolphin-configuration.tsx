@@ -5,9 +5,15 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Server, Save, RefreshCw, CheckCircle, XCircle } from 'lucide-react';
+import { Server, Save, RefreshCw } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
 
 interface BlueDolphinConfig {
@@ -26,14 +32,14 @@ export function BlueDolphinConfiguration() {
     protocol: 'ODATA',
     username: 'csgipoc',
     apiKey: '',
-    password: 'ef498b94-732b-46c8-a24c-65fbd27c1482'
+    password: 'ef498b94-732b-46c8-a24c-65fbd27c1482',
   });
-  
+
   const [isTested, setIsTested] = useState(false);
   const [isConfigured, setIsConfigured] = useState(true);
   const [isTesting, setIsTesting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  
+
   const toast = useToast();
 
   const handleSaveConfig = async () => {
@@ -60,7 +66,7 @@ export function BlueDolphinConfiguration() {
         },
         body: JSON.stringify({
           action: 'test-connection',
-          config: config
+          config: config,
         }),
       });
 
@@ -91,9 +97,10 @@ export function BlueDolphinConfiguration() {
   return (
     <div className="space-y-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Blue Dolphin Configuration</h2>
+        <h2 className="mb-2 text-2xl font-bold text-gray-900">Blue Dolphin Configuration</h2>
         <p className="text-gray-600">
-          Configure connection settings for Blue Dolphin integration. Set up API endpoints, authentication, and protocol preferences.
+          Configure connection settings for Blue Dolphin integration. Set up API endpoints,
+          authentication, and protocol preferences.
         </p>
       </div>
 
@@ -101,26 +108,28 @@ export function BlueDolphinConfiguration() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-lg border-2 border-blue-200">
-                <Server className="w-5 h-5 text-blue-700" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-blue-200 bg-blue-100">
+                <Server className="h-5 w-5 text-blue-700" />
               </div>
               <div>
                 <CardTitle className="text-base">Blue Dolphin Configuration</CardTitle>
-                <CardDescription>Configure connection settings for Blue Dolphin integration</CardDescription>
+                <CardDescription>
+                  Configure connection settings for Blue Dolphin integration
+                </CardDescription>
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              <Badge variant={isTested ? "default" : "secondary"}>
-                {isTested ? "Tested" : "Not Tested"}
+              <Badge variant={isTested ? 'default' : 'secondary'}>
+                {isTested ? 'Tested' : 'Not Tested'}
               </Badge>
-              <Badge variant={isConfigured ? "default" : "secondary"}>
-                {isConfigured ? "Configured" : "Not Configured"}
+              <Badge variant={isConfigured ? 'default' : 'secondary'}>
+                {isConfigured ? 'Configured' : 'Not Configured'}
               </Badge>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="space-y-4">
               <div>
                 <Label htmlFor="apiUrl">API URL</Label>
@@ -131,7 +140,7 @@ export function BlueDolphinConfiguration() {
                   placeholder="https://public-api.eu.bluedolphin.app"
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="odataUrl">OData URL</Label>
                 <Input
@@ -141,10 +150,15 @@ export function BlueDolphinConfiguration() {
                   placeholder="https://csgipoc.odata.bluedolphin.app"
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="protocol">Protocol</Label>
-                <Select value={config.protocol} onValueChange={(value: 'REST' | 'ODATA') => setConfig({ ...config, protocol: value })}>
+                <Select
+                  value={config.protocol}
+                  onValueChange={(value: 'REST' | 'ODATA') =>
+                    setConfig({ ...config, protocol: value })
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -155,7 +169,7 @@ export function BlueDolphinConfiguration() {
                 </Select>
               </div>
             </div>
-            
+
             <div className="space-y-4">
               <div>
                 <Label htmlFor="apiKey">API Key (Optional)</Label>
@@ -167,7 +181,7 @@ export function BlueDolphinConfiguration() {
                   placeholder="Enter API key"
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="username">Username (Alternative)</Label>
                 <Input
@@ -177,7 +191,7 @@ export function BlueDolphinConfiguration() {
                   placeholder="Enter username"
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="password">Password (Alternative)</Label>
                 <Input
@@ -190,8 +204,8 @@ export function BlueDolphinConfiguration() {
               </div>
             </div>
           </div>
-          
-          <div className="flex items-center justify-end space-x-4 pt-4 border-t">
+
+          <div className="flex items-center justify-end space-x-4 border-t pt-4">
             <Button
               variant="outline"
               onClick={handleTestConnection}
@@ -199,22 +213,22 @@ export function BlueDolphinConfiguration() {
               className="flex items-center space-x-2"
             >
               {isTesting ? (
-                <RefreshCw className="w-4 h-4 animate-spin" />
+                <RefreshCw className="h-4 w-4 animate-spin" />
               ) : (
-                <RefreshCw className="w-4 h-4" />
+                <RefreshCw className="h-4 w-4" />
               )}
               <span>{isTesting ? 'Testing...' : 'Test Connection'}</span>
             </Button>
-            
+
             <Button
               onClick={handleSaveConfig}
               disabled={isSaving}
               className="flex items-center space-x-2"
             >
               {isSaving ? (
-                <RefreshCw className="w-4 h-4 animate-spin" />
+                <RefreshCw className="h-4 w-4 animate-spin" />
               ) : (
-                <Save className="w-4 h-4" />
+                <Save className="h-4 w-4" />
               )}
               <span>{isSaving ? 'Saving...' : 'Save Configuration'}</span>
             </Button>

@@ -15,7 +15,7 @@ interface CETv22PhaseTimelineProps {
 export const CETv22PhaseTimeline: React.FC<CETv22PhaseTimelineProps> = ({
   phaseAnalysis,
   timelineData,
-  resourceDemands
+  resourceDemands,
 }) => {
   return (
     <div className="space-y-6">
@@ -30,16 +30,16 @@ export const CETv22PhaseTimeline: React.FC<CETv22PhaseTimelineProps> = ({
         <CardContent>
           <div className="space-y-4">
             {phaseAnalysis.map((phase) => (
-              <div key={phase.phaseNumber} className="p-4 border rounded-lg">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold text-lg">{phase.phaseName}</h3>
+              <div key={phase.phaseNumber} className="rounded-lg border p-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">{phase.phaseName}</h3>
                   <div className="flex items-center space-x-2">
                     <Badge variant="outline">{phase.complexity} Complexity</Badge>
                     <Badge variant="secondary">{phase.duration} weeks</Badge>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   <div className="flex items-center space-x-2">
                     <Clock className="h-4 w-4 text-blue-500" />
                     <div>
@@ -67,7 +67,7 @@ export const CETv22PhaseTimeline: React.FC<CETv22PhaseTimelineProps> = ({
 
                 {phase.deliverables.length > 0 && (
                   <div className="mt-3">
-                    <div className="text-sm text-muted-foreground mb-2">Key Deliverables</div>
+                    <div className="mb-2 text-sm text-muted-foreground">Key Deliverables</div>
                     <div className="flex flex-wrap gap-1">
                       {phase.deliverables.slice(0, 3).map((deliverable, index) => (
                         <Badge key={index} variant="outline" className="text-xs">
@@ -89,13 +89,14 @@ export const CETv22PhaseTimeline: React.FC<CETv22PhaseTimelineProps> = ({
           <CardTitle>Resource Demand Timeline</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8">
-            <Calendar className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+          <div className="py-8 text-center">
+            <Calendar className="mx-auto mb-4 h-16 w-16 text-gray-400" />
             <p className="text-muted-foreground">
               Interactive timeline visualization would be displayed here
             </p>
             <div className="mt-4 text-sm text-muted-foreground">
-              Showing {timelineData.length} data points across {resourceDemands.length} resource demands
+              Showing {timelineData.length} data points across {resourceDemands.length} resource
+              demands
             </div>
           </div>
         </CardContent>

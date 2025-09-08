@@ -16,7 +16,7 @@ export const CETv22FileUpload: React.FC<CETv22FileUploadProps> = ({
   onError,
   maxFileSize = 50 * 1024 * 1024, // 50MB default
   allowedTypes = ['.xlsx', '.xls'],
-  dragAndDrop = true
+  dragAndDrop = true,
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -25,89 +25,97 @@ export const CETv22FileUpload: React.FC<CETv22FileUploadProps> = ({
   const [isDragActive, setIsDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-
-
   // File validation
-  const validateFile = useCallback((file: File): string | null => {
-    // Check file size
-    if (file.size > maxFileSize) {
-      return `File size exceeds ${Math.round(maxFileSize / 1024 / 1024)}MB limit`;
-    }
-
-    // Check file type
-    const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
-    if (!allowedTypes.includes(fileExtension)) {
-      return `Invalid file type. Please upload ${allowedTypes.join(' or ')} files only`;
-    }
-
-    // Check file name pattern (optional - CET v22.0 files typically have specific naming)
-    if (!file.name.toLowerCase().includes('cet') && !file.name.toLowerCase().includes('v22')) {
-      console.warn('File name does not contain "CET" or "v22" - this may not be a CET v22.0 file');
-    }
-
-    return null;
-  }, [maxFileSize, allowedTypes]);
-
-  // Process uploaded file
-  const processFile = useCallback(async (file: File) => {
-    try {
-      setIsProcessing(true);
-      setProgress(0);
-      setError(null);
-
-      // Update progress
-      setProgress(25);
-
-      // Convert file to buffer
-      const arrayBuffer = await file.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-
-      setProgress(50);
-
-      // Parse the Excel file
-      const parserService = new CETv22ParserService();
-      const cetData = await parserService.parseExcelFile(buffer);
-
-      setProgress(75);
-
-      // Validate parsed data
-      if (!cetData.project || !cetData.resourceDemands) {
-        throw new CETv22Error('INVALID_DATA', 'Parsed data is incomplete or invalid');
+  const validateFile = useCallback(
+    (file: File): string | null => {
+      // Check file size
+      if (file.size > maxFileSize) {
+        return `File size exceeds ${Math.round(maxFileSize / 1024 / 1024)}MB limit`;
       }
 
-      setProgress(100);
+      // Check file type
+      const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+      if (!allowedTypes.includes(fileExtension)) {
+        return `Invalid file type. Please upload ${allowedTypes.join(' or ')} files only`;
+      }
 
-      // Success - call the callback
-      onFileProcessed(cetData);
+      // Check file name pattern (optional - CET v22.0 files typically have specific naming)
+      if (!file.name.toLowerCase().includes('cet') && !file.name.toLowerCase().includes('v22')) {
+        console.warn(
+          'File name does not contain "CET" or "v22" - this may not be a CET v22.0 file',
+        );
+      }
 
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Unknown error occurred');
-      setError(error.message);
-      onError(error);
-    } finally {
-      setIsProcessing(false);
-    }
-  }, [onFileProcessed, onError]);
+      return null;
+    },
+    [maxFileSize, allowedTypes],
+  );
+
+  // Process uploaded file
+  const processFile = useCallback(
+    async (file: File) => {
+      try {
+        setIsProcessing(true);
+        setProgress(0);
+        setError(null);
+
+        // Update progress
+        setProgress(25);
+
+        // Convert file to buffer
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+
+        setProgress(50);
+
+        // Parse the Excel file
+        const parserService = new CETv22ParserService();
+        const cetData = await parserService.parseExcelFile(buffer);
+
+        setProgress(75);
+
+        // Validate parsed data
+        if (!cetData.project || !cetData.resourceDemands) {
+          throw new CETv22Error('INVALID_DATA', 'Parsed data is incomplete or invalid');
+        }
+
+        setProgress(100);
+
+        // Success - call the callback
+        onFileProcessed(cetData);
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error('Unknown error occurred');
+        setError(error.message);
+        onError(error);
+      } finally {
+        setIsProcessing(false);
+      }
+    },
+    [onFileProcessed, onError],
+  );
 
   // Handle file selection
-  const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const handleFileSelect = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
 
-    // Validate the file
-    const validationError = validateFile(file);
-    if (validationError) {
-      setError(validationError);
-      onError(new Error(validationError));
-      return;
-    }
+      // Validate the file
+      const validationError = validateFile(file);
+      if (validationError) {
+        setError(validationError);
+        onError(new Error(validationError));
+        return;
+      }
 
-    setSelectedFile(file);
-    setError(null);
+      setSelectedFile(file);
+      setError(null);
 
-    // Auto-process if not disabled
-    processFile(file);
-  }, [validateFile, processFile, onError]);
+      // Auto-process if not disabled
+      processFile(file);
+    },
+    [validateFile, processFile, onError],
+  );
 
   // Handle drag and drop
   const handleDragEnter = useCallback((event: React.DragEvent) => {
@@ -127,30 +135,33 @@ export const CETv22FileUpload: React.FC<CETv22FileUploadProps> = ({
     event.stopPropagation();
   }, []);
 
-  const handleDrop = useCallback((event: React.DragEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
-    setIsDragActive(false);
+  const handleDrop = useCallback(
+    (event: React.DragEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+      setIsDragActive(false);
 
-    const files = event.dataTransfer?.files;
-    if (!files || files.length === 0) return;
+      const files = event.dataTransfer?.files;
+      if (!files || files.length === 0) return;
 
-    const file = files[0];
+      const file = files[0];
 
-    // Validate the file
-    const validationError = validateFile(file);
-    if (validationError) {
-      setError(validationError);
-      onError(new Error(validationError));
-      return;
-    }
+      // Validate the file
+      const validationError = validateFile(file);
+      if (validationError) {
+        setError(validationError);
+        onError(new Error(validationError));
+        return;
+      }
 
-    setSelectedFile(file);
-    setError(null);
+      setSelectedFile(file);
+      setError(null);
 
-    // Auto-process if not disabled
-    processFile(file);
-  }, [validateFile, processFile, onError]);
+      // Auto-process if not disabled
+      processFile(file);
+    },
+    [validateFile, processFile, onError],
+  );
 
   // Handle manual upload trigger
   const handleUploadClick = useCallback(() => {
@@ -187,12 +198,12 @@ export const CETv22FileUpload: React.FC<CETv22FileUploadProps> = ({
       <CardContent className="space-y-4">
         {/* Upload Area */}
         <div
-          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+          className={`rounded-lg border-2 border-dashed p-8 text-center transition-colors ${
             isDragActive
               ? 'border-blue-500 bg-blue-50'
               : selectedFile
-              ? 'border-green-500 bg-green-50'
-              : 'border-gray-300 hover:border-gray-400'
+                ? 'border-green-500 bg-green-50'
+                : 'border-gray-300 hover:border-gray-400'
           }`}
           onDragEnter={dragAndDrop ? handleDragEnter : undefined}
           onDragLeave={dragAndDrop ? handleDragLeave : undefined}
@@ -217,28 +228,32 @@ export const CETv22FileUpload: React.FC<CETv22FileUploadProps> = ({
                     <X className="h-4 w-4 text-red-500" />
                   </Button>
                 </div>
-                <div className="text-sm text-gray-500 mt-1">
+                <div className="mt-1 text-sm text-gray-500">
                   Size: {formatFileSize(selectedFile.size)}
                 </div>
                 <div className="text-sm text-gray-500">
-                  Last modified: {selectedFile.lastModified ? new Date(selectedFile.lastModified).toLocaleDateString() : 'Unknown'}
+                  Last modified:{' '}
+                  {selectedFile.lastModified
+                    ? new Date(selectedFile.lastModified).toLocaleDateString()
+                    : 'Unknown'}
                 </div>
               </div>
             </div>
           ) : (
             <div className="space-y-4">
               <div className="flex items-center justify-center">
-                <Upload className={`h-12 w-12 ${isDragActive ? 'text-blue-500' : 'text-gray-400'}`} />
+                <Upload
+                  className={`h-12 w-12 ${isDragActive ? 'text-blue-500' : 'text-gray-400'}`}
+                />
               </div>
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                <h3 className="mb-2 text-lg font-medium text-gray-900">
                   {isDragActive ? 'Drop your CET v22.0 file here' : 'Upload CET v22.0 Excel File'}
                 </h3>
-                <p className="text-gray-600 mb-4">
+                <p className="mb-4 text-gray-600">
                   {dragAndDrop
                     ? 'Drag and drop your Excel file here, or click to browse'
-                    : 'Click to browse and select your Excel file'
-                  }
+                    : 'Click to browse and select your Excel file'}
                 </p>
                 <Button onClick={handleUploadClick} disabled={isProcessing}>
                   Choose File
@@ -258,13 +273,15 @@ export const CETv22FileUpload: React.FC<CETv22FileUploadProps> = ({
         </div>
 
         {/* File Requirements */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h4 className="text-sm font-medium text-blue-900 mb-2">File Requirements:</h4>
-          <ul className="text-sm text-blue-800 space-y-1">
+        <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+          <h4 className="mb-2 text-sm font-medium text-blue-900">File Requirements:</h4>
+          <ul className="space-y-1 text-sm text-blue-800">
             <li>• Excel format (.xlsx or .xls)</li>
             <li>• Maximum size: {Math.round(maxFileSize / 1024 / 1024)}MB</li>
             <li>• Should contain CET v22.0 resource demand data</li>
-            <li>• Required sheets: Attributes, JobProfiles, demand sheets (Ph1Demand, Ph2Demand, etc.)</li>
+            <li>
+              • Required sheets: Attributes, JobProfiles, demand sheets (Ph1Demand, Ph2Demand, etc.)
+            </li>
           </ul>
         </div>
 
@@ -276,7 +293,7 @@ export const CETv22FileUpload: React.FC<CETv22FileUploadProps> = ({
               <span className="font-medium">{progress}%</span>
             </div>
             <Progress value={progress} className="w-full" />
-            <div className="text-xs text-gray-500 text-center">
+            <div className="text-center text-xs text-gray-500">
               This may take a few moments for large files
             </div>
           </div>
@@ -316,8 +333,8 @@ export const CETv22FileUpload: React.FC<CETv22FileUploadProps> = ({
 
         {/* File Info */}
         {selectedFile && (
-          <div className="bg-gray-50 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-gray-900 mb-2">File Information:</h4>
+          <div className="rounded-lg bg-gray-50 p-4">
+            <h4 className="mb-2 text-sm font-medium text-gray-900">File Information:</h4>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="text-gray-600">Name:</span>

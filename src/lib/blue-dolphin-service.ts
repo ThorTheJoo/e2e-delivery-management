@@ -11,7 +11,7 @@ import {
   ODataResponse,
   BlueDolphinConfig,
   SyncResult,
-  SyncOperation
+  SyncOperation,
 } from '@/types/blue-dolphin';
 
 export abstract class BlueDolphinBaseService {
@@ -30,7 +30,7 @@ export abstract class BlueDolphinBaseService {
   protected getAuthHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      Accept: 'application/json',
     };
 
     if (this.apiKey) {
@@ -42,10 +42,7 @@ export abstract class BlueDolphinBaseService {
     return headers;
   }
 
-  protected async request<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<T> {
+  protected async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
     const headers = {
       ...this.getAuthHeaders(),
@@ -59,9 +56,7 @@ export abstract class BlueDolphinBaseService {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      throw new Error(
-        `Blue Dolphin API Error: ${error.error?.message || response.statusText}`
-      );
+      throw new Error(`Blue Dolphin API Error: ${error.error?.message || response.statusText}`);
     }
 
     return response.json();
@@ -69,7 +64,7 @@ export abstract class BlueDolphinBaseService {
 
   protected buildQueryParams(params: Record<string, any>): string {
     const searchParams = new URLSearchParams();
-    
+
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
         if (Array.isArray(value)) {
@@ -94,7 +89,7 @@ export class BlueDolphinRestService extends BlueDolphinBaseService {
   }): Promise<ApiResponse<BlueDolphinDomain[]>> {
     const queryParams = this.buildQueryParams(params || {});
     const endpoint = `/api/v1/domains${queryParams ? `?${queryParams}` : ''}`;
-    
+
     return this.request<ApiResponse<BlueDolphinDomain[]>>(endpoint);
   }
 
@@ -109,10 +104,7 @@ export class BlueDolphinRestService extends BlueDolphinBaseService {
     });
   }
 
-  async updateDomain(
-    id: string,
-    domain: Partial<CreateDomainRequest>
-  ): Promise<BlueDolphinDomain> {
+  async updateDomain(id: string, domain: Partial<CreateDomainRequest>): Promise<BlueDolphinDomain> {
     return this.request<BlueDolphinDomain>(`/api/v1/domains/${id}`, {
       method: 'PUT',
       body: JSON.stringify(domain),
@@ -135,7 +127,7 @@ export class BlueDolphinRestService extends BlueDolphinBaseService {
   }): Promise<ApiResponse<BlueDolphinCapability[]>> {
     const queryParams = this.buildQueryParams(params || {});
     const endpoint = `/api/v1/capabilities${queryParams ? `?${queryParams}` : ''}`;
-    
+
     return this.request<ApiResponse<BlueDolphinCapability[]>>(endpoint);
   }
 
@@ -145,7 +137,7 @@ export class BlueDolphinRestService extends BlueDolphinBaseService {
 
   async createCapability(
     domainId: string,
-    capability: CreateCapabilityRequest
+    capability: CreateCapabilityRequest,
   ): Promise<BlueDolphinCapability> {
     return this.request<BlueDolphinCapability>(`/api/v1/domains/${domainId}/capabilities`, {
       method: 'POST',
@@ -165,7 +157,7 @@ export class BlueDolphinRestService extends BlueDolphinBaseService {
   }): Promise<ApiResponse<BlueDolphinRequirement[]>> {
     const queryParams = this.buildQueryParams(params || {});
     const endpoint = `/api/v1/requirements${queryParams ? `?${queryParams}` : ''}`;
-    
+
     return this.request<ApiResponse<BlueDolphinRequirement[]>>(endpoint);
   }
 
@@ -185,7 +177,7 @@ export class BlueDolphinRestService extends BlueDolphinBaseService {
   }): Promise<ApiResponse<BlueDolphinUseCase[]>> {
     const queryParams = this.buildQueryParams(params || {});
     const endpoint = `/api/v1/usecases${queryParams ? `?${queryParams}` : ''}`;
-    
+
     return this.request<ApiResponse<BlueDolphinUseCase[]>>(endpoint);
   }
 
@@ -199,7 +191,7 @@ export class BlueDolphinRestService extends BlueDolphinBaseService {
   }): Promise<ApiResponse<BlueDolphinApplicationFunction[]>> {
     const queryParams = this.buildQueryParams(params || {});
     const endpoint = `/api/v1/application-functions${queryParams ? `?${queryParams}` : ''}`;
-    
+
     return this.request<ApiResponse<BlueDolphinApplicationFunction[]>>(endpoint);
   }
 }
@@ -228,9 +220,7 @@ export class BlueDolphinODataService extends BlueDolphinBaseService {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      throw new Error(
-        `Blue Dolphin OData Error: ${error.error?.message || response.statusText}`
-      );
+      throw new Error(`Blue Dolphin OData Error: ${error.error?.message || response.statusText}`);
     }
 
     return response.json();
@@ -246,9 +236,8 @@ export class BlueDolphinODataService extends BlueDolphinBaseService {
     skip?: number;
     moreColumns?: boolean;
   }): Promise<ODataResponse<any>> {
-    
     const queryParams = new URLSearchParams();
-    
+
     // Add MoreColumns parameter if enabled
     if (options.moreColumns) {
       queryParams.append('MoreColumns', 'true');
@@ -260,7 +249,7 @@ export class BlueDolphinODataService extends BlueDolphinBaseService {
         queryParams.append('$select', options.select.join(','));
       }
     }
-    
+
     // Standard OData parameters
     if (options.filter) queryParams.append('$filter', options.filter);
     if (options.orderby) queryParams.append('$orderby', options.orderby);
@@ -282,14 +271,14 @@ export class BlueDolphinODataService extends BlueDolphinBaseService {
   }): Promise<ODataResponse<BlueDolphinDomain>> {
     const queryParams = this.buildODataQueryParams(options || {});
     const endpoint = `/Domains${queryParams ? `?${queryParams}` : ''}`;
-    
+
     return this.odataRequest<ODataResponse<BlueDolphinDomain>>(endpoint);
   }
 
   async getDomainById(id: string, expand?: string[]): Promise<BlueDolphinDomain> {
     const queryParams = expand ? this.buildODataQueryParams({ expand }) : '';
     const endpoint = `/Domains('${id}')${queryParams ? `?${queryParams}` : ''}`;
-    
+
     return this.odataRequest<BlueDolphinDomain>(endpoint);
   }
 
@@ -318,7 +307,7 @@ export class BlueDolphinODataService extends BlueDolphinBaseService {
 
     const queryParams = this.buildODataQueryParams(queryOptions);
     const endpoint = `/Capabilities${queryParams ? `?${queryParams}` : ''}`;
-    
+
     return this.odataRequest<ODataResponse<BlueDolphinCapability>>(endpoint);
   }
 
@@ -351,7 +340,7 @@ export class BlueDolphinODataService extends BlueDolphinBaseService {
 
     const queryParams = this.buildODataQueryParams(queryOptions);
     const endpoint = `/Requirements${queryParams ? `?${queryParams}` : ''}`;
-    
+
     return this.odataRequest<ODataResponse<BlueDolphinRequirement>>(endpoint);
   }
 
@@ -380,7 +369,7 @@ export class BlueDolphinODataService extends BlueDolphinBaseService {
 
     const queryParams = this.buildODataQueryParams(queryOptions);
     const endpoint = `/UseCases${queryParams ? `?${queryParams}` : ''}`;
-    
+
     return this.odataRequest<ODataResponse<BlueDolphinUseCase>>(endpoint);
   }
 
@@ -388,14 +377,14 @@ export class BlueDolphinODataService extends BlueDolphinBaseService {
   async getDomainCount(filter?: string): Promise<number> {
     const queryParams = filter ? `?$filter=${encodeURIComponent(filter)}` : '';
     const endpoint = `/Domains/$count${queryParams}`;
-    
+
     return this.odataRequest<number>(endpoint);
   }
 
   async getCapabilityCount(filter?: string): Promise<number> {
     const queryParams = filter ? `?$filter=${encodeURIComponent(filter)}` : '';
     const endpoint = `/Capabilities/$count${queryParams}`;
-    
+
     return this.odataRequest<number>(endpoint);
   }
 
@@ -438,7 +427,7 @@ export class BlueDolphinSyncService {
         entityId: domain.id,
         status: 'PENDING',
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
 
       try {
@@ -477,10 +466,7 @@ export class BlueDolphinSyncService {
   }
 
   // Sync capabilities from E2E to Blue Dolphin
-  async syncCapabilitiesToBlueDolphin(
-    domainId: string,
-    capabilities: any[]
-  ): Promise<SyncResult> {
+  async syncCapabilitiesToBlueDolphin(domainId: string, capabilities: any[]): Promise<SyncResult> {
     const operations: SyncOperation[] = [];
     const errors: string[] = [];
     let syncedCount = 0;
@@ -493,7 +479,7 @@ export class BlueDolphinSyncService {
         entityId: capability.id,
         status: 'PENDING',
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
 
       try {
@@ -506,10 +492,12 @@ export class BlueDolphinSyncService {
           type: 'TMF_ODA_CAPABILITY',
           level: 'LEVEL_1', // Default level
           metadata: {
-            effortEstimate: `${capability.baseEffort?.businessAnalyst + 
-              capability.baseEffort?.solutionArchitect + 
-              capability.baseEffort?.developer + 
-              capability.baseEffort?.qaEngineer} PD`,
+            effortEstimate: `${
+              capability.baseEffort?.businessAnalyst +
+              capability.baseEffort?.solutionArchitect +
+              capability.baseEffort?.developer +
+              capability.baseEffort?.qaEngineer
+            } PD`,
             complexity: 'MEDIUM',
           },
         });
@@ -536,9 +524,7 @@ export class BlueDolphinSyncService {
   }
 
   // Sync requirements from SpecSync to Blue Dolphin
-  async syncRequirementsToBlueDolphin(
-    requirements: any[]
-  ): Promise<SyncResult> {
+  async syncRequirementsToBlueDolphin(requirements: any[]): Promise<SyncResult> {
     const operations: SyncOperation[] = [];
     const errors: string[] = [];
     let syncedCount = 0;
@@ -551,7 +537,7 @@ export class BlueDolphinSyncService {
         entityId: requirement.id,
         status: 'PENDING',
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
 
       try {
@@ -560,7 +546,8 @@ export class BlueDolphinSyncService {
 
         await this.restService.createRequirement({
           name: requirement.rephrasedRequirementId || requirement.requirementId,
-          description: requirement.description || requirement.usecase1 || 'No description available',
+          description:
+            requirement.description || requirement.usecase1 || 'No description available',
           type: 'FUNCTIONAL_REQUIREMENT',
           priority: 'MEDIUM', // Default priority
           metadata: {
@@ -577,7 +564,9 @@ export class BlueDolphinSyncService {
         operation.status = 'FAILED';
         operation.error = error instanceof Error ? error.message : 'Unknown error';
         operation.updatedAt = new Date().toISOString();
-        errors.push(`Failed to sync requirement ${requirement.rephrasedRequirementId}: ${operation.error}`);
+        errors.push(
+          `Failed to sync requirement ${requirement.rephrasedRequirementId}: ${operation.error}`,
+        );
       }
 
       operations.push(operation);
@@ -602,19 +591,20 @@ export class BlueDolphinSyncService {
       id: domain.id,
       name: domain.name,
       description: domain.description,
-      capabilities: (domain as any).Capabilities?.map((cap: any) => ({
-        id: cap.id,
-        name: cap.name,
-        description: cap.description,
-        segments: [],
-        baseEffort: {
-          businessAnalyst: 5,
-          solutionArchitect: 3,
-          developer: 10,
-          qaEngineer: 2,
-        },
-        complexityFactors: {},
-      })) || [],
+      capabilities:
+        (domain as any).Capabilities?.map((cap: any) => ({
+          id: cap.id,
+          name: cap.name,
+          description: cap.description,
+          segments: [],
+          baseEffort: {
+            businessAnalyst: 5,
+            solutionArchitect: 3,
+            developer: 10,
+            qaEngineer: 2,
+          },
+          complexityFactors: {},
+        })) || [],
     }));
   }
 }
@@ -630,7 +620,7 @@ export function createBlueDolphinService(config: BlueDolphinConfig) {
       return {
         rest: new BlueDolphinRestService(config),
         odata: new BlueDolphinODataService(config),
-        sync: new BlueDolphinSyncService(config)
+        sync: new BlueDolphinSyncService(config),
       };
     default:
       throw new Error(`Unsupported protocol: ${config.protocol}`);

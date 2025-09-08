@@ -7,6 +7,7 @@ The CET v22.0 integration requires a comprehensive set of React components that 
 ## Core Component Structure
 
 ### 1. **Main Container Component**
+
 ```typescript
 // CETv22MainContainer.tsx
 interface CETv22MainContainerProps {
@@ -26,6 +27,7 @@ interface CETv22MainContainerProps {
 ```
 
 ### 2. **File Upload Component**
+
 ```typescript
 // CETv22FileUpload.tsx
 interface CETv22FileUploadProps {
@@ -45,6 +47,7 @@ interface CETv22FileUploadProps {
 ```
 
 ### 3. **Analysis Dashboard Component**
+
 ```typescript
 // CETv22AnalysisDashboard.tsx
 interface CETv22AnalysisDashboardProps {
@@ -93,6 +96,7 @@ CETv22MainContainer
 ### 1. **File Upload Components**
 
 #### FileDropZone
+
 ```typescript
 // CETv22FileDropZone.tsx
 interface FileDropZoneProps {
@@ -111,6 +115,7 @@ interface FileDropZoneProps {
 ```
 
 #### FileValidation
+
 ```typescript
 // CETv22FileValidation.tsx
 interface FileValidationProps {
@@ -130,6 +135,7 @@ interface FileValidationProps {
 ### 2. **Analysis Display Components**
 
 #### ProjectOverviewCard
+
 ```typescript
 // CETv22ProjectOverviewCard.tsx
 interface ProjectOverviewCardProps {
@@ -151,6 +157,7 @@ interface ProjectOverviewCardProps {
 ```
 
 #### ResourceSummaryCard
+
 ```typescript
 // CETv22ResourceSummaryCard.tsx
 interface ResourceSummaryCardProps {
@@ -170,6 +177,7 @@ interface ResourceSummaryCardProps {
 ```
 
 #### EffortAnalysisCard
+
 ```typescript
 // CETv22EffortAnalysisCard.tsx
 interface EffortAnalysisCardProps {
@@ -192,6 +200,7 @@ interface EffortAnalysisCardProps {
 ### 3. **Data Visualization Components**
 
 #### PhaseBreakdownChart
+
 ```typescript
 // CETv22PhaseBreakdownChart.tsx
 interface PhaseBreakdownChartProps {
@@ -209,6 +218,7 @@ interface PhaseBreakdownChartProps {
 ```
 
 #### ResourceDemandTimeline
+
 ```typescript
 // CETv22ResourceDemandTimeline.tsx
 interface ResourceDemandTimelineProps {
@@ -228,6 +238,7 @@ interface ResourceDemandTimelineProps {
 ### 4. **Integration Management Components**
 
 #### IntegrationOptions
+
 ```typescript
 // CETv22IntegrationOptions.tsx
 interface IntegrationOptionsProps {
@@ -251,6 +262,7 @@ interface IntegrationOptionsProps {
 ```
 
 #### MappingPreview
+
 ```typescript
 // CETv22MappingPreview.tsx
 interface MappingPreviewProps {
@@ -270,6 +282,7 @@ interface MappingPreviewProps {
 ## Component Styling & Theming
 
 ### 1. **Design System Integration**
+
 ```typescript
 // Use existing design system components
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -280,19 +293,21 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 ```
 
 ### 2. **Color Scheme**
+
 ```css
 /* CET-specific color variables */
 :root {
-  --cet-primary: #2563eb;      /* Blue for primary actions */
-  --cet-success: #16a34a;      /* Green for success states */
-  --cet-warning: #ca8a04;      /* Yellow for warnings */
-  --cet-error: #dc2626;        /* Red for errors */
-  --cet-info: #0891b2;         /* Cyan for information */
-  --cet-neutral: #6b7280;      /* Gray for neutral states */
+  --cet-primary: #2563eb; /* Blue for primary actions */
+  --cet-success: #16a34a; /* Green for success states */
+  --cet-warning: #ca8a04; /* Yellow for warnings */
+  --cet-error: #dc2626; /* Red for errors */
+  --cet-info: #0891b2; /* Cyan for information */
+  --cet-neutral: #6b7280; /* Gray for neutral states */
 }
 ```
 
 ### 3. **Responsive Design**
+
 ```typescript
 // Responsive breakpoints
 const breakpoints = {
@@ -312,6 +327,7 @@ const breakpoints = {
 ## State Management
 
 ### 1. **Component State**
+
 ```typescript
 // Local component state
 const [uploadState, setUploadState] = useState<UploadState>('idle');
@@ -321,6 +337,7 @@ const [selectedOptions, setSelectedOptions] = useState<Set<string>>(new Set());
 ```
 
 ### 2. **Shared State**
+
 ```typescript
 // Context-based state management
 interface CETv22Context {
@@ -334,6 +351,7 @@ interface CETv22Context {
 ```
 
 ### 3. **State Persistence**
+
 ```typescript
 // Local storage for user preferences
 const saveUserPreferences = (preferences: UserPreferences) => {
@@ -349,6 +367,7 @@ const loadUserPreferences = (): UserPreferences => {
 ## Event Handling
 
 ### 1. **File Events**
+
 ```typescript
 // File upload event handlers
 const handleFileSelect = (event: ChangeEvent<HTMLInputElement>) => {
@@ -368,12 +387,13 @@ const handleFileDrop = (event: DragEvent) => {
 ```
 
 ### 2. **Analysis Events**
+
 ```typescript
 // Analysis progress events
 const handleAnalysisProgress = (progress: number, step: string) => {
   setAnalysisProgress(progress);
   setCurrentStep(step);
-  
+
   if (progress === 100) {
     onAnalysisComplete();
   }
@@ -387,6 +407,7 @@ const handleAnalysisError = (error: Error) => {
 ```
 
 ### 3. **Integration Events**
+
 ```typescript
 // Integration action events
 const handleIntegrationStart = (options: IntegrationOptions) => {
@@ -403,6 +424,7 @@ const handleIntegrationComplete = (result: IntegrationResult) => {
 ## Performance Optimization
 
 ### 1. **Lazy Loading**
+
 ```typescript
 // Lazy load heavy components
 const CETv22ChartVisualization = lazy(() => import('./CETv22ChartVisualization'));
@@ -415,6 +437,7 @@ const CETv22DataTable = lazy(() => import('./CETv22DataTable'));
 ```
 
 ### 2. **Memoization**
+
 ```typescript
 // Memoize expensive calculations
 const memoizedEffortCalculation = useMemo(() => {
@@ -428,6 +451,7 @@ const memoizedChartData = useMemo(() => {
 ```
 
 ### 3. **Virtual Scrolling**
+
 ```typescript
 // Virtual scrolling for large datasets
 import { FixedSizeList as List } from 'react-window';
@@ -447,6 +471,7 @@ const VirtualizedDataTable = ({ data }: { data: CETData[] }) => (
 ## Accessibility Features
 
 ### 1. **Keyboard Navigation**
+
 ```typescript
 // Keyboard event handlers
 const handleKeyDown = (event: KeyboardEvent) => {
@@ -465,6 +490,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
 ```
 
 ### 2. **Screen Reader Support**
+
 ```typescript
 // ARIA labels and descriptions
 <div
@@ -473,7 +499,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
   aria-describedby="analysis-description"
 >
   <div id="analysis-description" className="sr-only">
-    Comprehensive analysis of CET v22.0 file with resource demands, 
+    Comprehensive analysis of CET v22.0 file with resource demands,
     effort estimates, and integration mappings.
   </div>
   {/* Component content */}
@@ -481,6 +507,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
 ```
 
 ### 3. **Focus Management**
+
 ```typescript
 // Focus management for modals and dialogs
 const focusTrapRef = useRef<HTMLDivElement>(null);
@@ -488,7 +515,7 @@ const focusTrapRef = useRef<HTMLDivElement>(null);
 useEffect(() => {
   if (isOpen && focusTrapRef.current) {
     const firstFocusable = focusTrapRef.current.querySelector(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
     ) as HTMLElement;
     firstFocusable?.focus();
   }
@@ -498,6 +525,7 @@ useEffect(() => {
 ## Testing Strategy
 
 ### 1. **Unit Tests**
+
 ```typescript
 // Component unit tests
 describe('CETv22FileUpload', () => {
@@ -505,7 +533,7 @@ describe('CETv22FileUpload', () => {
     const { getByTestId } = render(<CETv22FileUpload maxFileSize={50} />);
     // Test implementation
   });
-  
+
   it('should handle file selection', () => {
     const mockOnFileSelected = jest.fn();
     const { getByTestId } = render(
@@ -517,13 +545,14 @@ describe('CETv22FileUpload', () => {
 ```
 
 ### 2. **Integration Tests**
+
 ```typescript
 // Component integration tests
 describe('CETv22Integration', () => {
   it('should complete full analysis workflow', async () => {
     // Test complete workflow
   });
-  
+
   it('should handle errors gracefully', async () => {
     // Test error scenarios
   });
@@ -531,24 +560,26 @@ describe('CETv22Integration', () => {
 ```
 
 ### 3. **Visual Regression Tests**
+
 ```typescript
 // Visual testing with Storybook
 export const Default = Template.bind({});
 Default.args = {
   file: mockCETFile,
-  onAnalysisComplete: action('analysis-complete')
+  onAnalysisComplete: action('analysis-complete'),
 };
 
 export const WithErrors = Template.bind({});
 WithErrors.args = {
   file: mockCETFile,
-  errors: ['Invalid file format', 'Missing required sheets']
+  errors: ['Invalid file format', 'Missing required sheets'],
 };
 ```
 
 ## Component Documentation
 
 ### 1. **Storybook Stories**
+
 ```typescript
 // Component documentation with Storybook
 export default {
@@ -557,29 +588,30 @@ export default {
   parameters: {
     docs: {
       description: {
-        component: 'File upload component for CET v22.0 Excel files'
-      }
-    }
-  }
+        component: 'File upload component for CET v22.0 Excel files',
+      },
+    },
+  },
 };
 ```
 
 ### 2. **Props Documentation**
+
 ```typescript
 // Comprehensive props documentation
 interface CETv22FileUploadProps {
   /** Maximum file size in bytes */
   maxFileSize: number;
-  
+
   /** Array of allowed file extensions */
   allowedTypes: string[];
-  
+
   /** Enable drag and drop functionality */
   dragAndDrop?: boolean;
-  
+
   /** Callback when file is selected */
   onFileSelected: (file: File) => void;
-  
+
   /** Callback when validation errors occur */
   onValidationError: (errors: string[]) => void;
 }
@@ -587,4 +619,4 @@ interface CETv22FileUploadProps {
 
 ---
 
-*This UI component design provides a comprehensive foundation for building intuitive and powerful CET v22.0 integration interfaces.*
+_This UI component design provides a comprehensive foundation for building intuitive and powerful CET v22.0 integration interfaces._

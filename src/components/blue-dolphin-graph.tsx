@@ -2,7 +2,11 @@
 
 import React, { useMemo, useRef } from 'react';
 import dynamic from 'next/dynamic';
-import type { BlueDolphinVisualLink, BlueDolphinVisualNode, VisualizationViewMode } from '@/types/blue-dolphin-visualization';
+import type {
+  BlueDolphinVisualLink,
+  BlueDolphinVisualNode,
+  VisualizationViewMode,
+} from '@/types/blue-dolphin-visualization';
 
 const ForceGraph2D = dynamic(() => import('react-force-graph-2d'), { ssr: false }) as any;
 
@@ -14,7 +18,13 @@ interface BlueDolphinGraphProps {
   onLinkClick?: (l: BlueDolphinVisualLink) => void;
 }
 
-export function BlueDolphinGraph({ nodes, links, viewMode, onNodeClick, onLinkClick }: BlueDolphinGraphProps) {
+export function BlueDolphinGraph({
+  nodes,
+  links,
+  
+  onNodeClick,
+  onLinkClick,
+}: BlueDolphinGraphProps) {
   const fgRef = useRef<any>();
 
   const graphData = useMemo(() => ({ nodes, links }), [nodes, links]);
@@ -60,7 +70,12 @@ export function BlueDolphinGraph({ nodes, links, viewMode, onNodeClick, onLinkCl
       const paddingY = 2 / scale;
       const textHeight = 12 / scale;
       ctx.fillStyle = 'rgba(255,255,255,0.95)';
-      ctx.fillRect(n.x - textWidth / 2 - paddingX, n.y - size - textHeight - 6 / scale, textWidth + paddingX * 2, textHeight + paddingY * 2);
+      ctx.fillRect(
+        n.x - textWidth / 2 - paddingX,
+        n.y - size - textHeight - 6 / scale,
+        textWidth + paddingX * 2,
+        textHeight + paddingY * 2,
+      );
       ctx.fillStyle = '#0f172a';
       ctx.fillText(label, n.x - textWidth / 2, n.y - size - 6 / scale);
     };
@@ -101,7 +116,13 @@ export function BlueDolphinGraph({ nodes, links, viewMode, onNodeClick, onLinkCl
       const src = typeof l.source === 'object' ? l.source : null;
       const tgt = typeof l.target === 'object' ? l.target : null;
       if (!src || !tgt) return; // built-in renderer draws the line; we only draw the label when positions exist
-      if (typeof src.x !== 'number' || typeof src.y !== 'number' || typeof tgt.x !== 'number' || typeof tgt.y !== 'number') return;
+      if (
+        typeof src.x !== 'number' ||
+        typeof src.y !== 'number' ||
+        typeof tgt.x !== 'number' ||
+        typeof tgt.y !== 'number'
+      )
+        return;
 
       // Label in the middle
       const mx = (src.x + tgt.x) / 2;
@@ -113,14 +134,19 @@ export function BlueDolphinGraph({ nodes, links, viewMode, onNodeClick, onLinkCl
       const paddingY = 2 / scale;
       const textHeight = 12 / scale;
       ctx.fillStyle = 'rgba(255,255,255,0.95)';
-      ctx.fillRect(mx - textWidth / 2 - paddingX, my - textHeight / 2 - paddingY, textWidth + paddingX * 2, textHeight + paddingY * 2);
+      ctx.fillRect(
+        mx - textWidth / 2 - paddingX,
+        my - textHeight / 2 - paddingY,
+        textWidth + paddingX * 2,
+        textHeight + paddingY * 2,
+      );
       ctx.fillStyle = '#0f172a';
       ctx.fillText(label, mx - textWidth / 2, my + 4 / scale);
     };
   }, []);
 
   return (
-    <div className="w-full h-[70vh] rounded border">
+    <div className="h-[70vh] w-full rounded border">
       <ForceGraph2D
         ref={fgRef}
         graphData={graphData}
@@ -143,5 +169,3 @@ export function BlueDolphinGraph({ nodes, links, viewMode, onNodeClick, onLinkCl
 }
 
 export default BlueDolphinGraph;
-
-

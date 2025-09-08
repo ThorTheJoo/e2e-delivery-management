@@ -1,8 +1,12 @@
 {
   "name": "e2e-delivery-management",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "E2E Delivery Management System - TMF Scoping & Architecture Orchestrator",
   "private": true,
+  "engines": {
+    "node": ">=18.18 <23",
+    "npm": ">=9"
+  },
   "scripts": {
     "dev": "next dev",
     "prebuild": "node scripts/build-info.js",
@@ -10,7 +14,10 @@
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
-    "build-info": "node scripts/build-info.js"
+    "build-info": "node scripts/build-info.js",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint:fix": "next lint --fix"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.0",
@@ -68,5 +75,17 @@
     "eslint-config-next": "^14.2.32",
     "prettier": "^3.1.0",
     "prettier-plugin-tailwindcss": "^0.5.7"
+  },
+  "browserslist": {
+    "production": [
+      "last 2 versions",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }

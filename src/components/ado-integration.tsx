@@ -1,44 +1,54 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ADOWorkItemMapping, ADOValidationResult, ADOPreviewData, ADOExportStatus } from '@/types/ado';
+import {
+  ADOWorkItemMapping,
+  ADOValidationResult,
+  ADOPreviewData,
+  ADOExportStatus,
+} from '@/types/ado';
 import { Project, TMFOdaDomain, SpecSyncItem } from '@/types';
 import { adoService } from '@/lib/ado-service';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useToast } from '@/components/ui/toast';
-import { 
-  Server, 
-  FileText, 
-  Download, 
-  Upload, 
-  Eye, 
-  CheckCircle, 
-  XCircle, 
+import {
+  Server,
+  FileText,
+  Download,
+  Upload,
+  Eye,
+  CheckCircle,
+  XCircle,
   AlertTriangle,
   Info,
   Network,
   Users,
   Settings,
-  Play,
-  Square,
   BarChart3,
   ChevronDown,
   ChevronRight,
-  ExternalLink,
   Copy,
-  RefreshCw,
-  Filter,
   Search,
   Layers,
-  GitBranch,
-  Calendar,
-  Clock,
   Target,
-  Zap
+  Zap,
 } from 'lucide-react';
 
 interface ADOIntegrationProps {
@@ -61,15 +71,15 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
   const [activeTab, setActiveTab] = useState('overview');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
-  
+
   const toast = useToast();
 
   useEffect(() => {
     // Initialize with all domains and capabilities selected
-    const allDomainIds = tmfDomains.map(d => d.id);
-    const allCapabilityIds = tmfDomains.flatMap(d => d.capabilities.map(c => c.id));
-    const allRequirementIds = specSyncItems.map(r => r.id);
-    
+    const allDomainIds = tmfDomains.map((d) => d.id);
+    const allCapabilityIds = tmfDomains.flatMap((d) => d.capabilities.map((c) => c.id));
+    const allRequirementIds = specSyncItems.map((r) => r.id);
+
     setSelectedDomains(allDomainIds);
     setSelectedCapabilities(allCapabilityIds);
     setSelectedRequirements(allRequirementIds);
@@ -79,24 +89,29 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
     setIsGenerating(true);
     try {
       // Filter domains and items based on selection
-      const filteredDomains = tmfDomains.filter(d => selectedDomains.includes(d.id));
-      const filteredSpecSyncItems = specSyncItems.filter(r => selectedRequirements.includes(r.id));
-      
-      const mappings = adoService.generateWorkItemMappings(project, filteredDomains, filteredSpecSyncItems);
+      const filteredDomains = tmfDomains.filter((d) => selectedDomains.includes(d.id));
+      const filteredSpecSyncItems = specSyncItems.filter((r) =>
+        selectedRequirements.includes(r.id),
+      );
+
+      const mappings = adoService.generateWorkItemMappings(
+        project,
+        filteredDomains,
+        filteredSpecSyncItems,
+      );
       setWorkItemMappings(mappings);
-      
+
       const preview = adoService.generatePreview(mappings);
       setPreviewData(preview);
-      
+
       const validationResult = adoService.validateWorkItemMappings(mappings);
       setValidation(validationResult);
-      
+
       toast.showSuccess(`Generated ${mappings.length} work item mappings`);
-      
+
       console.log('Generated work item mappings:', mappings);
       console.log('Preview data:', preview);
       console.log('Validation result:', validationResult);
-      
     } catch (error) {
       console.error('Failed to generate work items:', error);
       toast.showError('Failed to generate work items');
@@ -122,7 +137,7 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      
+
       toast.showSuccess('Work items exported to JSON successfully');
     } catch (error) {
       console.error('Failed to export to JSON:', error);
@@ -136,14 +151,17 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
       return;
     }
 
-          console.log('🚀 Starting ADO export with mappings:', workItemMappings);
-      console.log('📊 Mapping details:', workItemMappings.map(m => ({
+    console.log('🚀 Starting ADO export with mappings:', workItemMappings);
+    console.log(
+      '📊 Mapping details:',
+      workItemMappings.map((m) => ({
         type: m.targetType,
         title: m.targetTitle,
-        source: m.sourceType
-      })));
-      setIsExporting(true);
-    
+        source: m.sourceType,
+      })),
+    );
+    setIsExporting(true);
+
     try {
       // First, check if ADO is configured
       const config = adoService.getConfiguration();
@@ -153,11 +171,11 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
       }
 
       console.log('🔍 ADO Configuration found:', config);
-      
+
       // Check if authenticated
       const authStatus = adoService.getAuthStatus();
       console.log('🔐 ADO Authentication status check:', authStatus);
-      
+
       if (!authStatus?.isAuthenticated) {
         console.log('❌ ADO not authenticated - stopping export');
         toast.showError('ADO not authenticated. Please test connection first.');
@@ -165,7 +183,7 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
       }
 
       console.log('🔐 ADO Authentication status:', authStatus);
-      
+
       // Test basic connection first
       console.log('🔗 Testing basic ADO connection...');
       try {
@@ -181,7 +199,7 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
         toast.showError('ADO connection test failed');
         return;
       }
-      
+
       // First, let's check what work item types are available
       console.log('🔍 Starting work item type check...');
       try {
@@ -192,7 +210,7 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
         toast.showError('Failed to get available work item types');
         return;
       }
-      
+
       // Validate work item types
       console.log('✅ Starting work item type validation...');
       try {
@@ -203,19 +221,21 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
         toast.showError('Failed to validate work item types');
         return;
       }
-      
+
       // Now proceed with export
       console.log('📤 Proceeding with export...');
       const status = await adoService.exportToADO(workItemMappings);
       console.log('📊 Export status received:', status);
-      
+
       setExportStatus(status);
-      
+
       if (status.status === 'completed') {
         toast.showSuccess(`Successfully exported ${status.processedItems} work items to ADO`);
         console.log('🎉 Export completed successfully!');
       } else if (status.status === 'completed_with_errors') {
-        toast.showWarning(`Export completed with ${status.errors.length} errors. ${status.processedItems} items exported.`);
+        toast.showWarning(
+          `Export completed with ${status.errors.length} errors. ${status.processedItems} items exported.`,
+        );
         console.log('⚠️ Export completed with errors:', status.errors);
       } else {
         toast.showError(`Export failed: ${status.errors.join(', ')}`);
@@ -223,7 +243,9 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
       }
     } catch (error) {
       console.error('💥 Failed to export to ADO:', error);
-      toast.showError(`Failed to export to ADO: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.showError(
+        `Failed to export to ADO: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     } finally {
       setIsExporting(false);
     }
@@ -239,30 +261,41 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
     setExpandedSections(newExpanded);
   };
 
-  const filteredMappings = workItemMappings.filter(mapping => {
-    const matchesSearch = mapping.targetTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         mapping.targetDescription.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredMappings = workItemMappings.filter((mapping) => {
+    const matchesSearch =
+      mapping.targetTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      mapping.targetDescription.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterType === 'all' || mapping.targetType === filterType;
     return matchesSearch && matchesFilter;
   });
 
   const getWorkItemIcon = (type: string) => {
     switch (type) {
-      case 'epic': return <Target className="h-4 w-4" />;
-      case 'feature': return <Layers className="h-4 w-4" />;
-      case 'User Story': return <Users className="h-4 w-4" />;
-      case 'task': return <Settings className="h-4 w-4" />;
-      default: return <FileText className="h-4 w-4" />;
+      case 'epic':
+        return <Target className="h-4 w-4" />;
+      case 'feature':
+        return <Layers className="h-4 w-4" />;
+      case 'User Story':
+        return <Users className="h-4 w-4" />;
+      case 'task':
+        return <Settings className="h-4 w-4" />;
+      default:
+        return <FileText className="h-4 w-4" />;
     }
   };
 
   const getWorkItemColor = (type: string) => {
     switch (type) {
-      case 'epic': return 'bg-purple-100 text-purple-800';
-      case 'feature': return 'bg-blue-100 text-blue-800';
-      case 'User Story': return 'bg-green-100 text-green-800';
-      case 'task': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'epic':
+        return 'bg-purple-100 text-purple-800';
+      case 'feature':
+        return 'bg-blue-100 text-blue-800';
+      case 'User Story':
+        return 'bg-green-100 text-green-800';
+      case 'task':
+        return 'bg-orange-100 text-orange-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -272,7 +305,9 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Azure DevOps Integration</h2>
-          <p className="text-gray-600">Transform TMF domains and capabilities into ADO work items</p>
+          <p className="text-gray-600">
+            Transform TMF domains and capabilities into ADO work items
+          </p>
         </div>
         <div className="flex items-center space-x-2">
           <Button
@@ -305,7 +340,7 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center space-x-2">
@@ -323,7 +358,9 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
               <Layers className="h-8 w-8 text-blue-600" />
               <div>
                 <p className="text-sm font-medium text-gray-600">Capabilities</p>
-                <p className="text-2xl font-bold">{tmfDomains.reduce((sum, d) => sum + d.capabilities.length, 0)}</p>
+                <p className="text-2xl font-bold">
+                  {tmfDomains.reduce((sum, d) => sum + d.capabilities.length, 0)}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -342,7 +379,7 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center space-x-2">
-                             <Server className="h-8 w-8 text-orange-600" />
+              <Server className="h-8 w-8 text-orange-600" />
               <div>
                 <p className="text-sm font-medium text-gray-600">Work Items</p>
                 <p className="text-2xl font-bold">{workItemMappings.length}</p>
@@ -380,23 +417,21 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
                 <Info className="h-5 w-5" />
                 <span>Integration Overview</span>
               </CardTitle>
-              <CardDescription>
-                Overview of the ADO integration mapping strategy
-              </CardDescription>
+              <CardDescription>Overview of the ADO integration mapping strategy</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Mapping Strategy */}
-              <div 
-                className="cursor-pointer hover:bg-muted/50 p-4 rounded-lg transition-colors"
+              <div
+                className="cursor-pointer rounded-lg p-4 transition-colors hover:bg-muted/50"
                 onClick={() => toggleSection('strategy')}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-lg border-2 border-blue-200">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-blue-200 bg-blue-100">
                       {expandedSections.has('strategy') ? (
-                        <ChevronDown className="w-5 h-5 text-blue-700" />
+                        <ChevronDown className="h-5 w-5 text-blue-700" />
                       ) : (
-                        <ChevronRight className="w-5 h-5 text-blue-700" />
+                        <ChevronRight className="h-5 w-5 text-blue-700" />
                       )}
                     </div>
                     <div>
@@ -407,26 +442,36 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
                 </div>
                 {expandedSections.has('strategy') && (
                   <div className="mt-4 space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="p-4 bg-purple-50 rounded-lg">
-                        <h4 className="font-semibold text-purple-800 mb-2">Epic Level</h4>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div className="rounded-lg bg-purple-50 p-4">
+                        <h4 className="mb-2 font-semibold text-purple-800">Epic Level</h4>
                         <p className="text-sm text-purple-700">Project + TMF Domains → ADO Epic</p>
-                        <p className="text-xs text-purple-600 mt-1">Each BSS transformation becomes an epic</p>
+                        <p className="mt-1 text-xs text-purple-600">
+                          Each BSS transformation becomes an epic
+                        </p>
                       </div>
-                      <div className="p-4 bg-blue-50 rounded-lg">
-                        <h4 className="font-semibold text-blue-800 mb-2">Feature Level</h4>
+                      <div className="rounded-lg bg-blue-50 p-4">
+                        <h4 className="mb-2 font-semibold text-blue-800">Feature Level</h4>
                         <p className="text-sm text-blue-700">TMF Domains → ADO Features</p>
-                        <p className="text-xs text-blue-600 mt-1">Each TMF domain becomes a feature</p>
+                        <p className="mt-1 text-xs text-blue-600">
+                          Each TMF domain becomes a feature
+                        </p>
                       </div>
-                      <div className="p-4 bg-green-50 rounded-lg">
-                        <h4 className="font-semibold text-green-800 mb-2">User Story Level</h4>
-                        <p className="text-sm text-green-700">TMF Capabilities → ADO User Stories</p>
-                        <p className="text-xs text-green-600 mt-1">Each capability becomes a user story</p>
+                      <div className="rounded-lg bg-green-50 p-4">
+                        <h4 className="mb-2 font-semibold text-green-800">User Story Level</h4>
+                        <p className="text-sm text-green-700">
+                          TMF Capabilities → ADO User Stories
+                        </p>
+                        <p className="mt-1 text-xs text-green-600">
+                          Each capability becomes a user story
+                        </p>
                       </div>
-                      <div className="p-4 bg-orange-50 rounded-lg">
-                        <h4 className="font-semibold text-orange-800 mb-2">Task Level</h4>
+                      <div className="rounded-lg bg-orange-50 p-4">
+                        <h4 className="mb-2 font-semibold text-orange-800">Task Level</h4>
                         <p className="text-sm text-orange-700">SpecSync Requirements → ADO Tasks</p>
-                        <p className="text-xs text-orange-600 mt-1">Each requirement becomes a task</p>
+                        <p className="mt-1 text-xs text-orange-600">
+                          Each requirement becomes a task
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -434,37 +479,40 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
               </div>
 
               {/* Data Selection */}
-              <div 
-                className="cursor-pointer hover:bg-muted/50 p-4 rounded-lg transition-colors"
+              <div
+                className="cursor-pointer rounded-lg p-4 transition-colors hover:bg-muted/50"
                 onClick={() => toggleSection('selection')}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-lg border-2 border-green-200">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-green-200 bg-green-100">
                       {expandedSections.has('selection') ? (
-                        <ChevronDown className="w-5 h-5 text-green-700" />
+                        <ChevronDown className="h-5 w-5 text-green-700" />
                       ) : (
-                        <ChevronRight className="w-5 h-5 text-green-700" />
+                        <ChevronRight className="h-5 w-5 text-green-700" />
                       )}
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold">Data Selection</h3>
-                      <p className="text-sm text-gray-600">Select which data to include in the integration</p>
+                      <p className="text-sm text-gray-600">
+                        Select which data to include in the integration
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Badge variant="secondary">
-                      {selectedDomains.length} domains, {selectedCapabilities.length} capabilities, {selectedRequirements.length} requirements
+                      {selectedDomains.length} domains, {selectedCapabilities.length} capabilities,{' '}
+                      {selectedRequirements.length} requirements
                     </Badge>
                   </div>
                 </div>
                 {expandedSections.has('selection') && (
                   <div className="mt-4 space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                       <div>
-                        <h4 className="font-medium mb-2">TMF Domains</h4>
-                        <div className="space-y-2 max-h-32 overflow-y-auto">
-                          {tmfDomains.map(domain => (
+                        <h4 className="mb-2 font-medium">TMF Domains</h4>
+                        <div className="max-h-32 space-y-2 overflow-y-auto">
+                          {tmfDomains.map((domain) => (
                             <label key={domain.id} className="flex items-center space-x-2">
                               <input
                                 type="checkbox"
@@ -473,7 +521,9 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
                                   if (e.target.checked) {
                                     setSelectedDomains([...selectedDomains, domain.id]);
                                   } else {
-                                    setSelectedDomains(selectedDomains.filter(id => id !== domain.id));
+                                    setSelectedDomains(
+                                      selectedDomains.filter((id) => id !== domain.id),
+                                    );
                                   }
                                 }}
                                 className="rounded"
@@ -484,31 +534,38 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
                         </div>
                       </div>
                       <div>
-                        <h4 className="font-medium mb-2">TMF Capabilities</h4>
-                        <div className="space-y-2 max-h-32 overflow-y-auto">
-                          {tmfDomains.flatMap(d => d.capabilities).map(capability => (
-                            <label key={capability.id} className="flex items-center space-x-2">
-                              <input
-                                type="checkbox"
-                                checked={selectedCapabilities.includes(capability.id)}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    setSelectedCapabilities([...selectedCapabilities, capability.id]);
-                                  } else {
-                                    setSelectedCapabilities(selectedCapabilities.filter(id => id !== capability.id));
-                                  }
-                                }}
-                                className="rounded"
-                              />
-                              <span className="text-sm">{capability.name}</span>
-                            </label>
-                          ))}
+                        <h4 className="mb-2 font-medium">TMF Capabilities</h4>
+                        <div className="max-h-32 space-y-2 overflow-y-auto">
+                          {tmfDomains
+                            .flatMap((d) => d.capabilities)
+                            .map((capability) => (
+                              <label key={capability.id} className="flex items-center space-x-2">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedCapabilities.includes(capability.id)}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setSelectedCapabilities([
+                                        ...selectedCapabilities,
+                                        capability.id,
+                                      ]);
+                                    } else {
+                                      setSelectedCapabilities(
+                                        selectedCapabilities.filter((id) => id !== capability.id),
+                                      );
+                                    }
+                                  }}
+                                  className="rounded"
+                                />
+                                <span className="text-sm">{capability.name}</span>
+                              </label>
+                            ))}
                         </div>
                       </div>
                       <div>
-                        <h4 className="font-medium mb-2">SpecSync Requirements</h4>
-                        <div className="space-y-2 max-h-32 overflow-y-auto">
-                          {specSyncItems.map(item => (
+                        <h4 className="mb-2 font-medium">SpecSync Requirements</h4>
+                        <div className="max-h-32 space-y-2 overflow-y-auto">
+                          {specSyncItems.map((item) => (
                             <label key={item.id} className="flex items-center space-x-2">
                               <input
                                 type="checkbox"
@@ -517,7 +574,9 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
                                   if (e.target.checked) {
                                     setSelectedRequirements([...selectedRequirements, item.id]);
                                   } else {
-                                    setSelectedRequirements(selectedRequirements.filter(id => id !== item.id));
+                                    setSelectedRequirements(
+                                      selectedRequirements.filter((id) => id !== item.id),
+                                    );
                                   }
                                 }}
                                 className="rounded"
@@ -553,13 +612,13 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
                 <div className="flex items-center space-x-4">
                   <div className="flex-1">
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
                       <input
                         type="text"
                         placeholder="Search work items..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full rounded-md border border-gray-300 py-2 pl-10 pr-4 focus:border-transparent focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
                   </div>
@@ -580,31 +639,42 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
                 {/* Work Items List */}
                 <div className="space-y-3">
                   {filteredMappings.length === 0 ? (
-                    <div className="text-center py-8">
-                      <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-500">No work items generated yet. Click "Generate Work Items" to get started.</p>
+                    <div className="py-8 text-center">
+                      <FileText className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+                      <p className="text-gray-500">
+                        No work items generated yet. Click "Generate Work Items" to get started.
+                      </p>
                     </div>
                   ) : (
                     filteredMappings.map((mapping, index) => (
-                      <div key={index} className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                      <div
+                        key={index}
+                        className="rounded-lg border p-4 transition-colors hover:bg-gray-50"
+                      >
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <div className="flex items-center space-x-3 mb-2">
+                            <div className="mb-2 flex items-center space-x-3">
                               {getWorkItemIcon(mapping.targetType)}
                               <Badge className={getWorkItemColor(mapping.targetType)}>
                                 {mapping.targetType.toUpperCase()}
                               </Badge>
                               <h3 className="font-semibold">{mapping.targetTitle}</h3>
                             </div>
-                            <p className="text-sm text-gray-600 mb-2">{mapping.targetDescription}</p>
+                            <p className="mb-2 text-sm text-gray-600">
+                              {mapping.targetDescription}
+                            </p>
                             <div className="flex items-center space-x-4 text-xs text-gray-500">
                               <span>Source: {mapping.sourceType}</span>
                               <span>Priority: {mapping.priority}</span>
-                              {mapping.estimatedEffort && <span>Effort: {mapping.estimatedEffort}d</span>}
-                              {mapping.storyPoints && <span>Story Points: {mapping.storyPoints}</span>}
+                              {mapping.estimatedEffort && (
+                                <span>Effort: {mapping.estimatedEffort}d</span>
+                              )}
+                              {mapping.storyPoints && (
+                                <span>Story Points: {mapping.storyPoints}</span>
+                              )}
                             </div>
                             {mapping.tags && mapping.tags.length > 0 && (
-                              <div className="flex items-center space-x-1 mt-2">
+                              <div className="mt-2 flex items-center space-x-1">
                                 {mapping.tags.slice(0, 3).map((tag, tagIndex) => (
                                   <Badge key={tagIndex} variant="outline" className="text-xs">
                                     {tag}
@@ -644,7 +714,7 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
         {/* Preview Tab */}
         <TabsContent value="preview" className="space-y-6">
           {previewData ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
@@ -655,12 +725,16 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
                 <CardContent>
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center p-4 bg-gray-50 rounded-lg">
-                        <div className="text-2xl font-bold text-gray-900">{previewData.summary.totalItems}</div>
+                      <div className="rounded-lg bg-gray-50 p-4 text-center">
+                        <div className="text-2xl font-bold text-gray-900">
+                          {previewData.summary.totalItems}
+                        </div>
                         <div className="text-sm text-gray-600">Total Items</div>
                       </div>
-                      <div className="text-center p-4 bg-gray-50 rounded-lg">
-                        <div className="text-2xl font-bold text-gray-900">{previewData.summary.totalEffort}</div>
+                      <div className="rounded-lg bg-gray-50 p-4 text-center">
+                        <div className="text-2xl font-bold text-gray-900">
+                          {previewData.summary.totalEffort}
+                        </div>
                         <div className="text-sm text-gray-600">Total Effort (days)</div>
                       </div>
                     </div>
@@ -673,11 +747,15 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
                         </div>
                         <div className="flex justify-between">
                           <span>Features:</span>
-                          <span className="font-medium">{previewData.summary.breakdown.features}</span>
+                          <span className="font-medium">
+                            {previewData.summary.breakdown.features}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span>User Stories:</span>
-                          <span className="font-medium">{previewData.summary.breakdown.userStories}</span>
+                          <span className="font-medium">
+                            {previewData.summary.breakdown.userStories}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span>Tasks:</span>
@@ -699,12 +777,14 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
                 <CardContent>
                   <div className="space-y-3">
                     {previewData.epics.map((epic, index) => (
-                      <div key={index} className="p-3 bg-purple-50 rounded-lg">
+                      <div key={index} className="rounded-lg bg-purple-50 p-3">
                         <h4 className="font-medium text-purple-900">{epic.targetTitle}</h4>
-                        <p className="text-sm text-purple-700 mt-1">{epic.targetDescription}</p>
-                        <div className="flex items-center space-x-2 mt-2">
+                        <p className="mt-1 text-sm text-purple-700">{epic.targetDescription}</p>
+                        <div className="mt-2 flex items-center space-x-2">
                           <Badge className="bg-purple-100 text-purple-800">Epic</Badge>
-                          <span className="text-xs text-purple-600">Effort: {epic.estimatedEffort}d</span>
+                          <span className="text-xs text-purple-600">
+                            Effort: {epic.estimatedEffort}d
+                          </span>
                         </div>
                       </div>
                     ))}
@@ -714,9 +794,11 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
             </div>
           ) : (
             <Card>
-              <CardContent className="text-center py-8">
-                <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500">No preview data available. Generate work items first.</p>
+              <CardContent className="py-8 text-center">
+                <BarChart3 className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+                <p className="text-gray-500">
+                  No preview data available. Generate work items first.
+                </p>
               </CardContent>
             </Card>
           )}
@@ -757,10 +839,13 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
                   {/* Errors */}
                   {validation.errors.length > 0 && (
                     <div>
-                      <h4 className="font-medium text-red-700 mb-2">Errors</h4>
+                      <h4 className="mb-2 font-medium text-red-700">Errors</h4>
                       <div className="space-y-2">
                         {validation.errors.map((error, index) => (
-                          <div key={index} className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                          <div
+                            key={index}
+                            className="rounded-lg border border-red-200 bg-red-50 p-3"
+                          >
                             <div className="flex items-center space-x-2">
                               <XCircle className="h-4 w-4 text-red-500" />
                               <span className="text-sm text-red-700">{error}</span>
@@ -774,10 +859,13 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
                   {/* Warnings */}
                   {validation.warnings.length > 0 && (
                     <div>
-                      <h4 className="font-medium text-yellow-700 mb-2">Warnings</h4>
+                      <h4 className="mb-2 font-medium text-yellow-700">Warnings</h4>
                       <div className="space-y-2">
                         {validation.warnings.map((warning, index) => (
-                          <div key={index} className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                          <div
+                            key={index}
+                            className="rounded-lg border border-yellow-200 bg-yellow-50 p-3"
+                          >
                             <div className="flex items-center space-x-2">
                               <AlertTriangle className="h-4 w-4 text-yellow-500" />
                               <span className="text-sm text-yellow-700">{warning}</span>
@@ -791,10 +879,13 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
                   {/* Info */}
                   {validation.info.length > 0 && (
                     <div>
-                      <h4 className="font-medium text-blue-700 mb-2">Information</h4>
+                      <h4 className="mb-2 font-medium text-blue-700">Information</h4>
                       <div className="space-y-2">
                         {validation.info.map((info, index) => (
-                          <div key={index} className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                          <div
+                            key={index}
+                            className="rounded-lg border border-blue-200 bg-blue-50 p-3"
+                          >
                             <div className="flex items-center space-x-2">
                               <Info className="h-4 w-4 text-blue-500" />
                               <span className="text-sm text-blue-700">{info}</span>
@@ -809,9 +900,11 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
             </Card>
           ) : (
             <Card>
-              <CardContent className="text-center py-8">
-                <CheckCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500">No validation data available. Generate work items first.</p>
+              <CardContent className="py-8 text-center">
+                <CheckCircle className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+                <p className="text-gray-500">
+                  No validation data available. Generate work items first.
+                </p>
               </CardContent>
             </Card>
           )}
@@ -835,15 +928,15 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
                   {exportStatus.processedItems} / {exportStatus.totalItems} items
                 </span>
               </div>
-              
+
               {/* Progress Bar */}
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+              <div className="h-2 w-full rounded-full bg-gray-200">
+                <div
+                  className="h-2 rounded-full bg-blue-600 transition-all duration-300"
                   style={{ width: `${exportStatus.progress}%` }}
                 ></div>
               </div>
-              
+
               {/* Status Details */}
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
@@ -859,41 +952,41 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
                   <span className="font-medium">Errors:</span> {exportStatus.errors.length}
                 </div>
               </div>
-              
+
               {/* Success Items */}
               {exportStatus.exportedItems.length > 0 && (
                 <div>
-                  <h4 className="font-medium text-green-700 mb-2">Successfully Exported Items</h4>
-                  <div className="space-y-1 max-h-32 overflow-y-auto">
+                  <h4 className="mb-2 font-medium text-green-700">Successfully Exported Items</h4>
+                  <div className="max-h-32 space-y-1 overflow-y-auto">
                     {exportStatus.exportedItems.map((item, index) => (
-                      <div key={index} className="text-sm text-green-600 bg-green-50 p-2 rounded">
+                      <div key={index} className="rounded bg-green-50 p-2 text-sm text-green-600">
                         ID: {item.id} - {item.fields['System.Title'] || 'Untitled'}
                       </div>
                     ))}
                   </div>
                 </div>
               )}
-              
+
               {/* Errors */}
               {exportStatus.errors.length > 0 && (
                 <div>
-                  <h4 className="font-medium text-red-700 mb-2">Export Errors</h4>
+                  <h4 className="mb-2 font-medium text-red-700">Export Errors</h4>
                   <div className="space-y-1">
                     {exportStatus.errors.map((error, index) => (
-                      <div key={index} className="text-sm text-red-600 bg-red-50 p-2 rounded">
+                      <div key={index} className="rounded bg-red-50 p-2 text-sm text-red-600">
                         {error}
                       </div>
                     ))}
                   </div>
                 </div>
               )}
-              
+
               {/* Debug Info */}
               <details className="mt-4">
                 <summary className="cursor-pointer text-sm font-medium text-gray-600">
                   Debug Information
                 </summary>
-                <pre className="mt-2 text-xs bg-gray-100 p-2 rounded overflow-x-auto">
+                <pre className="mt-2 overflow-x-auto rounded bg-gray-100 p-2 text-xs">
                   {JSON.stringify(exportStatus, null, 2)}
                 </pre>
               </details>

@@ -30,13 +30,13 @@ class MiroAuthService {
   public async initiateOAuth(): Promise<string> {
     try {
       const response = await fetch('/api/auth/miro');
-      
+
       if (!response.ok) {
         throw new Error(`Failed to initiate OAuth: ${response.statusText}`);
       }
-      
+
       const data = await response.json();
-      
+
       if (data.authUrl) {
         return data.authUrl;
       } else {
@@ -70,7 +70,7 @@ class MiroAuthService {
           refreshToken: data.refreshToken,
           expiresIn: data.expiresIn,
           tokenType: data.tokenType,
-          expiresAt: data.expiresIn ? Date.now() + (data.expiresIn * 1000) : undefined,
+          expiresAt: data.expiresIn ? Date.now() + data.expiresIn * 1000 : undefined,
         };
 
         // Store token in localStorage
@@ -135,8 +135,9 @@ class MiroAuthService {
 
   public isAuthenticated(): boolean {
     const token = this.getAccessToken();
-    const hasLocalStorageToken = typeof window !== 'undefined' ? !!localStorage.getItem('miro_access_token') : false;
-    
+    const hasLocalStorageToken =
+      typeof window !== 'undefined' ? !!localStorage.getItem('miro_access_token') : false;
+
     return token !== null || hasLocalStorageToken;
   }
 

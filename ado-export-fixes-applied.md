@@ -1,11 +1,13 @@
-# 🎯 ADO Export Issues - FIXES APPLIED! 
+# 🎯 ADO Export Issues - FIXES APPLIED!
 
 ## **Issues Identified & Resolved** ✅
 
 ### **1. Content-Type Header Error (400 Bad Request)**
+
 **Problem**: Azure DevOps API requires `application/json-patch+json` content type, not `application/json`
 
 **Fix Applied**:
+
 ```typescript
 // BEFORE (Wrong):
 'Content-Type': 'application/json'
@@ -15,21 +17,25 @@
 ```
 
 ### **2. Work Item Type Mismatch**
+
 **Problem**: Code was using `userstory` but ADO has `User Story` (with space)
 
 **Fix Applied**:
+
 ```typescript
 // BEFORE (Wrong):
-targetType: 'userstory'
+targetType: 'userstory';
 
 // AFTER (Correct):
-targetType: 'User Story'
+targetType: 'User Story';
 ```
 
 ### **3. URL Encoding for Work Item Types**
+
 **Problem**: Spaces in work item type names caused URL construction issues
 
 **Fix Applied**:
+
 ```typescript
 // BEFORE (Wrong):
 const response = await this.makeApiCall('/_apis/wit/workitems/$' + mapping.targetType + '?api-version=7.1', ...);
@@ -42,6 +48,7 @@ const response = await this.makeApiCall('/_apis/wit/workitems/$' + encodedType +
 ## **What Was Fixed** 🔧
 
 ### **Files Modified**:
+
 1. **`src/lib/ado-service.ts`**
    - Content-Type header updated
    - Work item type mapping corrected
@@ -49,6 +56,7 @@ const response = await this.makeApiCall('/_apis/wit/workitems/$' + encodedType +
    - Validation logic updated
 
 ### **Specific Changes**:
+
 - Line ~677: Content-Type header fixed
 - Line ~335: `userstory` → `User Story`
 - Line ~158: URL encoding in validation
@@ -57,6 +65,7 @@ const response = await this.makeApiCall('/_apis/wit/workitems/$' + encodedType +
 ## **Expected Results After Fixes** 📊
 
 ### **Before Fixes**:
+
 ```
 ❌ 400 Bad Request: Content-Type "application/json" not supported
 ❌ Work item type 'userstory' not available
@@ -64,6 +73,7 @@ const response = await this.makeApiCall('/_apis/wit/workitems/$' + encodedType +
 ```
 
 ### **After Fixes**:
+
 ```
 ✅ Content-Type "application/json-patch+json" accepted
 ✅ Work item type 'User Story' validated successfully
@@ -73,11 +83,13 @@ const response = await this.makeApiCall('/_apis/wit/workitems/$' + encodedType +
 ## **Test Steps** 🧪
 
 ### **1. Test Export Again**
+
 1. Click "Export to ADO" button
 2. Check browser console for success messages
 3. Verify export status shows completed items
 
 ### **2. Expected Console Output**:
+
 ```
 🚀 Starting ADO export with mappings: [...]
 🔍 Checking available work item types...
@@ -90,6 +102,7 @@ const response = await this.makeApiCall('/_apis/wit/workitems/$' + encodedType +
 ```
 
 ### **3. Check ADO Project**
+
 1. Go to: https://dev.azure.com/CSGSpecSync/ADOSandBox/_workitems/
 2. Verify new work items are created:
    - 1 Epic: "Mobily BSS Transformation - BSS Transformation"
@@ -98,34 +111,36 @@ const response = await this.makeApiCall('/_apis/wit/workitems/$' + encodedType +
 
 ## **Work Item Types Now Supported** 🎯
 
-| TMF Level | ADO Work Item Type | Status |
-|-----------|-------------------|---------|
-| Project | Epic | ✅ Available |
-| Domain | Feature | ✅ Available |
-| Capability | User Story | ✅ Available (Fixed) |
-| Requirement | Task | ✅ Available |
+| TMF Level   | ADO Work Item Type | Status               |
+| ----------- | ------------------ | -------------------- |
+| Project     | Epic               | ✅ Available         |
+| Domain      | Feature            | ✅ Available         |
+| Capability  | User Story         | ✅ Available (Fixed) |
+| Requirement | Task               | ✅ Available         |
 
 ## **If Issues Persist** 🆘
 
 ### **Check These Items**:
+
 1. **Authentication**: Verify PAT token is still valid
 2. **Project Access**: Ensure project exists and is accessible
 3. **Area/Iteration Paths**: Verify paths exist in ADO project
 4. **Custom Fields**: Check if any custom fields are required
 
 ### **Debug Commands**:
+
 ```javascript
 // In browser console:
 console.log('ADO Service:', adoService);
 console.log('Current config:', adoService.getConfiguration());
 
 // Test work item types:
-adoService.getAvailableWorkItemTypes().then(types => {
+adoService.getAvailableWorkItemTypes().then((types) => {
   console.log('Available types:', types);
 });
 
 // Test validation:
-adoService.validateWorkItemTypes().then(validation => {
+adoService.validateWorkItemTypes().then((validation) => {
   console.log('Validation:', validation);
 });
 ```
@@ -133,8 +148,9 @@ adoService.validateWorkItemTypes().then(validation => {
 ## **Summary** 📝
 
 The main issues were:
+
 1. **Wrong Content-Type header** - Fixed ✅
-2. **Incorrect work item type names** - Fixed ✅  
+2. **Incorrect work item type names** - Fixed ✅
 3. **URL encoding for spaces** - Fixed ✅
 
 Your ADO integration should now work correctly and create all 10 work items in your ADO project! 🎉

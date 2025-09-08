@@ -11,16 +11,16 @@ interface CETv22EffortAnalysisProps {
 }
 
 export const CETv22EffortAnalysisComponent: React.FC<CETv22EffortAnalysisProps> = ({
-  effortAnalysis
+  effortAnalysis,
 }) => {
   return (
     <div className="space-y-6">
       {/* Effort Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600 mb-2">
+              <div className="mb-2 text-3xl font-bold text-blue-600">
                 {effortAnalysis.totalEffort.toLocaleString()}
               </div>
               <div className="text-sm text-muted-foreground">Total Effort (Hours)</div>
@@ -31,7 +31,7 @@ export const CETv22EffortAnalysisComponent: React.FC<CETv22EffortAnalysisProps> 
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <div className="text-3xl font-bold text-green-600 mb-2">
+              <div className="mb-2 text-3xl font-bold text-green-600">
                 {effortAnalysis.phaseBreakdown.length}
               </div>
               <div className="text-sm text-muted-foreground">Phases</div>
@@ -42,7 +42,7 @@ export const CETv22EffortAnalysisComponent: React.FC<CETv22EffortAnalysisProps> 
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <div className="text-3xl font-bold text-purple-600 mb-2">
+              <div className="mb-2 text-3xl font-bold text-purple-600">
                 {effortAnalysis.weeklyBreakdown.length}
               </div>
               <div className="text-sm text-muted-foreground">Weeks</div>
@@ -62,12 +62,10 @@ export const CETv22EffortAnalysisComponent: React.FC<CETv22EffortAnalysisProps> 
         <CardContent>
           <div className="space-y-4">
             {effortAnalysis.phaseBreakdown.map((phase) => (
-              <div key={phase.phaseNumber} className="p-4 border rounded-lg">
-                <div className="flex items-center justify-between mb-3">
+              <div key={phase.phaseNumber} className="rounded-lg border p-4">
+                <div className="mb-3 flex items-center justify-between">
                   <h3 className="font-semibold">Phase {phase.phaseNumber}</h3>
-                  <Badge variant="secondary">
-                    {phase.percentage.toFixed(1)}%
-                  </Badge>
+                  <Badge variant="secondary">{phase.percentage.toFixed(1)}%</Badge>
                 </div>
                 <div className="text-2xl font-bold text-blue-600">
                   {phase.totalEffort.toLocaleString()} hours
@@ -87,8 +85,8 @@ export const CETv22EffortAnalysisComponent: React.FC<CETv22EffortAnalysisProps> 
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8">
-            <PieChart className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+          <div className="py-8 text-center">
+            <PieChart className="mx-auto mb-4 h-16 w-16 text-gray-400" />
             <p className="text-muted-foreground">
               Weekly effort visualization would be displayed here
             </p>

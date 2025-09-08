@@ -4,13 +4,38 @@ import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Trash2, Edit, ChevronDown, ChevronRight, Search, CheckCircle, Circle } from 'lucide-react';
-import { TMFReferenceService, TMFReferenceDomain, TMFReferenceCapability } from '@/lib/tmf-reference-service';
+import {
+  Plus,
+  Trash2,
+  Edit,
+  ChevronDown,
+  ChevronRight,
+  Search,
+  CheckCircle,
+  Circle,
+} from 'lucide-react';
+import {
+  TMFReferenceService,
+  TMFReferenceDomain,
+  TMFReferenceCapability,
+} from '@/lib/tmf-reference-service';
 
 interface UserDomain {
   id: string;
@@ -39,7 +64,11 @@ interface TMFDomainCapabilityManagerProps {
   specSyncData?: any; // SpecSync data for requirement mapping
 }
 
-export function TMFDomainCapabilityManager({ onStateChange, initialState, specSyncData }: TMFDomainCapabilityManagerProps) {
+export function TMFDomainCapabilityManager({
+  onStateChange,
+  initialState,
+  specSyncData,
+}: TMFDomainCapabilityManagerProps) {
   const [domains, setDomains] = useState<UserDomain[]>(initialState || []);
   const [referenceDomains, setReferenceDomains] = useState<TMFReferenceDomain[]>([]);
   const [referenceCapabilities, setReferenceCapabilities] = useState<TMFReferenceCapability[]>([]);
@@ -57,11 +86,11 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
       try {
         const [domainsData, capabilitiesData] = await Promise.all([
           TMFReferenceService.getReferenceDomains(),
-          TMFReferenceService.getAllReferenceCapabilities()
+          TMFReferenceService.getAllReferenceCapabilities(),
         ]);
         setReferenceDomains(domainsData);
         setReferenceCapabilities(capabilitiesData);
-        
+
         // Initialize with sample data if no domains exist
         if (domains.length === 0) {
           initializeSampleData(domainsData, capabilitiesData);
@@ -80,13 +109,13 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
   useEffect(() => {
     if (specSyncData?.items && domains.length > 0 && !loading && !isProcessingSpecSync.current) {
       isProcessingSpecSync.current = true;
-      
+
       const processSpecSyncData = () => {
         updateRequirementCounts(specSyncData.items);
         autoSelectMatchingDomainsAndCapabilities(specSyncData.items);
         isProcessingSpecSync.current = false;
       };
-      
+
       // Use setTimeout to break the synchronous update cycle
       setTimeout(processSpecSyncData, 0);
     }
@@ -100,10 +129,15 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
   }, [domains, loading]); // Remove onStateChange from dependencies to prevent infinite loop
 
   // Initialize sample data
-  const initializeSampleData = (referenceDomains: TMFReferenceDomain[], referenceCapabilities: TMFReferenceCapability[]) => {
+  const initializeSampleData = (
+    referenceDomains: TMFReferenceDomain[],
+    referenceCapabilities: TMFReferenceCapability[],
+  ) => {
     const sampleDomains: UserDomain[] = referenceDomains.map((refDomain, index) => {
-      const domainCapabilities = referenceCapabilities.filter(cap => cap.domain_id === refDomain.id);
-      
+      const domainCapabilities = referenceCapabilities.filter(
+        (cap) => cap.domain_id === refDomain.id,
+      );
+
       return {
         id: `domain-${index + 1}`,
         name: refDomain.name,
@@ -116,11 +150,11 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
           referenceCapabilityId: refCap.id,
           domainId: `domain-${index + 1}`,
           isSelected: false,
-          requirementCount: 0
+          requirementCount: 0,
         })),
         isSelected: false,
         isExpanded: false,
-        requirementCount: 0
+        requirementCount: 0,
       };
     });
 
@@ -128,13 +162,11 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
     onStateChange?.(sampleDomains);
   };
 
-
-
   const autoSelectMatchingDomainsAndCapabilities = (specSyncItems: any[]) => {
     // Extract unique domains and capabilities from SpecSync data
     const importedDomains = new Set<string>();
     const importedCapabilities = new Set<string>();
-    
+
     specSyncItems.forEach((item: any) => {
       if (item.domain) {
         importedDomains.add(item.domain.toString().trim());
@@ -148,31 +180,31 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
     });
 
     // Update existing domains to auto-select matching ones
-    const updatedDomains = domains.map(domain => {
+    const updatedDomains = domains.map((domain) => {
       const domainName = domain.name.toLowerCase();
-      const isDomainMatch = Array.from(importedDomains).some(importedDomain => 
-        importedDomain.toLowerCase() === domainName
+      const isDomainMatch = Array.from(importedDomains).some(
+        (importedDomain) => importedDomain.toLowerCase() === domainName,
       );
 
       // Update capabilities within this domain
-      const updatedCapabilities = domain.capabilities.map(capability => {
+      const updatedCapabilities = domain.capabilities.map((capability) => {
         const capabilityName = capability.name.toLowerCase();
-        const isCapabilityMatch = Array.from(importedCapabilities).some(importedCapability => 
-          importedCapability.toLowerCase() === capabilityName
+        const isCapabilityMatch = Array.from(importedCapabilities).some(
+          (importedCapability) => importedCapability.toLowerCase() === capabilityName,
         );
 
         return {
           ...capability,
-          isSelected: isCapabilityMatch
+          isSelected: isCapabilityMatch,
         };
       });
 
       // Add missing capabilities from imported data to this domain
-      Array.from(importedCapabilities).forEach(importedCapability => {
-        const capabilityExists = updatedCapabilities.some(cap => 
-          cap.name.toLowerCase() === importedCapability.toLowerCase()
+      Array.from(importedCapabilities).forEach((importedCapability) => {
+        const capabilityExists = updatedCapabilities.some(
+          (cap) => cap.name.toLowerCase() === importedCapability.toLowerCase(),
         );
-        
+
         if (!capabilityExists && isDomainMatch) {
           // Add new capability to this domain
           const newCapability: UserCapability = {
@@ -181,31 +213,31 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
             description: `Imported capability: ${importedCapability}`,
             domainId: domain.id,
             isSelected: true,
-            requirementCount: 0
+            requirementCount: 0,
           };
           updatedCapabilities.push(newCapability);
         }
       });
 
       // Domain is selected if any of its capabilities are selected or if domain name matches
-      const hasSelectedCapabilities = updatedCapabilities.some(cap => cap.isSelected);
+      const hasSelectedCapabilities = updatedCapabilities.some((cap) => cap.isSelected);
       const isSelected = isDomainMatch || hasSelectedCapabilities;
 
       return {
         ...domain,
         isSelected,
         capabilities: updatedCapabilities,
-        isExpanded: false // Keep domains collapsed by default
+        isExpanded: false, // Keep domains collapsed by default
       };
     });
 
     // Create missing domains from imported data
     const newDomains: UserDomain[] = [];
-    Array.from(importedDomains).forEach(importedDomain => {
-      const domainExists = updatedDomains.some(domain => 
-        domain.name.toLowerCase() === importedDomain.toLowerCase()
+    Array.from(importedDomains).forEach((importedDomain) => {
+      const domainExists = updatedDomains.some(
+        (domain) => domain.name.toLowerCase() === importedDomain.toLowerCase(),
       );
-      
+
       if (!domainExists) {
         // Create new domain from imported data
         const newDomain: UserDomain = {
@@ -215,7 +247,7 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
           capabilities: [],
           isSelected: true,
           isExpanded: false,
-          requirementCount: 0
+          requirementCount: 0,
         };
         newDomains.push(newDomain);
       }
@@ -223,46 +255,53 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
 
     // Combine existing and new domains
     const allDomains = [...updatedDomains, ...newDomains];
-    
+
     setDomains(allDomains);
   };
 
   const updateRequirementCounts = (specSyncItems: any[]) => {
-    const updatedDomains = domains.map(domain => {
-      const domainCapabilities = domain.capabilities.map(capability => {
+    const updatedDomains = domains.map((domain) => {
+      const domainCapabilities = domain.capabilities.map((capability) => {
         // Count requirements that match this capability
         const requirementCount = specSyncItems.filter((item: any) => {
           const itemCapability = (item.capability || item.afLevel2 || '').toString().toLowerCase();
           const itemDomain = (item.domain || '').toString().toLowerCase();
           const capabilityName = capability.name.toLowerCase();
           const domainName = domain.name.toLowerCase();
-          
+
           // Exact match for better accuracy
           const capabilityMatch = itemCapability === capabilityName;
           const domainMatch = itemDomain === domainName;
-          
+
           return capabilityMatch && domainMatch;
         }).length;
 
         return {
           ...capability,
-          requirementCount
+          requirementCount,
         };
       });
 
-      const domainRequirementCount = domainCapabilities.reduce((sum, cap) => sum + cap.requirementCount, 0);
+      const domainRequirementCount = domainCapabilities.reduce(
+        (sum, cap) => sum + cap.requirementCount,
+        0,
+      );
 
       return {
         ...domain,
         capabilities: domainCapabilities,
-        requirementCount: domainRequirementCount
+        requirementCount: domainRequirementCount,
       };
     });
 
     setDomains(updatedDomains);
   };
 
-  const addDomain = (domainData: { name: string; description: string; referenceDomainId?: string }) => {
+  const addDomain = (domainData: {
+    name: string;
+    description: string;
+    referenceDomainId?: string;
+  }) => {
     const newDomain: UserDomain = {
       id: `domain-${Date.now()}`,
       name: domainData.name,
@@ -271,7 +310,7 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
       capabilities: [],
       isSelected: false,
       isExpanded: false,
-      requirementCount: 0
+      requirementCount: 0,
     };
 
     const updatedDomains = [...domains, newDomain];
@@ -280,7 +319,11 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
     setAddDomainDialogOpen(false);
   };
 
-  const addCapability = (capabilityData: { name: string; description: string; referenceCapabilityId?: string }) => {
+  const addCapability = (capabilityData: {
+    name: string;
+    description: string;
+    referenceCapabilityId?: string;
+  }) => {
     const newCapability: UserCapability = {
       id: `capability-${Date.now()}`,
       name: capabilityData.name,
@@ -288,14 +331,14 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
       referenceCapabilityId: capabilityData.referenceCapabilityId,
       domainId: selectedDomainForCapability,
       isSelected: false,
-      requirementCount: 0
+      requirementCount: 0,
     };
 
-    const updatedDomains = domains.map(domain => {
+    const updatedDomains = domains.map((domain) => {
       if (domain.id === selectedDomainForCapability) {
         return {
           ...domain,
-          capabilities: [...domain.capabilities, newCapability]
+          capabilities: [...domain.capabilities, newCapability],
         };
       }
       return domain;
@@ -308,17 +351,17 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
   };
 
   const removeDomain = (domainId: string) => {
-    const updatedDomains = domains.filter(domain => domain.id !== domainId);
+    const updatedDomains = domains.filter((domain) => domain.id !== domainId);
     setDomains(updatedDomains);
     onStateChange?.(updatedDomains);
   };
 
   const removeCapability = (domainId: string, capabilityId: string) => {
-    const updatedDomains = domains.map(domain => {
+    const updatedDomains = domains.map((domain) => {
       if (domain.id === domainId) {
         return {
           ...domain,
-          capabilities: domain.capabilities.filter(cap => cap.id !== capabilityId)
+          capabilities: domain.capabilities.filter((cap) => cap.id !== capabilityId),
         };
       }
       return domain;
@@ -328,19 +371,19 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
   };
 
   const toggleDomainSelection = (domainId: string) => {
-    const updatedDomains = domains.map(domain => {
+    const updatedDomains = domains.map((domain) => {
       if (domain.id === domainId) {
         const newSelection = !domain.isSelected;
         // Also toggle all capabilities in this domain
-        const updatedCapabilities = domain.capabilities.map(cap => ({
+        const updatedCapabilities = domain.capabilities.map((cap) => ({
           ...cap,
-          isSelected: newSelection
+          isSelected: newSelection,
         }));
-                return {
-          ...domain, 
+        return {
+          ...domain,
           isSelected: newSelection,
           capabilities: updatedCapabilities,
-          isExpanded: false // Keep collapsed by default
+          isExpanded: false, // Keep collapsed by default
         };
       }
       return domain;
@@ -350,25 +393,25 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
   };
 
   const toggleCapabilitySelection = (domainId: string, capabilityId: string) => {
-    const updatedDomains = domains.map(domain => {
+    const updatedDomains = domains.map((domain) => {
       if (domain.id === domainId) {
-        const updatedCapabilities = domain.capabilities.map(cap => {
+        const updatedCapabilities = domain.capabilities.map((cap) => {
           if (cap.id === capabilityId) {
             return { ...cap, isSelected: !cap.isSelected };
           }
           return cap;
         });
-        
+
         // Check if all capabilities are selected to update domain selection
-        const allCapabilitiesSelected = updatedCapabilities.every(cap => cap.isSelected);
+        const allCapabilitiesSelected = updatedCapabilities.every((cap) => cap.isSelected);
         // Check if any capabilities are selected
-        const anyCapabilitiesSelected = updatedCapabilities.some(cap => cap.isSelected);
-        
+        const anyCapabilitiesSelected = updatedCapabilities.some((cap) => cap.isSelected);
+
         return {
           ...domain,
           capabilities: updatedCapabilities,
           isSelected: allCapabilitiesSelected || anyCapabilitiesSelected,
-          isExpanded: false // Keep collapsed by default
+          isExpanded: false, // Keep collapsed by default
         };
       }
       return domain;
@@ -378,7 +421,7 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
   };
 
   const toggleDomainExpansion = (domainId: string) => {
-    const updatedDomains = domains.map(domain => {
+    const updatedDomains = domains.map((domain) => {
       if (domain.id === domainId) {
         return { ...domain, isExpanded: !domain.isExpanded };
       }
@@ -396,9 +439,9 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
     setSelectedReferenceDomain(domainId);
     if (domainId && domainId !== 'custom') {
       // Auto-add the selected reference domain and its capabilities
-      const refDomain = referenceDomains.find(d => d.id === domainId);
-      const refCapabilities = referenceCapabilities.filter(cap => cap.domain_id === domainId);
-      
+      const refDomain = referenceDomains.find((d) => d.id === domainId);
+      const refCapabilities = referenceCapabilities.filter((cap) => cap.domain_id === domainId);
+
       if (refDomain) {
         const newDomain: UserDomain = {
           id: `domain-${Date.now()}`,
@@ -412,11 +455,11 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
             referenceCapabilityId: refCap.id,
             domainId: `domain-${Date.now()}`,
             isSelected: false,
-            requirementCount: 0
+            requirementCount: 0,
           })),
           isSelected: false,
           isExpanded: false,
-          requirementCount: 0
+          requirementCount: 0,
         };
 
         const updatedDomains = [...domains, newDomain];
@@ -427,28 +470,32 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
     setSelectedReferenceDomain('');
   };
 
-  const filteredDomains = domains.filter(domain =>
-    domain.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    domain.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    domain.capabilities.some(cap => 
-      cap.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      cap.description.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+  const filteredDomains = domains.filter(
+    (domain) =>
+      domain.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      domain.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      domain.capabilities.some(
+        (cap) =>
+          cap.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          cap.description.toLowerCase().includes(searchTerm.toLowerCase()),
+      ),
   );
 
-  const selectedDomainsCount = domains.filter(d => d.isSelected).length;
-  const selectedCapabilitiesCount = domains.reduce((count, domain) => 
-    count + domain.capabilities.filter(c => c.isSelected).length, 0
+  const selectedDomainsCount = domains.filter((d) => d.isSelected).length;
+  const selectedCapabilitiesCount = domains.reduce(
+    (count, domain) => count + domain.capabilities.filter((c) => c.isSelected).length,
+    0,
   );
 
-  const totalRequirementsCount = domains.reduce((count, domain) => 
-    count + domain.requirementCount, 0
+  const totalRequirementsCount = domains.reduce(
+    (count, domain) => count + domain.requirementCount,
+    0,
   );
 
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
         <span className="ml-2">Loading TMF reference data...</span>
       </div>
     );
@@ -462,12 +509,12 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
           <div className="text-sm text-muted-foreground">
             {selectedDomainsCount} domains, {selectedCapabilitiesCount} capabilities selected
             {totalRequirementsCount > 0 && (
-              <span className="ml-2 text-blue-600 font-medium">
+              <span className="ml-2 font-medium text-blue-600">
                 • {totalRequirementsCount} requirements mapped
               </span>
             )}
             {specSyncData && (
-              <span className="ml-2 text-green-600 font-medium">
+              <span className="ml-2 font-medium text-green-600">
                 • Import active ({specSyncData.items?.length || 0} requirements)
               </span>
             )}
@@ -506,7 +553,7 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
         <Input
           placeholder="Search domains and capabilities..."
           value={searchTerm}
@@ -518,8 +565,10 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
       {/* Domains List */}
       <div className="space-y-3">
         {filteredDomains.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            {searchTerm ? 'No domains match your search' : 'No domains added yet. Add your first domain to get started.'}
+          <div className="py-8 text-center text-muted-foreground">
+            {searchTerm
+              ? 'No domains match your search'
+              : 'No domains added yet. Add your first domain to get started.'}
           </div>
         ) : (
           filteredDomains.map((domain) => (
@@ -529,7 +578,7 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
                   <div className="flex items-center space-x-3">
                     <button
                       onClick={() => toggleDomainSelection(domain.id)}
-                      className="flex items-center space-x-2 hover:bg-muted/50 p-1 rounded"
+                      className="flex items-center space-x-2 rounded p-1 hover:bg-muted/50"
                     >
                       {domain.isSelected ? (
                         <CheckCircle className="h-5 w-5 text-green-600" />
@@ -541,7 +590,7 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
                           e.stopPropagation();
                           toggleDomainExpansion(domain.id);
                         }}
-                        className="flex items-center space-x-2 hover:bg-muted/50 p-1 rounded"
+                        className="flex items-center space-x-2 rounded p-1 hover:bg-muted/50"
                       >
                         {domain.isExpanded ? (
                           <ChevronDown className="h-4 w-4" />
@@ -550,7 +599,10 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
                         )}
                         <span className="font-semibold">{domain.name}</span>
                         {domain.id.includes('imported') && (
-                          <Badge variant="outline" className="text-xs text-blue-600 border-blue-600">
+                          <Badge
+                            variant="outline"
+                            className="border-blue-600 text-xs text-blue-600"
+                          >
                             Imported
                           </Badge>
                         )}
@@ -559,10 +611,11 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
                   </div>
                   <div className="flex items-center space-x-2">
                     <Badge variant="secondary">
-                      {domain.capabilities.filter(cap => cap.isSelected).length} selected capabilities
+                      {domain.capabilities.filter((cap) => cap.isSelected).length} selected
+                      capabilities
                     </Badge>
                     {domain.requirementCount > 0 && (
-                      <Badge variant="outline" className="text-blue-600 border-blue-600">
+                      <Badge variant="outline" className="border-blue-600 text-blue-600">
                         {domain.requirementCount} requirements
                       </Badge>
                     )}
@@ -574,32 +627,28 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
                       >
                         <Plus className="h-4 w-4" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeDomain(domain.id)}
-                      >
+                      <Button variant="ghost" size="sm" onClick={() => removeDomain(domain.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
                 </div>
-                <p className="text-sm text-muted-foreground ml-10">{domain.description}</p>
+                <p className="ml-10 text-sm text-muted-foreground">{domain.description}</p>
               </CardHeader>
 
               {/* Capabilities List */}
               {domain.isExpanded && (
                 <CardContent className="pt-0">
-                  <div className="space-y-2 ml-10">
+                  <div className="ml-10 space-y-2">
                     {domain.capabilities.length === 0 ? (
-                      <div className="text-sm text-muted-foreground py-2">
+                      <div className="py-2 text-sm text-muted-foreground">
                         No capabilities added to this domain yet.
                       </div>
                     ) : (
                       domain.capabilities.map((capability) => (
                         <div
                           key={capability.id}
-                          className="flex items-center justify-between p-3 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors"
+                          className="flex items-center justify-between rounded-lg bg-muted/30 p-3 transition-colors hover:bg-muted/50"
                         >
                           <div className="flex items-center space-x-3">
                             <button
@@ -612,21 +661,29 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
                                 <Circle className="h-4 w-4 text-gray-400" />
                               )}
                               <div className="text-left">
-                                <div className="font-medium text-sm flex items-center space-x-2">
+                                <div className="flex items-center space-x-2 text-sm font-medium">
                                   <span>{capability.name}</span>
                                   {capability.id.includes('imported') && (
-                                    <Badge variant="outline" className="text-xs text-blue-600 border-blue-600">
+                                    <Badge
+                                      variant="outline"
+                                      className="border-blue-600 text-xs text-blue-600"
+                                    >
                                       Imported
                                     </Badge>
                                   )}
                                 </div>
-                                <div className="text-xs text-muted-foreground">{capability.description}</div>
+                                <div className="text-xs text-muted-foreground">
+                                  {capability.description}
+                                </div>
                               </div>
                             </button>
                           </div>
                           <div className="flex items-center space-x-2">
                             {capability.isSelected && capability.requirementCount > 0 && (
-                              <Badge variant="outline" className="text-blue-600 border-blue-600 text-xs">
+                              <Badge
+                                variant="outline"
+                                className="border-blue-600 text-xs text-blue-600"
+                              >
                                 {capability.requirementCount} reqs
                               </Badge>
                             )}
@@ -654,13 +711,14 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              Add Capability to {domains.find(d => d.id === selectedDomainForCapability)?.name || 'Domain'}
+              Add Capability to{' '}
+              {domains.find((d) => d.id === selectedDomainForCapability)?.name || 'Domain'}
             </DialogTitle>
           </DialogHeader>
-          <AddCapabilityForm 
-            onAdd={addCapability} 
-            referenceCapabilities={referenceCapabilities.filter(cap => {
-              const selectedDomain = domains.find(d => d.id === selectedDomainForCapability);
+          <AddCapabilityForm
+            onAdd={addCapability}
+            referenceCapabilities={referenceCapabilities.filter((cap) => {
+              const selectedDomain = domains.find((d) => d.id === selectedDomainForCapability);
               return cap.domain_id === selectedDomain?.referenceDomainId;
             })}
           />
@@ -671,10 +729,10 @@ export function TMFDomainCapabilityManager({ onStateChange, initialState, specSy
 }
 
 // Add Domain Form Component
-function AddDomainForm({ 
-  onAdd, 
-  referenceDomains 
-}: { 
+function AddDomainForm({
+  onAdd,
+  referenceDomains,
+}: {
   onAdd: (data: { name: string; description: string; referenceDomainId?: string }) => void;
   referenceDomains: TMFReferenceDomain[];
 }) {
@@ -688,7 +746,7 @@ function AddDomainForm({
       onAdd({
         name: name.trim(),
         description: description.trim(),
-        referenceDomainId: selectedReference === 'custom' ? undefined : selectedReference
+        referenceDomainId: selectedReference === 'custom' ? undefined : selectedReference,
       });
       setName('');
       setDescription('');
@@ -745,10 +803,10 @@ function AddDomainForm({
 }
 
 // Add Capability Form Component
-function AddCapabilityForm({ 
-  onAdd, 
-  referenceCapabilities 
-}: { 
+function AddCapabilityForm({
+  onAdd,
+  referenceCapabilities,
+}: {
   onAdd: (data: { name: string; description: string; referenceCapabilityId?: string }) => void;
   referenceCapabilities: TMFReferenceCapability[];
 }) {
@@ -762,7 +820,7 @@ function AddCapabilityForm({
       onAdd({
         name: name.trim(),
         description: description.trim(),
-        referenceCapabilityId: selectedReference === 'custom' ? undefined : selectedReference
+        referenceCapabilityId: selectedReference === 'custom' ? undefined : selectedReference,
       });
       setName('');
       setDescription('');

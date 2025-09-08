@@ -1,22 +1,27 @@
-# 🔧 ADO Export Issues - FIXED! 
+# 🔧 ADO Export Issues - FIXED!
 
 ## **Root Causes Found** 🎯
 
 ### **Issue 1: Invalid Iteration Path** ❌
+
 ```
 TF401347: Invalid tree name given for work item -1, field 'System.IterationPath'
 ```
+
 Your iteration path `ADOSandBox\\E2ETool` doesn't exist in ADO.
 
 ### **Issue 2: Missing Custom Fields** ❌
+
 ```
 TF51535: Cannot find field Microsoft.VSTS.Common.StoryPoints
 ```
+
 Custom fields like `StoryPoints` don't exist in your ADO project.
 
 ## **What I Fixed** ✅
 
 ### **1. Removed Non-Existent Fields**
+
 - ✅ Removed `Microsoft.VSTS.Common.StoryPoints`
 - ✅ Removed `Microsoft.VSTS.Common.BusinessValue`
 - ✅ Removed `Microsoft.VSTS.Common.Priority`
@@ -24,6 +29,7 @@ Custom fields like `StoryPoints` don't exist in your ADO project.
 - ✅ Kept only `System.Tags` (standard field)
 
 ### **2. Fixed Path Issues**
+
 - ✅ Simplified area path to just `ADOSandBox`
 - ✅ Simplified iteration path to just `ADOSandBox`
 - ✅ Removed complex path construction
@@ -31,6 +37,7 @@ Custom fields like `StoryPoints` don't exist in your ADO project.
 ## **How to Fix Your Issue** 🚀
 
 ### **Step 1: Update ADO Configuration**
+
 1. **Go to ADO Configuration tab**
 2. **Change these values:**
    ```
@@ -40,10 +47,12 @@ Custom fields like `StoryPoints` don't exist in your ADO project.
 3. **Click "Save Configuration"**
 
 ### **Step 2: Test Connection**
+
 1. **Click "Test Connection"**
 2. **Should show "Connection Successful"**
 
 ### **Step 3: Try Export Again**
+
 1. **Generate work items** (if not already done)
 2. **Click "Export to ADO"**
 3. **Watch console for success messages**
@@ -74,6 +83,7 @@ Custom fields like `StoryPoints` don't exist in your ADO project.
 ## **What the Fix Does** 🔧
 
 ### **Before (Broken):**
+
 ```typescript
 // Complex paths that don't exist
 areaPath: 'ADOSandBox\\E2ETool'
@@ -85,6 +95,7 @@ iterationPath: 'ADOSandBox\\E2ETool'
 ```
 
 ### **After (Fixed):**
+
 ```typescript
 // Simple paths that exist
 areaPath: 'ADOSandBox'
@@ -110,17 +121,21 @@ iterationPath: 'ADOSandBox'
 ## **If Still Getting Errors** 🆘
 
 ### **Error 1: "Invalid tree name for System.AreaPath"**
+
 **Solution**: Make sure Area Path is just `ADOSandBox` (not `ADOSandBox\\E2ETool`)
 
 ### **Error 2: "Cannot find field"**
+
 **Solution**: The fix should handle this - only standard fields are used now
 
 ### **Error 3: "Work item type not available"**
+
 **Solution**: This was already fixed - all work item types are validated
 
 ## **Verification** ✅
 
 After the fix, you should see:
+
 - ✅ **No more "Invalid tree name" errors**
 - ✅ **No more "Cannot find field" errors**
 - ✅ **Work items created successfully in ADO**
@@ -131,9 +146,10 @@ After the fix, you should see:
 ## **Quick Test** 🧪
 
 After updating configuration, run this in console:
+
 ```javascript
 // Test with minimal fields
-adoService.testConnection().then(result => {
+adoService.testConnection().then((result) => {
   console.log('Connection test:', result);
   if (result) {
     console.log('✅ Ready to export!');

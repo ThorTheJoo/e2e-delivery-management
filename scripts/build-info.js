@@ -16,12 +16,12 @@ function getGitInfo() {
     const commit = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
     const shortCommit = commit.substring(0, 7);
     const timestamp = execSync('git log -1 --format=%cd --date=iso', { encoding: 'utf8' }).trim();
-    
+
     return {
       branch,
       commit,
       shortCommit,
-      timestamp
+      timestamp,
     };
   } catch (error) {
     console.warn('Git information not available:', error.message);
@@ -29,7 +29,7 @@ function getGitInfo() {
       branch: 'main',
       commit: 'unknown',
       shortCommit: 'dev',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 }
@@ -40,9 +40,9 @@ function generateBuildInfo() {
     version: packageJson.version,
     buildHash: `${gitInfo.branch}@${gitInfo.shortCommit}`,
     buildTimestamp: gitInfo.timestamp,
-    compliance: 'ODA 2025 Compliant'
+    compliance: 'ODA 2025 Compliant',
   };
-  
+
   // Write build info to a file that can be imported
   const buildInfoPath = path.join(process.cwd(), 'src/lib/build-info-generated.ts');
   const buildInfoContent = `// Auto-generated build information - DO NOT EDIT
@@ -53,20 +53,20 @@ export const BUILD_HASH = '${buildInfo.buildHash}';
 export const BUILD_TIMESTAMP = '${buildInfo.buildTimestamp}';
 export const COMPLIANCE = '${buildInfo.compliance}';
 `;
-  
+
   fs.writeFileSync(buildInfoPath, buildInfoContent);
-  
+
   // Set environment variables
   process.env.NEXT_PUBLIC_APP_VERSION = buildInfo.version;
   process.env.NEXT_PUBLIC_BUILD_HASH = buildInfo.buildHash;
   process.env.NEXT_PUBLIC_BUILD_TIMESTAMP = buildInfo.buildTimestamp;
-  
+
   console.log('Build information generated:');
   console.log(`  Version: ${buildInfo.version}`);
   console.log(`  Build Hash: ${buildInfo.buildHash}`);
   console.log(`  Build Timestamp: ${buildInfo.buildTimestamp}`);
   console.log(`  Compliance: ${buildInfo.compliance}`);
-  
+
   return buildInfo;
 }
 
