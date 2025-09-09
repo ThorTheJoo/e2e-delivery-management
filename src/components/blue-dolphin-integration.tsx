@@ -766,6 +766,26 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
                 </Button>
                 <Button
                   onClick={() => {
+                    setFilter("Definition eq 'Application Function'");
+                    loadObjects();
+                  }}
+                  variant="outline"
+                  size="sm"
+                >
+                  Application Function
+                </Button>
+                <Button
+                  onClick={() => {
+                    setFilter("Definition eq 'Application Service'");
+                    loadObjects();
+                  }}
+                  variant="outline"
+                  size="sm"
+                >
+                  Application Service
+                </Button>
+                <Button
+                  onClick={() => {
                     setFilter("contains(Title, 'Customer')");
                     loadObjects();
                   }}

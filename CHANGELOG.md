@@ -5,6 +5,30 @@ All notable changes to the E2E Delivery Management System will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.5] - 2025-01-XX - Blue Dolphin Quick Filters Enhancement
+
+### 🔧 Minor Features Added
+
+#### Blue Dolphin Integration Enhancements
+
+- **Application Function Quick Filter** - Added quick filter button for Application Function objects
+- **Application Service Quick Filter** - Added quick filter button for Application Service objects
+- **Enhanced Object Filtering** - Improved quick filter options for better object discovery
+
+### 🐛 Bug Fixes
+
+- **Filter Consistency** - Ensured all quick filters follow consistent naming and behavior patterns
+- **UI Layout** - Maintained proper button spacing and alignment in quick filters section
+
+### 📁 Files Modified
+
+- `src/components/blue-dolphin-integration.tsx` - Added Application Function and Application Service quick filters
+- `package.json` - Updated version to 1.2.5
+- `README.md` - Updated documentation to reflect new quick filter capabilities
+- `CHANGELOG.md` - Added version 1.2.5 changelog entry
+
+---
+
 ## [1.1.0] - 2025-08-28 - Blue Dolphin Integration Release
 
 ### 🎉 Major Features Added
@@ -581,6 +605,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Release Date | Key Features                                         |
 | ------- | ------------ | ---------------------------------------------------- |
+| 1.2.5   | 2025-01-XX   | Blue Dolphin Quick Filters Enhancement              |
 | 1.1.0   | 2025-08-28   | Blue Dolphin Integration, OData v4.0, Solution Model |
 | 1.0.0   | 2025-01-XX   | Use Case Tracking, Enhanced SpecSync Integration     |
 | 0.9.0   | 2025-01-XX   | SpecSync Import System, Requirement Mapping          |

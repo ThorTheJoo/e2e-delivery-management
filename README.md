@@ -12,6 +12,7 @@ The E2E Delivery Management System is a comprehensive platform for managing end-
 - **45+ Additional Fields**: Access to comprehensive enterprise metadata beyond standard fields
 - **Excel Power Query Compatibility**: Matches Excel integration capabilities
 - **Smart Field Handling**: Intelligent field selection and filtering
+- **Quick Filters**: Enhanced object filtering with Application Function and Application Service support
 
 **📋 CLI Testing Completed**: Successfully validated enhanced query capabilities via command-line testing. See [CLI Testing Summary](BLUE-DOLPHIN-CLI-TESTING-SUMMARY.md) for detailed findings.
 
