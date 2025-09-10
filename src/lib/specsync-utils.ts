@@ -1,4 +1,6 @@
 import { SpecSyncItem, SpecSyncState } from '@/types';
+import { supabase } from '@/lib/supabase';
+import { getActiveDataSource } from '@/lib/data-source';
 import { TMFCapability } from '@/types';
 
 // Map SpecSync items to existing TMF capabilities
@@ -282,8 +284,69 @@ export function saveSpecSyncData(state: SpecSyncState): void {
 
 // Load SpecSync data from localStorage
 export function loadSpecSyncData(): SpecSyncState | null {
+  // Hybrid: prefer Supabase if enabled; otherwise use localStorage as before
   try {
-    const raw = localStorage.getItem('specsync-data');
+    if (typeof window !== 'undefined' && getActiveDataSource() === 'supabase') {
+      // NOTE: This synchronous wrapper returns null immediately; the caller already
+      // handles default data when null is returned. For incremental adoption without
+      // refactors, we perform an async fetch-and-cache pattern below.
+      void (async () => {
+        try {
+          const { data, error } = await supabase
+            .from('specsync_items')
+            .select('*')
+            .limit(1000);
+          if (error) throw error;
+
+          const items: SpecSyncItem[] = (data || []).map((row: any) => ({
+            id: String(row.id || row.requirement_id || cryptoRandomId()),
+            requirementId: String(row.requirement_id || row.id || ''),
+            rephrasedRequirementId: String(row.rephrased_requirement_id || row.requirement_id || ''),
+            domain: String(row.metadata?.domain ?? ''),
+            vertical: String(row.metadata?.vertical ?? ''),
+            functionName: String(row.function_name ?? ''),
+            afLevel2: String(row.metadata?.af_level2 ?? row.function_name ?? ''),
+            capability: String(row.capability ?? ''),
+            referenceCapability: String(row.metadata?.reference_capability ?? row.capability ?? ''),
+            usecase1: String(row.usecase1 ?? ''),
+            description: row.description ?? '',
+            priority: row.priority ?? 'Medium',
+            status: row.status ?? 'Identified',
+          }));
+
+          // Compute counts
+          const domainsCount: Record<string, number> = {};
+          let useCases = 0;
+          for (const it of items) {
+            if (it.domain) domainsCount[it.domain] = (domainsCount[it.domain] || 0) + 1;
+            if (it.usecase1 && it.usecase1.trim().length > 0) useCases++;
+          }
+
+          const state: SpecSyncState = {
+            fileName: 'supabase',
+            importedAt: Date.now(),
+            includeInEstimates: true,
+            counts: {
+              totalRequirements: items.length,
+              domains: domainsCount,
+              useCases,
+            },
+            items,
+            selectedCapabilityIds: [],
+          };
+
+          // Cache to localStorage so existing flows remain synchronous/read-only friendly
+          try {
+            localStorage.setItem('specsync-data', JSON.stringify(state));
+          } catch {}
+        } catch (err) {
+          console.warn('Supabase SpecSync fetch failed; staying on local cache.', err);
+        }
+      })();
+    }
+
+    // Always return the current local cache (may be filled by the async task above)
+    const raw = typeof window !== 'undefined' ? localStorage.getItem('specsync-data') : null;
     return raw ? JSON.parse(raw) : null;
   } catch (err) {
     console.warn('Failed loading SpecSync data', err);
@@ -297,5 +360,18 @@ export function clearSpecSyncData(): void {
     localStorage.removeItem('specsync-data');
   } catch (err) {
     console.warn('Failed clearing SpecSync data', err);
+  }
+}
+
+function cryptoRandomId(): string {
+  try {
+    // Browser crypto API
+    const bytes = new Uint8Array(8);
+    crypto.getRandomValues(bytes);
+    return Array.from(bytes)
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+  } catch {
+    return Math.random().toString(36).slice(2);
   }
 }
