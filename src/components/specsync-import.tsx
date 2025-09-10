@@ -342,40 +342,25 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
               <table className="w-full border-collapse text-xs">
                 <thead>
                   <tr className="bg-muted/70">
-                    <th className="border border-muted-foreground/20 px-2 py-1 text-left">ID</th>
-                    <th className="border border-muted-foreground/20 px-2 py-1 text-left">
-                      Requirement
-                    </th>
-                    <th className="border border-muted-foreground/20 px-2 py-1 text-left">
-                      Domain
-                    </th>
-                    <th className="border border-muted-foreground/20 px-2 py-1 text-left">
-                      Capability
-                    </th>
-                    <th className="border border-muted-foreground/20 px-2 py-1 text-left">
-                      Use Case
-                    </th>
-                    <th className="border border-muted-foreground/20 px-2 py-1 text-left">
-                      Actions
-                    </th>
+                    <th className="border border-muted-foreground/20 px-2 py-1 text-left">Requirement ID</th>
+                    <th className="border border-muted-foreground/20 px-2 py-1 text-left">Rephrased Function Name</th>
+                    <th className="border border-muted-foreground/20 px-2 py-1 text-left">Domain</th>
+                    <th className="border border-muted-foreground/20 px-2 py-1 text-left">Platform Use Case - Beta</th>
+                    <th className="border border-muted-foreground/20 px-2 py-1 text-left">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {editedItems.slice(0, 10).map((item, index) => (
                     <tr key={index} className="hover:bg-muted/30">
                       <td className="border border-muted-foreground/20 px-2 py-1 font-mono text-xs">
-                        {editingItem?.index === index &&
-                        editingItem?.field === 'rephrasedRequirementId' ? (
+                        {editingItem?.index === index && editingItem?.field === 'requirementId' ? (
                           <div className="flex items-center space-x-1">
                             <input
                               type="text"
-                              value={item.rephrasedRequirementId}
+                              value={item.requirementId}
                               onChange={(e) => {
                                 const newItems = [...editedItems];
-                                newItems[index] = {
-                                  ...newItems[index],
-                                  rephrasedRequirementId: e.target.value,
-                                };
+                                newItems[index] = { ...newItems[index], requirementId: e.target.value };
                                 setEditedItems(newItems);
                               }}
                               className="w-full rounded border px-1 py-0.5 text-xs"
@@ -388,8 +373,8 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
                               onClick={() =>
                                 handleSaveEdit(
                                   index,
-                                  'rephrasedRequirementId',
-                                  item.rephrasedRequirementId,
+                                  'requirementId',
+                                  item.requirementId,
                                 )
                               }
                             >
@@ -406,14 +391,12 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
                           </div>
                         ) : (
                           <div className="flex items-center justify-between">
-                            <span>
-                              {item.rephrasedRequirementId || item.requirementId || `R${index + 1}`}
-                            </span>
+                            <span>{item.requirementId || `REQ-${index + 1}`}</span>
                             <Button
                               size="sm"
                               variant="ghost"
                               className="h-4 w-4 p-0"
-                              onClick={() => handleEditItem(index, 'rephrasedRequirementId')}
+                              onClick={() => handleEditItem(index, 'requirementId')}
                             >
                               <Edit className="h-3 w-3" />
                             </Button>
@@ -509,54 +492,6 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
                               variant="ghost"
                               className="h-4 w-4 p-0"
                               onClick={() => handleEditItem(index, 'domain')}
-                            >
-                              <Edit className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        )}
-                      </td>
-                      <td className="max-w-xs truncate border border-muted-foreground/20 px-2 py-1">
-                        {editingItem?.index === index && editingItem?.field === 'capability' ? (
-                          <div className="flex items-center space-x-1">
-                            <input
-                              type="text"
-                              value={item.capability}
-                              onChange={(e) => {
-                                const newItems = [...editedItems];
-                                newItems[index] = {
-                                  ...newItems[index],
-                                  capability: e.target.value,
-                                };
-                                setEditedItems(newItems);
-                              }}
-                              className="w-full rounded border px-1 py-0.5 text-xs"
-                              autoFocus
-                            />
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-4 w-4 p-0"
-                              onClick={() => handleSaveEdit(index, 'capability', item.capability)}
-                            >
-                              <Save className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-4 w-4 p-0"
-                              onClick={handleCancelEdit}
-                            >
-                              <Cancel className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        ) : (
-                          <div className="flex items-center justify-between">
-                            <span>{item.capability || item.afLevel2 || 'N/A'}</span>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-4 w-4 p-0"
-                              onClick={() => handleEditItem(index, 'capability')}
                             >
                               <Edit className="h-3 w-3" />
                             </Button>

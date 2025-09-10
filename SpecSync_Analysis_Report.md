@@ -11,6 +11,7 @@ This document outlines how the E2E Delivery Management application processes Spe
 - **Enhanced Domain Summary**: Visual grid showing domain-level statistics with badge counts
 - **Improved Data Validation**: Better error handling and data quality checks
 - **Extensible Field Mapping Framework**: Flexible architecture for future field additions and integrations
+- **SpecSync Import Preview Columns Updated**: Preview now shows Requirement ID, Rephrased Function Name, Domain, Use Case, and Actions. The Function/Capability column was removed for clarity. Rephrased Function Name values are sourced from the input file column header "Rephrased Function Name" (column I), with header-name matching for stability.
 
 ## Input File Format & Structure
 
