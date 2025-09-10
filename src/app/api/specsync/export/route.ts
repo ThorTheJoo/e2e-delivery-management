@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getActiveDataSource } from '@/lib/data-source';
 import { getServerSupabaseClient } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 
 // POST /api/specsync/export
 // Safely exports local SpecSync cache to Supabase when service role is available.
@@ -10,19 +10,12 @@ import { getServerSupabaseClient } from '@/lib/supabase';
 
 export async function POST(_req: NextRequest) {
   try {
-    if (getActiveDataSource() !== 'supabase') {
-      return NextResponse.json({ success: false, message: 'Supabase not enabled' }, { status: 400 });
-    }
-
-    // Server-side privileged key must be set via env on the server only (not exposed to client)
-    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      return NextResponse.json({ success: false, message: 'Service role key not configured' }, { status: 400 });
-    }
-
     // Read local cache from request (client sends current cache)
     const body = await _req.json().catch(() => ({}));
     const items = Array.isArray(body?.items) ? body.items : [];
     const projectId: string | undefined = body?.projectId;
+    const devServiceKey: string | undefined = body?.serviceRoleKey;
+    const devUrl: string | undefined = body?.supabaseUrl;
 
     if (!items.length) {
       return NextResponse.json({ success: false, message: 'No items to export' }, { status: 400 });
@@ -48,10 +41,14 @@ export async function POST(_req: NextRequest) {
       updated_at: new Date().toISOString(),
     }));
 
-    const sb = getServerSupabaseClient();
-    if (!sb) {
-      return NextResponse.json({ success: false, message: 'Service role client not available' }, { status: 400 });
+    let sb = getServerSupabaseClient();
+    // Dev override: allow UI-provided service key + URL in non-production only
+    if (!sb && process.env.NODE_ENV !== 'production' && devServiceKey && devUrl) {
+      try {
+        sb = createClient(devUrl, devServiceKey);
+      } catch {}
     }
+    if (!sb) return NextResponse.json({ success: false, message: 'Service role client not available' }, { status: 400 });
     // Use upsert on (project_id, requirement_id) if you add a unique constraint later
     const { error } = await sb.from('specsync_items').upsert(rows, { onConflict: 'requirement_id' });
     if (error) throw error;

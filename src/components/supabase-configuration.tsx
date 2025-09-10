@@ -82,7 +82,13 @@ export function SupabaseConfiguration() {
       const res = await fetch('/api/specsync/export', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: parsed.items || [] }),
+        body: JSON.stringify({
+          items: parsed.items || [],
+          // Dev-only override: allow providing service key and url from UI to avoid server env setup
+          // The API uses this only when NODE_ENV !== 'production'
+          serviceRoleKey: serviceRole || undefined,
+          supabaseUrl: url || undefined,
+        }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.message || 'Export failed');
