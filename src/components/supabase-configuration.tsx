@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { getDataSourceStatus } from '@/lib/data-source';
+import { getDataSourceStatus, getModuleMode, setModuleMode } from '@/lib/data-source';
+import { getBrowserSupabaseClient, TABLES } from '@/lib/supabase';
 
 interface EnvPreview {
   supabaseUrl: string;
@@ -17,6 +18,22 @@ export function SupabaseConfiguration() {
   const [url, setUrl] = useState('');
   const [anonKey, setAnonKey] = useState('');
   const [serviceRole, setServiceRole] = useState('');
+  const [moduleModes, setModuleModes] = useState<Record<string, 'local' | 'supabase'>>({
+    tmf: getModuleMode('tmf'),
+    specs: getModuleMode('specsync'),
+    bd: getModuleMode('bluedolphin'),
+    set: getModuleMode('set'),
+    cet: getModuleMode('cet'),
+  } as any);
+
+  const [preview, setPreview] = useState<{
+    tmfDomains: number;
+    tmfCapabilities: number;
+    userDomains: number;
+    userCapabilities: number;
+    specsyncItems: number;
+    cetv22Count: number;
+  }>({ tmfDomains: 0, tmfCapabilities: 0, userDomains: 0, userCapabilities: 0, specsyncItems: 0, cetv22Count: 0 });
 
   useEffect(() => {
     setStatus(getDataSourceStatus());
@@ -84,6 +101,45 @@ export function SupabaseConfiguration() {
       setMessage('Supabase configuration saved locally for UI use. For full runtime enablement in builds, also set .env.local and restart.');
     } catch (e: any) {
       setMessage(e?.message || 'Failed saving configuration');
+    }
+  };
+
+  const handleModuleModeChange = (k: keyof typeof moduleModes, value: 'local' | 'supabase') => {
+    const updated = { ...moduleModes, [k]: value } as any;
+    setModuleModes(updated);
+    // Persist per-module selection
+    const keyMap: Record<string, 'tmf' | 'specsync' | 'bluedolphin' | 'set' | 'cet'> = {
+      tmf: 'tmf',
+      specs: 'specsync',
+      bd: 'bluedolphin',
+      set: 'set',
+      cet: 'cet',
+    };
+    setModuleMode(keyMap[k], value);
+  };
+
+  const handleRefreshPreview = async () => {
+    try {
+      const sb = getBrowserSupabaseClient();
+      const [d, c, ud, uc, s, cet] = await Promise.all([
+        sb.from(TABLES.TMF_REFERENCE_DOMAINS).select('*', { count: 'exact', head: true }),
+        sb.from(TABLES.TMF_REFERENCE_CAPABILITIES).select('*', { count: 'exact', head: true }),
+        sb.from(TABLES.USER_DOMAINS).select('*', { count: 'exact', head: true }),
+        sb.from(TABLES.USER_CAPABILITIES).select('*', { count: 'exact', head: true }),
+        sb.from(TABLES.SPECSYNC_ITEMS).select('*', { count: 'exact', head: true }),
+        sb.from(TABLES.CETV22_DATA).select('*', { count: 'exact', head: true }),
+      ]);
+      setPreview({
+        tmfDomains: (d.count as any) || 0,
+        tmfCapabilities: (c.count as any) || 0,
+        userDomains: (ud.count as any) || 0,
+        userCapabilities: (uc.count as any) || 0,
+        specsyncItems: (s.count as any) || 0,
+        cetv22Count: (cet.count as any) || 0,
+      });
+      setMessage('Preview refreshed from Supabase.');
+    } catch (e: any) {
+      setMessage(e?.message || 'Failed to refresh preview');
     }
   };
 
@@ -187,6 +243,57 @@ export function SupabaseConfiguration() {
           set env variables and restart the dev server. The runtime selection is ultimately
           controlled by env; the app will fall back to local when Supabase is not ready.
         </p>
+      </div>
+
+      <div className="rounded-md border p-4">
+        <h4 className="mb-2 font-medium">What are you testing? (Per-module mode)</h4>
+        <div className="grid gap-3 md:grid-cols-2">
+          {[
+            { key: 'tmf', label: 'TMF (reference & user selections)' },
+            { key: 'specs', label: 'SpecSync import' },
+            { key: 'bd', label: 'Blue Dolphin solution model' },
+            { key: 'set', label: 'SET estimation' },
+            { key: 'cet', label: 'CET service design' },
+          ].map((m) => (
+            <div key={m.key} className="flex items-center justify-between rounded-md border px-3 py-2">
+              <span className="text-sm">{m.label}</span>
+              <div className="flex items-center gap-2">
+                <button
+                  className={`rounded-md px-2 py-1 text-xs ${moduleModes[m.key as any] === 'local' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
+                  onClick={() => handleModuleModeChange(m.key as any, 'local')}
+                >
+                  Local
+                </button>
+                <button
+                  className={`rounded-md px-2 py-1 text-xs ${moduleModes[m.key as any] === 'supabase' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
+                  onClick={() => handleModuleModeChange(m.key as any, 'supabase')}
+                >
+                  Supabase
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+        <p className="mt-2 text-xs text-muted-foreground">These switches let you test modules independently: only selected modules will target Supabase for persistence/reads when possible; others continue to use local storage.</p>
+      </div>
+
+      <div className="rounded-md border p-4">
+        <h4 className="mb-2 font-medium">Preview (Supabase read-only)</h4>
+        <div className="grid gap-3 md:grid-cols-3 text-sm">
+          <div className="rounded-md border p-3"><div className="font-medium">TMF Reference Domains</div><div>{preview.tmfDomains}</div></div>
+          <div className="rounded-md border p-3"><div className="font-medium">TMF Reference Capabilities</div><div>{preview.tmfCapabilities}</div></div>
+          <div className="rounded-md border p-3"><div className="font-medium">User Domains</div><div>{preview.userDomains}</div></div>
+          <div className="rounded-md border p-3"><div className="font-medium">User Capabilities</div><div>{preview.userCapabilities}</div></div>
+          <div className="rounded-md border p-3"><div className="font-medium">SpecSync Items</div><div>{preview.specsyncItems}</div></div>
+          <div className="rounded-md border p-3"><div className="font-medium">CETv22 Data</div><div>{preview.cetv22Count}</div></div>
+        </div>
+        <button
+          className="mt-3 rounded-md bg-muted px-3 py-2 text-xs"
+          onClick={handleRefreshPreview}
+          aria-label="Refresh preview"
+        >
+          Refresh Preview
+        </button>
       </div>
 
       <div className="rounded-md border p-4">

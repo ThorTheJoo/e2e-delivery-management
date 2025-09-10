@@ -9,6 +9,29 @@ export interface DataSourceStatus {
   reasons: string[];
 }
 
+export type ModuleKey = 'tmf' | 'specsync' | 'bluedolphin' | 'set' | 'cet';
+
+export function getModuleMode(module: ModuleKey): DataSource {
+  // UI override per module
+  if (typeof window !== 'undefined') {
+    const key = `supabase.ui.mode.${module}`;
+    const val = window.localStorage.getItem(key);
+    if (val === 'local' || val === 'supabase') {
+      if (val === 'supabase' && isSupabaseEnvConfigured()) return 'supabase';
+      return 'local';
+    }
+  }
+  return getActiveDataSource();
+}
+
+export function setModuleMode(module: ModuleKey, mode: DataSource): void {
+  try {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(`supabase.ui.mode.${module}`, mode);
+    }
+  } catch {}
+}
+
 function isNonEmpty(value: string | undefined | null): boolean {
   return Boolean(value && value.trim().length > 0);
 }
