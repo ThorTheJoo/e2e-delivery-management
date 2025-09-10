@@ -11,6 +11,8 @@ import {
   Schedule,
   CommercialModel,
 } from '@/types';
+import { getActiveDataSource } from '@/lib/data-source';
+import { SupabaseDataService } from '@/lib/supabase-data-service';
 
 // Import demo data
 import demoData from '../../demo-data.json';
@@ -32,6 +34,35 @@ class DataService {
 
   // Project methods
   async getProject(): Promise<Project> {
+    // Try Supabase first if enabled; fall back to demo data
+    try {
+      if (getActiveDataSource() === 'supabase') {
+        const projectsSvc = new SupabaseDataService<any>('projects');
+        const rows = await projectsSvc.read();
+        if (Array.isArray(rows) && rows.length > 0) {
+          const p = rows[0];
+          const toStr = (v: unknown) => (typeof v === 'string' ? v : v ? String(v) : '');
+          const months = (p.duration_months ?? null) as number | null;
+          const duration = months && Number.isFinite(months) ? `${months} months` : toStr(this.data?.project?.duration);
+          const project: Project = {
+            id: toStr(p.id || this.data?.project?.id || 'PROJECT-001'),
+            name: toStr(p.name || this.data?.project?.name || 'Project'),
+            customer: toStr(p.customer || this.data?.project?.customer || 'Customer'),
+            status: (p.status as any) || (this.data?.project?.status ?? 'In Progress'),
+            startDate: toStr(p.start_date || this.data?.project?.startDate),
+            endDate: toStr(p.end_date || this.data?.project?.endDate),
+            duration,
+            teamSize: (p.team_size as number) ?? this.data?.project?.teamSize ?? 0,
+            workingDaysPerMonth:
+              (p.working_days_per_month as number) ?? this.data?.project?.workingDaysPerMonth ?? 20,
+          };
+          return project;
+        }
+      }
+    } catch (err) {
+      console.warn('Supabase project read failed; falling back to demo data.', err);
+    }
+
     return this.data.project;
   }
 
