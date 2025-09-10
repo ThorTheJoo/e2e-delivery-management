@@ -16,6 +16,7 @@ import {
 import { dataService } from '@/lib/data-service';
 import { formatDate, calculateEffortTotal, getStatusColor, getSeverityColor } from '@/lib/utils';
 import { getBuildInfo } from '@/lib/build-info';
+import { getActiveDataSource, isSupabaseEnvConfigured } from '@/lib/data-source';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -94,6 +95,8 @@ export default function HomePage() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [loading, setLoading] = useState(true);
+  const [loadingMessage, setLoadingMessage] = useState('Initializing application...');
+  const [showDiagnostics, setShowDiagnostics] = useState(false);
 
   // Handle tab changes and reset expanded states
   const handleTabChange = (tab: string) => {
@@ -155,19 +158,33 @@ export default function HomePage() {
 
   useEffect(() => {
     console.log('useEffect triggered, starting data loading process...');
+    setLoadingMessage('Initializing data service...');
 
     const loadData = async () => {
       try {
         console.log('Starting data load...');
+        setLoadingMessage('Connecting to data sources...');
 
         // Test data service initialization
         console.log('Data service instance:', dataService);
+        setLoadingMessage('Loading project data...');
 
         // Load project data first to ensure we have basic data
         console.log('Attempting to load project data...');
-        const projectData = await dataService.getProject();
+
+        // Add timeout to prevent infinite loading
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Data loading timeout')), 8000); // 8 second timeout
+        });
+
+        const projectData = await Promise.race([
+          dataService.getProject(),
+          timeoutPromise
+        ]);
+
         console.log('Project loaded successfully:', projectData);
         setProject(projectData);
+        setLoadingMessage('Project data loaded, loading additional data...');
 
         // Set loading to false immediately after project is loaded
         console.log('Setting loading to false...');
@@ -302,12 +319,13 @@ export default function HomePage() {
         }
       } catch (error) {
         console.error('Error loading data:', error);
+        setLoadingMessage('Loading failed, using demo data...');
 
         // Fallback data if data service fails
         console.log('Using fallback data...');
         const fallbackProject: Project = {
           id: 'FALLBACK-001',
-          name: 'Fallback Project',
+          name: 'Demo Project (Fallback Mode)',
           customer: 'Demo Customer',
           status: 'In Progress',
           startDate: '2025-01-15',
@@ -327,7 +345,17 @@ export default function HomePage() {
         setDocuments([]);
 
         console.log('Fallback data set, setting loading to false...');
+        setLoadingMessage('Ready to use!');
         setLoading(false);
+      } finally {
+        // Ensure loading is always set to false, even if there's an unexpected error
+        setTimeout(() => {
+          if (loading) {
+            console.log('Emergency loading timeout - forcing loading to false');
+            setLoadingMessage('Emergency timeout reached - app ready');
+            setLoading(false);
+          }
+        }, 12000); // 12 second emergency timeout
       }
     };
 
@@ -429,11 +457,11 @@ export default function HomePage() {
 
   // Update requirement counts when tmfCapabilities are loaded
   // Intentionally exclude updateRequirementCounts from deps to avoid rebind loops
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (specSyncState && tmfCapabilities.length > 0) {
       updateRequirementCounts(specSyncState);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tmfCapabilities, specSyncState]);
 
   // Initialize default TMF domains if none exist
@@ -529,6 +557,7 @@ export default function HomePage() {
       ];
       setTmfDomains(defaultTmfDomains);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Changed from [tmfDomains.length] to [] to prevent infinite loop
 
   const handleSpecSyncImport = (state: SpecSyncState) => {
@@ -612,17 +641,42 @@ export default function HomePage() {
             Loading E2E Delivery Management System...
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
-            If this takes too long, please refresh the page
+            {loadingMessage}
           </p>
-          <button
-            onClick={() => {
-              console.log('Manual refresh button clicked');
-              setLoading(false);
-            }}
-            className="mt-4 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-          >
-            Skip Loading
-          </button>
+          <div className="mt-4 flex flex-col gap-2">
+            <button
+              onClick={() => {
+                console.log('Manual refresh button clicked');
+                setLoading(false);
+              }}
+              className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+            >
+              Skip Loading
+            </button>
+            <button
+              onClick={() => setShowDiagnostics(!showDiagnostics)}
+              className="rounded bg-gray-600 px-4 py-2 text-white hover:bg-gray-700 text-sm"
+            >
+              {showDiagnostics ? 'Hide' : 'Show'} Diagnostics
+            </button>
+          </div>
+
+          {showDiagnostics && (
+            <div className="mt-6 max-w-md rounded bg-gray-100 p-4 text-left text-xs">
+              <h4 className="font-semibold mb-2">Loading Diagnostics:</h4>
+              <ul className="space-y-1">
+                <li>• Data source: {getActiveDataSource()}</li>
+                <li>• Supabase configured: {isSupabaseEnvConfigured() ? 'Yes' : 'No'}</li>
+                <li>• Current message: {loadingMessage}</li>
+                <li>• Timeout: 8 seconds</li>
+                <li>• Emergency timeout: 15 seconds</li>
+              </ul>
+              <div className="mt-3">
+                <p className="text-red-600 font-medium">Having trouble?</p>
+                <p>Try: Configure Supabase in Settings → Supabase Configuration</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -710,7 +764,7 @@ export default function HomePage() {
               </TabsTrigger>
               <TabsTrigger value="tmf" className="flex items-center space-x-2">
                 <Network className="h-4 w-4" />
-                <span className="hidden sm:inline">TMF</span>
+                <span className="hidden sm:inline">Requirements</span>
               </TabsTrigger>
               <TabsTrigger value="solution-model" className="flex items-center space-x-2">
                 <PencilRuler className="h-4 w-4" />
@@ -1043,10 +1097,10 @@ export default function HomePage() {
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <Network className="h-5 w-5" />
-                    <span>TMF Domain and Capability Management</span>
+                    <span>Solution Input Parameters</span>
                   </CardTitle>
                   <CardDescription>
-                    Manage TMF ODA domains and capabilities with imported requirements
+                    Guideline for E2E Use Case Variants
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -1117,10 +1171,10 @@ export default function HomePage() {
                         <div>
                           <h3 className="flex items-center space-x-2 text-base font-semibold">
                             <Network className="h-4 w-4" />
-                            <span>TMF Domain and Capability Manager</span>
+                            <span>Domain & TMF Function Overview</span>
                           </h3>
                           <p className="text-sm text-muted-foreground">
-                            Manage TMF ODA domains and capabilities with imported requirements
+                            Overview of Specsync Domain/TMF Function Mappings
                           </p>
                         </div>
                       </div>
@@ -1384,7 +1438,7 @@ export default function HomePage() {
                     {workPackages.map((workPackage) => {
                       // Check if this work package has SET data updates
                       const setMatch = Object.entries(setMatchedWorkPackages).find(
-                        ([ignored, match]) => match.workPackages.includes(workPackage.name),
+                        ([_ignored, match]) => match.workPackages.includes(workPackage.name),
                       );
 
                       const setEffort = setMatch ? setMatch[1].effort : null;

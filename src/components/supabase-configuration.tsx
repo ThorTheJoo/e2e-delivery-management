@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { getDataSourceStatus, getModuleMode, setModuleMode } from '@/lib/data-source';
-import { getBrowserSupabaseClient, TABLES } from '@/lib/supabase';
+import { getDataSourceStatus, getModuleMode, setModuleMode, getActiveDataSource } from '@/lib/data-source';
+import { getBrowserSupabaseClient, TABLES, getStoredSupabaseConfig } from '@/lib/supabase';
 
 interface EnvPreview {
   supabaseUrl: string;
@@ -18,6 +18,7 @@ export function SupabaseConfiguration() {
   const [url, setUrl] = useState('');
   const [anonKey, setAnonKey] = useState('');
   const [serviceRole, setServiceRole] = useState('');
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [moduleModes, setModuleModes] = useState<Record<string, 'local' | 'supabase'>>({
     tmf: getModuleMode('tmf'),
     specs: getModuleMode('specsync'),
@@ -35,6 +36,10 @@ export function SupabaseConfiguration() {
     cetv22Count: number;
   }>({ tmfDomains: 0, tmfCapabilities: 0, userDomains: 0, userCapabilities: 0, specsyncItems: 0, cetv22Count: 0 });
   const [connectStatus, setConnectStatus] = useState<'unknown' | 'ok' | 'fail'>('unknown');
+  const [selectedTable, setSelectedTable] = useState<string>('projects');
+  const [tableData, setTableData] = useState<any[]>([]);
+  const [tableLoading, setTableLoading] = useState(false);
+  const [tableError, setTableError] = useState<string | null>(null);
 
   useEffect(() => {
     setStatus(getDataSourceStatus());
@@ -50,7 +55,12 @@ export function SupabaseConfiguration() {
       const sr = localStorage.getItem('supabase.serviceRole.hint');
       if (sr) setServiceRole(sr);
     } catch {}
-  }, []);
+
+    // Load initial table data
+    if (getActiveDataSource() === 'supabase') {
+      loadTableData(selectedTable);
+    }
+  }, [selectedTable]);
 
   const envPreview: EnvPreview = useMemo(
     () => ({
@@ -79,35 +89,94 @@ export function SupabaseConfiguration() {
     try {
       const cache = typeof window !== 'undefined' ? localStorage.getItem('specsync-data') : null;
       const parsed = cache ? JSON.parse(cache) : { items: [] };
+
+      // Get stored credentials
+      const storedConfig = getStoredSupabaseConfig();
+      const serviceKey = storedConfig?.serviceKey || serviceRole;
+      const supabaseUrl = storedConfig?.url || url;
+
+      console.log('Exporting SpecSync data:', {
+        itemsCount: parsed.items?.length || 0,
+        hasStoredConfig: !!storedConfig,
+        hasServiceKey: !!serviceKey,
+        hasUrl: !!supabaseUrl
+      });
+
       const res = await fetch('/api/specsync/export', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           items: parsed.items || [],
-          // Dev-only override: allow providing service key and url from UI to avoid server env setup
-          // The API uses this only when NODE_ENV !== 'production'
-          serviceRoleKey: serviceRole || undefined,
-          supabaseUrl: url || undefined,
+          serviceRoleKey: serviceKey || undefined,
+          supabaseUrl: supabaseUrl || undefined,
         }),
       });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error('API Error:', res.status, errorText);
+        let errorMessage = `API Error ${res.status}`;
+
+        try {
+          const errorJson = JSON.parse(errorText);
+          errorMessage = errorJson.message || errorJson.error || errorMessage;
+        } catch (e) {
+          // If it's not JSON, use the raw text
+          errorMessage = errorText || errorMessage;
+        }
+
+        throw new Error(errorMessage);
+      }
+
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.message || 'Export failed');
-      setMessage(`Exported ${json.exported} items to Supabase.`);
+      if (!json.success) {
+        const errorMsg = json.details || json.message || json.error || 'Export failed';
+        throw new Error(errorMsg);
+      }
+
+      setMessage(`✅ Successfully exported ${json.exported} items to Supabase!`);
     } catch (e: any) {
-      setMessage(e?.message || 'Export failed. Ensure Supabase is enabled and service role key is configured on server.');
+      console.error('Export error:', e);
+      setMessage(`❌ Export failed: ${e?.message || 'Unknown error'}`);
     } finally {
       setSaving(false);
     }
   };
 
-  const handleSaveConfig = () => {
+  const handleSaveConfig = async () => {
     try {
       localStorage.setItem('supabaseConfig', JSON.stringify({ url, anonKey }));
       if (serviceRole) localStorage.setItem('supabase.serviceRole.hint', serviceRole);
       setStatus(getDataSourceStatus());
-      setMessage('Supabase configuration saved locally for UI use. For full runtime enablement in builds, also set .env.local and restart.');
+
+      // Test the configuration immediately
+      const testMessage = await testConfiguration();
+      setMessage(`✅ Configuration saved! ${testMessage}`);
     } catch (e: any) {
-      setMessage(e?.message || 'Failed saving configuration');
+      setMessage(`❌ Failed saving configuration: ${e?.message || 'Unknown error'}`);
+    }
+  };
+
+  const testConfiguration = async (): Promise<string> => {
+    try {
+      const response = await fetch('/api/specsync/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: [],
+          serviceRoleKey: serviceRole || undefined,
+          supabaseUrl: url || undefined,
+        }),
+      });
+
+      if (response.ok) {
+        return 'Configuration is working correctly.';
+      } else {
+        const error = await response.json();
+        return `Configuration test failed: ${error.message}`;
+      }
+    } catch (error: any) {
+      return `Configuration test failed: ${error.message}`;
     }
   };
 
@@ -151,6 +220,62 @@ export function SupabaseConfiguration() {
     } catch (e: any) {
       setMessage(e?.message || 'Failed to refresh preview');
     }
+  };
+
+  const handleTableSelect = async (tableName: string) => {
+    setSelectedTable(tableName);
+    await loadTableData(tableName);
+  };
+
+  const loadTableData = async (tableName: string) => {
+    setTableLoading(true);
+    setTableError(null);
+    setTableData([]);
+
+    try {
+      const sb = getBrowserSupabaseClient();
+
+      // Try to load data ordered by created_at, but fall back to just selecting all if the column doesn't exist
+      let query = sb.from(tableName).select('*').limit(10);
+
+      // First try with ordering by created_at
+      try {
+        const result = await query.order('created_at', { ascending: false });
+        if (result.error) throw result.error;
+        setTableData(result.data || []);
+      } catch (orderError) {
+        // If ordering by created_at fails, try without ordering
+        console.warn(`Could not order by created_at for table ${tableName}, loading without ordering`);
+        try {
+          const result = await sb.from(tableName).select('*').limit(10);
+          if (result.error) throw result.error;
+          setTableData(result.data || []);
+        } catch (selectError) {
+          throw selectError;
+        }
+      }
+    } catch (e: any) {
+      console.error(`Failed to load data from table ${tableName}:`, e);
+      if (e.message && e.message.includes('does not exist')) {
+        setTableError(`Table '${tableName}' does not exist yet. You may need to create it first.`);
+      } else {
+        setTableError(e?.message || 'Failed to load table data');
+      }
+    } finally {
+      setTableLoading(false);
+    }
+  };
+
+  const formatValue = (value: any): string => {
+    if (value === null || value === undefined) return 'null';
+    if (typeof value === 'object') return JSON.stringify(value, null, 2);
+    if (value instanceof Date) return value.toISOString();
+    return String(value);
+  };
+
+  const truncateValue = (value: string, maxLength: number = 50): string => {
+    if (value.length <= maxLength) return value;
+    return value.substring(0, maxLength) + '...';
   };
 
   return (
@@ -288,31 +413,127 @@ export function SupabaseConfiguration() {
       </div>
 
       <div className="rounded-md border p-4">
-        <h4 className="mb-2 font-medium">Preview (Supabase read-only)</h4>
-        <div className="mb-2 text-sm">
+        <h4 className="mb-2 font-medium">Database Preview & Explorer</h4>
+
+        {/* Connection Status */}
+        <div className="mb-4 text-sm">
           Connection: {connectStatus === 'ok' ? (
-            <span className="rounded bg-green-100 px-2 py-0.5 text-green-700">OK</span>
+            <span className="rounded bg-green-100 px-2 py-0.5 text-green-700">✅ Connected</span>
           ) : connectStatus === 'fail' ? (
-            <span className="rounded bg-red-100 px-2 py-0.5 text-red-700">FAILED</span>
+            <span className="rounded bg-red-100 px-2 py-0.5 text-red-700">❌ Failed</span>
           ) : (
-            <span className="rounded bg-muted px-2 py-0.5">Unknown</span>
+            <span className="rounded bg-muted px-2 py-0.5">⏳ Checking...</span>
           )}
         </div>
-        <div className="grid gap-3 md:grid-cols-3 text-sm">
-          <div className="rounded-md border p-3"><div className="font-medium">TMF Reference Domains</div><div>{preview.tmfDomains}</div></div>
-          <div className="rounded-md border p-3"><div className="font-medium">TMF Reference Capabilities</div><div>{preview.tmfCapabilities}</div></div>
-          <div className="rounded-md border p-3"><div className="font-medium">User Domains</div><div>{preview.userDomains}</div></div>
-          <div className="rounded-md border p-3"><div className="font-medium">User Capabilities</div><div>{preview.userCapabilities}</div></div>
-          <div className="rounded-md border p-3"><div className="font-medium">SpecSync Items</div><div>{preview.specsyncItems}</div></div>
-          <div className="rounded-md border p-3"><div className="font-medium">CETv22 Data</div><div>{preview.cetv22Count}</div></div>
+
+        {/* Table Counts Overview */}
+        <div className="mb-4">
+          <h5 className="text-sm font-medium mb-2">Table Counts</h5>
+          <div className="grid gap-2 md:grid-cols-3 text-sm">
+            <div className="rounded-md border p-2">
+              <div className="font-medium text-xs">TMF Reference Domains</div>
+              <div className="text-lg font-bold">{preview.tmfDomains}</div>
+            </div>
+            <div className="rounded-md border p-2">
+              <div className="font-medium text-xs">TMF Reference Capabilities</div>
+              <div className="text-lg font-bold">{preview.tmfCapabilities}</div>
+            </div>
+            <div className="rounded-md border p-2">
+              <div className="font-medium text-xs">User Domains</div>
+              <div className="text-lg font-bold">{preview.userDomains}</div>
+            </div>
+            <div className="rounded-md border p-2">
+              <div className="font-medium text-xs">User Capabilities</div>
+              <div className="text-lg font-bold">{preview.userCapabilities}</div>
+            </div>
+            <div className="rounded-md border p-2">
+              <div className="font-medium text-xs">SpecSync Items</div>
+              <div className="text-lg font-bold">{preview.specsyncItems}</div>
+            </div>
+            <div className="rounded-md border p-2">
+              <div className="font-medium text-xs">CETv22 Data</div>
+              <div className="text-lg font-bold">{preview.cetv22Count}</div>
+            </div>
+          </div>
         </div>
-        <button
-          className="mt-3 rounded-md bg-muted px-3 py-2 text-xs"
-          onClick={handleRefreshPreview}
-          aria-label="Refresh preview"
-        >
-          Refresh Preview
-        </button>
+
+        {/* Table Selector and Data Viewer */}
+        <div className="border-t pt-4">
+          <div className="flex items-center justify-between mb-4">
+            <h5 className="text-sm font-medium">Table Data Explorer</h5>
+            <button
+              className="rounded-md bg-muted px-3 py-1 text-xs"
+              onClick={handleRefreshPreview}
+              aria-label="Refresh preview"
+            >
+              Refresh Counts
+            </button>
+          </div>
+
+          {/* Table Selector */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2">Select Table:</label>
+            <select
+              value={selectedTable}
+              onChange={(e) => handleTableSelect(e.target.value)}
+              className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+            >
+              <option value="projects">Projects</option>
+              <option value="tmf_reference_domains">TMF Reference Domains</option>
+              <option value="tmf_reference_capabilities">TMF Reference Capabilities</option>
+              <option value="user_domains">User Domains</option>
+              <option value="user_capabilities">User Capabilities</option>
+              <option value="specsync_items">SpecSync Items</option>
+              <option value="blue_dolphin_objects">Blue Dolphin Objects</option>
+              <option value="cetv22_data">CETv22 Data</option>
+              <option value="work_packages">Work Packages</option>
+              <option value="bill_of_materials">Bill of Materials</option>
+              <option value="integration_configs">Integration Configs</option>
+              <option value="user_preferences">User Preferences</option>
+              <option value="filter_categories">Filter Categories</option>
+              <option value="filter_options">Filter Options</option>
+            </select>
+          </div>
+
+          {/* Table Data Display */}
+          <div className="border rounded-md">
+            <div className="bg-gray-50 px-4 py-2 border-b">
+              <h6 className="text-sm font-medium">{selectedTable} Records (Last 10)</h6>
+              {tableLoading && <span className="text-xs text-gray-500 ml-2">Loading...</span>}
+            </div>
+
+            {tableError ? (
+              <div className="p-4 text-red-600 text-sm">
+                Error: {tableError}
+              </div>
+            ) : tableData.length === 0 ? (
+              <div className="p-4 text-gray-500 text-sm">
+                {tableLoading ? 'Loading records...' : 'No records found'}
+              </div>
+            ) : (
+              <div className="max-h-96 overflow-auto">
+                {tableData.map((record, index) => (
+                  <div key={record.id || index} className="border-b last:border-b-0 p-4">
+                    <div className="grid gap-2 text-sm">
+                      {Object.entries(record).map(([key, value]) => (
+                        <div key={key} className="flex">
+                          <span className="font-medium text-gray-600 w-1/3 truncate">{key}:</span>
+                          <span className="text-gray-900 w-2/3 font-mono text-xs">
+                            {truncateValue(formatValue(value), 100)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="mt-2 text-xs text-gray-500">
+            Showing up to 10 records ordered by creation date (newest first). All data is read-only.
+          </div>
+        </div>
       </div>
 
       <div className="rounded-md border p-4">
@@ -333,14 +554,59 @@ export function SupabaseConfiguration() {
       </div>
 
       <div className="rounded-md border p-4">
-        <h4 className="mb-2 font-medium">Required .env.local</h4>
-        <pre className="overflow-x-auto rounded bg-muted p-3 text-xs">
+        <h4 className="mb-2 font-medium">🚀 Quick Setup (No .env.local needed!)</h4>
+        <div className="space-y-3 text-sm">
+          <div className="flex items-start gap-2">
+            <span className="text-green-600 font-bold">1.</span>
+            <div>
+              <p className="font-medium">Fill in your Supabase credentials above</p>
+              <p className="text-muted-foreground">URL, Anon Key, and Service Role Key from your Supabase dashboard</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="text-green-600 font-bold">2.</span>
+            <div>
+              <p className="font-medium">Click "Save Configuration (UI)"</p>
+              <p className="text-muted-foreground">This stores everything in your browser - no files needed!</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="text-green-600 font-bold">3.</span>
+            <div>
+              <p className="font-medium">Switch to "Database (Supabase)" mode</p>
+              <p className="text-muted-foreground">Enable Supabase for all your data operations</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="text-green-600 font-bold">4.</span>
+            <div>
+              <p className="font-medium">Test with "Export SpecSync Now"</p>
+              <p className="text-muted-foreground">Verify everything works without touching any files!</p>
+            </div>
+          </div>
+        </div>
+        <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded">
+          <p className="text-sm text-blue-800">
+            <strong>💡 Pro tip:</strong> This UI-based approach works immediately and doesn't require file system access or server restarts. Perfect for development and testing!
+          </p>
+        </div>
+      </div>
+
+      <div className="rounded-md border p-4">
+        <h4 className="mb-2 font-medium">Advanced: .env.local Setup (Optional)</h4>
+        <details className="text-sm">
+          <summary className="cursor-pointer font-medium mb-2">For production deployments or permanent setup</summary>
+          <pre className="overflow-x-auto rounded bg-muted p-3 text-xs">
 {`NEXT_PUBLIC_SUPABASE_URL=your-project-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 NEXT_PUBLIC_DATA_SOURCE=supabase
 # Server-only (for export):
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key`}
-        </pre>
+          </pre>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Create this file in your project root for permanent configuration. The UI method above works without this file.
+          </p>
+        </details>
       </div>
     </section>
   );

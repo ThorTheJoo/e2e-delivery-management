@@ -8,11 +8,8 @@ import {
   Plus,
   Trash2,
   Edit,
-  Check,
-  X,
   ChevronDown,
   ChevronRight,
-  Upload,
   FileSpreadsheet,
 } from 'lucide-react';
 import { TMFOdaDomain, TMFOdaCapability, TMFOdaState } from '@/types';
@@ -349,12 +346,12 @@ export function TMFOdaManager({ onStateChange, initialState }: TMFOdaManagerProp
         domains: mockDomains,
       }));
     }
-  }, [initialState]);
+  }, [initialState, state.domains.length]);
 
   // Notify parent of state changes
   useEffect(() => {
     onStateChange?.(state);
-  }, [state, onStateChange]);
+  }, [state, state.domains.length, onStateChange]);
 
   const generateId = () => `id-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 

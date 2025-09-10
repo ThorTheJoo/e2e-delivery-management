@@ -211,10 +211,6 @@ export interface ComplexitySelection {
 	channelIds: string[]; // multi
 	deploymentId: string; // single
 	nfrSelections: Partial<Record<NfrKey, string>>;
-	integration: {
-		apiCount: number;
-		requiresLegacyCompatibility: boolean;
-	};
 	deliveryServicesEnabled?: string[];
 }
 
@@ -232,10 +228,6 @@ export const ComplexitySelectionSchema = z.object({
 	channelIds: z.array(z.string()).min(0),
 	deploymentId: z.string(),
 	nfrSelections: NfrSelectionsSchema.default({}),
-	integration: z.object({
-		apiCount: z.number().int().min(0),
-		requiresLegacyCompatibility: z.boolean(),
-	}),
 	deliveryServicesEnabled: z.array(z.string()).optional(),
 });
 

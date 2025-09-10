@@ -8,8 +8,7 @@ import {
   Dependency,
   Document,
   Estimation,
-  Schedule,
-  CommercialModel,
+  TMFOdaDomain,
 } from '@/types';
 import { getActiveDataSource } from '@/lib/data-source';
 import { SupabaseDataService } from '@/lib/supabase-data-service';
@@ -189,7 +188,7 @@ class DataService {
       const refDomains = await this.getTMFReferenceDomains();
       const caps = await this.getTMFCapabilities();
       const byDomain: Record<string, TMFOdaDomain> = {};
-      refDomains.forEach((d, idx) => {
+      refDomains.forEach((d, _idx) => {
         byDomain[d.id] = {
           id: d.id,
           name: d.name,

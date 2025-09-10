@@ -487,7 +487,7 @@ export class ADOService {
     );
   }
 
-  private calculateCapabilityEffort(capability: any): number {
+  private calculateCapabilityEffort(_capability: any): number {
     // Default effort calculation - can be enhanced with actual effort data
     return 5; // 5 days per capability
   }

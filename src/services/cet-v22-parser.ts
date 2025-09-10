@@ -245,7 +245,7 @@ export class CETv22ParserService {
 
       return {
         id,
-        productService: this.getCellValue(row, headers, 'Product Service') || 'Unknown',
+        productService: this.getCellValue(row, headers, 'Product / Service') || this.getCellValue(row, headers, 'Product Service') || 'Unknown',
         projectTeam: this.getCellValue(row, headers, 'Project Team') || 'Unknown',
         projectRole: this.getCellValue(row, headers, 'Project Role') || 'Unknown',
         salesRegion: this.getCellValue(row, headers, 'Sales Region') || 'Global',
@@ -256,7 +256,7 @@ export class CETv22ParserService {
         resourceLevel: this.getCellValue(row, headers, 'Resource Level') || 'Mid',
         resourceCostRegion: this.getCellValue(row, headers, 'Resource Cost Region') || 'Global',
         demandLocationCountryCode:
-          this.getCellValue(row, headers, 'Demand Location Country Code') || 'US',
+          this.getCellValue(row, headers, 'Demand Location - Country Code') || this.getCellValue(row, headers, 'Demand Location Country Code') || 'US',
         workerType: this.getCellValue(row, headers, 'Worker Type') || 'Full-Time',
         hourlyRate: parseFloat(this.getCellValue(row, headers, 'Hourly Rate') || '100'),
         availability: parseFloat(this.getCellValue(row, headers, 'Availability') || '40'),
@@ -302,7 +302,7 @@ export class CETv22ParserService {
 
   private analyzePhaseData(
     sheetData: any[][],
-    phaseNumber: number,
+    _phaseNumber: number,
   ): { startWeek: number; endWeek: number; totalEffort: number; resourceCount: number } {
     if (sheetData.length < 2) {
       return { startWeek: 1, endWeek: 4, totalEffort: 0, resourceCount: 0 };

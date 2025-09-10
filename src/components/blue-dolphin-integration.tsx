@@ -24,7 +24,6 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
   const [objects, setObjects] = useState<BlueDolphinObjectEnhanced[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [objectCount, setObjectCount] = useState(0);
   const [objectTotal, setObjectTotal] = useState(0);
   const [lastDataUpdate, setLastDataUpdate] = useState<Date | null>(null);
   const [lastApiResponse, setLastApiResponse] = useState<any>(null);
@@ -83,7 +82,6 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
 
       if (result.success) {
         setObjects(result.data || []);
-        setObjectCount(result.count || 0);
         setObjectTotal(result.total || 0);
         setLastDataUpdate(new Date());
         setLastApiResponse(result);
@@ -116,8 +114,6 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
 
   const clearObjects = () => {
     setObjects([]);
-    setObjectCount(0);
-    setObjectCount(0);
     setObjectTotal(0);
     setError(null);
     setWorkspaceFilter('');

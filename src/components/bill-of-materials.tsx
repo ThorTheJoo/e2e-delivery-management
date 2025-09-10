@@ -17,7 +17,6 @@ import {
   BOMFilters,
   BOMSummary,
   ServiceDeliveryCategory,
-  SpecSyncItem,
   SpecSyncState,
 } from '@/types';
 
@@ -101,7 +100,7 @@ export function BillOfMaterials({
 
       // 1. Process SpecSync data
       if (specSyncState?.items) {
-        specSyncState.items.forEach((specItem, index) => {
+        specSyncState.items.forEach((specItem, _index) => {
           const serviceDeliveryServices = DEFAULT_SERVICE_DELIVERY_SERVICES.map(
             (service, serviceIndex) => ({
               id: `service-${itemId}-${serviceIndex}`,
@@ -426,11 +425,8 @@ export function BillOfMaterials({
       deployment: number;
     } = { customer: 1, product: 1, access: 1, channel: 1, deployment: 1 };
     let nfrAggregateMultiplier = 1;
-    let integrationMultiplier = 1;
     let deliveryServiceMultipliers: Record<string, number> = {};
     let complexitySelections: Record<string, string> = {};
-    let integrationApiCount = 0;
-    let integrationLegacy = false;
     let productMixList: string[] = [];
     let accessTechList: string[] = [];
     let channelList: string[] = [];
@@ -465,15 +461,6 @@ export function BillOfMaterials({
               : [],
           deploymentId: selection.deploymentId || selection.deployment || '',
           nfrSelections: selection.nfrSelections || {},
-          integration: {
-            apiCount:
-              typeof selection?.integration?.apiCount === 'number'
-                ? selection.integration.apiCount
-                : 0,
-            requiresLegacyCompatibility: Boolean(
-              selection?.integration?.requiresLegacyCompatibility,
-            ),
-          },
           deliveryServicesEnabled: selection.deliveryServicesEnabled,
         };
 
@@ -482,8 +469,6 @@ export function BillOfMaterials({
         stageMultipliers = result.stageMultipliers || {};
         deliveryServiceMultipliers = result.deliveryServiceMultipliers || {};
         complexitySelections = normalized.nfrSelections || {};
-        integrationApiCount = normalized.integration.apiCount;
-        integrationLegacy = normalized.integration.requiresLegacyCompatibility;
         productMixList = normalized.productMixIds || [];
         accessTechList = normalized.accessTechnologyIds || [];
         channelList = normalized.channelIds || [];
@@ -502,7 +487,6 @@ export function BillOfMaterials({
           nfrAggregateMultiplier = Object.values(result.nfr)
             .filter(Boolean)
             .reduce((acc, item: any) => acc * (item?.multiplier || 1), 1);
-          integrationMultiplier = result.integration?.multiplier || 1;
         } catch {}
 
         try {
@@ -530,15 +514,12 @@ export function BillOfMaterials({
       'NFR Scalability',
       'NFR Security',
       'NFR Availability',
-      'Integrations (API Count)',
-      'Integrations (Legacy Compatibility)',
       'Customer Mult',
       'Product Mix Mult',
       'Access Tech Mult',
       'Channel Mult',
       'Deployment Mult',
       'NFR Aggregate Mult',
-      'Integration Mult',
       'Stage Presales',
       'Stage Solutioning',
       'Stage Design',
@@ -583,15 +564,12 @@ export function BillOfMaterials({
           `"${complexitySelections['scalability'] || ''}"`,
           `"${complexitySelections['security'] || ''}"`,
           `"${complexitySelections['availability'] || ''}"`,
-          integrationApiCount,
-          integrationLegacy ? 'Yes' : 'No',
           categoryMultipliers.customer,
           categoryMultipliers.product,
           categoryMultipliers.access,
           categoryMultipliers.channel,
           categoryMultipliers.deployment,
           nfrAggregateMultiplier,
-          integrationMultiplier,
           stageMultipliers['presales'] || '',
           stageMultipliers['solutioning'] || '',
           stageMultipliers['design'] || '',

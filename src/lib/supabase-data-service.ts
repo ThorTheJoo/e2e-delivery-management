@@ -25,6 +25,15 @@ export class SupabaseDataService<T extends BaseRecord> {
 
   async create(data: Partial<T>): Promise<T> {
     if (!this.isEnabled()) throw new Error('Supabase is not enabled');
+
+    // Check if we have a valid Supabase client
+    if (!supabase || !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+        process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your-project') ||
+        !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.includes('your-')) {
+      throw new Error('Supabase client not properly configured');
+    }
+
     const { data: result, error } = await supabase
       .from(this.tableName)
       .insert(data)
@@ -36,6 +45,16 @@ export class SupabaseDataService<T extends BaseRecord> {
 
   async read(filters?: QueryFilters): Promise<T[]> {
     if (!this.isEnabled()) return [];
+
+    // Check if we have a valid Supabase client
+    if (!supabase || !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+        process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your-project') ||
+        !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.includes('your-')) {
+      console.warn('Supabase client not properly configured, returning empty array');
+      return [];
+    }
+
     let query = supabase.from(this.tableName).select('*');
     if (filters) {
       for (const [key, value] of Object.entries(filters)) {
@@ -49,6 +68,15 @@ export class SupabaseDataService<T extends BaseRecord> {
 
   async update(id: string, data: Partial<T>): Promise<T> {
     if (!this.isEnabled()) throw new Error('Supabase is not enabled');
+
+    // Check if we have a valid Supabase client
+    if (!supabase || !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+        process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your-project') ||
+        !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.includes('your-')) {
+      throw new Error('Supabase client not properly configured');
+    }
+
     const { data: result, error } = await supabase
       .from(this.tableName)
       .update({ ...data, updated_at: new Date().toISOString() })
@@ -61,6 +89,15 @@ export class SupabaseDataService<T extends BaseRecord> {
 
   async delete(id: string): Promise<void> {
     if (!this.isEnabled()) throw new Error('Supabase is not enabled');
+
+    // Check if we have a valid Supabase client
+    if (!supabase || !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+        process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your-project') ||
+        !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.includes('your-')) {
+      throw new Error('Supabase client not properly configured');
+    }
+
     const { error } = await supabase
       .from(this.tableName)
       .delete()

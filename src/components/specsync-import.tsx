@@ -2,7 +2,6 @@
 
 import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Upload, X, CheckCircle, AlertCircle, Edit, Save, X as Cancel } from 'lucide-react';
 import * as XLSX from 'xlsx';
@@ -39,7 +38,7 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
 
     const headers = lines[0].split(',').map((h) => h.trim().replace(/^"|"$/g, ''));
 
-    // Header mapping with flexible naming
+    // Header mapping with flexible naming - updated for new column structure
     const headerMap = {
       rephrasedRequirementId:
         headers.find((h) => /rephrased.*requirement.*id/i.test(h)) || 'Rephrased Requirement ID',
@@ -63,13 +62,18 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
         row[header] = values[index] || '';
       });
 
+      // Get rephrased function name with fallback to original requirement text
+      const rephrasedFunctionName = row[headerMap.functionName] || 
+        row[headerMap.sourceRequirementId] || 
+        `REQ-${index + 1}`;
+
       return {
         id: `imported-${index + 1}`,
         requirementId: row[headerMap.sourceRequirementId] || `REQ-${index + 1}`,
         rephrasedRequirementId: row[headerMap.rephrasedRequirementId] || '',
         domain: row[headerMap.domain] || '',
         vertical: row[headerMap.vertical] || '',
-        functionName: row[headerMap.functionName] || '',
+        functionName: rephrasedFunctionName,
         afLevel2: row[headerMap.afLevel2] || '',
         capability: row[headerMap.afLevel2] || '', // Use AF Level 2 as capability
         referenceCapability: row[headerMap.referenceCapability] || '',
@@ -99,6 +103,12 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
         r['Architecture Framework Level 2'] ||
         '';
       const rc = r['Reference Capability'] || r['Capability'] || '';
+      
+      // Get rephrased function name with fallback to original requirement text
+      const rephrasedFunctionName = fn || 
+        r['Source Requirement ID'] || 
+        r['SourceRequirementId'] || 
+        `REQ-${index + 1}`;
 
       return {
         id: `excel-${index + 1}`,
@@ -107,7 +117,7 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
           r['Rephrased Requirement ID'] || r['RephrasedRequirementId'] || r['RequirementId'] || '',
         domain: r['Rephrased Domain'] || r['Domain'] || '',
         vertical: r['Rephrased Vertical'] || r['Vertical'] || '',
-        functionName: fn,
+        functionName: rephrasedFunctionName,
         afLevel2: af2,
         capability: af2, // STRICT: only AF Level 2
         referenceCapability: rc,
@@ -342,18 +352,15 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
               <table className="w-full border-collapse text-xs">
                 <thead>
                   <tr className="bg-muted/70">
-                    <th className="border border-muted-foreground/20 px-2 py-1 text-left">ID</th>
+                    <th className="border border-muted-foreground/20 px-2 py-1 text-left">Requirement ID</th>
                     <th className="border border-muted-foreground/20 px-2 py-1 text-left">
-                      Requirement
+                      Rephrased Function Name
                     </th>
                     <th className="border border-muted-foreground/20 px-2 py-1 text-left">
                       Domain
                     </th>
                     <th className="border border-muted-foreground/20 px-2 py-1 text-left">
-                      Function
-                    </th>
-                    <th className="border border-muted-foreground/20 px-2 py-1 text-left">
-                      Use Case
+                      Encompass Use Case - Beta
                     </th>
                     <th className="border border-muted-foreground/20 px-2 py-1 text-left">
                       Actions
@@ -363,6 +370,7 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
                 <tbody>
                   {editedItems.slice(0, 10).map((item, index) => (
                     <tr key={index} className="hover:bg-muted/30">
+                      {/* Requirement ID Column */}
                       <td className="border border-muted-foreground/20 px-2 py-1 font-mono text-xs">
                         {editingItem?.index === index &&
                         editingItem?.field === 'rephrasedRequirementId' ? (
@@ -420,6 +428,7 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
                           </div>
                         )}
                       </td>
+                      {/* Rephrased Function Name Column */}
                       <td className="max-w-xs truncate border border-muted-foreground/20 px-2 py-1">
                         {editingItem?.index === index && editingItem?.field === 'functionName' ? (
                           <div className="flex items-center space-x-1">
@@ -458,7 +467,7 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
                           </div>
                         ) : (
                           <div className="flex items-center justify-between">
-                            <span>{item.functionName || item.afLevel2 || 'N/A'}</span>
+                            <span>{item.functionName || 'N/A'}</span>
                             <Button
                               size="sm"
                               variant="ghost"
@@ -470,6 +479,7 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
                           </div>
                         )}
                       </td>
+                      {/* Domain Column */}
                       <td className="border border-muted-foreground/20 px-2 py-1">
                         {editingItem?.index === index && editingItem?.field === 'domain' ? (
                           <div className="flex items-center space-x-1">
@@ -515,54 +525,7 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
                           </div>
                         )}
                       </td>
-                      <td className="max-w-xs truncate border border-muted-foreground/20 px-2 py-1">
-                        {editingItem?.index === index && editingItem?.field === 'capability' ? (
-                          <div className="flex items-center space-x-1">
-                            <input
-                              type="text"
-                              value={item.capability}
-                              onChange={(e) => {
-                                const newItems = [...editedItems];
-                                newItems[index] = {
-                                  ...newItems[index],
-                                  capability: e.target.value,
-                                };
-                                setEditedItems(newItems);
-                              }}
-                              className="w-full rounded border px-1 py-0.5 text-xs"
-                              autoFocus
-                            />
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-4 w-4 p-0"
-                              onClick={() => handleSaveEdit(index, 'capability', item.capability)}
-                            >
-                              <Save className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-4 w-4 p-0"
-                              onClick={handleCancelEdit}
-                            >
-                              <Cancel className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        ) : (
-                          <div className="flex items-center justify-between">
-                            <span>{item.capability || item.afLevel2 || 'N/A'}</span>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-4 w-4 p-0"
-                              onClick={() => handleEditItem(index, 'capability')}
-                            >
-                              <Edit className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        )}
-                      </td>
+                      {/* Use Case Column */}
                       <td className="max-w-xs truncate border border-muted-foreground/20 px-2 py-1">
                         {editingItem?.index === index && editingItem?.field === 'usecase1' ? (
                           <div className="flex items-center space-x-1">
@@ -608,6 +571,7 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
                           </div>
                         )}
                       </td>
+                      {/* Actions Column */}
                       <td className="border border-muted-foreground/20 px-2 py-1 text-center">
                         <div className="flex items-center justify-center space-x-1">
                           <Badge variant="secondary" className="text-xs">
@@ -628,8 +592,9 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
       )}
 
       <div className="text-xs text-muted-foreground">
-        Supported formats: CSV, Excel (.xlsx, .xls). Files should contain columns for Domain,
-        Function Name, AF Level 2, and Reference Capability.
+        Supported formats: CSV, Excel (.xlsx, .xls). Files should contain columns for Rephrased Function Name,
+        Domain, Encompass Use Case - Beta, and other requirement fields. The system will read the "Rephrased Function Name" column
+        and fallback to the original requirement text if not available.
       </div>
     </div>
   );

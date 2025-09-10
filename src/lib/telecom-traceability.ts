@@ -76,7 +76,7 @@ export function generateTraceabilityFromSelection(
   const result = computeComplexity(selection, DEFAULT_COMPLEXITY_CONFIG);
 
   const keys: string[] = [
-    `customer-type:${selection.customerTypeId}`,
+    `customer-type:${selection.customerTypeIds[0] || ''}`,
     ...selection.productMixIds.map((id) => `product-mix:${id}`),
     ...selection.channelIds.map((id) => `channel:${id}`),
     ...selection.accessTechnologyIds.map((id) => `access-technology:${id}`),
@@ -94,13 +94,13 @@ export function generateTraceabilityFromSelection(
     ...selection.productMixIds.map((v) => `Product:${v}`),
     ...selection.channelIds.map((v) => `Channel:${v}`),
     ...selection.accessTechnologyIds.map((v) => `Access:${v}`),
-    `Customer:${selection.customerTypeId}`,
+    `Customer:${selection.customerTypeIds[0] || ''}`,
     `Deployment:${selection.deploymentId}`,
   ]);
 
   const fields: Record<string, string | number | boolean> = {
     'Custom.ComplexityMultiplier': result.overallMultiplier,
-    'Custom.CustomerType': selection.customerTypeId,
+    'Custom.CustomerType': selection.customerTypeIds[0] || '',
     'Custom.ProductMix': selection.productMixIds.join(';'),
     'Custom.AccessTech': selection.accessTechnologyIds.join(';'),
     'Custom.Channel': selection.channelIds.join(';'),

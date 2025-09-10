@@ -23,6 +23,60 @@ export function getBrowserSupabaseClient(): SupabaseClient {
   return supabase;
 }
 
+// Enhanced client with fallback to UI config for server operations
+export function getConfiguredSupabaseClient(serviceRoleKey?: string, supabaseUrl?: string): SupabaseClient | null {
+  // First try direct parameters (from API call)
+  if (serviceRoleKey && supabaseUrl) {
+    try {
+      return createClient(supabaseUrl, serviceRoleKey);
+    } catch (error) {
+      console.warn('Failed to create Supabase client with direct params:', error);
+    }
+  }
+
+  // Then try environment variables (production)
+  const envUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const envAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const envServiceKey = serviceRoleKey || process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (envUrl && envServiceKey) {
+    try {
+      return createClient(envUrl, envServiceKey);
+    } catch (error) {
+      console.warn('Failed to create Supabase client with env vars:', error);
+    }
+  }
+
+  // For server-side operations, we can't access localStorage
+  // The UI should pass the credentials directly to the API
+  console.warn('No Supabase configuration available. Please configure credentials.');
+  return null;
+}
+
+// Helper function for UI to get stored config (client-side only)
+export function getStoredSupabaseConfig() {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  try {
+    const raw = window.localStorage.getItem('supabaseConfig');
+    const serviceRaw = window.localStorage.getItem('supabase.serviceRole.hint');
+
+    if (raw && serviceRaw) {
+      const cfg = JSON.parse(raw);
+      return {
+        url: cfg?.url,
+        serviceKey: serviceRaw
+      };
+    }
+  } catch (error) {
+    console.warn('Failed to get stored Supabase config:', error);
+  }
+
+  return null;
+}
+
 export function getServerSupabaseClient(): SupabaseClient | null {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;

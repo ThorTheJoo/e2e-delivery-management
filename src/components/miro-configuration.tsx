@@ -123,27 +123,6 @@ export function MiroConfiguration() {
     }
   };
 
-  const loadSavedConfig = () => {
-    const saved = localStorage.getItem('miroConfig');
-    if (saved) {
-      try {
-        const parsedConfig = JSON.parse(saved);
-        // Validate that the saved config has the correct structure
-        if (parsedConfig && typeof parsedConfig === 'object' && 'clientId' in parsedConfig) {
-          setConfig(parsedConfig);
-          setIsConfigured(true);
-          // Sync the loaded configuration with the server
-          syncConfigWithServer(parsedConfig);
-        } else {
-          console.warn('Invalid Miro config structure found in localStorage, clearing...');
-          localStorage.removeItem('miroConfig');
-        }
-      } catch (error) {
-        console.error('Error parsing Miro config from localStorage:', error);
-        localStorage.removeItem('miroConfig');
-      }
-    }
-  };
 
   const clearMiroConfig = () => {
     localStorage.removeItem('miroConfig');
@@ -161,6 +140,28 @@ export function MiroConfiguration() {
   };
 
   useEffect(() => {
+    const loadSavedConfig = () => {
+      const saved = localStorage.getItem('miroConfig');
+      if (saved) {
+        try {
+          const parsedConfig = JSON.parse(saved);
+          // Validate that the saved config has the correct structure
+          if (parsedConfig && typeof parsedConfig === 'object' && 'clientId' in parsedConfig) {
+            setConfig(parsedConfig);
+            setIsConfigured(true);
+            // Sync the loaded configuration with the server
+            syncConfigWithServer(parsedConfig);
+          } else {
+            console.warn('Invalid Miro config structure found in localStorage, clearing...');
+            localStorage.removeItem('miroConfig');
+          }
+        } catch (error) {
+          console.error('Error parsing Miro config from localStorage:', error);
+          localStorage.removeItem('miroConfig');
+        }
+      }
+    };
+
     loadSavedConfig();
     checkConnectionStatus();
   }, []);

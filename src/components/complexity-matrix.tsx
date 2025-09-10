@@ -5,8 +5,6 @@ import { Calculator, ChevronDown, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { MultiSelect } from '@/components/ui/multi-select';
-import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
   DEFAULT_COMPLEXITY_CONFIG,
   type ComplexitySelection,
@@ -19,6 +17,9 @@ interface FieldOption {
   id: string;
   label: string;
 }
+
+// Move nfrKeys outside component as it's a constant
+const nfrKeys: NfrKey[] = ['performance', 'scalability', 'security', 'availability'];
 
 export function ComplexityMatrix() {
   const config = DEFAULT_COMPLEXITY_CONFIG;
@@ -48,7 +49,6 @@ export function ComplexityMatrix() {
     [config],
   );
 
-  const nfrKeys: NfrKey[] = ['performance', 'scalability', 'security', 'availability'];
   const nfrOptions: Record<NfrKey, FieldOption[]> = useMemo(() => {
     const res: Record<NfrKey, FieldOption[]> = {
       performance: [],
@@ -75,7 +75,6 @@ export function ComplexityMatrix() {
       security: nfrOptions.security[0]?.id,
       availability: nfrOptions.availability[0]?.id,
     },
-    integration: { apiCount: 0, requiresLegacyCompatibility: false },
     deliveryServicesEnabled: undefined,
   });
 
@@ -162,9 +161,9 @@ export function ComplexityMatrix() {
             variant="ghost"
             size="sm"
             onClick={() => {
-              // Retail baseline: Consumer + Mobile, Retail, 4G/5G, Cloud, 3 APIs, baseline NFRs
+              // Retail baseline: Consumer + Mobile, Retail, 4G/5G, Cloud, baseline NFRs
               const baseline: ComplexitySelection = {
-                customerTypeId: 'consumer',
+                customerTypeIds: ['consumer'],
                 productMixIds: ['mobile'],
                 accessTechnologyIds: ['4g-5g'],
                 channelIds: ['retail'],
@@ -175,7 +174,6 @@ export function ComplexityMatrix() {
                   security: 'sec-baseline',
                   availability: 'avail-baseline',
                 },
-                integration: { apiCount: 3, requiresLegacyCompatibility: false },
                 deliveryServicesEnabled: undefined,
               };
               setSelection(baseline);
@@ -263,39 +261,6 @@ export function ComplexityMatrix() {
               </Select>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <div className="mb-1 text-xs text-muted-foreground">API Integrations</div>
-                <Input
-                  type="number"
-                  min={0}
-                  value={selection.integration.apiCount}
-                  onChange={(e) =>
-                    setSelection({
-                      ...selection,
-                      integration: { ...selection.integration, apiCount: Number(e.target.value || 0) },
-                    })
-                  }
-                  aria-label="API Integrations"
-                />
-              </div>
-              <label className="mt-6 inline-flex items-center space-x-2">
-                <Checkbox
-                  checked={selection.integration.requiresLegacyCompatibility}
-                  onCheckedChange={(v) =>
-                    setSelection({
-                      ...selection,
-                      integration: {
-                        ...selection.integration,
-                        requiresLegacyCompatibility: Boolean(v),
-                      },
-                    })
-                  }
-                  aria-label="Legacy compatibility required"
-                />
-                <span className="text-sm">Legacy compatibility</span>
-              </label>
-            </div>
           </div>
 
           {/* NFR selections */}
@@ -327,27 +292,6 @@ export function ComplexityMatrix() {
             ))}
           </div>
 
-          {/* Results */}
-          <div className="rounded-lg border p-3">
-            <div className="mb-2 text-sm font-medium">Computed Multipliers</div>
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-              <div>
-                <div className="text-xs text-muted-foreground">Overall</div>
-                <div className="text-xl font-bold">x{result.overallMultiplier}</div>
-              </div>
-              <div className="md:col-span-2">
-                <div className="text-xs text-muted-foreground">Stages</div>
-                <div className="mt-1 grid grid-cols-3 gap-2 text-sm md:grid-cols-7">
-                  {Object.entries(result.stageMultipliers).map(([k, v]) => (
-                    <div key={k} className="rounded bg-gray-50 px-2 py-1 text-center">
-                      <span className="block text-[10px] uppercase text-gray-500">{k}</span>
-                      <span className="font-medium">x{v}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       )}
     </div>

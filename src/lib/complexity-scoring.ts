@@ -19,7 +19,6 @@ export interface ComplexityResult {
     ComplexityBreakdownItem
   >;
   nfr: Record<NfrKey, ComplexityBreakdownItem | null>;
-  integration: ComplexityBreakdownItem;
 
   // Aggregates
   overallMultiplier: number; // excludes delivery services
@@ -66,24 +65,6 @@ function computeNfrMultiplier(
   return { nfr, aggregate };
 }
 
-function computeIntegrationMultiplier(
-  config: ComplexityConfig,
-  apiCount: number,
-  requiresLegacyCompatibility: boolean,
-): ComplexityBreakdownItem {
-  const base = 1 + apiCount * config.integration.basePerApiPercent;
-  const legacy = requiresLegacyCompatibility
-    ? base * config.integration.legacyCompatibilityMultiplier
-    : base;
-  const capped = config.integration.cap ? Math.min(legacy, config.integration.cap) : legacy;
-  return {
-    key: 'integration',
-    label: `Integrations (${apiCount} API${apiCount === 1 ? '' : 's'}${
-      requiresLegacyCompatibility ? ', legacy' : ''
-    })`,
-    multiplier: Number(capped.toFixed(4)),
-  };
-}
 
 export function computeComplexity(
   selections: ComplexitySelection,
@@ -117,18 +98,13 @@ export function computeComplexity(
   } as ComplexityResult['categories'];
 
   const nfrAgg = computeNfrMultiplier(config, selections);
-  const integration = computeIntegrationMultiplier(
-    config,
-    selections.integration.apiCount,
-    selections.integration.requiresLegacyCompatibility,
-  );
 
   // Product of category multipliers (excluding delivery services)
   const categoryProduct = Object.values(categories).reduce(
     (acc, item) => acc * (item?.multiplier ?? 1),
     1,
   );
-  const overallMultiplier = Number((categoryProduct * nfrAgg.aggregate * integration.multiplier).toFixed(4));
+  const overallMultiplier = Number((categoryProduct * nfrAgg.aggregate).toFixed(4));
 
   // Stage multipliers are baseline-scaled
   const stageMultipliers = Object.fromEntries(
@@ -148,7 +124,6 @@ export function computeComplexity(
   return {
     categories,
     nfr: nfrAgg.nfr,
-    integration,
     overallMultiplier,
     stageMultipliers,
     deliveryServiceMultipliers,
@@ -168,7 +143,7 @@ export function formatComplexitySummary(result: ComplexityResult): string {
     .map(([k, v]) => `${k}=x${v}`)
     .join(', ');
 
-  return `Categories[${cat}] | NFR[${nfr}] | Integration=${result.integration.multiplier} | Overall=${result.overallMultiplier} | Stages[${stages}]`;
+  return `Categories[${cat}] | NFR[${nfr}] | Overall=${result.overallMultiplier} | Stages[${stages}]`;
 }
 
 

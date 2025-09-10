@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ADOConfiguration, ADOAuthStatus } from '@/types/ado';
 import { adoService } from '@/lib/ado-service';
 import { Button } from '@/components/ui/button';
@@ -81,13 +81,7 @@ export function ADOConfigurationComponent() {
 
   const toast = useToast();
 
-  useEffect(() => {
-    loadConfiguration();
-    loadLogs();
-    loadNotifications();
-  }, []);
-
-  const loadConfiguration = async () => {
+  const loadConfiguration = useCallback(async () => {
     try {
       const config = await adoService.loadConfiguration();
       if (config) {
@@ -98,7 +92,13 @@ export function ADOConfigurationComponent() {
       console.error('Failed to load configuration:', error);
       toast.showError('Failed to load configuration');
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    loadConfiguration();
+    loadLogs();
+    loadNotifications();
+  }, [toast, loadConfiguration]);
 
   const loadLogs = () => {
     const serviceLogs = adoService.getLogs();

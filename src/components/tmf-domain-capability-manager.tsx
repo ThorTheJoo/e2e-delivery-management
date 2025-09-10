@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
   Select,
@@ -24,7 +24,6 @@ import { Textarea } from '@/components/ui/textarea';
 import {
   Plus,
   Trash2,
-  Edit,
   ChevronDown,
   ChevronRight,
   Search,

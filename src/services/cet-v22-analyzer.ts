@@ -151,7 +151,7 @@ export class CETv22AnalyzerService {
     });
   }
 
-  private analyzeRisks(demands: any[], jobProfiles: any[], project: any): CETv22RiskAnalysis[] {
+  private analyzeRisks(demands: any[], _jobProfiles: any[], _project: any): CETv22RiskAnalysis[] {
     const risks: CETv22RiskAnalysis[] = [];
 
     // High effort concentration risk
@@ -184,7 +184,7 @@ export class CETv22AnalyzerService {
 
     // Skill gap risk
     const uniqueRoles = new Set(demands.map((d) => d.jobProfile));
-    const availableSkills = new Set(jobProfiles.map((p) => p.projectRole));
+    const availableSkills = new Set(_jobProfiles.map((p) => p.projectRole));
     const skillGaps = Array.from(uniqueRoles).filter((role) => !availableSkills.has(role));
 
     if (skillGaps.length > 0) {
@@ -272,7 +272,7 @@ export class CETv22AnalyzerService {
     return totalResourceHours > 0 ? (totalEffort / totalResourceHours) * 100 : 0;
   }
 
-  private analyzeRoleBreakdown(demands: any[], jobProfiles: any[]): CETv22RoleEffort[] {
+  private analyzeRoleBreakdown(demands: any[], _jobProfiles: any[]): CETv22RoleEffort[] {
     const roleEfforts = new Map<string, number>();
 
     demands.forEach((demand) => {
