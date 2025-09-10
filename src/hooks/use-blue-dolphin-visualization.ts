@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import type { BlueDolphinConfig, BlueDolphinObjectEnhanced } from '@/types/blue-dolphin';
 import type {
   BlueDolphinVisualLink,
@@ -11,6 +11,7 @@ import {
   resolveLinkEndpoints,
   uniqueSorted,
 } from '@/lib/blue-dolphin-visualization-utils';
+import { getFilterOptions } from '@/lib/filter-service';
 
 interface UseBlueDolphinVisualizationResult {
   nodes: BlueDolphinVisualNode[];
@@ -208,8 +209,16 @@ export function useBlueDolphinVisualization(
     await loadData();
   }, [invalidateCache, loadData]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const available = useMemo(() => {
+  const [available, setAvailable] = useState({
+    workspaces: [] as string[],
+    relationTypes: [] as string[],
+    relationNames: [] as string[],
+    sourceDefinitions: [] as string[],
+    targetDefinitions: [] as string[],
+  });
+
+  // Build local calculated lists as fallback
+  const computeLocalAvailable = useCallback(() => {
     const snap = dataSnapshotRef.current;
     if (!snap)
       return {
@@ -241,7 +250,32 @@ export function useBlueDolphinVisualization(
       snap.relations.map((r: any) => r.RelatedBlueDolphinObjectDefinitionName),
     );
     return { workspaces, relationTypes, relationNames, sourceDefinitions, targetDefinitions };
-  }, [nodes, links]);
+  }, []);
+
+  // Hybrid: try Supabase filter options first, fallback to computed lists
+  useEffect(() => {
+    (async () => {
+      try {
+        const local = computeLocalAvailable();
+        const [work, types, names, srcDefs, tgtDefs] = await Promise.all([
+          getFilterOptions('workspaces', local.workspaces),
+          getFilterOptions('relationTypes', local.relationTypes),
+          getFilterOptions('relationNames', local.relationNames),
+          getFilterOptions('sourceDefinitions', local.sourceDefinitions),
+          getFilterOptions('targetDefinitions', local.targetDefinitions),
+        ]);
+        setAvailable({
+          workspaces: work.map((o) => o.value),
+          relationTypes: types.map((o) => o.value),
+          relationNames: names.map((o) => o.value),
+          sourceDefinitions: srcDefs.map((o) => o.value),
+          targetDefinitions: tgtDefs.map((o) => o.value),
+        });
+      } catch {
+        setAvailable(computeLocalAvailable());
+      }
+    })();
+  }, [nodes, links, computeLocalAvailable]);
 
   // Preload options on first hook usage (persist filter lists before user clicks Load)
   // Use a light call to fetch a small objects sample and relations to populate dropdowns.

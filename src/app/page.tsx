@@ -129,6 +129,7 @@ export default function HomePage() {
   const [setMatchedWorkPackages, setSetMatchedWorkPackages] = useState<Record<string, any>>({});
   const [cetv22Data, setCetv22Data] = useState<any>(null);
   const [tmfDomains, setTmfDomains] = useState<TMFOdaDomain[]>([]);
+  const [userTmfDomains, setUserTmfDomains] = useState<any[]>([]);
   const [specSyncItems, setSpecSyncItems] = useState<SpecSyncItem[]>([]);
 
   const toast = useToast();
@@ -182,6 +183,38 @@ export default function HomePage() {
         } catch (e) {
           console.error('Error loading TMF capabilities:', e);
           setTmfCapabilities([]);
+        }
+
+        // Load user TMF domains (read-only; safe fallback inside service)
+        try {
+          const userDomains = await dataService.getUserTmfDomains();
+          if (Array.isArray(userDomains) && userDomains.length > 0) {
+            // Map to TMFDomainCapabilityManager expected shape
+            const mapped = userDomains.map((d) => ({
+              id: d.id,
+              name: d.name,
+              description: d.description,
+              referenceDomainId: (d as any).referenceDomainId,
+              isSelected: Boolean((d as any).isSelected),
+              isExpanded: false,
+              requirementCount: 0,
+              capabilities: (d.capabilities || []).map((c: any) => ({
+                id: c.id,
+                name: c.name,
+                description: c.description || '',
+                referenceCapabilityId: c.referenceCapabilityId,
+                domainId: c.domainId || d.id,
+                isSelected: Boolean(c.isSelected),
+                requirementCount: Number(c.requirementCount ?? 0),
+              })),
+            }));
+            setUserTmfDomains(mapped);
+          } else {
+            setUserTmfDomains([]);
+          }
+        } catch (e) {
+          console.warn('User TMF domains load failed; using local defaults.', e);
+          setUserTmfDomains([]);
         }
 
         try {
@@ -1105,6 +1138,7 @@ export default function HomePage() {
                     {isTmfManagerExpanded && (
                       <TMFDomainCapabilityManager
                         specSyncData={specSyncState}
+                        initialState={userTmfDomains && userTmfDomains.length > 0 ? (userTmfDomains as any) : undefined}
                         onStateChange={handleTmfStateChange}
                       />
                     )}
