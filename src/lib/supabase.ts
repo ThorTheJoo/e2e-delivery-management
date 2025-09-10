@@ -34,4 +34,5 @@ export const TABLES = {
   CETV22_DATA: 'cetv22_data',
   FILTER_CATEGORIES: 'filter_categories',
   FILTER_OPTIONS: 'filter_options',
+  PROJECTS: 'projects',
 } as const;

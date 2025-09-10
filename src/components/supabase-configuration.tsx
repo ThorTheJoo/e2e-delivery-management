@@ -34,6 +34,7 @@ export function SupabaseConfiguration() {
     specsyncItems: number;
     cetv22Count: number;
   }>({ tmfDomains: 0, tmfCapabilities: 0, userDomains: 0, userCapabilities: 0, specsyncItems: 0, cetv22Count: 0 });
+  const [connectStatus, setConnectStatus] = useState<'unknown' | 'ok' | 'fail'>('unknown');
 
   useEffect(() => {
     setStatus(getDataSourceStatus());
@@ -121,6 +122,9 @@ export function SupabaseConfiguration() {
   const handleRefreshPreview = async () => {
     try {
       const sb = getBrowserSupabaseClient();
+      // Simple connectivity probe (select 1 from projects or any small table)
+      const probe = await sb.from(TABLES.PROJECTS).select('*', { head: true, count: 'exact' }).limit(1);
+      setConnectStatus(!probe.error ? 'ok' : 'fail');
       const [d, c, ud, uc, s, cet] = await Promise.all([
         sb.from(TABLES.TMF_REFERENCE_DOMAINS).select('*', { count: 'exact', head: true }),
         sb.from(TABLES.TMF_REFERENCE_CAPABILITIES).select('*', { count: 'exact', head: true }),
@@ -279,6 +283,15 @@ export function SupabaseConfiguration() {
 
       <div className="rounded-md border p-4">
         <h4 className="mb-2 font-medium">Preview (Supabase read-only)</h4>
+        <div className="mb-2 text-sm">
+          Connection: {connectStatus === 'ok' ? (
+            <span className="rounded bg-green-100 px-2 py-0.5 text-green-700">OK</span>
+          ) : connectStatus === 'fail' ? (
+            <span className="rounded bg-red-100 px-2 py-0.5 text-red-700">FAILED</span>
+          ) : (
+            <span className="rounded bg-muted px-2 py-0.5">Unknown</span>
+          )}
+        </div>
         <div className="grid gap-3 md:grid-cols-3 text-sm">
           <div className="rounded-md border p-3"><div className="font-medium">TMF Reference Domains</div><div>{preview.tmfDomains}</div></div>
           <div className="rounded-md border p-3"><div className="font-medium">TMF Reference Capabilities</div><div>{preview.tmfCapabilities}</div></div>
