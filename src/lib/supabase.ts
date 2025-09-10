@@ -23,6 +23,17 @@ export function getBrowserSupabaseClient(): SupabaseClient {
   return supabase;
 }
 
+export function getServerSupabaseClient(): SupabaseClient | null {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (url && serviceKey) {
+    try {
+      return createClient(url, serviceKey);
+    } catch {}
+  }
+  return null;
+}
+
 // Database table names
 export const TABLES = {
   TMF_REFERENCE_DOMAINS: 'tmf_reference_domains',

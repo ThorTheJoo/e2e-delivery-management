@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getActiveDataSource } from '@/lib/data-source';
-import { supabase } from '@/lib/supabase';
+import { getServerSupabaseClient } from '@/lib/supabase';
 
 // POST /api/specsync/export
 // Safely exports local SpecSync cache to Supabase when service role is available.
@@ -48,8 +48,12 @@ export async function POST(_req: NextRequest) {
       updated_at: new Date().toISOString(),
     }));
 
+    const sb = getServerSupabaseClient();
+    if (!sb) {
+      return NextResponse.json({ success: false, message: 'Service role client not available' }, { status: 400 });
+    }
     // Use upsert on (project_id, requirement_id) if you add a unique constraint later
-    const { error } = await supabase.from('specsync_items').upsert(rows, { onConflict: 'requirement_id' });
+    const { error } = await sb.from('specsync_items').upsert(rows, { onConflict: 'requirement_id' });
     if (error) throw error;
 
     return NextResponse.json({ success: true, exported: rows.length });
