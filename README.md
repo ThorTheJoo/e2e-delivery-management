@@ -194,6 +194,16 @@ For support and questions:
 - [ ] Large dataset handling
 
 ### Phase 4: Advanced Features
+-
+### Incremental Supabase Rollout
+
+- The app defaults to `local` data source to preserve existing mock-data behavior.
+- To enable Supabase, set these in `.env.local`:
+  - `NEXT_PUBLIC_SUPABASE_URL`
+  - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+  - Optional: `NEXT_PUBLIC_DATA_SOURCE=supabase`
+- Check active data source: `GET /api/data-source`.
+- If Supabase env is missing or placeholders are used, the app safely falls back to local storage.
 
 - [ ] Field population indicators
 - [ ] Progressive loading

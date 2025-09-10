@@ -11,6 +11,9 @@ export async function GET() {
   console.log('MIRO_REDIRECT_URI:', process.env.MIRO_REDIRECT_URI);
   console.log('=== END ENVIRONMENT DEBUG ===');
 
+  const { getDataSourceStatus } = await import('@/lib/data-source');
+  const dataSource = getDataSourceStatus();
+
   return NextResponse.json({
     miroClientId: process.env.MIRO_CLIENT_ID,
     miroClientSecret: process.env.MIRO_CLIENT_SECRET ? '***SET***' : 'NOT SET',
@@ -18,5 +21,6 @@ export async function GET() {
     allMiroVars: Object.keys(process.env).filter((key) => key.includes('MIRO')),
     nodeEnv: process.env.NODE_ENV,
     cwd: process.cwd(),
+    dataSource,
   });
 }
