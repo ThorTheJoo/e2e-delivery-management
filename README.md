@@ -4,9 +4,23 @@
 
 The E2E Delivery Management System is a comprehensive platform for managing end-to-end delivery processes, integrating with various enterprise systems including Blue Dolphin, Azure DevOps, Miro, and SpecSync. The system provides TMF ODA 2025 compliant architecture management, requirement tracking, and delivery orchestration capabilities.
 
-## 🚀 New Features
+## 🚀 Latest Features (v1.3.0)
 
-### Enhanced Blue Dolphin Integration
+### 🎉 Supabase Integration & Enhanced Data Management
+
+- **Complete Supabase Integration**: Full backend integration with Supabase for data persistence
+- **Hybrid Data Architecture**: Seamless switching between mock data and Supabase backend
+- **Configuration Management**: Comprehensive Supabase configuration with environment guidance
+- **Data Export Capabilities**: Enhanced SpecSync export functionality with server-side processing
+
+### 📋 Bill of Materials (BOM) Configuration System
+
+- **Dynamic Field Discovery**: Intelligent field discovery and configuration management
+- **Export Functionality**: Excel and CSV export capabilities for BOM data
+- **Persistent Storage**: Configuration persistence with local storage integration
+- **User-Friendly Interface**: Toast notifications and responsive design
+
+### 🔧 Enhanced Blue Dolphin Integration
 
 - **MoreColumns Support**: Discovered and validated enhanced object retrieval capabilities
 - **45+ Additional Fields**: Access to comprehensive enterprise metadata beyond standard fields
