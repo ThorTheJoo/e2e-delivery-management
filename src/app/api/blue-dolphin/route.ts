@@ -1191,6 +1191,181 @@ export async function POST(request: NextRequest) {
           );
         }
 
+      case 'generate-user-api-key':
+        const { userKeyManagementApiKey, userId, keyName, expiryDate } = body;
+        
+        if (!userKeyManagementApiKey || !userId || !keyName || !expiryDate) {
+          return NextResponse.json(
+            { success: false, error: 'Missing required parameters' },
+            { status: 400 }
+          );
+        }
+
+        try {
+          const service = new BlueDolphinRestService(config);
+          const result = await service.generateUserApiKey(
+            userKeyManagementApiKey,
+            userId,
+            keyName,
+            expiryDate
+          );
+          
+          return NextResponse.json(result);
+        } catch (error) {
+          return NextResponse.json(
+            { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+            { status: 500 }
+          );
+        }
+
+      case 'test-user-api-key':
+        if (!config.userApiKey) {
+          return NextResponse.json(
+            { success: false, error: 'User API Key not configured' },
+            { status: 400 }
+          );
+        }
+
+        try {
+          const service = new BlueDolphinRestService(config);
+          const result = await service.testUserApiKey();
+          
+          return NextResponse.json(result);
+        } catch (error) {
+          return NextResponse.json(
+            { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+            { status: 500 }
+          );
+        }
+
+      case 'test-workspace':
+        const { workspaceId } = body;
+        
+        if (!config.userApiKey || !workspaceId) {
+          return NextResponse.json(
+            { success: false, error: 'User API Key and Workspace ID required' },
+            { status: 400 }
+          );
+        }
+
+        try {
+          const service = new BlueDolphinRestService({ ...config, workspaceId });
+          const result = await service.testUserApiKey();
+          
+          return NextResponse.json(result);
+        } catch (error) {
+          return NextResponse.json(
+            { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+            { status: 500 }
+          );
+        }
+
+      case 'test-object-type':
+        const { objectTypeId } = body;
+        
+        if (!config.userApiKey || !objectTypeId) {
+          return NextResponse.json(
+            { success: false, error: 'User API Key and Object Type ID required' },
+            { status: 400 }
+          );
+        }
+
+        try {
+          const service = new BlueDolphinRestService({ ...config, objectTypeId });
+          const result = await service.testUserApiKey();
+          
+          return NextResponse.json(result);
+        } catch (error) {
+          return NextResponse.json(
+            { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+            { status: 500 }
+          );
+        }
+
+      case 'create-object':
+        if (!config.userApiKey) {
+          return NextResponse.json(
+            { success: false, error: 'User API Key not configured' },
+            { status: 400 }
+          );
+        }
+
+        try {
+          const service = new BlueDolphinRestService(config);
+          const result = await service.createObject(data);
+          
+          return NextResponse.json({ success: true, data: result });
+        } catch (error) {
+          return NextResponse.json(
+            { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+            { status: 500 }
+          );
+        }
+
+      case 'get-objects-rest':
+        if (!config.userApiKey) {
+          return NextResponse.json(
+            { success: false, error: 'User API Key not configured' },
+            { status: 400 }
+          );
+        }
+
+        try {
+          const service = new BlueDolphinRestService(config);
+          const result = await service.getObjects(data);
+          
+          return NextResponse.json({ success: true, data: result });
+        } catch (error) {
+          return NextResponse.json(
+            { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+            { status: 500 }
+          );
+        }
+
+      case 'update-object':
+        const { objectId, objectData } = body;
+        
+        if (!config.userApiKey || !objectId) {
+          return NextResponse.json(
+            { success: false, error: 'User API Key and Object ID required' },
+            { status: 400 }
+          );
+        }
+
+        try {
+          const service = new BlueDolphinRestService(config);
+          const result = await service.updateObject(objectId, objectData);
+          
+          return NextResponse.json({ success: true, data: result });
+        } catch (error) {
+          return NextResponse.json(
+            { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+            { status: 500 }
+          );
+        }
+
+      case 'delete-object':
+        const { objectId: deleteObjectId } = body;
+        
+        if (!config.userApiKey || !deleteObjectId) {
+          return NextResponse.json(
+            { success: false, error: 'User API Key and Object ID required' },
+            { status: 400 }
+          );
+        }
+
+        try {
+          const service = new BlueDolphinRestService(config);
+          const result = await service.deleteObject(deleteObjectId);
+          
+          return NextResponse.json({ success: result });
+        } catch (error) {
+          return NextResponse.json(
+            { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+            { status: 500 }
+          );
+        }
+
       default:
         return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 });
     }

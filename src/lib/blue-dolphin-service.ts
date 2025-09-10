@@ -12,6 +12,8 @@ import {
   BlueDolphinConfig,
   SyncResult,
   SyncOperation,
+  UserApiKeyGenerationRequest,
+  UserApiKeyGenerationResponse,
 } from '@/types/blue-dolphin';
 
 export abstract class BlueDolphinBaseService {
@@ -80,6 +82,179 @@ export abstract class BlueDolphinBaseService {
 }
 
 export class BlueDolphinRestService extends BlueDolphinBaseService {
+  private userApiKey?: string;
+  private tenant: string;
+  private workspaceId?: string;
+  private objectTypeId?: string;
+
+  constructor(config: BlueDolphinConfig) {
+    super(config);
+    this.userApiKey = config.userApiKey;
+    this.tenant = 'csgipoc'; // Default tenant
+    this.workspaceId = config.workspaceId;
+    this.objectTypeId = config.objectTypeId;
+  }
+
+  // User API Key Management
+  async generateUserApiKey(
+    userKeyManagementApiKey: string,
+    userId: string,
+    keyName: string,
+    expiryDate: string
+  ): Promise<{ success: boolean; userApiKey?: string; error?: string }> {
+    try {
+      const response = await fetch(`${this.baseUrl}/v1/user-api-keys`, {
+        method: 'POST',
+        headers: {
+          'x-api-key': userKeyManagementApiKey,
+          'TENANT': this.tenant,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          name: keyName,
+          user_id: userId,
+          expiration_date: expiryDate
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return { success: true, userApiKey: data.key };
+      } else {
+        const errorData = await response.json();
+        return { success: false, error: errorData.errors || 'Unknown error' };
+      }
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  }
+
+  // Test User API Key
+  async testUserApiKey(): Promise<{ success: boolean; error?: string }> {
+    if (!this.userApiKey) {
+      return { success: false, error: 'User API Key not configured' };
+    }
+
+    try {
+      const response = await fetch(`${this.baseUrl}/v1/objects?workspace_id=${this.workspaceId || 'default'}`, {
+        method: 'GET',
+        headers: {
+          'x-api-key': this.userApiKey,
+          'TENANT': this.tenant,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+
+      return { success: response.ok, error: response.ok ? undefined : 'Authentication failed' };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  }
+
+  // CRUD Operations with User API Key
+  async getObjects(options?: any): Promise<any[]> {
+    if (!this.userApiKey) {
+      throw new Error('User API Key not configured');
+    }
+
+    const params = new URLSearchParams({
+      workspace_id: this.workspaceId || 'default',
+      ...options
+    });
+
+    const response = await fetch(`${this.baseUrl}/v1/objects?${params}`, {
+      method: 'GET',
+      headers: {
+        'x-api-key': this.userApiKey,
+        'TENANT': this.tenant,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch objects: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.value || data.data || [];
+  }
+
+  async createObject(object: any): Promise<any> {
+    if (!this.userApiKey) {
+      throw new Error('User API Key not configured');
+    }
+
+    const response = await fetch(`${this.baseUrl}/v1/objects`, {
+      method: 'POST',
+      headers: {
+        'x-api-key': this.userApiKey,
+        'TENANT': this.tenant,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        object_title: object.title || object.name,
+        object_type_id: this.objectTypeId || '1',
+        workspace_id: this.workspaceId || 'default',
+        description: object.description,
+        definition: object.definition || 'Application Component',
+        ...object
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`Failed to create object: ${errorData.errors || response.statusText}`);
+    }
+
+    return await response.json();
+  }
+
+  async updateObject(id: string, object: any): Promise<any> {
+    if (!this.userApiKey) {
+      throw new Error('User API Key not configured');
+    }
+
+    const response = await fetch(`${this.baseUrl}/v1/objects/${id}`, {
+      method: 'PUT',
+      headers: {
+        'x-api-key': this.userApiKey,
+        'TENANT': this.tenant,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(object)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`Failed to update object: ${errorData.errors || response.statusText}`);
+    }
+
+    return await response.json();
+  }
+
+  async deleteObject(id: string): Promise<boolean> {
+    if (!this.userApiKey) {
+      throw new Error('User API Key not configured');
+    }
+
+    const response = await fetch(`${this.baseUrl}/v1/objects/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'x-api-key': this.userApiKey,
+        'TENANT': this.tenant,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
+
+    return response.ok;
+  }
+
   // Domain operations
   async getDomains(params?: {
     type?: string;

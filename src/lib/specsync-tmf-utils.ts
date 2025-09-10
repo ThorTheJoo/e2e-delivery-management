@@ -1,5 +1,5 @@
 import { SpecSyncItem, SpecSyncState, TMFFunction, TMFMapping } from '@/types';
-import { TMFReferenceService } from './tmf-reference-service-new';
+import { TMFReferenceServiceClient as TMFReferenceService, TMFDomain } from './tmf-reference-service-client';
 
 // Map SpecSync items to TMF functions
 export async function mapSpecSyncToTMFunctions(
@@ -279,4 +279,242 @@ export async function clearSpecSyncDataWithTMFMappings(): Promise<void> {
   } catch (err) {
     console.warn('Failed clearing SpecSync data with TMF mappings', err);
   }
+}
+
+// Get missing domains from SpecSync data that aren't in current overview
+export async function getMissingDomainsFromSpecSync(
+  specSyncItems: SpecSyncItem[],
+  currentDomains: any[]
+): Promise<{ domain: string; functionCount: number; functions: string[] }[]> {
+  const missingDomains: { domain: string; functionCount: number; functions: string[] }[] = [];
+  
+  // Extract unique domains from SpecSync data
+  const specSyncDomains = new Set<string>();
+  const domainFunctions: Record<string, Set<string>> = {};
+  
+  specSyncItems.forEach((item) => {
+    if (item.domain) {
+      const domain = item.domain.trim();
+      specSyncDomains.add(domain);
+      
+      if (!domainFunctions[domain]) {
+        domainFunctions[domain] = new Set();
+      }
+      
+      // Add function names from various fields
+      if (item['Rephrased Function Name']) {
+        domainFunctions[domain].add(item['Rephrased Function Name'].trim());
+      }
+      if (item.capability) {
+        domainFunctions[domain].add(item.capability.trim());
+      }
+      if (item.afLevel2) {
+        domainFunctions[domain].add(item.afLevel2.trim());
+      }
+    }
+  });
+  
+  // Check which SpecSync domains are missing from current overview
+  const currentDomainNames = currentDomains.map(d => d.name.toLowerCase());
+  
+  for (const domain of Array.from(specSyncDomains)) {
+    const isMissing = !currentDomainNames.some(currentName => 
+      currentName === domain.toLowerCase() || 
+      currentName.includes(domain.toLowerCase()) ||
+      domain.toLowerCase().includes(currentName)
+    );
+    
+    if (isMissing) {
+      missingDomains.push({
+        domain,
+        functionCount: domainFunctions[domain].size,
+        functions: Array.from(domainFunctions[domain])
+      });
+    }
+  }
+  
+  return missingDomains;
+}
+
+// Get missing TMF functions from SpecSync data that aren't mapped
+export async function getMissingTMFunctionsFromSpecSync(
+  specSyncItems: SpecSyncItem[],
+  currentDomains: any[]
+): Promise<{ function: TMFFunction; specSyncCount: number; domain: string; confidence: number }[]> {
+  const missingFunctions: { function: TMFFunction; specSyncCount: number; domain: string; confidence: number }[] = [];
+  
+  // Get all currently mapped function IDs
+  const mappedFunctionIds = new Set<string>();
+  currentDomains.forEach(domain => {
+    domain.capabilities?.forEach((cap: any) => {
+      if (cap.referenceFunctionId) {
+        mappedFunctionIds.add(cap.referenceFunctionId);
+      }
+    });
+  });
+  
+  // Get all TMF functions
+  const allTMFunctions = await TMFReferenceService.getAllFunctions();
+  
+  // Group SpecSync items by function name for counting
+  const specSyncFunctionCounts: Record<string, number> = {};
+  const specSyncFunctionDomains: Record<string, string> = {};
+  
+  specSyncItems.forEach((item) => {
+    const functionName = item['Rephrased Function Name'] || item.capability || item.afLevel2;
+    if (functionName) {
+      const normalizedName = functionName.trim().toLowerCase();
+      specSyncFunctionCounts[normalizedName] = (specSyncFunctionCounts[normalizedName] || 0) + 1;
+      specSyncFunctionDomains[normalizedName] = item.domain || 'Unknown';
+    }
+  });
+  
+  // Find TMF functions that match SpecSync function names but aren't mapped
+  for (const tmfFunction of allTMFunctions) {
+    if (mappedFunctionIds.has(tmfFunction.id)) {
+      continue; // Already mapped
+    }
+    
+    const normalizedTMFName = tmfFunction.function_name.toLowerCase();
+    
+    // Check if this TMF function matches any SpecSync function name
+    for (const [specSyncName, count] of Object.entries(specSyncFunctionCounts)) {
+      if (normalizedTMFName === specSyncName || 
+          normalizedTMFName.includes(specSyncName) || 
+          specSyncName.includes(normalizedTMFName)) {
+        
+        missingFunctions.push({
+          function: tmfFunction,
+          specSyncCount: count,
+          domain: specSyncFunctionDomains[specSyncName],
+          confidence: normalizedTMFName === specSyncName ? 1.0 : 0.8
+        });
+        break; // Found a match, move to next TMF function
+      }
+    }
+  }
+  
+  return missingFunctions;
+}
+
+// Analyze gaps between SpecSync data and current overview
+export async function analyzeSpecSyncGaps(
+  specSyncItems: SpecSyncItem[],
+  currentDomains: any[]
+): Promise<{
+  missingDomains: { domain: string; functionCount: number; functions: string[] }[];
+  missingFunctions: { function: TMFFunction; specSyncCount: number; domain: string; confidence: number }[];
+  totalMissingItems: number;
+}> {
+  const [missingDomains, missingFunctions] = await Promise.all([
+    getMissingDomainsFromSpecSync(specSyncItems, currentDomains),
+    getMissingTMFunctionsFromSpecSync(specSyncItems, currentDomains)
+  ]);
+  
+  return {
+    missingDomains,
+    missingFunctions,
+    totalMissingItems: missingDomains.length + missingFunctions.length
+  };
+}
+
+// Get missing TMF domains from reference data that aren't in current overview
+export async function getMissingTMFDomainsFromReference(
+  currentDomains: any[],
+  allTMFDomains: TMFDomain[]
+): Promise<{ domain: TMFDomain; functionCount: number; functions: TMFFunction[] }[]> {
+  const missingDomains: { domain: TMFDomain; functionCount: number; functions: TMFFunction[] }[] = [];
+  
+  // Get current domain names (normalized for comparison)
+  const currentDomainNames = currentDomains.map(d => d.name.toLowerCase().trim());
+  
+  // Get all TMF functions grouped by domain
+  const allTMFFunctions = await TMFReferenceService.getAllFunctions();
+  const functionsByDomain: Record<string, TMFFunction[]> = {};
+  
+  allTMFFunctions.forEach(func => {
+    const domainName = func.domain_name || 'Unknown';
+    if (!functionsByDomain[domainName]) {
+      functionsByDomain[domainName] = [];
+    }
+    functionsByDomain[domainName].push(func);
+  });
+  
+  // Check which TMF domains are missing from current overview
+  for (const tmfDomain of allTMFDomains) {
+    const domainName = tmfDomain.name.toLowerCase().trim();
+    
+    const isMissing = !currentDomainNames.some(currentName => 
+      currentName === domainName || 
+      currentName.includes(domainName) ||
+      domainName.includes(currentName)
+    );
+    
+    
+    if (isMissing) {
+      const domainFunctions = functionsByDomain[tmfDomain.name] || [];
+      missingDomains.push({
+        domain: tmfDomain,
+        functionCount: domainFunctions.length,
+        functions: domainFunctions
+      });
+    }
+  }
+  
+  return missingDomains;
+}
+
+// Get missing TMF functions from reference data that aren't in current overview
+export async function getMissingTMFFunctionsFromReference(
+  currentDomains: any[],
+  allTMFFunctions: TMFFunction[]
+): Promise<{ function: TMFFunction; domain: string }[]> {
+  const missingFunctions: { function: TMFFunction; domain: string }[] = [];
+  
+  // Get all currently mapped function IDs from overview
+  const mappedFunctionIds = new Set<string>();
+  currentDomains.forEach(domain => {
+    domain.capabilities?.forEach((cap: any) => {
+      if (cap.referenceFunctionId) {
+        mappedFunctionIds.add(cap.referenceFunctionId);
+      }
+    });
+  });
+  
+  // Find TMF functions that aren't mapped in current overview
+  for (const tmfFunction of allTMFFunctions) {
+    if (!mappedFunctionIds.has(tmfFunction.id)) {
+      missingFunctions.push({
+        function: tmfFunction,
+        domain: tmfFunction.domain_name || 'Unknown'
+      });
+    }
+  }
+  
+  return missingFunctions;
+}
+
+// Analyze gaps between TMF reference data and current overview
+export async function analyzeTMFReferenceGaps(
+  currentDomains: any[]
+): Promise<{
+  missingDomains: { domain: TMFDomain; functionCount: number; functions: TMFFunction[] }[];
+  missingFunctions: { function: TMFFunction; domain: string }[];
+  totalMissingItems: number;
+}> {
+  const [allTMFDomains, allTMFFunctions] = await Promise.all([
+    TMFReferenceService.getDomains(),
+    TMFReferenceService.getAllFunctions()
+  ]);
+  
+  const [missingDomains, missingFunctions] = await Promise.all([
+    getMissingTMFDomainsFromReference(currentDomains, allTMFDomains),
+    getMissingTMFFunctionsFromReference(currentDomains, allTMFFunctions)
+  ]);
+  
+  return {
+    missingDomains,
+    missingFunctions,
+    totalMissingItems: missingDomains.length + missingFunctions.length
+  };
 }

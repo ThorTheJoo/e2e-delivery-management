@@ -5,6 +5,32 @@ All notable changes to the E2E Delivery Management System will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2025-09-10 - SpecSync Mapping Precision Fix
+
+### 🔧 Bug Fixes
+
+#### SpecSync Mapping Improvements
+
+- **Fixed Over-Selection Issue** - Resolved problem where 10 functions were selected instead of 5 unique functions
+- **Implemented Strict Exact Matching** - Replaced fuzzy matching with precise exact matching only
+- **Field-Specific Processing** - Now only uses `domain` and `functionName` fields from SpecSync data
+- **Eliminated False Positives** - Removed word-based, partial, and contains matching that caused incorrect selections
+- **Clean Data Extraction** - Streamlined data processing to use only relevant SpecSync fields
+
+#### Technical Improvements
+
+- **Removed Fallback Fields** - Eliminated fallback to `capability`, `afLevel2`, and `Rephrased Function Name` fields
+- **Simplified Matching Logic** - Replaced complex matching algorithms with straightforward exact matching
+- **Enhanced Debugging** - Improved console logging for better troubleshooting
+- **Data Validation** - Added proper filtering for empty or invalid SpecSync data
+
+### 🎯 Impact
+
+- **Accurate Mapping** - SpecSync data now correctly maps to exactly 5 unique TMF functions
+- **Better Performance** - Simplified matching logic improves processing speed
+- **Reliable Results** - Eliminates over-selection and false positive matches
+- **Cleaner Code** - Removed complex fuzzy matching logic for maintainability
+
 ## [1.4.0] - 2025-01-XX - TMF Reference Data Integration & Enhanced SpecSync Mapping
 
 ### 🎉 Major Features Added

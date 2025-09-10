@@ -346,7 +346,7 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
           {/* Requirements Preview Table - Now Modifiable */}
           <div className="mt-4">
             <h4 className="mb-2 text-sm font-medium">
-              Requirements Preview (First 10) - Click to Edit
+              Requirements Preview (First 15) - Click to Edit
             </h4>
             <div className="overflow-x-auto">
               <table className="w-full border-collapse text-xs">
@@ -363,12 +363,12 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
                       Encompass Use Case - Beta
                     </th>
                     <th className="border border-muted-foreground/20 px-2 py-1 text-left">
-                      Actions
+                      Requirements by Domain
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {editedItems.slice(0, 10).map((item, index) => (
+                  {editedItems.slice(0, 15).map((item, index) => (
                     <tr key={index} className="hover:bg-muted/30">
                       {/* Requirement ID Column */}
                       <td className="border border-muted-foreground/20 px-2 py-1 font-mono text-xs">

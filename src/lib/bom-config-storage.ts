@@ -383,3 +383,4 @@ export class BOMConfigStorage {
 
 // Export singleton instance
 export const bomConfigStorage = BOMConfigStorage.getInstance();
+

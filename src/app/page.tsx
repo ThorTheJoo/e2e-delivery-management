@@ -638,6 +638,211 @@ export default function HomePage() {
     }
   };
 
+  // Get domain and function cards with integrated data from SpecSync, SET, and service design
+  const getDomainFunctionCards = () => {
+    // If we have TMF functions from Supabase, use them
+    if (tmfFunctions.length > 0) {
+      const domainMap = new Map<string, {
+        name: string;
+        functions: Array<{
+          id: string;
+          function_name: string;
+          domain_name: string;
+          vertical?: string;
+          function_id?: string;
+          uid?: string;
+          requirementCount: number;
+          useCaseCount: number;
+          developmentEffort: number;
+          mandateEffort: number;
+          requirements: Array<{
+            id: string;
+            requirementId: string;
+            description: string;
+            priority: string;
+            status: string;
+            usecase1?: string;
+          }>;
+        }>;
+        totalRequirements: number;
+      }>();
+
+      tmfFunctions.forEach((func) => {
+        const domainName = func.domain_name || 'Unknown';
+        if (!domainMap.has(domainName)) {
+          domainMap.set(domainName, {
+            name: domainName,
+            functions: [],
+            totalRequirements: 0,
+          });
+        }
+
+        const domain = domainMap.get(domainName)!;
+        const requirementCount = requirementCounts[func.id] || 0;
+        const useCaseCount = useCaseCounts[func.id] || 0;
+        
+        // Get effort data from SET file (estimation page)
+        const domainEffort = setDomainEfforts[domainName] || 0;
+        const developmentEffort = Math.round(domainEffort / domain.functions.length) || 0;
+        
+        // Get mandate effort from service design data (CETv22)
+        let mandateEffort = 0;
+        if (cetv22Data && cetv22Data.resourceDemands) {
+          // Calculate mandate effort based on resource demands for this domain
+          const domainResourceDemands = cetv22Data.resourceDemands.filter(demand => 
+            demand.productType.toLowerCase().includes(domainName.toLowerCase()) ||
+            demand.jobProfile.toLowerCase().includes(domainName.toLowerCase())
+          );
+          mandateEffort = Math.round(domainResourceDemands.reduce((sum, demand) => sum + demand.effortHours, 0) / 8); // Convert hours to days
+        }
+
+        // Find requirements that match this TMF function
+        const matchingRequirements = specSyncState?.items.filter(item => {
+          const itemFunction = (item.functionName || '').toString().trim().toLowerCase();
+          const itemDomain = (item.domain || '').toString().trim().toLowerCase();
+          const functionName = func.function_name.trim().toLowerCase();
+          const domainNameLower = domainName.toLowerCase();
+
+          // Try to match function name and domain
+          const functionMatch = itemFunction === functionName || 
+                               itemFunction.includes(functionName) || 
+                               functionName.includes(itemFunction);
+          const domainMatch = itemDomain === domainNameLower || 
+                             itemDomain.includes(domainNameLower) || 
+                             domainNameLower.includes(itemDomain);
+
+          return functionMatch && domainMatch;
+        }) || [];
+
+        domain.functions.push({
+          id: func.id,
+          function_name: func.function_name,
+          domain_name: func.domain_name || 'Unknown',
+          vertical: func.vertical,
+          function_id: func.function_id,
+          uid: func.uid,
+          requirementCount: matchingRequirements.length,
+          useCaseCount,
+          developmentEffort,
+          mandateEffort,
+          requirements: matchingRequirements.map(req => ({
+            id: req.id,
+            requirementId: req.requirementId,
+            description: req.description,
+            priority: req.priority,
+            status: req.status,
+            usecase1: req.usecase1,
+          })),
+        });
+
+        domain.totalRequirements += matchingRequirements.length;
+      });
+
+      return Array.from(domainMap.values());
+    }
+
+    // Fallback: Create domain cards from SpecSync data if available
+    if (specSyncState && specSyncState.items.length > 0) {
+      const domainMap = new Map<string, {
+        name: string;
+        functions: Array<{
+          id: string;
+          function_name: string;
+          domain_name: string;
+          vertical?: string;
+          function_id?: string;
+          uid?: string;
+          requirementCount: number;
+          useCaseCount: number;
+          developmentEffort: number;
+          mandateEffort: number;
+          requirements: Array<{
+            id: string;
+            requirementId: string;
+            description: string;
+            priority: string;
+            status: string;
+            usecase1?: string;
+          }>;
+        }>;
+        totalRequirements: number;
+      }>();
+
+      // Group SpecSync items by function name and domain
+      const functionGroups = new Map<string, SpecSyncItem[]>();
+      
+      specSyncState.items.forEach((item) => {
+        const domainName = item.domain || 'Unknown';
+        const functionName = item.functionName || item.capability || 'Unknown Function';
+        const key = `${domainName}||${functionName}`;
+        
+        if (!functionGroups.has(key)) {
+          functionGroups.set(key, []);
+        }
+        functionGroups.get(key)!.push(item);
+      });
+
+      functionGroups.forEach((items, key) => {
+        const [domainName, functionName] = key.split('||');
+        
+        if (!domainMap.has(domainName)) {
+          domainMap.set(domainName, {
+            name: domainName,
+            functions: [],
+            totalRequirements: 0,
+          });
+        }
+
+        const domain = domainMap.get(domainName)!;
+        const requirementCount = items.length;
+        const useCaseCount = items.filter(item => item.usecase1).length;
+        
+        // Get effort data from SET file (estimation page)
+        const domainEffort = setDomainEfforts[domainName] || 0;
+        const developmentEffort = Math.round(domainEffort / Math.max(domain.functions.length, 1)) || 5; // Default 5 days
+        
+        // Get mandate effort from service design data (CETv22)
+        let mandateEffort = 0;
+        if (cetv22Data && cetv22Data.resourceDemands) {
+          // Calculate mandate effort based on resource demands for this domain
+          const domainResourceDemands = cetv22Data.resourceDemands.filter(demand => 
+            demand.productType.toLowerCase().includes(domainName.toLowerCase()) ||
+            demand.jobProfile.toLowerCase().includes(domainName.toLowerCase())
+          );
+          mandateEffort = Math.round(domainResourceDemands.reduce((sum, demand) => sum + demand.effortHours, 0) / 8); // Convert hours to days
+        }
+
+        domain.functions.push({
+          id: `specsync-${functionName.replace(/\s+/g, '-').toLowerCase()}`,
+          function_name: functionName,
+          domain_name: domainName,
+          vertical: items[0].vertical,
+          function_id: items[0].requirementId,
+          uid: items[0].id,
+          requirementCount,
+          useCaseCount,
+          developmentEffort,
+          mandateEffort,
+          requirements: items.map(req => ({
+            id: req.id,
+            requirementId: req.requirementId,
+            description: req.description,
+            priority: req.priority,
+            status: req.status,
+            usecase1: req.usecase1,
+          })),
+        });
+
+        domain.totalRequirements += requirementCount;
+      });
+
+      return Array.from(domainMap.values());
+    }
+
+    // Return empty array if no data available
+    return [];
+  };
+
   const handleSETDataLoaded = (
     domainEfforts: Record<string, number>,
     matchedWorkPackages: Record<string, any>,
@@ -977,7 +1182,7 @@ export default function HomePage() {
                 )}
               </div>
 
-              {/* TMF Capabilities Overview - Moved from TMF tab */}
+              {/* F. Domain and Function Overview - Moved from TMF tab */}
               <div className="border-b pb-6">
                 <div
                   className="mb-4 flex cursor-pointer items-center justify-between rounded-lg p-2 transition-colors hover:bg-muted/50"
@@ -994,11 +1199,10 @@ export default function HomePage() {
                     <div>
                       <h3 className="flex items-center space-x-2 text-base font-semibold">
                         <Network className="h-4 w-4" />
-                        <span>TMF Capabilities Overview</span>
+                        <span>TMF Domain and Function Overview</span>
                       </h3>
                       <p className="text-sm text-muted-foreground">
-                        View TMF capabilities with requirement counts from imported SpecSync
-                        data
+                        View TMF domains and functions with requirement counts from imported SpecSync data
                       </p>
                     </div>
                   </div>
@@ -1014,85 +1218,143 @@ export default function HomePage() {
                   )}
                 </div>
                 {isTmfCapabilitiesExpanded && (
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {tmfFunctions.map((tmfFunction) => (
-                      <Card key={tmfFunction.id} className="effort-card hover-lift">
-                        <CardHeader className="pb-3">
-                          <CardTitle className="flex items-center justify-between text-base">
-                            <span className="truncate">{tmfFunction.function_name}</span>
-                            <RequirementBadge count={requirementCounts[tmfFunction.id] || 0} />
-                          </CardTitle>
-                          <CardDescription className="line-clamp-2 text-xs">
-                            {tmfFunction.vertical || 'TMF Function'}
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent className="pt-0">
-                          <div className="space-y-3">
-                            <div className="grid grid-cols-2 gap-2 text-xs">
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">Domain:</span>
-                                <span className="font-medium">
-                                  {tmfFunction.domain_name || 'Unknown'}
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">Vertical:</span>
-                                <span className="font-medium">
-                                  {tmfFunction.vertical || 'N/A'}
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">AF Level 1:</span>
-                                <span className="font-medium">
-                                  {tmfFunction.af_level_1 || 'N/A'}
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">AF Level 2:</span>
-                                <span className="font-medium">
-                                  {tmfFunction.af_level_2 || 'N/A'}
-                                </span>
-                              </div>
-                            </div>
-                            <div className="border-t pt-2">
-                              <div className="mb-1 text-xs text-muted-foreground">Function Details</div>
-                              <div className="flex flex-wrap gap-1">
-                                <span className="rounded bg-tmf-100 px-1.5 py-0.5 text-xs text-tmf-800">
-                                  ID: {tmfFunction.function_id || 'N/A'}
-                                </span>
-                                {tmfFunction.uid && (
-                                  <span className="rounded bg-tmf-100 px-1.5 py-0.5 text-xs text-tmf-800">
-                                    UID: {tmfFunction.uid}
-                                  </span>
-                                )}
-                              </div>
-                              {useCaseCounts[tmfFunction.id] > 0 && (
-                                <div className="border-t pt-2">
-                                  <div className="mb-1 text-xs text-muted-foreground">
-                                    Use Cases
+                  <div className="space-y-6">
+                    {getDomainFunctionCards().map((domain) => (
+                      <div key={domain.name} className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-lg font-semibold text-gray-900">{domain.name}</h4>
+                          <div className="flex items-center space-x-2">
+                            <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                              {domain.functions.length} functions
+                            </Badge>
+                            <Badge variant="outline" className="bg-green-50 text-green-700">
+                              {domain.totalRequirements} requirements
+                            </Badge>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                          {domain.functions.map((func) => (
+                            <Card key={func.id} className="effort-card hover-lift">
+                              <CardHeader className="pb-3">
+                                <CardTitle className="flex items-center justify-between text-base">
+                                  <span className="truncate">{func.function_name}</span>
+                                  <RequirementBadge count={func.requirementCount || 0} />
+                                </CardTitle>
+                                <CardDescription className="line-clamp-2 text-xs">
+                                  {func.vertical || 'TMF Function'}
+                                </CardDescription>
+                              </CardHeader>
+                              <CardContent className="pt-0">
+                                <div className="space-y-3">
+                                  <div className="grid grid-cols-2 gap-2 text-xs">
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">Domain:</span>
+                                      <span className="font-medium">
+                                        {func.domain_name || 'Unknown'}
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">Vertical:</span>
+                                      <span className="font-medium">
+                                        {func.vertical || 'N/A'}
+                                      </span>
+                                    </div>
                                   </div>
-                                  <div className="flex items-center gap-1">
-                                    <span className="rounded bg-orange-100 px-1.5 py-0.5 text-xs font-medium text-orange-800">
-                                      {useCaseCounts[tmfFunction.id]} unique use cases
-                                    </span>
+                                  <div className="border-t pt-2">
+                                    <div className="mb-1 text-xs text-muted-foreground">Function Details</div>
+                                    <div className="flex flex-wrap gap-1">
+                                      <span className="rounded bg-tmf-100 px-1.5 py-0.5 text-xs text-tmf-800">
+                                        ID: {func.function_id || 'N/A'}
+                                      </span>
+                                      {func.uid && (
+                                        <span className="rounded bg-tmf-100 px-1.5 py-0.5 text-xs text-tmf-800">
+                                          UID: {func.uid}
+                                        </span>
+                                      )}
+                                    </div>
+                                    {func.requirements && func.requirements.length > 0 && (
+                                      <div className="border-t pt-2">
+                                        <div className="mb-2 text-xs text-muted-foreground">
+                                          Requirements ({func.requirements.length})
+                                        </div>
+                                        <div className="space-y-1 max-h-32 overflow-y-auto">
+                                          {func.requirements.map((req, index) => (
+                                            <div key={req.id} className="text-xs bg-gray-50 p-2 rounded">
+                                              <div className="font-medium text-gray-700">
+                                                {req.requirementId}
+                                              </div>
+                                              <div className="text-gray-600 line-clamp-2">
+                                                {req.description}
+                                              </div>
+                                              <div className="flex items-center gap-2 mt-1">
+                                                <span className={`px-1.5 py-0.5 rounded text-xs ${
+                                                  req.priority === 'High' ? 'bg-red-100 text-red-800' :
+                                                  req.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                                                  'bg-green-100 text-green-800'
+                                                }`}>
+                                                  {req.priority}
+                                                </span>
+                                                <span className={`px-1.5 py-0.5 rounded text-xs ${
+                                                  req.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
+                                                  req.status === 'Completed' ? 'bg-green-100 text-green-800' :
+                                                  'bg-gray-100 text-gray-800'
+                                                }`}>
+                                                  {req.status}
+                                                </span>
+                                              </div>
+                                              {req.usecase1 && (
+                                                <div className="text-xs text-gray-500 mt-1">
+                                                  Use case: {req.usecase1}
+                                                </div>
+                                              )}
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+                                    {func.useCaseCount > 0 && (
+                                      <div className="border-t pt-2">
+                                        <div className="mb-1 text-xs text-muted-foreground">
+                                          Use Cases
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                          <span className="rounded bg-orange-100 px-1.5 py-0.5 text-xs font-medium text-orange-800">
+                                            {func.useCaseCount} unique use cases
+                                          </span>
+                                        </div>
+                                      </div>
+                                    )}
                                   </div>
                                 </div>
-                              )}
-                            </div>
-                          </div>
-                        </CardContent>
-                        <CardFooter className="pt-0">
-                          <div className="w-full text-center">
-                            <div className="mb-1 text-xs text-muted-foreground">
-                              Total Effort
-                            </div>
-                            <div className="text-lg font-bold text-tmf-600">
-                              10 days
-                            </div>
-                          </div>
-                        </CardFooter>
-                      </Card>
+                              </CardContent>
+                              <CardFooter className="pt-0">
+                                <div className="w-full text-center">
+                                  <div className="mb-1 text-xs text-muted-foreground">
+                                    Development Effort
+                                  </div>
+                                  <div className="text-lg font-bold text-tmf-600">
+                                    {func.developmentEffort || 0} days
+                                  </div>
+                                  {func.mandateEffort > 0 && (
+                                    <div className="mt-1 text-xs text-muted-foreground">
+                                      Mandate: {func.mandateEffort} days
+                                    </div>
+                                  )}
+                                </div>
+                              </CardFooter>
+                            </Card>
+                          ))}
+                        </div>
+                      </div>
                     ))}
+                    {getDomainFunctionCards().length === 0 && (
+                      <div className="text-center py-8">
+                        <div className="text-muted-foreground mb-2">No domain and function data available</div>
+                        <div className="text-sm text-muted-foreground">
+                          Load SpecSync data or TMF reference data to see domain and function cards
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

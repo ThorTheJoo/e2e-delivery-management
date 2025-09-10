@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { flushSync } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -31,10 +32,20 @@ import {
   Circle,
 } from 'lucide-react';
 import {
-  TMFReferenceService,
+  TMFReferenceServiceClient as TMFReferenceService,
   TMFDomain,
   TMFFunction,
-} from '@/lib/tmf-reference-service-new';
+} from '@/lib/tmf-reference-service-client';
+import {
+  getStaticTMFDomains,
+  getStaticTMFFunctions,
+  getStaticTMFFunctionsByDomain,
+  findBestStaticTMFMatch,
+  StaticTMFDomain,
+  StaticTMFFunction,
+} from '@/lib/static-tmf-reference-data';
+import { EnhancedAddCustomDomainDialog } from './enhanced-add-custom-domain-dialog';
+import { analyzeTMFReferenceGaps } from '@/lib/specsync-tmf-utils';
 
 interface UserDomain {
   id: string;
@@ -61,14 +72,16 @@ interface TMFDomainCapabilityManagerProps {
   onStateChange?: (domains: UserDomain[]) => void;
   initialState?: UserDomain[];
   specSyncData?: any; // SpecSync data for requirement mapping
+  onMappingComplete?: (mappedDomains: UserDomain[]) => void; // Callback when SpecSync mapping is complete
 }
 
 export function TMFDomainCapabilityManager({
   onStateChange,
   initialState,
   specSyncData,
+  onMappingComplete,
 }: TMFDomainCapabilityManagerProps) {
-  const [domains, setDomains] = useState<UserDomain[]>(initialState || []);
+  const [domains, setDomains] = useState<UserDomain[]>([]);
   const [referenceDomains, setReferenceDomains] = useState<TMFDomain[]>([]);
   const [referenceFunctions, setReferenceFunctions] = useState<TMFFunction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -77,22 +90,51 @@ export function TMFDomainCapabilityManager({
   const [selectedDomainForCapability, setSelectedDomainForCapability] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedReferenceDomain, setSelectedReferenceDomain] = useState<string>('');
+  const [enhancedDialogOpen, setEnhancedDialogOpen] = useState(false);
+  const [missingItemsCount, setMissingItemsCount] = useState(0);
   const isProcessingSpecSync = useRef(false);
 
   // Load reference data
   useEffect(() => {
     const loadReferenceData = async () => {
       try {
-        const [domainsData, functionsData] = await Promise.all([
-          TMFReferenceService.getDomains(),
-          TMFReferenceService.getAllFunctions(),
-        ]);
+        // Use static data to avoid Supabase timing issues
+        const staticDomains = getStaticTMFDomains();
+        const staticFunctions = getStaticTMFFunctions();
+        
+        // Convert static data to TMF format for compatibility
+        const domainsData: TMFDomain[] = staticDomains.map(domain => ({
+          id: domain.id,
+          name: domain.name,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          function_count: domain.functionCount
+        }));
+        
+        const functionsData: TMFFunction[] = staticFunctions.map(func => ({
+          id: func.id,
+          domain_id: func.domainId,
+          function_name: func.functionName,
+          vertical: func.vertical,
+          af_level_1: func.afLevel1,
+          af_level_2: func.afLevel2,
+          function_id: null,
+          uid: null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          domain_name: func.domainName
+        }));
+
         setReferenceDomains(domainsData);
         setReferenceFunctions(functionsData);
 
-        // Initialize with sample data if no domains exist
+        // Initialize with TMF reference data only if no existing domains
         if (domains.length === 0) {
+          console.log('🔄 Initializing sample data with TMF reference data...');
           initializeSampleData(domainsData, functionsData);
+          console.log('✅ Sample data initialized');
+        } else {
+          console.log('ℹ️ Using existing domains, not initializing sample data');
         }
       } catch (error) {
         console.error('Error loading reference data:', error);
@@ -104,28 +146,88 @@ export function TMFDomainCapabilityManager({
     loadReferenceData();
   }, []);
 
-  // Process SpecSync data after domains are initialized
+  // Process SpecSync data after reference data is loaded
   useEffect(() => {
-    if (specSyncData?.items && domains.length > 0 && !loading && !isProcessingSpecSync.current) {
+    console.log('🔄 SpecSync useEffect triggered:', {
+      hasSpecSyncData: !!specSyncData?.items,
+      specSyncItemsLength: specSyncData?.items?.length || 0,
+      referenceDomainsLength: referenceDomains.length,
+      loading,
+      isProcessing: isProcessingSpecSync.current
+    });
+
+    if (specSyncData?.items && referenceDomains.length > 0 && !loading && !isProcessingSpecSync.current) {
+      console.log('✅ Starting SpecSync processing...');
       isProcessingSpecSync.current = true;
 
-      const processSpecSyncData = () => {
-        updateRequirementCounts(specSyncData.items);
-        autoSelectMatchingDomainsAndCapabilities(specSyncData.items);
-        isProcessingSpecSync.current = false;
+      const processSpecSyncData = async () => {
+        try {
+          console.log('🚀 Calling autoSelectMatchingDomainsAndCapabilities...');
+          await autoSelectMatchingDomainsAndCapabilities(specSyncData.items);
+          console.log('✅ autoSelectMatchingDomainsAndCapabilities completed');
+          await analyzeMissingItems();
+          console.log('✅ analyzeMissingItems completed');
+        } catch (error) {
+          console.error('❌ Error in processSpecSyncData:', error);
+        } finally {
+          isProcessingSpecSync.current = false;
+          console.log('🏁 SpecSync processing finished');
+        }
       };
 
       // Use setTimeout to break the synchronous update cycle
       setTimeout(processSpecSyncData, 0);
+    } else {
+      console.log('❌ SpecSync processing skipped:', {
+        reason: !specSyncData?.items ? 'No SpecSync data' : 
+                referenceDomains.length === 0 ? 'No reference domains' :
+                loading ? 'Still loading' : 'Already processing'
+      });
     }
-  }, [specSyncData?.items, loading, domains.length]); // Only depend on domains.length, not the full domains array
+  }, [specSyncData?.items, loading, referenceDomains.length]); // Process when reference data is loaded
+
+  // Analyze missing TMF reference items when domains change
+  useEffect(() => {
+    if (domains.length > 0 && !loading && !isProcessingSpecSync.current) {
+      analyzeMissingItems();
+    }
+  }, [domains.length, loading]); // Analyze when domains change
+
+  // Analyze missing items from TMF reference data
+  const analyzeMissingItems = async () => {
+    try {
+      const gaps = await analyzeTMFReferenceGaps(domains);
+      setMissingItemsCount(gaps.totalMissingItems);
+    } catch (error) {
+      console.error('Error analyzing missing TMF reference items:', error);
+    }
+  };
+
+  // Memoized callback for onStateChange to prevent unnecessary re-renders
+  const handleStateChange = useCallback((updatedDomains: UserDomain[]) => {
+    onStateChange?.(updatedDomains);
+  }, [onStateChange]);
 
   // Handle onStateChange callback when domains change (but not during SpecSync processing)
   useEffect(() => {
+    console.log('🔄 Domains state changed:', {
+      domainsLength: domains.length,
+      loading,
+      isProcessing: isProcessingSpecSync.current,
+      selectedDomains: domains.filter(d => d.isSelected).length,
+      selectedCapabilities: domains.reduce((sum, d) => sum + d.capabilities.filter(c => c.isSelected).length, 0)
+    });
+    
     if (domains.length > 0 && !loading && !isProcessingSpecSync.current) {
-      onStateChange?.(domains);
+      console.log('✅ Calling handleStateChange with updated domains');
+      handleStateChange(domains);
+    } else {
+      console.log('❌ Skipping handleStateChange:', {
+        reason: domains.length === 0 ? 'No domains' : 
+                loading ? 'Still loading' : 'Processing SpecSync'
+      });
     }
-  }, [domains, loading]); // Remove onStateChange from dependencies to prevent infinite loop
+  }, [domains, loading, handleStateChange]); // Include handleStateChange in dependencies
 
   // Initialize sample data
   const initializeSampleData = (
@@ -158,119 +260,227 @@ export function TMFDomainCapabilityManager({
     });
 
     setDomains(sampleDomains);
-    onStateChange?.(sampleDomains);
+    handleStateChange(sampleDomains);
   };
 
-  const autoSelectMatchingDomainsAndCapabilities = (specSyncItems: any[]) => {
-    // Extract unique domains and functions from SpecSync data
-    const importedDomains = new Set<string>();
-    const importedFunctions = new Set<string>();
-
-    specSyncItems.forEach((item: any) => {
-      if (item.domain) {
-        importedDomains.add(item.domain.toString().trim());
-      }
-      if (item['Rephrased Function Name']) {
-        importedFunctions.add(item['Rephrased Function Name'].toString().trim());
-      }
-      // Also check for legacy capability fields
-      if (item.capability) {
-        importedFunctions.add(item.capability.toString().trim());
-      }
-      if (item.afLevel2) {
-        importedFunctions.add(item.afLevel2.toString().trim());
-      }
-    });
-
-    // Update existing domains to auto-select matching ones
-    const updatedDomains = domains.map((domain) => {
-      const domainName = domain.name.toLowerCase();
-      const isDomainMatch = Array.from(importedDomains).some(
-        (importedDomain) => importedDomain.toLowerCase() === domainName,
-      );
-
-      // Update functions within this domain
-      const updatedCapabilities = domain.capabilities.map((capability) => {
-        const functionName = capability.name.toLowerCase();
-        const isFunctionMatch = Array.from(importedFunctions).some(
-          (importedFunction) => importedFunction.toLowerCase() === functionName,
-        );
-
-        return {
-          ...capability,
-          isSelected: isFunctionMatch,
-        };
+  const autoSelectMatchingDomainsAndCapabilities = async (specSyncItems: any[]) => {
+    try {
+      console.log('🔍 Starting autoSelectMatchingDomainsAndCapabilities with', specSyncItems.length, 'items');
+      console.log('🔍 Current domains state:', domains.length, 'domains loaded');
+      
+      // EXTRACT ONLY domain and functionName from SpecSync data - NO OTHER FIELDS
+      console.log('📋 Processing SpecSync items - ONLY using domain and functionName fields');
+      const specSyncData = specSyncItems.map(item => ({
+        domain: item.domain?.toString().trim() || '',
+        functionName: item.functionName?.toString().trim() || ''
+      })).filter(item => item.domain && item.functionName);
+      
+      console.log('📊 SpecSync data (domain + functionName only):', specSyncData);
+      
+      // Get unique domains and functions from SpecSync data
+      const importedDomains = new Set<string>();
+      const importedFunctions = new Set<string>();
+      
+      specSyncData.forEach(item => {
+        if (item.domain) importedDomains.add(item.domain);
+        if (item.functionName) importedFunctions.add(item.functionName);
+      });
+      
+      console.log('📊 Imported domains:', Array.from(importedDomains));
+      console.log('📊 Imported functions:', Array.from(importedFunctions));
+      
+      // Log the TMF function names we have available
+      const staticFunctions = getStaticTMFFunctions();
+      console.log('🎯 Available TMF functions:');
+      staticFunctions.forEach(func => {
+        console.log(`  - ${func.functionName} (${func.domainName})`);
       });
 
-      // Add missing functions from imported data to this domain
-      Array.from(importedFunctions).forEach((importedFunction) => {
-        const functionExists = updatedCapabilities.some(
-          (cap) => cap.name.toLowerCase() === importedFunction.toLowerCase(),
-        );
+      // Update existing domains to select matching capabilities
+      const updatedDomains = domains.map((domain) => {
+        let hasMatchingCapabilities = false;
+        let domainSelected = false;
 
-        if (!functionExists && isDomainMatch) {
-          // Add new function to this domain
-          const newCapability: UserCapability = {
-            id: `capability-imported-${Date.now()}-${Math.random()}`,
-            name: importedFunction,
-            description: `Imported TMF Function: ${importedFunction}`,
-            domainId: domain.id,
-            isSelected: true,
-            requirementCount: 0,
+        // STRICT EXACT DOMAIN MATCH ONLY
+        console.log(`🔍 Checking domain: "${domain.name}" against SpecSync domains:`, Array.from(importedDomains));
+        
+        const matchingSpecSyncDomain = Array.from(importedDomains).find(importedDomain => {
+          const normalizedDomainName = domain.name.toLowerCase().trim();
+          const normalizedImportedDomain = importedDomain.toLowerCase().trim();
+          
+          console.log(`  🔍 Comparing: "${normalizedDomainName}" vs "${normalizedImportedDomain}"`);
+          
+          // EXACT MATCH ONLY - NO FUZZY MATCHING
+          const exactMatch = normalizedDomainName === normalizedImportedDomain;
+          if (exactMatch) {
+            console.log(`  ✅ EXACT DOMAIN MATCH`);
+          } else {
+            console.log(`  ❌ NO DOMAIN MATCH`);
+          }
+          return exactMatch;
+        });
+
+        if (matchingSpecSyncDomain) {
+          console.log(`🎯 Found matching domain: ${domain.name} matches ${matchingSpecSyncDomain}`);
+          
+          // Get functions for this domain from SpecSync data
+          const domainSpecSyncItems = specSyncData.filter(item => {
+            const itemDomain = item.domain.toLowerCase();
+            const matchingDomain = matchingSpecSyncDomain.toLowerCase();
+            return itemDomain === matchingDomain;
+          });
+
+          console.log(`📋 Found ${domainSpecSyncItems.length} items for domain ${domain.name}`);
+          
+          // Log the specific functions we're looking for in this domain
+          const specSyncFunctionsInDomain = domainSpecSyncItems.map(item => item.functionName);
+          console.log(`🔍 Looking for these functions in ${domain.name}:`, specSyncFunctionsInDomain);
+          
+          // Log the available TMF functions in this domain
+          const availableTMFunctions = domain.capabilities.map(cap => cap.name);
+          console.log(`🎯 Available TMF functions in ${domain.name}:`, availableTMFunctions);
+
+          // STRICT EXACT MATCHING FUNCTION ONLY
+          const matchFunction = (specSyncName: string, tmfName: string): boolean => {
+            const normalizedSpec = specSyncName.toLowerCase().trim();
+            const normalizedTmf = tmfName.toLowerCase().trim();
+            
+            console.log(`    🔍 Matching: "${normalizedSpec}" vs "${normalizedTmf}"`);
+            
+            // EXACT MATCH ONLY - NO FUZZY MATCHING
+            const exactMatch = normalizedSpec === normalizedTmf;
+            if (exactMatch) {
+              console.log(`    ✅ EXACT MATCH`);
+            } else {
+              console.log(`    ❌ NO MATCH`);
+            }
+            return exactMatch;
           };
-          updatedCapabilities.push(newCapability);
+
+          // Update capabilities to select matching ones
+          const updatedCapabilities = domain.capabilities.map((capability) => {
+            let isSelected = false;
+            
+            console.log(`🔍 Checking TMF function: "${capability.name}"`);
+            console.log(`  📋 Available SpecSync functions in this domain:`, domainSpecSyncItems.map(item => item.functionName));
+            
+            // Check against all SpecSync functions in this domain
+            for (const item of domainSpecSyncItems) {
+              // ONLY use functionName field - NO OTHER FIELDS
+              const functionName = item.functionName;
+              if (!functionName) continue;
+              
+              console.log(`  🔍 Comparing with SpecSync: "${functionName}"`);
+              
+              if (matchFunction(functionName, capability.name)) {
+                isSelected = true;
+                hasMatchingCapabilities = true;
+                console.log(`  ✅ MATCH FOUND: "${capability.name}" matches "${functionName}"`);
+                break;
+              } else {
+                console.log(`  ❌ No match: "${capability.name}" vs "${functionName}"`);
+              }
+            }
+
+            console.log(`  🎯 Final result for "${capability.name}": ${isSelected ? 'SELECTED' : 'NOT SELECTED'}`);
+            return {
+              ...capability,
+              isSelected,
+            };
+          });
+
+          // Select domain if it has any matching capabilities
+          domainSelected = hasMatchingCapabilities;
+          
+          // Log summary of what was selected in this domain
+          const selectedCapabilities = updatedCapabilities.filter(cap => cap.isSelected);
+          console.log(`📊 ${domain.name}: Selected ${selectedCapabilities.length}/${updatedCapabilities.length} capabilities`);
+          if (selectedCapabilities.length > 0) {
+            console.log(`   ✅ Selected: ${selectedCapabilities.map(cap => cap.name).join(', ')}`);
+          } else {
+            console.log(`   ❌ No capabilities selected in ${domain.name}`);
+          }
+
+          return {
+            ...domain,
+            isSelected: domainSelected,
+            capabilities: updatedCapabilities,
+          };
+        }
+
+        return domain;
+      });
+
+      // Don't create new functions - only map to existing TMF functions
+      console.log('✅ Mapping complete - only using existing TMF functions');
+      
+      // Final verification - log what was actually selected
+      console.log('🎯 FINAL VERIFICATION:');
+      updatedDomains.forEach(domain => {
+        if (domain.isSelected) {
+          const selectedFunctions = domain.capabilities.filter(cap => cap.isSelected);
+          console.log(`  ${domain.name}: ${selectedFunctions.length} functions selected`);
+          selectedFunctions.forEach(func => {
+            console.log(`    ✅ ${func.name}`);
+          });
+        } else {
+          console.log(`  ${domain.name}: NOT SELECTED`);
         }
       });
+      
+      setDomains(updatedDomains);
 
-      // Domain is selected if any of its functions are selected or if domain name matches
-      const hasSelectedFunctions = updatedCapabilities.some((cap) => cap.isSelected);
-      const isSelected = isDomainMatch || hasSelectedFunctions;
-
-      return {
-        ...domain,
-        isSelected,
-        capabilities: updatedCapabilities,
-        isExpanded: false, // Keep domains collapsed by default
-      };
-    });
-
-    // Create missing domains from imported data
-    const newDomains: UserDomain[] = [];
-    Array.from(importedDomains).forEach((importedDomain) => {
-      const domainExists = updatedDomains.some(
-        (domain) => domain.name.toLowerCase() === importedDomain.toLowerCase(),
+      console.log('🔄 Updated domains with selections');
+      
+      // Log final summary
+      const totalSelectedDomains = updatedDomains.filter(d => d.isSelected).length;
+      const totalSelectedCapabilities = updatedDomains.reduce((sum, d) => 
+        sum + d.capabilities.filter(c => c.isSelected).length, 0
       );
-
-      if (!domainExists) {
-        // Create new domain from imported data
-        const newDomain: UserDomain = {
-          id: `domain-imported-${Date.now()}-${Math.random()}`,
-          name: importedDomain,
-          description: `Imported domain: ${importedDomain}`,
-          capabilities: [],
-          isSelected: true,
-          isExpanded: false,
-          requirementCount: 0,
-        };
-        newDomains.push(newDomain);
-      }
-    });
-
-    // Combine existing and new domains
-    const allDomains = [...updatedDomains, ...newDomains];
-
-    setDomains(allDomains);
+      console.log(`🎯 Final Results: ${totalSelectedDomains} domains selected, ${totalSelectedCapabilities} capabilities selected`);
+      
+      // Use flushSync to ensure immediate UI update
+      console.log('🔄 Setting domains state with selections...');
+      flushSync(() => {
+        setDomains(updatedDomains);
+      });
+      console.log('✅ Domains state updated');
+      
+      // Update requirement counts with the updated domains
+      console.log('🔄 Updating requirement counts...');
+      const finalDomainsWithCounts = updateRequirementCounts(specSyncItems, updatedDomains);
+      console.log('✅ Requirement counts updated');
+      
+      // Final state update with requirement counts
+      console.log('🔄 Final state update with requirement counts...');
+      flushSync(() => {
+        setDomains(finalDomainsWithCounts);
+      });
+      console.log('✅ Final state update completed');
+      
+      console.log('✅ SpecSync mapping completed successfully');
+      
+      // Notify parent component that mapping is complete
+      onMappingComplete?.(finalDomainsWithCounts);
+      
+    } catch (error) {
+      console.error('Error in autoSelectMatchingDomainsAndCapabilities:', error);
+    }
   };
 
-  const updateRequirementCounts = (specSyncItems: any[]) => {
-    const updatedDomains = domains.map((domain) => {
+  const updateRequirementCounts = (specSyncItems: any[], domainsToUpdate?: UserDomain[]) => {
+    const domainsToProcess = domainsToUpdate || domains;
+    
+    console.log('📊 Updating requirement counts for', domainsToProcess.length, 'domains');
+    
+    const updatedDomains = domainsToProcess.map((domain) => {
       const domainCapabilities = domain.capabilities.map((capability) => {
         // Count requirements that match this function
         const requirementCount = specSyncItems.filter((item: any) => {
-          const itemFunction = (item['Rephrased Function Name'] || item.capability || item.afLevel2 || '').toString().toLowerCase();
-          const itemDomain = (item.domain || '').toString().toLowerCase();
-          const functionName = capability.name.toLowerCase();
-          const domainName = domain.name.toLowerCase();
+          const itemFunction = (item.functionName || '').toString().trim().toLowerCase();
+          const itemDomain = (item.domain || '').toString().trim().toLowerCase();
+          const functionName = capability.name.trim().toLowerCase();
+          const domainName = domain.name.trim().toLowerCase();
 
           // Exact match for better accuracy
           const functionMatch = itemFunction === functionName;
@@ -278,6 +488,10 @@ export function TMFDomainCapabilityManager({
 
           return functionMatch && domainMatch;
         }).length;
+
+        if (requirementCount > 0) {
+          console.log(`📈 ${capability.name}: ${requirementCount} requirements`);
+        }
 
         return {
           ...capability,
@@ -290,6 +504,10 @@ export function TMFDomainCapabilityManager({
         0,
       );
 
+      if (domainRequirementCount > 0) {
+        console.log(`📈 Domain ${domain.name}: ${domainRequirementCount} total requirements`);
+      }
+
       return {
         ...domain,
         capabilities: domainCapabilities,
@@ -297,7 +515,21 @@ export function TMFDomainCapabilityManager({
       };
     });
 
-    setDomains(updatedDomains);
+    // Only update state if we're not already in the middle of updating
+    if (!domainsToUpdate) {
+      setDomains(updatedDomains);
+    }
+    
+    return updatedDomains;
+  };
+
+  // Calculate selected counts for badge display
+  const getSelectedCounts = () => {
+    const selectedDomains = domains.filter(domain => domain.isSelected).length;
+    const selectedCapabilities = domains.reduce((total, domain) => 
+      total + domain.capabilities.filter(cap => cap.isSelected).length, 0
+    );
+    return { selectedDomains, selectedCapabilities };
   };
 
   const addDomain = (domainData: {
@@ -318,7 +550,7 @@ export function TMFDomainCapabilityManager({
 
     const updatedDomains = [...domains, newDomain];
     setDomains(updatedDomains);
-    onStateChange?.(updatedDomains);
+    handleStateChange(updatedDomains);
     setAddDomainDialogOpen(false);
   };
 
@@ -348,15 +580,126 @@ export function TMFDomainCapabilityManager({
     });
 
     setDomains(updatedDomains);
-    onStateChange?.(updatedDomains);
+    handleStateChange(updatedDomains);
     setAddCapabilityDialogOpen(false);
     setSelectedDomainForCapability('');
+  };
+
+  // Handle adding missing domain with functions
+  const handleAddMissingDomain = async (missingDomain: { domain: TMFDomain; functionCount: number; functions: TMFFunction[] }) => {
+    try {
+      // Create new domain
+      const newDomain: UserDomain = {
+        id: `domain-${Date.now()}-${Math.random()}`,
+        name: missingDomain.domain.name,
+        description: `TMF Domain: ${missingDomain.domain.name} with ${missingDomain.functionCount} functions`,
+        isSelected: true,
+        isExpanded: false,
+        requirementCount: 0,
+        capabilities: [],
+      };
+
+      // Create capabilities for each TMF function
+      const newCapabilities: UserCapability[] = missingDomain.functions.map((func) => ({
+        id: `capability-${Date.now()}-${Math.random()}`,
+        name: func.function_name,
+        description: `TMF Function: ${func.function_name}`,
+        domainId: newDomain.id,
+        isSelected: true,
+        requirementCount: 0,
+        referenceFunctionId: func.id,
+      }));
+
+      newDomain.capabilities = newCapabilities;
+
+      const updatedDomains = [...domains, newDomain];
+      setDomains(updatedDomains);
+      handleStateChange(updatedDomains);
+      
+      // Re-analyze missing items
+      await analyzeMissingItems();
+    } catch (error) {
+      console.error('Error adding missing TMF domain:', error);
+    }
+  };
+
+  // Handle adding missing functions
+  const handleAddMissingFunctions = async (missingFunctions: Array<{ function: TMFFunction; domain: string }>) => {
+    try {
+      // Group functions by domain
+      const functionsByDomain: Record<string, TMFFunction[]> = {};
+      missingFunctions.forEach(({ function: func, domain }) => {
+        if (!functionsByDomain[domain]) {
+          functionsByDomain[domain] = [];
+        }
+        functionsByDomain[domain].push(func);
+      });
+
+      let updatedDomains = [...domains];
+
+      // Add functions to existing domains or create new domains
+      for (const [domainName, functions] of Object.entries(functionsByDomain)) {
+        const existingDomain = updatedDomains.find(d => d.name.toLowerCase() === domainName.toLowerCase());
+        
+        if (existingDomain) {
+          // Add to existing domain
+          const newCapabilities: UserCapability[] = functions.map((func) => ({
+            id: `capability-${Date.now()}-${Math.random()}`,
+            name: func.function_name,
+            description: `TMF Function: ${func.function_name}`,
+            domainId: existingDomain.id,
+            isSelected: true,
+            requirementCount: 0,
+            referenceFunctionId: func.id,
+          }));
+
+          updatedDomains = updatedDomains.map((domain) =>
+            domain.id === existingDomain.id
+              ? {
+                  ...domain,
+                  capabilities: [...domain.capabilities, ...newCapabilities],
+                  isSelected: true,
+                }
+              : domain,
+          );
+        } else {
+          // Create new domain
+          const newDomain: UserDomain = {
+            id: `domain-${Date.now()}-${Math.random()}`,
+            name: domainName,
+            description: `TMF Domain: ${domainName} with ${functions.length} functions`,
+            isSelected: true,
+            isExpanded: false,
+            requirementCount: 0,
+            capabilities: functions.map((func) => ({
+              id: `capability-${Date.now()}-${Math.random()}`,
+              name: func.function_name,
+              description: `TMF Function: ${func.function_name}`,
+              domainId: `domain-${Date.now()}-${Math.random()}`,
+              isSelected: true,
+              requirementCount: 0,
+              referenceFunctionId: func.id,
+            })),
+          };
+
+          updatedDomains.push(newDomain);
+        }
+      }
+
+      setDomains(updatedDomains);
+      handleStateChange(updatedDomains);
+
+      // Re-analyze missing items
+      await analyzeMissingItems();
+    } catch (error) {
+      console.error('Error adding missing TMF functions:', error);
+    }
   };
 
   const removeDomain = (domainId: string) => {
     const updatedDomains = domains.filter((domain) => domain.id !== domainId);
     setDomains(updatedDomains);
-    onStateChange?.(updatedDomains);
+    handleStateChange(updatedDomains);
   };
 
   const removeCapability = (domainId: string, capabilityId: string) => {
@@ -370,7 +713,7 @@ export function TMFDomainCapabilityManager({
       return domain;
     });
     setDomains(updatedDomains);
-    onStateChange?.(updatedDomains);
+    handleStateChange(updatedDomains);
   };
 
   const toggleDomainSelection = (domainId: string) => {
@@ -420,7 +763,7 @@ export function TMFDomainCapabilityManager({
       return domain;
     });
     setDomains(updatedDomains);
-    onStateChange?.(updatedDomains);
+    handleStateChange(updatedDomains);
   };
 
   const toggleDomainExpansion = (domainId: string) => {
@@ -467,7 +810,7 @@ export function TMFDomainCapabilityManager({
 
         const updatedDomains = [...domains, newDomain];
         setDomains(updatedDomains);
-        onStateChange?.(updatedDomains);
+        handleStateChange(updatedDomains);
       }
     }
     setSelectedReferenceDomain('');
@@ -537,20 +880,19 @@ export function TMFDomainCapabilityManager({
               ))}
             </SelectContent>
           </Select>
-          <Dialog open={addDomainDialogOpen} onOpenChange={setAddDomainDialogOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm" className="flex items-center space-x-2">
-                <Plus className="h-4 w-4" />
-                <span>Add Custom Domain</span>
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add Custom TMF Domain</DialogTitle>
-              </DialogHeader>
-              <AddDomainForm onAdd={addDomain} referenceDomains={referenceDomains} />
-            </DialogContent>
-          </Dialog>
+          <Button 
+            size="sm" 
+            className="flex items-center space-x-2"
+            onClick={() => setEnhancedDialogOpen(true)}
+          >
+            <Plus className="h-4 w-4" />
+            <span>Add Custom Domain</span>
+            {missingItemsCount > 0 && (
+              <Badge variant="secondary" className="ml-2">
+                {missingItemsCount}
+              </Badge>
+            )}
+          </Button>
         </div>
       </div>
 
@@ -727,6 +1069,17 @@ export function TMFDomainCapabilityManager({
           />
         </DialogContent>
       </Dialog>
+
+      {/* Enhanced Add Custom Domain Dialog */}
+      <EnhancedAddCustomDomainDialog
+        open={enhancedDialogOpen}
+        onOpenChange={setEnhancedDialogOpen}
+        currentDomains={domains}
+        onAddMissingDomain={handleAddMissingDomain}
+        onAddMissingFunctions={handleAddMissingFunctions}
+        onAddCustomDomain={addDomain}
+        referenceDomains={referenceDomains}
+      />
     </div>
   );
 }

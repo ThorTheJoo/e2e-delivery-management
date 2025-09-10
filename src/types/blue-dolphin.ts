@@ -195,10 +195,33 @@ export interface ODataResponse<T> {
 export interface BlueDolphinConfig {
   apiUrl: string;
   odataUrl: string;
-  apiKey?: string;
+  apiKey?: string; // User Key Management API Key
   username?: string;
   password?: string;
   protocol: 'REST' | 'ODATA' | 'HYBRID';
+  
+  // User API Key fields
+  userApiKey?: string; // Generated User API Key
+  userId?: string; // User ID for API key generation
+  userApiKeyExpiry?: string; // Expiry date (YYYY-MM-DD format)
+  userApiKeyName?: string; // Name for the generated key
+  userApiKeyGenerated?: boolean; // Whether key has been generated
+  userApiKeyGeneratedAt?: string; // When it was generated
+  
+  // Workspace and object type fields
+  workspaceId?: string; // Workspace ID for operations
+  objectTypeId?: string; // Object type ID for operations
+}
+
+export interface UserApiKeyGenerationRequest {
+  name: string;
+  user_id: string;
+  expiration_date: string; // YYYY-MM-DD format
+}
+
+export interface UserApiKeyGenerationResponse {
+  id: string;
+  key: string;
 }
 
 // Sync operation types
