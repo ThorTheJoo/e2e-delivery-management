@@ -14,10 +14,24 @@ export function SupabaseConfiguration() {
   const [mode, setMode] = useState<'local' | 'supabase'>(status.selected);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [url, setUrl] = useState('');
+  const [anonKey, setAnonKey] = useState('');
+  const [serviceRole, setServiceRole] = useState('');
 
   useEffect(() => {
     setStatus(getDataSourceStatus());
     setMode(getDataSourceStatus().selected);
+    // Load UI-saved config
+    try {
+      const raw = localStorage.getItem('supabaseConfig');
+      if (raw) {
+        const cfg = JSON.parse(raw);
+        setUrl(cfg?.url || '');
+        setAnonKey(cfg?.anonKey || '');
+      }
+      const sr = localStorage.getItem('supabase.serviceRole.hint');
+      if (sr) setServiceRole(sr);
+    } catch {}
   }, []);
 
   const envPreview: EnvPreview = useMemo(
@@ -36,6 +50,10 @@ export function SupabaseConfiguration() {
         ? 'To enable Supabase, ensure .env.local has NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY, then restart dev server.'
         : 'Switched to local mode. If you had Supabase enabled, it will fall back automatically.',
     );
+    try {
+      localStorage.setItem('supabase.ui.mode', next);
+      setStatus(getDataSourceStatus());
+    } catch {}
   };
 
   const handleExportSpecSync = async () => {
@@ -55,6 +73,17 @@ export function SupabaseConfiguration() {
       setMessage(e?.message || 'Export failed. Ensure Supabase is enabled and service role key is configured on server.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleSaveConfig = () => {
+    try {
+      localStorage.setItem('supabaseConfig', JSON.stringify({ url, anonKey }));
+      if (serviceRole) localStorage.setItem('supabase.serviceRole.hint', serviceRole);
+      setStatus(getDataSourceStatus());
+      setMessage('Supabase configuration saved locally for UI use. For full runtime enablement in builds, also set .env.local and restart.');
+    } catch (e: any) {
+      setMessage(e?.message || 'Failed saving configuration');
     }
   };
 
@@ -86,6 +115,52 @@ export function SupabaseConfiguration() {
             <li>NEXT_PUBLIC_SUPABASE_ANON_KEY: <span className="font-semibold">{envPreview.supabaseAnonKey}</span></li>
             <li>NEXT_PUBLIC_DATA_SOURCE: <span className="font-semibold">{envPreview.dataSource}</span></li>
           </ul>
+        </div>
+      </div>
+
+      <div className="rounded-md border p-4">
+        <h4 className="mb-2 font-medium">Capture Configuration (UI-local)</h4>
+        <div className="grid gap-3 md:grid-cols-2">
+          <div>
+            <label className="mb-1 block text-xs text-muted-foreground">NEXT_PUBLIC_SUPABASE_URL</label>
+            <input
+              className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="https://<project>.supabase.co"
+              aria-label="Supabase URL"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs text-muted-foreground">NEXT_PUBLIC_SUPABASE_ANON_KEY</label>
+            <input
+              className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+              value={anonKey}
+              onChange={(e) => setAnonKey(e.target.value)}
+              placeholder="anon key"
+              aria-label="Supabase anon key"
+            />
+          </div>
+          <div className="md:col-span-2">
+            <label className="mb-1 block text-xs text-muted-foreground">SUPABASE_SERVICE_ROLE_KEY (server-only hint)</label>
+            <input
+              className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+              value={serviceRole}
+              onChange={(e) => setServiceRole(e.target.value)}
+              placeholder="service role key (do not expose to browser in production)"
+              aria-label="Supabase service role key"
+            />
+          </div>
+        </div>
+        <div className="mt-3 flex items-center gap-2">
+          <button
+            className="rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground"
+            onClick={handleSaveConfig}
+            aria-label="Save configuration"
+          >
+            Save Configuration (UI)
+          </button>
+          <span className="text-xs text-muted-foreground">This stores values locally so the UI can run in Supabase mode without editing files. For builds, also set .env.local.</span>
         </div>
       </div>
 

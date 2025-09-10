@@ -20,6 +20,20 @@ function isPlaceholder(value: string | undefined | null): boolean {
 }
 
 export function isSupabaseEnvConfigured(): boolean {
+  // Browser override via UI-saved config
+  if (typeof window !== 'undefined') {
+    try {
+      const raw = window.localStorage.getItem('supabaseConfig');
+      if (raw) {
+        const cfg = JSON.parse(raw || '{}');
+        const url = cfg?.url as string | undefined;
+        const anon = cfg?.anonKey as string | undefined;
+        if (isNonEmpty(url) && isNonEmpty(anon) && !isPlaceholder(url) && !isPlaceholder(anon)) {
+          return true;
+        }
+      }
+    } catch {}
+  }
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!isNonEmpty(url) || !isNonEmpty(anon)) return false;
@@ -28,7 +42,11 @@ export function isSupabaseEnvConfigured(): boolean {
 }
 
 export function getActiveDataSource(): DataSource {
-  const desired = (process.env.NEXT_PUBLIC_DATA_SOURCE || 'local').toLowerCase();
+  let desired = (process.env.NEXT_PUBLIC_DATA_SOURCE || 'local').toLowerCase();
+  if (typeof window !== 'undefined') {
+    const uiMode = window.localStorage.getItem('supabase.ui.mode');
+    if (uiMode === 'local' || uiMode === 'supabase') desired = uiMode;
+  }
   if (desired === 'supabase' && isSupabaseEnvConfigured()) return 'supabase';
   return 'local';
 }
