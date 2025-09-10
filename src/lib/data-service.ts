@@ -106,6 +106,44 @@ class DataService {
     return this.data.tmfCapabilities[id] || null;
   }
 
+  // TMF Reference Domains (read-only, hybrid)
+  async getTMFReferenceDomains(): Promise<
+    Array<{ id: string; name: string; description: string; category?: string; version?: string }>
+  > {
+    try {
+      if (getActiveDataSource() === 'supabase') {
+        const svc = new SupabaseDataService<any>('tmf_reference_domains');
+        const rows = await svc.read();
+        if (Array.isArray(rows) && rows.length > 0) {
+          return rows.map((r) => ({
+            id: String(r.id),
+            name: String(r.name),
+            description: String(r.description || ''),
+            category: r.category || r.metadata?.category,
+            version: r.version || '1.0',
+          }));
+        }
+      }
+    } catch (err) {
+      console.warn('Supabase TMF domains read failed; using fallback.', err);
+    }
+
+    // Fallback to local static reference service if available, otherwise map from demo data keys
+    try {
+      const { TMFReferenceService } = await import('@/lib/tmf-reference-service');
+      return TMFReferenceService.getReferenceDomains();
+    } catch {
+      // Last resort: infer from demo data keys
+      return Object.keys(this.data?.tmfCapabilities || {}).map((k, i) => ({
+        id: `domain-${i + 1}`,
+        name: k,
+        description: k,
+        category: 'Business',
+        version: '1.0',
+      }));
+    }
+  }
+
   async updateTMFCapability(
     id: string,
     capability: Partial<TMFCapability>,
