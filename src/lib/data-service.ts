@@ -144,6 +144,83 @@ class DataService {
     }
   }
 
+  // Read-only user-selected TMF domains/capabilities (hybrid)
+  async getUserTmfDomains(): Promise<TMFOdaDomain[]> {
+    try {
+      if (getActiveDataSource() === 'supabase') {
+        const domainsSvc = new SupabaseDataService<any>('user_domains');
+        const capsSvc = new SupabaseDataService<any>('user_capabilities');
+        const [domains, caps] = await Promise.all([domainsSvc.read(), capsSvc.read()]);
+        if (Array.isArray(domains) && domains.length > 0) {
+          const domainIdToCaps = new Map<string, any[]>();
+          for (const c of caps || []) {
+            const arr = domainIdToCaps.get(c.domain_id) || [];
+            arr.push(c);
+            domainIdToCaps.set(c.domain_id, arr);
+          }
+          return (domains || []).map((d: any) => ({
+            id: String(d.id),
+            name: String(d.name),
+            description: String(d.description || ''),
+            referenceDomainId: d.reference_domain_id || undefined,
+            isSelected: Boolean(d.is_selected ?? false),
+            createdAt: d.created_at || new Date().toISOString(),
+            updatedAt: d.updated_at || new Date().toISOString(),
+            capabilities: (domainIdToCaps.get(d.id) || []).map((c: any) => ({
+              id: String(c.id),
+              name: String(c.name),
+              description: String(c.description || ''),
+              domainId: String(d.id),
+              isSelected: Boolean(c.is_selected ?? false),
+              createdAt: c.created_at || new Date().toISOString(),
+              updatedAt: c.updated_at || new Date().toISOString(),
+            })),
+            requirementCount: Number(d.requirement_count ?? 0),
+            isExpanded: Boolean(d.is_expanded ?? false),
+          }));
+        }
+      }
+    } catch (err) {
+      console.warn('Supabase user TMF domains read failed; using mock state.', err);
+    }
+
+    // Fallback: build mock user domains from reference capabilities by grouping
+    try {
+      const refDomains = await this.getTMFReferenceDomains();
+      const caps = await this.getTMFCapabilities();
+      const byDomain: Record<string, TMFOdaDomain> = {};
+      refDomains.forEach((d, idx) => {
+        byDomain[d.id] = {
+          id: d.id,
+          name: d.name,
+          description: d.description,
+          capabilities: [],
+          isSelected: false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        } as TMFOdaDomain;
+      });
+      caps.forEach((c) => {
+        const domainKeys = Object.keys(byDomain);
+        const target = byDomain[domainKeys[0]] || Object.values(byDomain)[0];
+        if (target) {
+          target.capabilities.push({
+            id: c.id,
+            name: c.name,
+            description: c.description,
+            domainId: target.id,
+            isSelected: false,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          });
+        }
+      });
+      return Object.values(byDomain);
+    } catch {
+      return [];
+    }
+  }
+
   async updateTMFCapability(
     id: string,
     capability: Partial<TMFCapability>,
