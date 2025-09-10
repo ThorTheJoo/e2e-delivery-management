@@ -8,6 +8,9 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Download, BarChart3, FileText, Calculator, Settings, RefreshCw, Eye, Users, Edit } from 'lucide-react';
+import { computeComplexity } from '@/lib/complexity-scoring';
+import { DEFAULT_COMPLEXITY_CONFIG } from '@/types/complexity';
+import { generateTraceabilityFromSelection } from '@/lib/telecom-traceability';
 import {
   BOMItem,
   BOMState,
@@ -411,6 +414,103 @@ export function BillOfMaterials({
 
   // Export to CSV
   const exportToCSV = () => {
+    // Load persisted complexity selection to compute multiplier (non-breaking)
+    let complexityMultiplier = 1;
+    let selection: any = null;
+    let stageMultipliers: Record<string, number> = {};
+    let categoryMultipliers: {
+      customer: number;
+      product: number;
+      access: number;
+      channel: number;
+      deployment: number;
+    } = { customer: 1, product: 1, access: 1, channel: 1, deployment: 1 };
+    let nfrAggregateMultiplier = 1;
+    let integrationMultiplier = 1;
+    let deliveryServiceMultipliers: Record<string, number> = {};
+    let complexitySelections: Record<string, string> = {};
+    let integrationApiCount = 0;
+    let integrationLegacy = false;
+    let productMixList: string[] = [];
+    let accessTechList: string[] = [];
+    let channelList: string[] = [];
+    let customerType = '';
+    let deployment = '';
+    let trace = null as null | ReturnType<typeof generateTraceabilityFromSelection>;
+    try {
+      const raw = localStorage.getItem('complexity-selection');
+      if (raw) {
+        selection = JSON.parse(raw);
+        // Backward-compatible normalization from earlier single-value schema
+        const normalized = {
+          customerTypeIds: Array.isArray(selection.customerTypeIds)
+            ? selection.customerTypeIds
+            : selection.customerTypeId
+              ? [selection.customerTypeId]
+              : [],
+          productMixIds: Array.isArray(selection.productMixIds)
+            ? selection.productMixIds
+            : selection.productMixId
+              ? [selection.productMixId]
+              : [],
+          accessTechnologyIds: Array.isArray(selection.accessTechnologyIds)
+            ? selection.accessTechnologyIds
+            : selection.accessTechnologyId
+              ? [selection.accessTechnologyId]
+              : [],
+          channelIds: Array.isArray(selection.channelIds)
+            ? selection.channelIds
+            : selection.channelId
+              ? [selection.channelId]
+              : [],
+          deploymentId: selection.deploymentId || selection.deployment || '',
+          nfrSelections: selection.nfrSelections || {},
+          integration: {
+            apiCount:
+              typeof selection?.integration?.apiCount === 'number'
+                ? selection.integration.apiCount
+                : 0,
+            requiresLegacyCompatibility: Boolean(
+              selection?.integration?.requiresLegacyCompatibility,
+            ),
+          },
+          deliveryServicesEnabled: selection.deliveryServicesEnabled,
+        };
+
+        const result = computeComplexity(normalized, DEFAULT_COMPLEXITY_CONFIG);
+        complexityMultiplier = result.overallMultiplier || 1;
+        stageMultipliers = result.stageMultipliers || {};
+        deliveryServiceMultipliers = result.deliveryServiceMultipliers || {};
+        complexitySelections = normalized.nfrSelections || {};
+        integrationApiCount = normalized.integration.apiCount;
+        integrationLegacy = normalized.integration.requiresLegacyCompatibility;
+        productMixList = normalized.productMixIds || [];
+        accessTechList = normalized.accessTechnologyIds || [];
+        channelList = normalized.channelIds || [];
+        customerType = (normalized.customerTypeIds && normalized.customerTypeIds.join('; ')) || '';
+        deployment = normalized.deploymentId || '';
+
+        // Extract category multipliers and aggregates (non-breaking)
+        try {
+          categoryMultipliers = {
+            customer: result.categories['customer-type']?.multiplier || 1,
+            product: result.categories['product-mix']?.multiplier || 1,
+            access: result.categories['access-technology']?.multiplier || 1,
+            channel: result.categories['channel']?.multiplier || 1,
+            deployment: result.categories['deployment']?.multiplier || 1,
+          };
+          nfrAggregateMultiplier = Object.values(result.nfr)
+            .filter(Boolean)
+            .reduce((acc, item: any) => acc * (item?.multiplier || 1), 1);
+          integrationMultiplier = result.integration?.multiplier || 1;
+        } catch {}
+
+        try {
+          trace = generateTraceabilityFromSelection(normalized);
+        } catch {}
+      }
+    } catch {}
+
     const headers = [
       'ID',
       'TMF Domain',
@@ -419,6 +519,40 @@ export function BillOfMaterials({
       'Application Component',
       'Use Case',
       'CUT Effort (Mandays)',
+      'Complexity Multiplier',
+      'Complexity-Adjusted Effort (Mandays)',
+      'Customer Type',
+      'Product Mix',
+      'Access Technology',
+      'Channel',
+      'Deployment',
+      'NFR Performance',
+      'NFR Scalability',
+      'NFR Security',
+      'NFR Availability',
+      'Integrations (API Count)',
+      'Integrations (Legacy Compatibility)',
+      'Customer Mult',
+      'Product Mix Mult',
+      'Access Tech Mult',
+      'Channel Mult',
+      'Deployment Mult',
+      'NFR Aggregate Mult',
+      'Integration Mult',
+      'Stage Presales',
+      'Stage Solutioning',
+      'Stage Design',
+      'Stage Build',
+      'Stage Test',
+      'Stage Cutover',
+      'Stage Operations',
+      'Service Multipliers',
+      'eTOM Processes',
+      'ODA Functional Blocks',
+      'ArchiMate Business Processes',
+      'ArchiMate Application Services',
+      'ArchiMate Application Components',
+      'ADO Tags',
       'Resource Domain',
       'Priority',
       'Status',
@@ -438,6 +572,42 @@ export function BillOfMaterials({
           `"${item.applicationComponent || ''}"`,
           `"${item.useCase || ''}"`,
           item.cutEffort || 0,
+          complexityMultiplier,
+          ((item.cutEffort || 0) * complexityMultiplier).toFixed(2),
+          `"${customerType}"`,
+          `"${productMixList.join('; ')}"`,
+          `"${accessTechList.join('; ')}"`,
+          `"${channelList.join('; ')}"`,
+          `"${deployment}"`,
+          `"${complexitySelections['performance'] || ''}"`,
+          `"${complexitySelections['scalability'] || ''}"`,
+          `"${complexitySelections['security'] || ''}"`,
+          `"${complexitySelections['availability'] || ''}"`,
+          integrationApiCount,
+          integrationLegacy ? 'Yes' : 'No',
+          categoryMultipliers.customer,
+          categoryMultipliers.product,
+          categoryMultipliers.access,
+          categoryMultipliers.channel,
+          categoryMultipliers.deployment,
+          nfrAggregateMultiplier,
+          integrationMultiplier,
+          stageMultipliers['presales'] || '',
+          stageMultipliers['solutioning'] || '',
+          stageMultipliers['design'] || '',
+          stageMultipliers['build'] || '',
+          stageMultipliers['test'] || '',
+          stageMultipliers['cutover'] || '',
+          stageMultipliers['operations'] || '',
+          `"${Object.entries(deliveryServiceMultipliers)
+            .map(([k, v]) => `${k}:${v}`)
+            .join('; ')}"`,
+          `"${trace?.etomProcesses?.join('; ') || ''}"`,
+          `"${trace?.odaFunctionalBlocks?.join('; ') || ''}"`,
+          `"${trace?.archimate?.businessProcesses?.join('; ') || ''}"`,
+          `"${trace?.archimate?.applicationServices?.join('; ') || ''}"`,
+          `"${trace?.archimate?.applicationComponents?.join('; ') || ''}"`,
+          `"${trace?.ado?.tags?.join('; ') || ''}"`,
           `"${item.resourceDomain || ''}"`,
           item.priority,
           item.status,

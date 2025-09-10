@@ -28,7 +28,11 @@ export class ADOService {
   // Configuration Management
   async loadConfiguration(): Promise<ADOConfiguration | null> {
     try {
-      const savedConfig = localStorage.getItem('ado-configuration');
+      if (typeof window === 'undefined') {
+        this.log('info', 'Skipping configuration load on server');
+        return null;
+      }
+      const savedConfig = window.localStorage.getItem('ado-configuration');
       if (savedConfig) {
         this.configuration = JSON.parse(savedConfig);
         this.log('info', 'Configuration loaded from storage');
@@ -43,7 +47,9 @@ export class ADOService {
   async saveConfiguration(config: ADOConfiguration): Promise<void> {
     try {
       this.configuration = config;
-      localStorage.setItem('ado-configuration', JSON.stringify(config));
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('ado-configuration', JSON.stringify(config));
+      }
       this.log('info', 'Configuration saved successfully');
 
       // Test connection if authentication is provided
@@ -410,6 +416,30 @@ export class ADOService {
       return null;
     }
 
+    // Enrich with complexity attributes if present in localStorage selection (non-breaking)
+    let complexityFields: Record<string, any> = {};
+    try {
+      const raw = typeof window !== 'undefined' ? window.localStorage.getItem('complexity-selection') : null;
+      if (raw) {
+        const selection = JSON.parse(raw);
+        complexityFields = {
+          'Custom.Complexity.CustomerType': selection.customerTypeId || '',
+          'Custom.Complexity.ProductMix': Array.isArray(selection.productMixIds)
+            ? selection.productMixIds.join(';')
+            : selection.productMixId || '',
+          'Custom.Complexity.AccessTech': Array.isArray(selection.accessTechnologyIds)
+            ? selection.accessTechnologyIds.join(';')
+            : selection.accessTechnologyId || '',
+          'Custom.Complexity.Channel': Array.isArray(selection.channelIds)
+            ? selection.channelIds.join(';')
+            : selection.channelId || '',
+          'Custom.Complexity.Deployment': selection.deploymentId || '',
+          'Custom.Complexity.APIs': selection?.integration?.apiCount || 0,
+          'Custom.Complexity.Legacy': Boolean(selection?.integration?.requiresLegacyCompatibility),
+        };
+      }
+    } catch {}
+
     return {
       sourceType: 'requirement',
       sourceId: item.id,
@@ -435,6 +465,7 @@ export class ADOService {
         'Custom.Usecase': item.usecase1,
         'Custom.Priority': item.priority || 'Medium',
         'Custom.Status': item.status || 'New',
+        ...complexityFields,
       },
       relationships: [`UserStory:${matchingCapability.name}`],
       estimatedEffort: this.calculateTaskEffort(item),

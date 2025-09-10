@@ -7,7 +7,16 @@ function encodeBasicAuth(username: string, password: string): string {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    // Defensive body parsing: handle empty/invalid JSON gracefully
+    let body: any = {};
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { success: false, error: 'Invalid or empty JSON payload' },
+        { status: 400 },
+      );
+    }
     const { action, config, data } = body;
 
     if (!config) {

@@ -44,6 +44,7 @@ import { ADOIntegration } from '@/components/ado-integration';
 import { CETv22ServiceDesign } from '@/components/cet-v22/CETv22ServiceDesign';
 import { BillOfMaterials } from '@/components/bill-of-materials';
 import { useToast, ToastContainer } from '@/components/ui/toast';
+import { ComplexityMatrix } from '@/components/complexity-matrix';
 import {
   mapSpecSyncToCapabilities,
   calculateUseCaseCountsByCapability,
@@ -100,6 +101,7 @@ export default function HomePage() {
     setIsSpecSyncExpanded(false);
     setIsTmfManagerExpanded(false);
     setIsTmfCapabilitiesExpanded(false);
+    setIsEtomProcessesExpanded(false);
   };
 
   // Toggle solution model sections
@@ -118,14 +120,9 @@ export default function HomePage() {
   const [isSpecSyncExpanded, setIsSpecSyncExpanded] = useState(false);
   const [isTmfManagerExpanded, setIsTmfManagerExpanded] = useState(false);
   const [isTmfCapabilitiesExpanded, setIsTmfCapabilitiesExpanded] = useState(false);
+  const [isEtomProcessesExpanded, setIsEtomProcessesExpanded] = useState(false);
   const [solutionModelSections, setSolutionModelSections] = useState<Set<string>>(
-    new Set([
-      'domain-management',
-      'capabilities',
-      'requirements-sync',
-      'object-data',
-      'visualization',
-    ]),
+    new Set([]),
   );
   const [setDomainEfforts, setSetDomainEfforts] = useState<Record<string, number>>({});
   const [setMatchedWorkPackages, setSetMatchedWorkPackages] = useState<Record<string, any>>({});
@@ -795,18 +792,33 @@ export default function HomePage() {
                 </Card>
               </div>
 
-              {/* eTOM Processes Section */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Route className="h-5 w-5" />
-                    <span>eTOM Processes</span>
-                  </CardTitle>
-                  <CardDescription>
-                    Enterprise Tomography Operations Map processes and effort breakdowns
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
+              {/* eTOM Processes Section - Collapsible */}
+              <div className="border-b pb-6">
+                <div
+                  className="mb-4 flex cursor-pointer items-center justify-between rounded-lg p-2 transition-colors hover:bg-muted/50"
+                  onClick={() => setIsEtomProcessesExpanded(!isEtomProcessesExpanded)}
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-blue-200 bg-blue-100">
+                      {isEtomProcessesExpanded ? (
+                        <ChevronDown className="h-5 w-5 text-blue-700" />
+                      ) : (
+                        <ChevronRight className="h-5 w-5 text-blue-700" />
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="flex items-center space-x-2 text-base font-semibold">
+                        <Route className="h-4 w-4" />
+                        <span>eTOM Processes</span>
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        Enterprise Tomography Operations Map processes and effort breakdowns
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {isEtomProcessesExpanded && (
                   <div className="space-y-4">
                     {etomProcesses.map((process) => (
                       <div key={process.id} className="rounded-lg border p-4">
@@ -861,8 +873,133 @@ export default function HomePage() {
                       </div>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
+                )}
+              </div>
+
+              {/* TMF Capabilities Overview - Moved from TMF tab */}
+              <div className="border-b pb-6">
+                <div
+                  className="mb-4 flex cursor-pointer items-center justify-between rounded-lg p-2 transition-colors hover:bg-muted/50"
+                  onClick={() => setIsTmfCapabilitiesExpanded(!isTmfCapabilitiesExpanded)}
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-purple-200 bg-purple-100">
+                      {isTmfCapabilitiesExpanded ? (
+                        <ChevronDown className="h-5 w-5 text-purple-700" />
+                      ) : (
+                        <ChevronRight className="h-5 w-5 text-purple-700" />
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="flex items-center space-x-2 text-base font-semibold">
+                        <Network className="h-4 w-4" />
+                        <span>TMF Capabilities Overview</span>
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        View TMF capabilities with requirement counts from imported SpecSync
+                        data
+                      </p>
+                    </div>
+                  </div>
+                  {specSyncState && (
+                    <div
+                      className="flex items-center space-x-2"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Badge variant="secondary">
+                        {specSyncState.items.length} requirements mapped
+                      </Badge>
+                    </div>
+                  )}
+                </div>
+                {isTmfCapabilitiesExpanded && (
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {tmfCapabilities.map((capability) => (
+                      <Card key={capability.id} className="effort-card hover-lift">
+                        <CardHeader className="pb-3">
+                          <CardTitle className="flex items-center justify-between text-base">
+                            <span className="truncate">{capability.name}</span>
+                            <RequirementBadge count={requirementCounts[capability.id] || 0} />
+                          </CardTitle>
+                          <CardDescription className="line-clamp-2 text-xs">
+                            {capability.description}
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="pt-0">
+                          <div className="space-y-3">
+                            <div className="grid grid-cols-2 gap-2 text-xs">
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">BA:</span>
+                                <span className="font-medium">
+                                  {capability.baseEffort.businessAnalyst}d
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">SA:</span>
+                                <span className="font-medium">
+                                  {capability.baseEffort.solutionArchitect}d
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Dev:</span>
+                                <span className="font-medium">
+                                  {capability.baseEffort.developer}d
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">QA:</span>
+                                <span className="font-medium">
+                                  {capability.baseEffort.qaEngineer}d
+                                </span>
+                              </div>
+                            </div>
+                            <div className="border-t pt-2">
+                              <div className="mb-1 text-xs text-muted-foreground">Segments</div>
+                              <div className="flex flex-wrap gap-1">
+                                {capability.segments.slice(0, 3).map((segment) => (
+                                  <span
+                                    key={segment}
+                                    className="rounded bg-tmf-100 px-1.5 py-0.5 text-xs text-tmf-800"
+                                  >
+                                    {segment}
+                                  </span>
+                                ))}
+                                {capability.segments.length > 3 && (
+                                  <span className="rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-600">
+                                    +{capability.segments.length - 3}
+                                  </span>
+                                )}
+                              </div>
+                              {useCaseCounts[capability.id] > 0 && (
+                                <div className="border-t pt-2">
+                                  <div className="mb-1 text-xs text-muted-foreground">
+                                    Use Cases
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <span className="rounded bg-orange-100 px-1.5 py-0.5 text-xs font-medium text-orange-800">
+                                      {useCaseCounts[capability.id]} unique use cases
+                                    </span>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                        <CardFooter className="pt-0">
+                          <div className="w-full text-center">
+                            <div className="mb-1 text-xs text-muted-foreground">
+                              Total Effort
+                            </div>
+                            <div className="text-lg font-bold text-tmf-600">
+                              {calculateEffortTotal(capability.baseEffort)} days
+                            </div>
+                          </div>
+                        </CardFooter>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
             </TabsContent>
 
             {/* TMF Capabilities Tab */}
@@ -879,130 +1016,8 @@ export default function HomePage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {/* TMF Capabilities Overview - Collapsible */}
-                  <div className="border-b pb-6">
-                    <div
-                      className="mb-4 flex cursor-pointer items-center justify-between rounded-lg p-2 transition-colors hover:bg-muted/50"
-                      onClick={() => setIsTmfCapabilitiesExpanded(!isTmfCapabilitiesExpanded)}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-purple-200 bg-purple-100">
-                          {isTmfCapabilitiesExpanded ? (
-                            <ChevronDown className="h-5 w-5 text-purple-700" />
-                          ) : (
-                            <ChevronRight className="h-5 w-5 text-purple-700" />
-                          )}
-                        </div>
-                        <div>
-                          <h3 className="flex items-center space-x-2 text-base font-semibold">
-                            <Network className="h-4 w-4" />
-                            <span>TMF Capabilities Overview</span>
-                          </h3>
-                          <p className="text-sm text-muted-foreground">
-                            View TMF capabilities with requirement counts from imported SpecSync
-                            data
-                          </p>
-                        </div>
-                      </div>
-                      {specSyncState && (
-                        <div
-                          className="flex items-center space-x-2"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <Badge variant="secondary">
-                            {specSyncState.items.length} requirements mapped
-                          </Badge>
-                        </div>
-                      )}
-                    </div>
-                    {isTmfCapabilitiesExpanded && (
-                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        {tmfCapabilities.map((capability) => (
-                          <Card key={capability.id} className="effort-card hover-lift">
-                            <CardHeader className="pb-3">
-                              <CardTitle className="flex items-center justify-between text-base">
-                                <span className="truncate">{capability.name}</span>
-                                <RequirementBadge count={requirementCounts[capability.id] || 0} />
-                              </CardTitle>
-                              <CardDescription className="line-clamp-2 text-xs">
-                                {capability.description}
-                              </CardDescription>
-                            </CardHeader>
-                            <CardContent className="pt-0">
-                              <div className="space-y-3">
-                                <div className="grid grid-cols-2 gap-2 text-xs">
-                                  <div className="flex justify-between">
-                                    <span className="text-muted-foreground">BA:</span>
-                                    <span className="font-medium">
-                                      {capability.baseEffort.businessAnalyst}d
-                                    </span>
-                                  </div>
-                                  <div className="flex justify-between">
-                                    <span className="text-muted-foreground">SA:</span>
-                                    <span className="font-medium">
-                                      {capability.baseEffort.solutionArchitect}d
-                                    </span>
-                                  </div>
-                                  <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Dev:</span>
-                                    <span className="font-medium">
-                                      {capability.baseEffort.developer}d
-                                    </span>
-                                  </div>
-                                  <div className="flex justify-between">
-                                    <span className="text-muted-foreground">QA:</span>
-                                    <span className="font-medium">
-                                      {capability.baseEffort.qaEngineer}d
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="border-t pt-2">
-                                  <div className="mb-1 text-xs text-muted-foreground">Segments</div>
-                                  <div className="flex flex-wrap gap-1">
-                                    {capability.segments.slice(0, 3).map((segment) => (
-                                      <span
-                                        key={segment}
-                                        className="rounded bg-tmf-100 px-1.5 py-0.5 text-xs text-tmf-800"
-                                      >
-                                        {segment}
-                                      </span>
-                                    ))}
-                                    {capability.segments.length > 3 && (
-                                      <span className="rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-600">
-                                        +{capability.segments.length - 3}
-                                      </span>
-                                    )}
-                                  </div>
-                                  {useCaseCounts[capability.id] > 0 && (
-                                    <div className="border-t pt-2">
-                                      <div className="mb-1 text-xs text-muted-foreground">
-                                        Use Cases
-                                      </div>
-                                      <div className="flex items-center gap-1">
-                                        <span className="rounded bg-orange-100 px-1.5 py-0.5 text-xs font-medium text-orange-800">
-                                          {useCaseCounts[capability.id]} unique use cases
-                                        </span>
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            </CardContent>
-                            <CardFooter className="pt-0">
-                              <div className="w-full text-center">
-                                <div className="mb-1 text-xs text-muted-foreground">
-                                  Total Effort
-                                </div>
-                                <div className="text-lg font-bold text-tmf-600">
-                                  {calculateEffortTotal(capability.baseEffort)} days
-                                </div>
-                              </div>
-                            </CardFooter>
-                          </Card>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  {/* Complexity Matrix (Non-breaking, additive) */}
+                  <ComplexityMatrix />
 
                   {/* SpecSync Import - Collapsible */}
                   <div className="border-b pb-6">

@@ -350,7 +350,7 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
                       Domain
                     </th>
                     <th className="border border-muted-foreground/20 px-2 py-1 text-left">
-                      Capability
+                      Function
                     </th>
                     <th className="border border-muted-foreground/20 px-2 py-1 text-left">
                       Use Case
