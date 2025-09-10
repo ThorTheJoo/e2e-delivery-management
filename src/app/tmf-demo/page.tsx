@@ -1,19 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { TMFOdaManager } from '@/components/tmf-oda-manager';
-import { TMFOdaState } from '@/types';
+import { TMFDomainCapabilityManager } from '@/components/tmf-domain-capability-manager';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ArrowLeft, Download } from 'lucide-react';
 import Link from 'next/link';
 
 export default function TMFOdaDemoPage() {
-  const [tmfState, setTmfState] = useState<TMFOdaState | null>(null);
+  const [tmfState, setTmfState] = useState<any[] | null>(null);
 
-  const handleStateChange = (state: TMFOdaState) => {
+  const handleStateChange = (state: any[]) => {
     setTmfState(state);
-    console.log('TMF ODA State updated:', state);
+    console.log('TMF Domain State updated:', state);
   };
 
   const exportState = () => {
@@ -65,14 +64,14 @@ export default function TMFOdaDemoPage() {
               <div className="text-sm text-blue-100">
                 {tmfState ? (
                   <>
-                    <span className="font-medium">{tmfState.domains.length}</span> domains,{' '}
+                    <span className="font-medium">{tmfState.length}</span> domains,{' '}
                     <span className="font-medium">
-                      {tmfState.domains.reduce(
+                      {tmfState.reduce(
                         (sum, domain) => sum + domain.capabilities.length,
                         0,
                       )}
                     </span>{' '}
-                    capabilities
+                    functions
                   </>
                 ) : (
                   'No data loaded'
@@ -117,11 +116,11 @@ export default function TMFOdaDemoPage() {
                 <div className="border-t pt-4">
                   <h4 className="mb-2 text-sm font-medium text-gray-700">Features</h4>
                   <ul className="space-y-1 text-sm text-gray-600">
-                    <li>• Add/Remove TMF ODA domains</li>
-                    <li>• Add/Remove capabilities per domain</li>
-                    <li>• Select/Deselect domains & capabilities</li>
-                    <li>• Edit names and descriptions</li>
-                    <li>• Expandable domain views</li>
+                    <li>• Add/Remove TMF domains</li>
+                    <li>• Add/Remove TMF functions per domain</li>
+                    <li>• Select/Deselect domains & functions</li>
+                    <li>• Real TMF reference data integration</li>
+                    <li>• SpecSync import mapping</li>
                     <li>• Real-time state management</li>
                   </ul>
                 </div>
@@ -131,7 +130,7 @@ export default function TMFOdaDemoPage() {
 
           {/* Main Content */}
           <div className="lg:col-span-3">
-            <TMFOdaManager onStateChange={handleStateChange} initialState={tmfState || undefined} />
+            <TMFDomainCapabilityManager onStateChange={handleStateChange} initialState={tmfState || undefined} />
           </div>
         </div>
 

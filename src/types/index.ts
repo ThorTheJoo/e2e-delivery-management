@@ -40,6 +40,38 @@ export interface TMFOdaState {
   selectedCapabilityIds: string[];
 }
 
+// TMF Reference Data Types
+export interface TMFDomain {
+  id: string;
+  name: string;
+  created_at: string;
+  updated_at: string;
+  function_count?: number;
+}
+
+export interface TMFFunction {
+  id: string;
+  domain_id: string;
+  function_name: string;
+  vertical: string | null;
+  af_level_1: string | null;
+  af_level_2: string | null;
+  function_id: number | null;
+  uid: number | null;
+  created_at: string;
+  updated_at: string;
+  domain_name?: string;
+}
+
+export interface TMFMapping {
+  id: string;
+  specsync_item_id: string;
+  tmf_function_id: string;
+  mapping_confidence: number;
+  created_at: string;
+  updated_at: string;
+}
+
 // TMF Capabilities
 export interface TMFCapability {
   id: string;
@@ -280,6 +312,7 @@ export interface SpecSyncItem {
   afLevel2: string;
   capability: string;
   referenceCapability: string;
+  'Rephrased Function Name'?: string;
   usecase1: string;
   description?: string;
   priority?: string;

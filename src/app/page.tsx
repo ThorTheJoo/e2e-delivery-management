@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   Project,
   TMFCapability,
+  TMFFunction,
   ETOMProcess,
   WorkPackage,
   Milestone,
@@ -49,8 +50,8 @@ import { BOMConfiguration } from '@/components/bom-configuration';
 import { useToast, ToastContainer } from '@/components/ui/toast';
 import { ComplexityMatrix } from '@/components/complexity-matrix';
 import {
-  mapSpecSyncToCapabilities,
-  calculateUseCaseCountsByCapability,
+  mapSpecSyncToTMFunctions,
+  calculateUseCaseCountsByFunction,
   saveSpecSyncData,
   loadSpecSyncData,
   clearSpecSyncData,
@@ -87,7 +88,7 @@ export default function HomePage() {
     teamSize: 4,
     workingDaysPerMonth: 20,
   });
-  const [tmfCapabilities, setTmfCapabilities] = useState<TMFCapability[]>([]);
+  const [tmfFunctions, setTmfFunctions] = useState<TMFFunction[]>([]);
   const [etomProcesses, setEtomProcesses] = useState<ETOMProcess[]>([]);
   const [workPackages, setWorkPackages] = useState<WorkPackage[]>([]);
   const [milestones, setMilestones] = useState<Milestone[]>([]);
@@ -207,12 +208,13 @@ export default function HomePage() {
         console.log('Loading additional data...');
 
         try {
-          const tmfData = await dataService.getTMFCapabilities();
-          console.log('TMF capabilities loaded:', tmfData?.length || 0);
-          setTmfCapabilities(tmfData || []);
+          const { TMFReferenceService } = await import('@/lib/tmf-reference-service-new');
+          const tmfData = await TMFReferenceService.getAllFunctions();
+          console.log('TMF functions loaded:', tmfData?.length || 0);
+          setTmfFunctions(tmfData || []);
         } catch (e) {
-          console.error('Error loading TMF capabilities:', e);
-          setTmfCapabilities([]);
+          console.error('Error loading TMF functions:', e);
+          setTmfFunctions([]);
         }
 
         // Load user TMF domains (read-only; safe fallback inside service)
@@ -349,7 +351,7 @@ export default function HomePage() {
         };
 
         setProject(fallbackProject);
-        setTmfCapabilities([]);
+        setTmfFunctions([]);
         setEtomProcesses([]);
         setWorkPackages([]);
         setMilestones([]);
@@ -468,14 +470,14 @@ export default function HomePage() {
     }
   }, []);
 
-  // Update requirement counts when tmfCapabilities are loaded
+  // Update requirement counts when tmfFunctions are loaded
   // Intentionally exclude updateRequirementCounts from deps to avoid rebind loops
   useEffect(() => {
-    if (specSyncState && tmfCapabilities.length > 0) {
+    if (specSyncState && tmfFunctions.length > 0) {
       updateRequirementCounts(specSyncState);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tmfCapabilities, specSyncState]);
+  }, [tmfFunctions, specSyncState]);
 
   // Initialize default TMF domains if none exist
   // Intentionally only on mount to seed defaults
@@ -580,8 +582,8 @@ export default function HomePage() {
     updateRequirementCounts(state);
     saveSpecSyncData(state);
 
-    const mapping = mapSpecSyncToCapabilities(state.items, tmfCapabilities);
-    const topCaps = Object.entries(mapping.countsByCapability)
+    const mapping = mapSpecSyncToTMFunctions(state.items, tmfFunctions);
+    const topCaps = Object.entries(mapping.countsByFunction)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 2)
       .map(([k, v]) => `${k}(${v})`)
@@ -626,12 +628,12 @@ export default function HomePage() {
   }, []);
 
   const updateRequirementCounts = (state: SpecSyncState) => {
-    // Only update counts if tmfCapabilities are loaded
-    if (tmfCapabilities.length > 0) {
-      const mapping = mapSpecSyncToCapabilities(state.items, tmfCapabilities);
-      setRequirementCounts(mapping.countsByCapability);
+    // Only update counts if tmfFunctions are loaded
+    if (tmfFunctions.length > 0) {
+      const mapping = mapSpecSyncToTMFunctions(state.items, tmfFunctions);
+      setRequirementCounts(mapping.countsByFunction);
 
-      const useCaseMapping = calculateUseCaseCountsByCapability(state.items, tmfCapabilities);
+      const useCaseMapping = calculateUseCaseCountsByFunction(state.items, tmfFunctions);
       setUseCaseCounts(useCaseMapping);
     }
   };
@@ -712,9 +714,7 @@ export default function HomePage() {
     );
   }
 
-  const totalEffort = tmfCapabilities.reduce((sum, capability) => {
-    return sum + calculateEffortTotal(capability.baseEffort);
-  }, 0);
+  const totalEffort = tmfFunctions.length * 10; // Default effort per function
 
   const completedWorkPackages = workPackages.filter((wp) => wp.status === 'Completed').length;
   const totalWorkPackages = workPackages.length;
@@ -822,8 +822,8 @@ export default function HomePage() {
                   <div className="metric-label">Total Effort (Days)</div>
                 </Card>
                 <Card className="metric-card">
-                  <div className="metric-value">{tmfCapabilities.length}</div>
-                  <div className="metric-label">TMF Capabilities</div>
+                  <div className="metric-value">{tmfFunctions.length}</div>
+                  <div className="metric-label">TMF Functions</div>
                 </Card>
                 <Card className="metric-card">
                   <div className="metric-value">{etomProcesses.length}</div>
@@ -1015,70 +1015,65 @@ export default function HomePage() {
                 </div>
                 {isTmfCapabilitiesExpanded && (
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {tmfCapabilities.map((capability) => (
-                      <Card key={capability.id} className="effort-card hover-lift">
+                    {tmfFunctions.map((tmfFunction) => (
+                      <Card key={tmfFunction.id} className="effort-card hover-lift">
                         <CardHeader className="pb-3">
                           <CardTitle className="flex items-center justify-between text-base">
-                            <span className="truncate">{capability.name}</span>
-                            <RequirementBadge count={requirementCounts[capability.id] || 0} />
+                            <span className="truncate">{tmfFunction.function_name}</span>
+                            <RequirementBadge count={requirementCounts[tmfFunction.id] || 0} />
                           </CardTitle>
                           <CardDescription className="line-clamp-2 text-xs">
-                            {capability.description}
+                            {tmfFunction.vertical || 'TMF Function'}
                           </CardDescription>
                         </CardHeader>
                         <CardContent className="pt-0">
                           <div className="space-y-3">
                             <div className="grid grid-cols-2 gap-2 text-xs">
                               <div className="flex justify-between">
-                                <span className="text-muted-foreground">BA:</span>
+                                <span className="text-muted-foreground">Domain:</span>
                                 <span className="font-medium">
-                                  {capability.baseEffort.businessAnalyst}d
+                                  {tmfFunction.domain_name || 'Unknown'}
                                 </span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-muted-foreground">SA:</span>
+                                <span className="text-muted-foreground">Vertical:</span>
                                 <span className="font-medium">
-                                  {capability.baseEffort.solutionArchitect}d
+                                  {tmfFunction.vertical || 'N/A'}
                                 </span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-muted-foreground">Dev:</span>
+                                <span className="text-muted-foreground">AF Level 1:</span>
                                 <span className="font-medium">
-                                  {capability.baseEffort.developer}d
+                                  {tmfFunction.af_level_1 || 'N/A'}
                                 </span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-muted-foreground">QA:</span>
+                                <span className="text-muted-foreground">AF Level 2:</span>
                                 <span className="font-medium">
-                                  {capability.baseEffort.qaEngineer}d
+                                  {tmfFunction.af_level_2 || 'N/A'}
                                 </span>
                               </div>
                             </div>
                             <div className="border-t pt-2">
-                              <div className="mb-1 text-xs text-muted-foreground">Segments</div>
+                              <div className="mb-1 text-xs text-muted-foreground">Function Details</div>
                               <div className="flex flex-wrap gap-1">
-                                {capability.segments.slice(0, 3).map((segment) => (
-                                  <span
-                                    key={segment}
-                                    className="rounded bg-tmf-100 px-1.5 py-0.5 text-xs text-tmf-800"
-                                  >
-                                    {segment}
-                                  </span>
-                                ))}
-                                {capability.segments.length > 3 && (
-                                  <span className="rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-600">
-                                    +{capability.segments.length - 3}
+                                <span className="rounded bg-tmf-100 px-1.5 py-0.5 text-xs text-tmf-800">
+                                  ID: {tmfFunction.function_id || 'N/A'}
+                                </span>
+                                {tmfFunction.uid && (
+                                  <span className="rounded bg-tmf-100 px-1.5 py-0.5 text-xs text-tmf-800">
+                                    UID: {tmfFunction.uid}
                                   </span>
                                 )}
                               </div>
-                              {useCaseCounts[capability.id] > 0 && (
+                              {useCaseCounts[tmfFunction.id] > 0 && (
                                 <div className="border-t pt-2">
                                   <div className="mb-1 text-xs text-muted-foreground">
                                     Use Cases
                                   </div>
                                   <div className="flex items-center gap-1">
                                     <span className="rounded bg-orange-100 px-1.5 py-0.5 text-xs font-medium text-orange-800">
-                                      {useCaseCounts[capability.id]} unique use cases
+                                      {useCaseCounts[tmfFunction.id]} unique use cases
                                     </span>
                                   </div>
                                 </div>
@@ -1092,7 +1087,7 @@ export default function HomePage() {
                               Total Effort
                             </div>
                             <div className="text-lg font-bold text-tmf-600">
-                              {calculateEffortTotal(capability.baseEffort)} days
+                              10 days
                             </div>
                           </div>
                         </CardFooter>

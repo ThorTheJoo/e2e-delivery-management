@@ -32,9 +32,9 @@ import {
 } from 'lucide-react';
 import {
   TMFReferenceService,
-  TMFReferenceDomain,
-  TMFReferenceCapability,
-} from '@/lib/tmf-reference-service';
+  TMFDomain,
+  TMFFunction,
+} from '@/lib/tmf-reference-service-new';
 
 interface UserDomain {
   id: string;
@@ -51,7 +51,7 @@ interface UserCapability {
   id: string;
   name: string;
   description: string;
-  referenceCapabilityId?: string;
+  referenceFunctionId?: string;
   domainId: string;
   isSelected: boolean;
   requirementCount: number;
@@ -69,8 +69,8 @@ export function TMFDomainCapabilityManager({
   specSyncData,
 }: TMFDomainCapabilityManagerProps) {
   const [domains, setDomains] = useState<UserDomain[]>(initialState || []);
-  const [referenceDomains, setReferenceDomains] = useState<TMFReferenceDomain[]>([]);
-  const [referenceCapabilities, setReferenceCapabilities] = useState<TMFReferenceCapability[]>([]);
+  const [referenceDomains, setReferenceDomains] = useState<TMFDomain[]>([]);
+  const [referenceFunctions, setReferenceFunctions] = useState<TMFFunction[]>([]);
   const [loading, setLoading] = useState(true);
   const [addDomainDialogOpen, setAddDomainDialogOpen] = useState(false);
   const [addCapabilityDialogOpen, setAddCapabilityDialogOpen] = useState(false);
@@ -83,16 +83,16 @@ export function TMFDomainCapabilityManager({
   useEffect(() => {
     const loadReferenceData = async () => {
       try {
-        const [domainsData, capabilitiesData] = await Promise.all([
-          TMFReferenceService.getReferenceDomains(),
-          TMFReferenceService.getAllReferenceCapabilities(),
+        const [domainsData, functionsData] = await Promise.all([
+          TMFReferenceService.getDomains(),
+          TMFReferenceService.getAllFunctions(),
         ]);
         setReferenceDomains(domainsData);
-        setReferenceCapabilities(capabilitiesData);
+        setReferenceFunctions(functionsData);
 
         // Initialize with sample data if no domains exist
         if (domains.length === 0) {
-          initializeSampleData(domainsData, capabilitiesData);
+          initializeSampleData(domainsData, functionsData);
         }
       } catch (error) {
         console.error('Error loading reference data:', error);
@@ -129,24 +129,24 @@ export function TMFDomainCapabilityManager({
 
   // Initialize sample data
   const initializeSampleData = (
-    referenceDomains: TMFReferenceDomain[],
-    referenceCapabilities: TMFReferenceCapability[],
+    referenceDomains: TMFDomain[],
+    referenceFunctions: TMFFunction[],
   ) => {
     const sampleDomains: UserDomain[] = referenceDomains.map((refDomain, index) => {
-      const domainCapabilities = referenceCapabilities.filter(
-        (cap) => cap.domain_id === refDomain.id,
+      const domainFunctions = referenceFunctions.filter(
+        (func) => func.domain_id === refDomain.id,
       );
 
       return {
         id: `domain-${index + 1}`,
         name: refDomain.name,
-        description: refDomain.description,
+        description: `TMF ${refDomain.name} domain with ${domainFunctions.length} functions`,
         referenceDomainId: refDomain.id,
-        capabilities: domainCapabilities.map((refCap, capIndex) => ({
-          id: `capability-${index + 1}-${capIndex + 1}`,
-          name: refCap.name,
-          description: refCap.description,
-          referenceCapabilityId: refCap.id,
+        capabilities: domainFunctions.map((refFunc, funcIndex) => ({
+          id: `capability-${index + 1}-${funcIndex + 1}`,
+          name: refFunc.function_name,
+          description: `TMF Function: ${refFunc.function_name}`,
+          referenceFunctionId: refFunc.id,
           domainId: `domain-${index + 1}`,
           isSelected: false,
           requirementCount: 0,
@@ -162,19 +162,23 @@ export function TMFDomainCapabilityManager({
   };
 
   const autoSelectMatchingDomainsAndCapabilities = (specSyncItems: any[]) => {
-    // Extract unique domains and capabilities from SpecSync data
+    // Extract unique domains and functions from SpecSync data
     const importedDomains = new Set<string>();
-    const importedCapabilities = new Set<string>();
+    const importedFunctions = new Set<string>();
 
     specSyncItems.forEach((item: any) => {
       if (item.domain) {
         importedDomains.add(item.domain.toString().trim());
       }
+      if (item['Rephrased Function Name']) {
+        importedFunctions.add(item['Rephrased Function Name'].toString().trim());
+      }
+      // Also check for legacy capability fields
       if (item.capability) {
-        importedCapabilities.add(item.capability.toString().trim());
+        importedFunctions.add(item.capability.toString().trim());
       }
       if (item.afLevel2) {
-        importedCapabilities.add(item.afLevel2.toString().trim());
+        importedFunctions.add(item.afLevel2.toString().trim());
       }
     });
 
@@ -185,31 +189,31 @@ export function TMFDomainCapabilityManager({
         (importedDomain) => importedDomain.toLowerCase() === domainName,
       );
 
-      // Update capabilities within this domain
+      // Update functions within this domain
       const updatedCapabilities = domain.capabilities.map((capability) => {
-        const capabilityName = capability.name.toLowerCase();
-        const isCapabilityMatch = Array.from(importedCapabilities).some(
-          (importedCapability) => importedCapability.toLowerCase() === capabilityName,
+        const functionName = capability.name.toLowerCase();
+        const isFunctionMatch = Array.from(importedFunctions).some(
+          (importedFunction) => importedFunction.toLowerCase() === functionName,
         );
 
         return {
           ...capability,
-          isSelected: isCapabilityMatch,
+          isSelected: isFunctionMatch,
         };
       });
 
-      // Add missing capabilities from imported data to this domain
-      Array.from(importedCapabilities).forEach((importedCapability) => {
-        const capabilityExists = updatedCapabilities.some(
-          (cap) => cap.name.toLowerCase() === importedCapability.toLowerCase(),
+      // Add missing functions from imported data to this domain
+      Array.from(importedFunctions).forEach((importedFunction) => {
+        const functionExists = updatedCapabilities.some(
+          (cap) => cap.name.toLowerCase() === importedFunction.toLowerCase(),
         );
 
-        if (!capabilityExists && isDomainMatch) {
-          // Add new capability to this domain
+        if (!functionExists && isDomainMatch) {
+          // Add new function to this domain
           const newCapability: UserCapability = {
             id: `capability-imported-${Date.now()}-${Math.random()}`,
-            name: importedCapability,
-            description: `Imported capability: ${importedCapability}`,
+            name: importedFunction,
+            description: `Imported TMF Function: ${importedFunction}`,
             domainId: domain.id,
             isSelected: true,
             requirementCount: 0,
@@ -218,9 +222,9 @@ export function TMFDomainCapabilityManager({
         }
       });
 
-      // Domain is selected if any of its capabilities are selected or if domain name matches
-      const hasSelectedCapabilities = updatedCapabilities.some((cap) => cap.isSelected);
-      const isSelected = isDomainMatch || hasSelectedCapabilities;
+      // Domain is selected if any of its functions are selected or if domain name matches
+      const hasSelectedFunctions = updatedCapabilities.some((cap) => cap.isSelected);
+      const isSelected = isDomainMatch || hasSelectedFunctions;
 
       return {
         ...domain,
@@ -261,18 +265,18 @@ export function TMFDomainCapabilityManager({
   const updateRequirementCounts = (specSyncItems: any[]) => {
     const updatedDomains = domains.map((domain) => {
       const domainCapabilities = domain.capabilities.map((capability) => {
-        // Count requirements that match this capability
+        // Count requirements that match this function
         const requirementCount = specSyncItems.filter((item: any) => {
-          const itemCapability = (item.capability || item.afLevel2 || '').toString().toLowerCase();
+          const itemFunction = (item['Rephrased Function Name'] || item.capability || item.afLevel2 || '').toString().toLowerCase();
           const itemDomain = (item.domain || '').toString().toLowerCase();
-          const capabilityName = capability.name.toLowerCase();
+          const functionName = capability.name.toLowerCase();
           const domainName = domain.name.toLowerCase();
 
           // Exact match for better accuracy
-          const capabilityMatch = itemCapability === capabilityName;
+          const functionMatch = itemFunction === functionName;
           const domainMatch = itemDomain === domainName;
 
-          return capabilityMatch && domainMatch;
+          return functionMatch && domainMatch;
         }).length;
 
         return {
@@ -321,13 +325,13 @@ export function TMFDomainCapabilityManager({
   const addCapability = (capabilityData: {
     name: string;
     description: string;
-    referenceCapabilityId?: string;
+    referenceFunctionId?: string;
   }) => {
     const newCapability: UserCapability = {
       id: `capability-${Date.now()}`,
       name: capabilityData.name,
       description: capabilityData.description,
-      referenceCapabilityId: capabilityData.referenceCapabilityId,
+      referenceFunctionId: capabilityData.referenceFunctionId,
       domainId: selectedDomainForCapability,
       isSelected: false,
       requirementCount: 0,
@@ -437,21 +441,21 @@ export function TMFDomainCapabilityManager({
   const handleReferenceDomainChange = (domainId: string) => {
     setSelectedReferenceDomain(domainId);
     if (domainId && domainId !== 'custom') {
-      // Auto-add the selected reference domain and its capabilities
+      // Auto-add the selected reference domain and its functions
       const refDomain = referenceDomains.find((d) => d.id === domainId);
-      const refCapabilities = referenceCapabilities.filter((cap) => cap.domain_id === domainId);
+      const refFunctions = referenceFunctions.filter((func) => func.domain_id === domainId);
 
       if (refDomain) {
         const newDomain: UserDomain = {
           id: `domain-${Date.now()}`,
           name: refDomain.name,
-          description: refDomain.description,
+          description: `TMF ${refDomain.name} domain with ${refFunctions.length} functions`,
           referenceDomainId: refDomain.id,
-          capabilities: refCapabilities.map((refCap, index) => ({
+          capabilities: refFunctions.map((refFunc, index) => ({
             id: `capability-${Date.now()}-${index}`,
-            name: refCap.name,
-            description: refCap.description,
-            referenceCapabilityId: refCap.id,
+            name: refFunc.function_name,
+            description: `TMF Function: ${refFunc.function_name}`,
+            referenceFunctionId: refFunc.id,
             domainId: `domain-${Date.now()}`,
             isSelected: false,
             requirementCount: 0,
@@ -716,9 +720,9 @@ export function TMFDomainCapabilityManager({
           </DialogHeader>
           <AddCapabilityForm
             onAdd={addCapability}
-            referenceCapabilities={referenceCapabilities.filter((cap) => {
+            referenceFunctions={referenceFunctions.filter((func) => {
               const selectedDomain = domains.find((d) => d.id === selectedDomainForCapability);
-              return cap.domain_id === selectedDomain?.referenceDomainId;
+              return func.domain_id === selectedDomain?.referenceDomainId;
             })}
           />
         </DialogContent>
@@ -733,7 +737,7 @@ function AddDomainForm({
   referenceDomains,
 }: {
   onAdd: (data: { name: string; description: string; referenceDomainId?: string }) => void;
-  referenceDomains: TMFReferenceDomain[];
+  referenceDomains: TMFDomain[];
 }) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -804,10 +808,10 @@ function AddDomainForm({
 // Add Capability Form Component
 function AddCapabilityForm({
   onAdd,
-  referenceCapabilities,
+  referenceFunctions,
 }: {
-  onAdd: (data: { name: string; description: string; referenceCapabilityId?: string }) => void;
-  referenceCapabilities: TMFReferenceCapability[];
+  onAdd: (data: { name: string; description: string; referenceFunctionId?: string }) => void;
+  referenceFunctions: TMFFunction[];
 }) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -819,7 +823,7 @@ function AddCapabilityForm({
       onAdd({
         name: name.trim(),
         description: description.trim(),
-        referenceCapabilityId: selectedReference === 'custom' ? undefined : selectedReference,
+        referenceFunctionId: selectedReference === 'custom' ? undefined : selectedReference,
       });
       setName('');
       setDescription('');
@@ -830,16 +834,16 @@ function AddCapabilityForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="reference-capability">Reference Capability (Optional)</Label>
+        <Label htmlFor="reference-function">Reference TMF Function (Optional)</Label>
         <Select value={selectedReference} onValueChange={setSelectedReference}>
           <SelectTrigger>
-            <SelectValue placeholder="Select a reference capability" />
+            <SelectValue placeholder="Select a reference TMF function" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="custom">Custom Capability</SelectItem>
-            {referenceCapabilities.map((capability) => (
-              <SelectItem key={capability.id} value={capability.id}>
-                {capability.name}
+            <SelectItem value="custom">Custom Function</SelectItem>
+            {referenceFunctions.map((func) => (
+              <SelectItem key={func.id} value={func.id}>
+                {func.function_name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -847,12 +851,12 @@ function AddCapabilityForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="capability-name">Capability Name</Label>
+        <Label htmlFor="capability-name">Function Name</Label>
         <Input
           id="capability-name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Enter capability name"
+          placeholder="Enter TMF function name"
           required
         />
       </div>
@@ -863,13 +867,13 @@ function AddCapabilityForm({
           id="capability-description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Enter capability description"
+          placeholder="Enter function description"
           required
         />
       </div>
 
       <div className="flex justify-end space-x-2">
-        <Button type="submit">Add Capability</Button>
+        <Button type="submit">Add Function</Button>
       </div>
     </form>
   );

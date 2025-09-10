@@ -1,33 +1,27 @@
-import { SpecSyncItem, SpecSyncState } from '@/types';
+import { SpecSyncItem, SpecSyncState, TMFFunction } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { getActiveDataSource } from '@/lib/data-source';
-import { TMFCapability } from '@/types';
+import { TMFReferenceService } from '@/lib/tmf-reference-service-new';
 
-// Map SpecSync items to existing TMF capabilities
-export function mapSpecSyncToCapabilities(
+// Map SpecSync items to existing TMF functions
+export function mapSpecSyncToTMFunctions(
   items: SpecSyncItem[],
-  tmfCapabilities: TMFCapability[],
+  tmfFunctions: TMFFunction[],
 ): {
-  countsByCapability: Record<string, number>;
-  assignments: Array<{ requirementId: string; capabilityId: string }>;
+  countsByFunction: Record<string, number>;
+  assignments: Array<{ requirementId: string; functionId: string }>;
   unmapped: number;
 } {
-  const countsByCapability: Record<string, number> = {};
-  const assignments: Array<{ requirementId: string; capabilityId: string }> = [];
+  const countsByFunction: Record<string, number> = {};
+  const assignments: Array<{ requirementId: string; functionId: string }> = [];
   let unmapped = 0;
   const seenLocal = new Set();
 
-  // Build a label-to-id map from TMF capabilities
+  // Build a label-to-id map from TMF functions
   const labelToId = new Map<string, string>();
-  tmfCapabilities.forEach((cap) => {
-    const normalizedName = cap.name.toLowerCase().trim();
-    labelToId.set(normalizedName, cap.id);
-
-    // Also map segments
-    cap.segments.forEach((segment) => {
-      const normalizedSegment = segment.toLowerCase().trim();
-      labelToId.set(normalizedSegment, cap.id);
-    });
+  tmfFunctions.forEach((func) => {
+    const normalizedName = func.function_name.toLowerCase().trim();
+    labelToId.set(normalizedName, func.id);
   });
 
   const normalize = (s: string) =>
@@ -36,77 +30,65 @@ export function mapSpecSyncToCapabilities(
       .toLowerCase();
 
   items.forEach((item) => {
-    const capName = normalize(item.capability);
+    const rephrasedFunctionName = normalize(item['Rephrased Function Name'] || item.capability);
     const af2Name = normalize(item.afLevel2);
     const funcName = normalize(item.functionName);
     const domain = normalize(item.domain);
 
-    let capId: string | null = null;
+    let functionId: string | null = null;
 
-    // Try to find exact matches first
-    if (capName && labelToId.has(capName)) {
-      capId = labelToId.get(capName)!;
+    // Try to find exact matches first - prioritize Rephrased Function Name
+    if (rephrasedFunctionName && labelToId.has(rephrasedFunctionName)) {
+      functionId = labelToId.get(rephrasedFunctionName)!;
     } else if (af2Name && labelToId.has(af2Name)) {
-      capId = labelToId.get(af2Name)!;
+      functionId = labelToId.get(af2Name)!;
     } else if (funcName && labelToId.has(funcName)) {
-      capId = labelToId.get(funcName)!;
+      functionId = labelToId.get(funcName)!;
     }
 
-    // Domain-guided fallback
-    if (!capId) {
-      if (/integration/i.test(domain)) {
-        capId = /workflow|orchestr/i.test(funcName)
-          ? 'bpm-workflow'
-          : /api|rest|soap|graphql/i.test(funcName)
-            ? 'api-mgmt'
-            : null;
-      } else if (/resource/i.test(domain) && /lifecycle|resource/i.test(funcName)) {
-        capId = 'resource-lifecycle-mgmt';
-      } else if (/product/i.test(domain) && /billing|charging|pricing/i.test(funcName)) {
-        capId = 'billing-management';
-      } else if (/enterprise/i.test(domain) && /fraud/i.test(funcName)) {
-        capId = 'fraud-mgmt';
-      } else if (/enterprise/i.test(domain) && /compliance|regulatory|gdpr|sox/i.test(funcName)) {
-        capId = 'compliance-mgmt';
+    // Try fuzzy matching if exact match not found
+    if (!functionId) {
+      for (const [normalizedName, id] of Array.from(labelToId.entries())) {
+        if (rephrasedFunctionName && (
+          normalizedName.includes(rephrasedFunctionName) ||
+          rephrasedFunctionName.includes(normalizedName)
+        )) {
+          functionId = id;
+          break;
+        }
       }
     }
 
-    if (capId) {
+    if (functionId) {
       const rid = String(item.rephrasedRequirementId || item.requirementId || Math.random());
-      const key = `${capId}||${rid}`;
+      const key = `${functionId}||${rid}`;
 
       if (!seenLocal.has(key)) {
         seenLocal.add(key);
-        countsByCapability[capId] = (countsByCapability[capId] || 0) + 1;
-        assignments.push({ requirementId: rid, capabilityId: capId });
+        countsByFunction[functionId] = (countsByFunction[functionId] || 0) + 1;
+        assignments.push({ requirementId: rid, functionId: functionId });
       }
     } else {
       unmapped++;
     }
   });
 
-  return { countsByCapability, assignments, unmapped };
+  return { countsByFunction, assignments, unmapped };
 }
 
-// Calculate use case counts per capability from SpecSync data
-export function calculateUseCaseCountsByCapability(
+// Calculate use case counts per function from SpecSync data
+export function calculateUseCaseCountsByFunction(
   items: SpecSyncItem[],
-  tmfCapabilities: TMFCapability[],
+  tmfFunctions: TMFFunction[],
 ): Record<string, number> {
-  const useCaseCountsByCapability: Record<string, number> = {};
-  const capabilityUseCases: Record<string, Set<string>> = {};
+  const useCaseCountsByFunction: Record<string, number> = {};
+  const functionUseCases: Record<string, Set<string>> = {};
 
-  // Build a label-to-id map from TMF capabilities
+  // Build a label-to-id map from TMF functions
   const labelToId = new Map<string, string>();
-  tmfCapabilities.forEach((cap) => {
-    const normalizedName = cap.name.toLowerCase().trim();
-    labelToId.set(normalizedName, cap.id);
-
-    // Also map segments
-    cap.segments.forEach((segment) => {
-      const normalizedSegment = segment.toLowerCase().trim();
-      labelToId.set(normalizedSegment, cap.id);
-    });
+  tmfFunctions.forEach((func) => {
+    const normalizedName = func.function_name.toLowerCase().trim();
+    labelToId.set(normalizedName, func.id);
   });
 
   const normalize = (s: string) =>
@@ -115,7 +97,7 @@ export function calculateUseCaseCountsByCapability(
       .toLowerCase();
 
   items.forEach((item) => {
-    const capName = normalize(item.capability);
+    const rephrasedFunctionName = normalize(item['Rephrased Function Name'] || item.capability);
     const af2Name = normalize(item.afLevel2);
     const funcName = normalize(item.functionName);
     const domain = normalize(item.domain);
@@ -123,93 +105,57 @@ export function calculateUseCaseCountsByCapability(
 
     if (!useCase) return; // Skip items without use case
 
-    let capId: string | null = null;
+    let functionId: string | null = null;
 
-    // Try to find exact matches first
-    if (capName && labelToId.has(capName)) {
-      capId = labelToId.get(capName)!;
+    // Try to find exact matches first - prioritize Rephrased Function Name
+    if (rephrasedFunctionName && labelToId.has(rephrasedFunctionName)) {
+      functionId = labelToId.get(rephrasedFunctionName)!;
     } else if (af2Name && labelToId.has(af2Name)) {
-      capId = labelToId.get(af2Name)!;
+      functionId = labelToId.get(af2Name)!;
     } else if (funcName && labelToId.has(funcName)) {
-      capId = labelToId.get(funcName)!;
+      functionId = labelToId.get(funcName)!;
     }
 
-    // Try partial matches for capability names
-    if (!capId) {
+    // Try fuzzy matching if exact match not found
+    if (!functionId) {
       for (const [normalizedName, id] of Array.from(labelToId.entries())) {
-        if (
-          (capName && normalizedName.includes(capName)) ||
-          (capName && capName.includes(normalizedName))
-        ) {
-          capId = id;
-          break;
-        }
-        if (
-          (af2Name && normalizedName.includes(af2Name)) ||
-          (af2Name && af2Name.includes(normalizedName))
-        ) {
-          capId = id;
+        if (rephrasedFunctionName && (
+          normalizedName.includes(rephrasedFunctionName) ||
+          rephrasedFunctionName.includes(normalizedName)
+        )) {
+          functionId = id;
           break;
         }
       }
     }
 
-    // Domain-guided fallback
-    if (!capId) {
-      if (/integration/i.test(domain)) {
-        capId = /workflow|orchestr/i.test(funcName)
-          ? 'bpm-workflow'
-          : /api|rest|soap|graphql/i.test(funcName)
-            ? 'api-mgmt'
-            : null;
-      } else if (/resource/i.test(domain) && /lifecycle|resource/i.test(funcName)) {
-        capId = 'resource-lifecycle-mgmt';
-      } else if (
-        /product/i.test(domain) &&
-        (/billing|charging|pricing|tariff|rating/i.test(funcName) ||
-          /billing|charging|pricing|tariff|rating/i.test(capName))
-      ) {
-        capId = 'billing';
-      } else if (
-        /customer/i.test(domain) &&
-        (/customer|profile|information/i.test(funcName) ||
-          /customer|profile|information/i.test(capName))
-      ) {
-        capId = 'crm';
-      } else if (/enterprise/i.test(domain) && /fraud/i.test(funcName)) {
-        capId = 'fraud-mgmt';
-      } else if (/enterprise/i.test(domain) && /compliance|regulatory|gdpr|sox/i.test(funcName)) {
-        capId = 'compliance-mgmt';
+    if (functionId) {
+      if (!functionUseCases[functionId]) {
+        functionUseCases[functionId] = new Set();
       }
-    }
-
-    if (capId) {
-      if (!capabilityUseCases[capId]) {
-        capabilityUseCases[capId] = new Set();
-      }
-      capabilityUseCases[capId].add(useCase);
+      functionUseCases[functionId].add(useCase);
     }
   });
 
   // Convert sets to counts
-  Object.entries(capabilityUseCases).forEach(([capId, useCases]) => {
-    useCaseCountsByCapability[capId] = useCases.size;
+  Object.entries(functionUseCases).forEach(([functionId, useCases]) => {
+    useCaseCountsByFunction[functionId] = useCases.size;
   });
 
-  return useCaseCountsByCapability;
+  return useCaseCountsByFunction;
 }
 
-// Generate dynamic capability IDs for unmapped items
-export function generateDynamicCapabilityId(basis: string): string {
-  const normalized = String(basis || 'capability')
+// Generate dynamic function IDs for unmapped items
+export function generateDynamicFunctionId(basis: string): string {
+  const normalized = String(basis || 'function')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
   return `imported-${normalized}`;
 }
 
-// Create dynamic capabilities for unmapped items
-export function createDynamicCapabilities(
+// Create dynamic functions for unmapped items
+export function createDynamicFunctions(
   items: SpecSyncItem[],
 ): Record<string, { id: string; name: string; description: string; requirementCount: number }> {
   const dynamicGroups: Record<
@@ -218,15 +164,15 @@ export function createDynamicCapabilities(
   > = {};
 
   items.forEach((item) => {
-    // For now, we'll create dynamic capabilities for all items
+    // For now, we'll create dynamic functions for all items
     // In a real implementation, you might want to track which items are mapped
     const domain = item.domain || 'Imported';
-    const capabilityName = item.afLevel2 || item.functionName || 'Unknown';
+    const functionName = item['Rephrased Function Name'] || item.afLevel2 || item.functionName || 'Unknown';
 
     if (!dynamicGroups[domain]) {
       dynamicGroups[domain] = {
-        id: generateDynamicCapabilityId(capabilityName),
-        name: capabilityName,
+        id: generateDynamicFunctionId(functionName),
+        name: functionName,
         description: item.referenceCapability || '',
         requirementCount: 1,
       };
@@ -241,21 +187,23 @@ export function createDynamicCapabilities(
 // Calculate effort overlay for SpecSync requirements
 export function computeSpecSyncEffortOverlay(
   state: SpecSyncState,
-  tmfCapabilities: TMFCapability[],
+  tmfFunctions: TMFFunction[],
 ): { total: number; breakdown: Record<string, number> } {
   if (!state.includeInEstimates || !state.items.length) {
     return { total: 0, breakdown: {} };
   }
 
-  const mapping = mapSpecSyncToCapabilities(state.items, tmfCapabilities);
+  const mapping = mapSpecSyncToTMFunctions(state.items, tmfFunctions);
   const breakdown: Record<string, number> = {};
   let total = 0;
 
-  Object.entries(mapping.countsByCapability).forEach(([capId, count]) => {
-    const capability = tmfCapabilities.find((cap) => cap.id === capId);
-    if (capability) {
-      const effort = calculateEffortTotal(capability.baseEffort);
-      breakdown[capId] = effort * count;
+  Object.entries(mapping.countsByFunction).forEach(([functionId, count]) => {
+    const tmfFunction = tmfFunctions.find((func) => func.id === functionId);
+    if (tmfFunction) {
+      // For now, use a default effort calculation since TMF functions don't have baseEffort
+      // In a real implementation, you might want to add effort data to TMF functions
+      const effort = 10; // Default effort per function
+      breakdown[functionId] = effort * count;
       total += effort * count;
     }
   });
@@ -263,15 +211,6 @@ export function computeSpecSyncEffortOverlay(
   return { total, breakdown };
 }
 
-// Helper function to calculate total effort
-function calculateEffortTotal(effort: {
-  businessAnalyst: number;
-  solutionArchitect: number;
-  developer: number;
-  qaEngineer: number;
-}): number {
-  return effort.businessAnalyst + effort.solutionArchitect + effort.developer + effort.qaEngineer;
-}
 
 // Save SpecSync data to localStorage
 export function saveSpecSyncData(state: SpecSyncState): void {
