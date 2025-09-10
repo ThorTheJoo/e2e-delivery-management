@@ -387,6 +387,13 @@ export function NavigationSidebar({
           action: 'tab',
           target: 'ado-config',
         },
+        {
+          id: 'supabase-config',
+          label: 'Supabase Configuration',
+          icon: <Server className="h-4 w-4" />,
+          action: 'tab',
+          target: 'supabase-config',
+        },
       ],
     },
   ];

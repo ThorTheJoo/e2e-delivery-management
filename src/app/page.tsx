@@ -38,6 +38,7 @@ import { BlueDolphinIntegration } from '@/components/blue-dolphin-integration';
 import { BlueDolphinVisualization } from '@/components/blue-dolphin-visualization';
 import { BlueDolphinConfiguration } from '@/components/blue-dolphin-configuration';
 import { MiroConfiguration } from '@/components/miro-configuration';
+import { SupabaseConfiguration } from '@/components/supabase-configuration';
 import { MiroSetupGuide } from '@/components/miro-setup-guide';
 import { ADOConfigurationComponent } from '@/components/ado-configuration';
 import { ADOIntegration } from '@/components/ado-integration';
@@ -1643,6 +1644,11 @@ export default function HomePage() {
             {/* ADO Configuration Tab */}
             <TabsContent value="ado-config" className="space-y-6">
               <ADOConfigurationComponent />
+            </TabsContent>
+
+            {/* Supabase Configuration Tab */}
+            <TabsContent value="supabase-config" className="space-y-6">
+              <SupabaseConfiguration />
             </TabsContent>
           </Tabs>
         </main>
