@@ -73,6 +73,32 @@ class DataService {
 
   // TMF Capabilities methods
   async getTMFCapabilities(): Promise<TMFCapability[]> {
+    // Hybrid: Supabase (if enabled) -> fallback to demo data
+    try {
+      if (getActiveDataSource() === 'supabase') {
+        const svc = new SupabaseDataService<any>('tmf_reference_capabilities');
+        const rows = await svc.read();
+        if (Array.isArray(rows) && rows.length > 0) {
+          return rows.map((r) => ({
+            id: String(r.id),
+            name: String(r.name),
+            description: String(r.description || ''),
+            segments: Array.isArray(r.metadata?.segments) ? r.metadata.segments : [],
+            baseEffort: {
+              businessAnalyst: Number(r.metadata?.baseEffort?.businessAnalyst ?? 8),
+              solutionArchitect: Number(r.metadata?.baseEffort?.solutionArchitect ?? 6),
+              developer: Number(r.metadata?.baseEffort?.developer ?? 20),
+              qaEngineer: Number(r.metadata?.baseEffort?.qaEngineer ?? 10),
+            },
+            complexityFactors: typeof r.metadata?.complexityFactors === 'object'
+              ? r.metadata.complexityFactors
+              : {},
+          } as TMFCapability));
+        }
+      }
+    } catch (err) {
+      console.warn('Supabase TMF capabilities read failed; using demo data.', err);
+    }
     return Object.values(this.data.tmfCapabilities);
   }
 
