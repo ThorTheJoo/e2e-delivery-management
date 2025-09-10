@@ -11,6 +11,8 @@ import { Download, BarChart3, FileText, Calculator, Settings, RefreshCw, Eye, Us
 import { computeComplexity } from '@/lib/complexity-scoring';
 import { DEFAULT_COMPLEXITY_CONFIG } from '@/types/complexity';
 import { generateTraceabilityFromSelection } from '@/lib/telecom-traceability';
+import { bomExportGenerator } from '@/lib/bom-export';
+import { useToast } from '@/hooks/use-toast';
 import {
   BOMItem,
   BOMState,
@@ -56,6 +58,7 @@ export function BillOfMaterials({
   setMatchedWorkPackages,
   cetv22Data,
 }: BillOfMaterialsProps) {
+  const toast = useToast();
   const [bomState, setBomState] = useState<BOMState>({
     items: [],
     filters: {
@@ -411,8 +414,43 @@ export function BillOfMaterials({
     });
   }, [bomState.items, searchTerm, selectedFilters]);
 
-  // Export to CSV
-  const exportToCSV = () => {
+  // Export to CSV using dynamic field selection
+  const exportToCSV = async () => {
+    try {
+      // Initialize the export generator
+      await bomExportGenerator.initialize();
+      
+      // Get filtered items for export
+      const itemsToExport = filteredItems.map(item => ({
+        ...item,
+        // Ensure all required fields are present
+        id: item.id || `item-${Math.random().toString(36).substr(2, 9)}`,
+        tmfDomain: item.tmfDomain || 'Unknown',
+        capability: item.capability || 'Unknown',
+        requirement: item.requirement || 'Unknown',
+        priority: item.priority || 'Medium',
+        status: item.status || 'Identified',
+        source: item.source || 'Manual',
+        createdAt: item.createdAt || new Date().toISOString(),
+        updatedAt: item.updatedAt || new Date().toISOString()
+      }));
+
+      // Generate filename with timestamp
+      const timestamp = new Date().toISOString().split('T')[0];
+      const filename = `bom-export-${timestamp}.csv`;
+
+      // Download CSV using dynamic field selection
+      bomExportGenerator.downloadCSV(itemsToExport, filename);
+      
+      toast.showSuccess('Export Complete', `Exported ${itemsToExport.length} items to ${filename}`);
+    } catch (error) {
+      console.error('Export failed:', error);
+      toast.showError('Export Failed', 'Could not generate CSV export');
+    }
+  };
+
+  // Legacy export function (kept for backward compatibility)
+  const _exportToCSVLegacy = () => {
     // Load persisted complexity selection to compute multiplier (non-breaking)
     let complexityMultiplier = 1;
     let selection: any = null;
@@ -643,6 +681,17 @@ export function BillOfMaterials({
               <Button variant="outline" onClick={() => window.location.reload()}>
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Refresh
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  // Navigate to BOM configuration tab
+                  const event = new CustomEvent('navigate-to-tab', { detail: 'bom-config' });
+                  window.dispatchEvent(event);
+                }}
+              >
+                <Settings className="mr-2 h-4 w-4" />
+                Configure Export
               </Button>
               <Button onClick={exportToCSV}>
                 <Download className="mr-2 h-4 w-4" />

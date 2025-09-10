@@ -45,6 +45,7 @@ import { ADOConfigurationComponent } from '@/components/ado-configuration';
 import { ADOIntegration } from '@/components/ado-integration';
 import { CETv22ServiceDesign } from '@/components/cet-v22/CETv22ServiceDesign';
 import { BillOfMaterials } from '@/components/bill-of-materials';
+import { BOMConfiguration } from '@/components/bom-configuration';
 import { useToast, ToastContainer } from '@/components/ui/toast';
 import { ComplexityMatrix } from '@/components/complexity-matrix';
 import {
@@ -97,6 +98,18 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [loadingMessage, setLoadingMessage] = useState('Initializing application...');
   const [showDiagnostics, setShowDiagnostics] = useState(false);
+
+  // Handle navigation events from child components
+  useEffect(() => {
+    const handleNavigateToTab = (event: CustomEvent) => {
+      setActiveTab(event.detail);
+    };
+
+    window.addEventListener('navigate-to-tab', handleNavigateToTab as EventListener);
+    return () => {
+      window.removeEventListener('navigate-to-tab', handleNavigateToTab as EventListener);
+    };
+  }, []);
 
   // Handle tab changes and reset expanded states
   const handleTabChange = (tab: string) => {
@@ -183,7 +196,7 @@ export default function HomePage() {
         ]);
 
         console.log('Project loaded successfully:', projectData);
-        setProject(projectData);
+        setProject(projectData as Project);
         setLoadingMessage('Project data loaded, loading additional data...');
 
         // Set loading to false immediately after project is loaded
@@ -1097,10 +1110,10 @@ export default function HomePage() {
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <Network className="h-5 w-5" />
-                    <span>Solution Input Parameters</span>
+                    <span>Solution Inputs</span>
                   </CardTitle>
                   <CardDescription>
-                    Guideline for E2E Use Case Variants
+                    SpecSync Data Loader and E2E Use Case Parameters
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -1737,6 +1750,11 @@ export default function HomePage() {
             {/* Supabase Configuration Tab */}
             <TabsContent value="supabase-config" className="space-y-6">
               <SupabaseConfiguration />
+            </TabsContent>
+
+            {/* BOM Configuration Tab */}
+            <TabsContent value="bom-config" className="space-y-6">
+              <BOMConfiguration />
             </TabsContent>
           </Tabs>
         </main>

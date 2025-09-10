@@ -236,7 +236,7 @@ export function SupabaseConfiguration() {
       const sb = getBrowserSupabaseClient();
 
       // Try to load data ordered by created_at, but fall back to just selecting all if the column doesn't exist
-      let query = sb.from(tableName).select('*').limit(10);
+      const query = sb.from(tableName).select('*').limit(10);
 
       // First try with ordering by created_at
       try {

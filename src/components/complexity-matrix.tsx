@@ -10,8 +10,6 @@ import {
   type ComplexitySelection,
   type NfrKey,
 } from '@/types/complexity';
-import { computeComplexity, formatComplexitySummary } from '@/lib/complexity-scoring';
-import { generateTraceabilityFromSelection, serializeTraceabilityToCSV } from '@/lib/telecom-traceability';
 
 interface FieldOption {
   id: string;
@@ -78,7 +76,6 @@ export function ComplexityMatrix() {
     deliveryServicesEnabled: undefined,
   });
 
-  const [result, setResult] = useState(() => computeComplexity(selection, config));
 
   // Persistence: load from localStorage, then save on change
   useEffect(() => {
@@ -98,32 +95,6 @@ export function ComplexityMatrix() {
     } catch {}
   }, [selection]);
 
-  const handleCompute = () => {
-    const r = computeComplexity(selection, config);
-    setResult(r);
-    // Non-intrusive test hook: log formatted summary for debugging
-    // eslint-disable-next-line no-console
-    console.log('[ComplexityMatrix] Test Result:', r, '\n', formatComplexitySummary(r));
-  };
-
-  const handleExportTraceability = () => {
-    try {
-      const matrix = generateTraceabilityFromSelection(selection);
-      const csv = serializeTraceabilityToCSV(matrix);
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      link.setAttribute('href', url);
-      link.setAttribute('download', `complexity-traceability-${new Date().toISOString().split('T')[0]}.csv`);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error('Traceability export failed', e);
-    }
-  };
 
   return (
     <div className="border-b pb-6">
@@ -148,49 +119,12 @@ export function ComplexityMatrix() {
           <div>
             <h3 className="flex items-center space-x-2 text-base font-semibold">
               <Calculator className="h-4 w-4" />
-              <span>Complexity Estimation Matrix (Beta)</span>
+              <span>E2E Use Case Parameters</span>
             </h3>
             <p className="text-sm text-muted-foreground">
-              Configure telecom complexity parameters and preview computed multipliers. Purely
-              additive, does not affect existing data.
+              Criteria used to quantify the number of E2E Use Cases required
             </p>
           </div>
-        </div>
-        <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              // Retail baseline: Consumer + Mobile, Retail, 4G/5G, Cloud, baseline NFRs
-              const baseline: ComplexitySelection = {
-                customerTypeIds: ['consumer'],
-                productMixIds: ['mobile'],
-                accessTechnologyIds: ['4g-5g'],
-                channelIds: ['retail'],
-                deploymentId: 'cloud',
-                nfrSelections: {
-                  performance: 'perf-baseline',
-                  scalability: 'scal-baseline',
-                  security: 'sec-baseline',
-                  availability: 'avail-baseline',
-                },
-                deliveryServicesEnabled: undefined,
-              };
-              setSelection(baseline);
-              try {
-                localStorage.setItem('complexity-selection', JSON.stringify(baseline));
-              } catch {}
-            }}
-            aria-label="Load Retail Baseline"
-          >
-            Load Retail Baseline
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleCompute} aria-label="Run Complexity Test">
-            Run Test
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleExportTraceability} aria-label="Export Traceability CSV">
-            Export Traceability
-          </Button>
         </div>
       </div>
 

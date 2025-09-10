@@ -394,6 +394,13 @@ export function NavigationSidebar({
           action: 'tab',
           target: 'supabase-config',
         },
+        {
+          id: 'bom-config',
+          label: 'BOM Configuration',
+          icon: <Settings className="h-4 w-4" />,
+          action: 'tab',
+          target: 'bom-config',
+        },
       ],
     },
   ];
