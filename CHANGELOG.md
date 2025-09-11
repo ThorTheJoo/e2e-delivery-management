@@ -330,6 +330,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.25.0] - 2025-09-02
 
+## [1.27.0] - 2025-01-15 - TMF Compliance Update & Alpha Release
+
+### 🎉 Major Features Added
+
+#### TMF Compliance Update
+
+- **TMF 2025 Compliance** - Updated compliance statement from ODA 2025 to TMF 2025 Compliant
+- **Alpha Badge** - Added alpha badge to indicate prototype status for users
+- **Version Bump** - Updated to version 1.27.0 for main branch release
+
+#### UI/UX Enhancements
+
+- **Alpha Prototype Indicator** - Clear visual indication that this is an alpha/prototype version
+- **Updated Compliance Text** - Changed header compliance text to reflect TMF 2025 standards
+- **Enhanced User Awareness** - Better user understanding of application maturity level
+
+### 🔧 Technical Improvements
+
+#### Version Management
+
+- **Semantic Versioning** - Proper version bump to 1.27.0 for main branch release
+- **Build Info Updates** - Updated build information to reflect new version
+- **Release Documentation** - Comprehensive release notes for version 1.27.0
+
+#### Compliance Updates
+
+- **TMF Standards** - Updated compliance references to TMF 2025 standards
+- **Header Updates** - Modified main page header to show TMF 2025 Compliant
+- **Alpha Badge Integration** - Added alpha badge near application name
+
+### 🎯 Impact
+
+- **Clear Prototype Status** - Users now understand this is an alpha/prototype version
+- **TMF Compliance** - Updated compliance statement reflects current TMF 2025 standards
+- **Version Clarity** - Clear version progression and release management
+- **User Experience** - Better user awareness of application maturity and compliance
+
+### 📁 Files Modified
+
+- `package.json` - Updated version to 1.27.0
+- `src/lib/build-info.ts` - Updated default version to 1.27.0
+- `src/app/page.tsx` - Added alpha badge and updated compliance text
+- `index.html` - Updated version, compliance, and added alpha badge
+- `styles.css` - Added alpha badge styling
+- `CHANGELOG.md` - Added version 1.27.0 changelog entry
+
+---
+
 ## [1.26.0] - 2025-09-02
 
 ### Added
