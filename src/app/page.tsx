@@ -29,6 +29,7 @@ import { BlueDolphinVisualization } from '@/components/blue-dolphin-visualizatio
 import { BlueDolphinConfiguration } from '@/components/blue-dolphin-configuration';
 import { BlueDolphinWorkspaceOperations } from '@/components/blue-dolphin-workspace-operations';
 import { SpecSyncBlueDolphinMapping } from '@/components/specsync-blue-dolphin-mapping';
+import { SpecSyncRelationshipTraversal } from '@/components/specsync-relationship-traversal';
 import { MiroConfiguration } from '@/components/miro-configuration';
 import { SupabaseConfiguration } from '@/components/supabase-configuration';
 import { MiroSetupGuide } from '@/components/miro-setup-guide';
@@ -89,6 +90,10 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [loadingMessage, setLoadingMessage] = useState('Initializing application...');
   const [showDiagnostics, setShowDiagnostics] = useState(false);
+  
+  // NEW - State for relationship traversal
+  const [mappingResults, setMappingResults] = useState<any[]>([]);
+  const [workspaceFilter, setWorkspaceFilter] = useState<string>('Grant Test'); // Fixed: Use correct workspace
 
   // Handle navigation events from child components
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -930,7 +935,12 @@ export default function HomePage() {
                 <Network className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold">CSG Delivery Orchestrator</h1>
+                <div className="flex items-center space-x-3">
+                  <h1 className="text-2xl font-bold">CSG Delivery Orchestrator</h1>
+                  <Badge variant="secondary" className="bg-orange-500 text-white hover:bg-orange-600">
+                    ALPHA
+                  </Badge>
+                </div>
                 <p className="text-white/90">
                   v{getBuildInfo().version} - {getBuildInfo().compliance}
                 </p>
@@ -1599,7 +1609,26 @@ export default function HomePage() {
                         username: 'csgipoc',
                         password: 'ef498b94-732b-46c8-a24c-65fbd27c1482',
                       }}
+                      onMappingComplete={setMappingResults}
                     />
+                    
+                    {/* NEW - Relationship Traversal Component */}
+                    {mappingResults.length > 0 && (
+                      <div className="mt-6">
+                        <SpecSyncRelationshipTraversal
+                          mappingResults={mappingResults}
+                          blueDolphinConfig={{
+                            protocol: 'ODATA',
+                            apiUrl: 'https://csgipoc.odata.bluedolphin.app',
+                            odataUrl: 'https://csgipoc.odata.bluedolphin.app',
+                            apiKey: '',
+                            username: 'csgipoc',
+                            password: 'ef498b94-732b-46c8-a24c-65fbd27c1482',
+                          }}
+                          workspaceFilter={workspaceFilter}
+                        />
+                      </div>
+                    )}
                   </CardContent>
                 )}
               </Card>

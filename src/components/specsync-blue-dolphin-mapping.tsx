@@ -23,6 +23,7 @@ interface SpecSyncBlueDolphinMappingProps {
     username: string;
     password: string;
   };
+  onMappingComplete?: (results: MappingResult[]) => void; // NEW - Optional callback for relationship traversal
 }
 
 interface MappingResult {
@@ -41,7 +42,8 @@ interface FilterCriteria {
 
 export function SpecSyncBlueDolphinMapping({ 
   specSyncItems, 
-  blueDolphinConfig 
+  blueDolphinConfig,
+  onMappingComplete // NEW - Optional callback parameter
 }: SpecSyncBlueDolphinMappingProps) {
   // State management
   const [selectedFunctionNames, setSelectedFunctionNames] = useState<Set<string>>(new Set());
@@ -207,6 +209,7 @@ export function SpecSyncBlueDolphinMapping({
 
         console.log('✅ Mapping results:', matches);
         setMappingResults(matches);
+        onMappingComplete?.(matches); // NEW - Call callback if provided for relationship traversal
       } else {
         setError(result.error || 'Failed to retrieve Blue Dolphin objects');
       }

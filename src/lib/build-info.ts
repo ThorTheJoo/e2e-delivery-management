@@ -9,7 +9,7 @@ export interface BuildInfo {
 // Get build information from environment and package.json
 export function getBuildInfo(): BuildInfo {
   // Get version from package.json (this will be replaced during build)
-  const version = process.env.NEXT_PUBLIC_APP_VERSION || '1.2.2';
+  const version = process.env.NEXT_PUBLIC_APP_VERSION || '1.7.0';
 
   // Get build hash from environment (set during build process)
   const buildHash = process.env.NEXT_PUBLIC_BUILD_HASH || 'main@dev';
@@ -18,7 +18,7 @@ export function getBuildInfo(): BuildInfo {
   const buildTimestamp = process.env.NEXT_PUBLIC_BUILD_TIMESTAMP || new Date().toLocaleString();
 
   // Compliance information
-  const compliance = 'ODA 2025 Compliant';
+  const compliance = 'TMF 2025 Compliant';
 
   return {
     version,
