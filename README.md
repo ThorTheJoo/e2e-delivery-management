@@ -4,7 +4,23 @@
 
 The E2E Delivery Management System is a comprehensive platform for managing end-to-end delivery processes, integrating with various enterprise systems including Blue Dolphin, Azure DevOps, Miro, and SpecSync. The system provides TMF ODA 2025 compliant architecture management, requirement tracking, and delivery orchestration capabilities.
 
-## 🚀 Latest Features (v1.4.1)
+## 🚀 Latest Features (v1.6.0)
+
+### 🔗 Enhanced Blue Dolphin Integration
+
+- **Advanced Object Filtering**: Enhanced filtering capabilities with Application Function and Application Service quick filters
+- **Status-based Filtering**: Comprehensive status filtering with Accepted, In Progress, and other status options
+- **Workspace Management**: Improved workspace filtering and management capabilities
+- **Enhanced Field Support**: Better support for enhanced object fields with MoreColumns parameter
+- **Export Functionality**: Enhanced export capabilities for Blue Dolphin object data
+
+### 🎯 SpecSync Blue Dolphin Mapping
+
+- **Intelligent Mapping System**: Advanced SpecSync to Blue Dolphin object mapping algorithms
+- **Multi-criteria Filtering**: Filter by workspace, status, and object type for precise mapping
+- **Confidence Scoring**: Confidence-based matching with exact and contains match types
+- **Batch Processing**: Efficient batch processing for large SpecSync datasets
+- **Visual Mapping Interface**: User-friendly interface for managing SpecSync to Blue Dolphin mappings
 
 ### 🔧 SpecSync Mapping Fixes
 

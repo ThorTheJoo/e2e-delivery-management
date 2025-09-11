@@ -47,7 +47,7 @@ export function SpecSyncBlueDolphinMapping({
   const [selectedFunctionNames, setSelectedFunctionNames] = useState<Set<string>>(new Set());
   const [filterCriteria, setFilterCriteria] = useState<FilterCriteria>({
     workspace: '',
-    status: 'Active',
+    status: 'Accepted',
     objectType: 'Application Function'
   });
   const [availableWorkspaces, setAvailableWorkspaces] = useState<string[]>([]);
@@ -361,7 +361,7 @@ export function SpecSyncBlueDolphinMapping({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="Active">Active</SelectItem>
+                  <SelectItem value="Accepted">Accepted</SelectItem>
                   <SelectItem value="Archived">Archived</SelectItem>
                 </SelectContent>
               </Select>
@@ -558,6 +558,9 @@ export function SpecSyncBlueDolphinMapping({
                             SpecSync Function
                           </th>
                           <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Blue Dolphin ID
+                          </th>
+                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Blue Dolphin Title
                           </th>
                           <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -576,6 +579,9 @@ export function SpecSyncBlueDolphinMapping({
                           <tr key={_index} className="hover:bg-gray-50">
                             <td className="px-4 py-2 text-sm text-gray-900 font-medium">
                               {result.specSyncFunctionName}
+                            </td>
+                            <td className="px-4 py-2 text-sm text-gray-600 font-mono">
+                              {result.blueDolphinObject.ID}
                             </td>
                             <td className="px-4 py-2 text-sm text-gray-900">
                               {result.blueDolphinObject.Title}

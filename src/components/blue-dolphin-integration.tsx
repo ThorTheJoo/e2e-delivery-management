@@ -837,8 +837,6 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="Accepted">Accepted</SelectItem>
-                    <SelectItem value="Archived">Archived</SelectItem>
                     {availableStatuses.map((status) => (
                       <SelectItem key={status} value={status}>
                         {status}

@@ -5,6 +5,76 @@ All notable changes to the E2E Delivery Management System will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2025-01-15 - Enhanced Blue Dolphin Integration & SpecSync Mapping Improvements
+
+### 🎉 Major Features Added
+
+#### Enhanced Blue Dolphin Integration
+
+- **Advanced Object Filtering** - Enhanced filtering capabilities with Application Function and Application Service quick filters
+- **Status-based Filtering** - Comprehensive status filtering with Accepted, In Progress, and other status options
+- **Workspace Management** - Improved workspace filtering and management capabilities
+- **Enhanced Field Support** - Better support for enhanced object fields with MoreColumns parameter
+- **Export Functionality** - Enhanced export capabilities for Blue Dolphin object data
+
+#### SpecSync Blue Dolphin Mapping
+
+- **Intelligent Mapping System** - Advanced SpecSync to Blue Dolphin object mapping algorithms
+- **Multi-criteria Filtering** - Filter by workspace, status, and object type for precise mapping
+- **Confidence Scoring** - Confidence-based matching with exact and contains match types
+- **Batch Processing** - Efficient batch processing for large SpecSync datasets
+- **Visual Mapping Interface** - User-friendly interface for managing SpecSync to Blue Dolphin mappings
+
+### 🔧 Technical Improvements
+
+#### Blue Dolphin Service Layer
+
+- **Enhanced API Integration** - Improved OData v4.0 integration with better error handling
+- **Performance Optimization** - Optimized data retrieval and caching strategies
+- **Field Selection Logic** - Smart field selection and filtering for enhanced object retrieval
+- **Connection Management** - Improved connection testing and validation
+- **Data Validation** - Enhanced data validation and error reporting
+
+#### SpecSync Integration
+
+- **Mapping Persistence** - Persistent storage of SpecSync to Blue Dolphin mappings
+- **Search Capabilities** - Enhanced search and discovery for Blue Dolphin objects
+- **Filter Management** - Advanced filtering options for object discovery
+- **Export Integration** - Seamless export of mapping results
+- **Error Handling** - Comprehensive error handling and user feedback
+
+#### UI/UX Enhancements
+
+- **Modern Interface Design** - Clean, modern interface with improved usability
+- **Responsive Layout** - Enhanced responsive design for all screen sizes
+- **Loading States** - Better loading indicators and progress feedback
+- **Error Display** - Clear error messages and troubleshooting guidance
+- **Success Notifications** - Improved success feedback and status updates
+
+### 🐛 Bug Fixes
+
+- **Filter Consistency** - Fixed filter consistency issues across different object types
+- **Data Loading** - Resolved data loading issues with large datasets
+- **Export Functionality** - Fixed export functionality for Blue Dolphin object data
+- **Mapping Accuracy** - Improved accuracy of SpecSync to Blue Dolphin object mappings
+- **Performance Issues** - Resolved performance bottlenecks in data processing
+
+### 📁 Files Modified
+
+- `src/components/blue-dolphin-integration.tsx` - Enhanced Blue Dolphin integration with advanced filtering
+- `src/components/specsync-blue-dolphin-mapping.tsx` - New SpecSync to Blue Dolphin mapping component
+- `package.json` - Updated version to 1.6.0
+
+### 🎯 Impact
+
+- **Better Integration** - Improved integration between SpecSync and Blue Dolphin systems
+- **Enhanced Filtering** - More precise filtering and discovery of Blue Dolphin objects
+- **Improved Mapping** - More accurate and efficient SpecSync to Blue Dolphin mappings
+- **Better Performance** - Optimized performance for large datasets and complex operations
+- **Enhanced User Experience** - Improved interface and user interaction patterns
+
+---
+
 ## [1.4.1] - 2025-09-10 - SpecSync Mapping Precision Fix
 
 ### 🔧 Bug Fixes
