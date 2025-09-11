@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSupabaseClient, getConfiguredSupabaseClient } from '@/lib/supabase';
-import { createClient } from '@supabase/supabase-js';
 
 // POST /api/specsync/export
 // Safely exports local SpecSync cache to Supabase when service role is available.

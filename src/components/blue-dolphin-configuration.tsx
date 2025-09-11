@@ -43,11 +43,11 @@ export function BlueDolphinConfiguration() {
     odataUrl: 'https://csgipoc.odata.bluedolphin.app',
     protocol: 'HYBRID',
     username: 'csgipoc',
-    apiKey: 'ea09e6ac-1747-4c5a-955e-a4f699ba3678', // User Key Management API Key
+    apiKey: 'f49253d1-32c7-492a-b022-64caab216d49', // User Key Management API Key
     password: 'ef498b94-732b-46c8-a24c-65fbd27c1482',
     // User API Key fields
     userApiKey: '',
-    userId: '',
+    userId: '68627d4e8b0ee343e2d1c795', // Pre-populate with your User ID
     userApiKeyExpiry: '',
     userApiKeyName: '',
     userApiKeyGenerated: false,
@@ -62,6 +62,8 @@ export function BlueDolphinConfiguration() {
   const [isTesting, setIsTesting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isRetrieving, setIsRetrieving] = useState(false);
+  const [existingApiKeys, setExistingApiKeys] = useState<any[]>([]);
 
   const toast = useToast();
 
@@ -109,49 +111,141 @@ export function BlueDolphinConfiguration() {
   const loadSavedConfig = () => {
     const saved = localStorage.getItem('blueDolphinConfig');
     if (saved) {
-      setConfig(JSON.parse(saved));
+      const savedConfig = JSON.parse(saved);
+      // Ensure required fields are present and preserve OData functionality
+      setConfig(prev => ({
+        ...prev,
+        ...savedConfig,
+        // Always ensure API URL is set for REST operations
+        apiUrl: savedConfig.apiUrl || 'https://public-api.eu.bluedolphin.app',
+        // Preserve OData URL for OData operations
+        odataUrl: savedConfig.odataUrl || 'https://csgipoc.odata.bluedolphin.app',
+        // Default to HYBRID to support both REST and OData
+        protocol: savedConfig.protocol || 'HYBRID',
+        username: savedConfig.username || 'csgipoc',
+        // Use the correct API key from your Blue Dolphin configuration
+        apiKey: savedConfig.apiKey || 'f49253d1-32c7-492a-b022-64caab216d49',
+        password: savedConfig.password || 'ef498b94-732b-46c8-a24c-65fbd27c1482'
+      }));
     }
   };
 
-  // User API Key Generation
-  const handleGenerateUserApiKey = async () => {
-    if (!config.apiKey || !config.userId || !config.userApiKeyName || !config.userApiKeyExpiry) {
-      toast.showError('Please fill in all required fields');
+  // Retrieve Existing User API Keys
+  const handleRetrieveUserApiKeys = async () => {
+    if (!config.apiKey || !config.userId) {
+      toast.showError('Please configure API Key and User ID first');
       return;
     }
 
-    setIsGenerating(true);
+    console.log('🔍 Retrieving existing User API Keys...');
+    setIsRetrieving(true);
     try {
       const response = await fetch('/api/blue-dolphin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          action: 'generate-user-api-key',
+          action: 'retrieve-user-api-keys',
           userKeyManagementApiKey: config.apiKey,
           userId: config.userId,
-          keyName: config.userApiKeyName,
-          expiryDate: config.userApiKeyExpiry
+          config: config
         })
       });
 
       const result = await response.json();
+      console.log('📥 Retrieved API Keys:', result);
       
       if (result.success) {
-        setConfig(prev => ({
-          ...prev,
+        setExistingApiKeys(result.apiKeys || []);
+        toast.showSuccess(`Retrieved ${result.apiKeys?.length || 0} existing API keys`);
+      } else {
+        toast.showError('Failed to retrieve API keys', JSON.stringify(result.error));
+      }
+    } catch (error) {
+      console.error('💥 Error retrieving API keys:', error);
+      toast.showError('Error retrieving API keys', error instanceof Error ? error.message : 'Unknown error');
+    } finally {
+      setIsRetrieving(false);
+    }
+  };
+
+  // User API Key Generation
+  const handleGenerateUserApiKey = async () => {
+    console.log('🔧 Generate User API Key clicked');
+    console.log('Config:', config);
+    
+    if (!config.apiKey || !config.userId || !config.userApiKeyName || !config.userApiKeyExpiry) {
+      console.log('❌ Missing required fields');
+      toast.showError('Please fill in all required fields');
+      return;
+    }
+
+    console.log('✅ All fields present, starting generation...');
+    setIsGenerating(true);
+    try {
+      const requestData = {
+        action: 'generate-user-api-key',
+        userKeyManagementApiKey: config.apiKey,
+        userId: config.userId,
+        keyName: config.userApiKeyName,
+        expiryDate: config.userApiKeyExpiry,
+        config: config
+      };
+      
+      console.log('📤 Sending request:', requestData);
+      
+      const response = await fetch('/api/blue-dolphin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestData)
+      });
+
+      console.log('📥 Response status:', response.status);
+      const result = await response.json();
+      console.log('📥 Response data:', result);
+      
+      if (result.success) {
+        console.log('✅ Success! Updating config with new API key');
+        const updatedConfig = {
+          ...config,
           userApiKey: result.userApiKey,
           userApiKeyGenerated: true,
           userApiKeyGeneratedAt: new Date().toISOString()
-        }));
+        };
+        setConfig(updatedConfig);
+        
+        // Save to localStorage
+        localStorage.setItem('blueDolphinConfig', JSON.stringify(updatedConfig));
+        
+        // Refresh existing API keys list
+        await handleRetrieveUserApiKeys();
+        
         toast.showSuccess('User API Key generated successfully!');
       } else {
-        toast.showError(`Failed to generate User API Key: ${result.error}`);
+        console.log('❌ Failed:', result.error);
+        toast.showError('Failed to generate User API Key', JSON.stringify(result.error));
       }
     } catch (error) {
-      toast.showError(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error('💥 Error:', error);
+      toast.showError('Error generating User API Key', error instanceof Error ? error.message : 'Unknown error');
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  // Select Existing User API Key
+  const handleSelectApiKey = (apiKey: string) => {
+    const updatedConfig = {
+      ...config,
+      userApiKey: apiKey,
+      userApiKeyGenerated: true,
+      userApiKeyGeneratedAt: new Date().toISOString()
+    };
+    setConfig(updatedConfig);
+    
+    // Save to localStorage
+    localStorage.setItem('blueDolphinConfig', JSON.stringify(updatedConfig));
+    
+    toast.showSuccess('User API Key selected successfully!');
   };
 
   // Test User API Key
@@ -473,15 +567,98 @@ export function BlueDolphinConfiguration() {
             </div>
           </div>
 
-          {/* Status Display */}
-          {config.userApiKeyGenerated && (
-            <div className="p-3 bg-green-50 border border-green-200 rounded">
-              <p className="text-green-800 font-medium">✅ User API Key Generated</p>
-              <p className="text-sm text-green-600">
-                Generated: {config.userApiKeyGeneratedAt ? new Date(config.userApiKeyGeneratedAt).toLocaleString() : 'Unknown'}
-              </p>
+          {/* Current User API Key Display */}
+          {config.userApiKey && (
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-blue-800 font-medium">🔑 Current User API Key</p>
+                  <p className="text-sm text-blue-600 font-mono break-all">
+                    {config.userApiKey}
+                  </p>
+                  <p className="text-xs text-blue-500 mt-1">
+                    Generated: {config.userApiKeyGeneratedAt ? new Date(config.userApiKeyGeneratedAt).toLocaleString() : 'Unknown'}
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigator.clipboard.writeText(config.userApiKey || '')}
+                  className="text-blue-600 hover:text-blue-800"
+                >
+                  Copy
+                </Button>
+              </div>
             </div>
           )}
+
+          {/* Existing API Keys Section */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-medium text-gray-700">Existing API Keys</h4>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRetrieveUserApiKeys}
+                disabled={isRetrieving || !config.apiKey || !config.userId}
+                className="flex items-center space-x-2"
+              >
+                {isRetrieving ? (
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4" />
+                )}
+                <span>{isRetrieving ? 'Retrieving...' : 'Retrieve Keys'}</span>
+              </Button>
+            </div>
+
+            {existingApiKeys.length > 0 ? (
+              <div className="space-y-2 max-h-40 overflow-y-auto">
+                {existingApiKeys.map((apiKey, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-mono text-gray-800 break-all">
+                        {apiKey.key || apiKey.id || `Key ${index + 1}`}
+                      </p>
+                      {apiKey.name && (
+                        <p className="text-xs text-gray-500">{apiKey.name}</p>
+                      )}
+                      {apiKey.expiration_date && (
+                        <p className="text-xs text-gray-500">
+                          Expires: {new Date(apiKey.expiration_date).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex space-x-2 ml-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleSelectApiKey(apiKey.key || apiKey.id)}
+                        className="text-xs"
+                      >
+                        Select
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigator.clipboard.writeText(apiKey.key || apiKey.id)}
+                        className="text-xs"
+                      >
+                        Copy
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-4 text-gray-500 text-sm">
+                {isRetrieving ? 'Retrieving API keys...' : 'No existing API keys found. Click "Retrieve Keys" to load them.'}
+              </div>
+            )}
+          </div>
 
           <div className="flex items-center justify-end space-x-4 border-t pt-4">
             <Button

@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useEffect } from 'react';
 import { Calculator, ChevronDown, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+// Button is not used in this component
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { MultiSelect } from '@/components/ui/multi-select';
 import {

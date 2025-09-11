@@ -1,7 +1,6 @@
 import { SpecSyncItem, SpecSyncState, TMFFunction } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { getActiveDataSource } from '@/lib/data-source';
-import { TMFReferenceService } from '@/lib/tmf-reference-service-new';
 
 // Map SpecSync items to existing TMF functions
 export function mapSpecSyncToTMFunctions(
@@ -33,7 +32,7 @@ export function mapSpecSyncToTMFunctions(
     const rephrasedFunctionName = normalize(item['Rephrased Function Name'] || item.capability);
     const af2Name = normalize(item.afLevel2);
     const funcName = normalize(item.functionName);
-    const domain = normalize(item.domain);
+    // domain not used here
 
     let functionId: string | null = null;
 
@@ -100,7 +99,7 @@ export function calculateUseCaseCountsByFunction(
     const rephrasedFunctionName = normalize(item['Rephrased Function Name'] || item.capability);
     const af2Name = normalize(item.afLevel2);
     const funcName = normalize(item.functionName);
-    const domain = normalize(item.domain);
+    // domain not used here
     const useCase = item.usecase1?.trim();
 
     if (!useCase) return; // Skip items without use case

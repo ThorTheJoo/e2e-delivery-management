@@ -12,13 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -31,19 +25,8 @@ import {
   CheckCircle,
   Circle,
 } from 'lucide-react';
-import {
-  TMFReferenceServiceClient as TMFReferenceService,
-  TMFDomain,
-  TMFFunction,
-} from '@/lib/tmf-reference-service-client';
-import {
-  getStaticTMFDomains,
-  getStaticTMFFunctions,
-  getStaticTMFFunctionsByDomain,
-  findBestStaticTMFMatch,
-  StaticTMFDomain,
-  StaticTMFFunction,
-} from '@/lib/static-tmf-reference-data';
+import { TMFDomain, TMFFunction } from '@/lib/tmf-reference-service-client';
+import { getStaticTMFDomains, getStaticTMFFunctions } from '@/lib/static-tmf-reference-data';
 import { EnhancedAddCustomDomainDialog } from './enhanced-add-custom-domain-dialog';
 import { analyzeTMFReferenceGaps } from '@/lib/specsync-tmf-utils';
 
@@ -77,7 +60,7 @@ interface TMFDomainCapabilityManagerProps {
 
 export function TMFDomainCapabilityManager({
   onStateChange,
-  initialState,
+  initialState: _initialState,
   specSyncData,
   onMappingComplete,
 }: TMFDomainCapabilityManagerProps) {
@@ -95,6 +78,7 @@ export function TMFDomainCapabilityManager({
   const isProcessingSpecSync = useRef(false);
 
   // Load reference data
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const loadReferenceData = async () => {
       try {
@@ -147,6 +131,7 @@ export function TMFDomainCapabilityManager({
   }, []);
 
   // Process SpecSync data after reference data is loaded
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     console.log('🔄 SpecSync useEffect triggered:', {
       hasSpecSyncData: !!specSyncData?.items,
@@ -209,6 +194,7 @@ export function TMFDomainCapabilityManager({
   }, [onStateChange]);
 
   // Handle onStateChange callback when domains change (but not during SpecSync processing)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     console.log('🔄 Domains state changed:', {
       domainsLength: domains.length,

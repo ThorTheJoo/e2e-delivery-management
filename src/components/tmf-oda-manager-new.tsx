@@ -4,16 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import {
-  Plus,
-  Trash2,
-  Edit,
-  ChevronDown,
-  ChevronRight,
-  FileSpreadsheet,
-  Search,
-  Filter,
-} from 'lucide-react';
+import { Plus, Edit, ChevronDown, ChevronRight, FileSpreadsheet, Search, Filter } from 'lucide-react';
 import { TMFDomain, TMFFunction, SpecSyncState } from '@/types';
 import { SpecSyncImport } from './specsync-import';
 import { TMFReferenceService } from '@/lib/tmf-reference-service-new';
@@ -33,7 +24,7 @@ interface DomainWithFunctions extends TMFDomain {
   mappedFunctionIds?: string[];
 }
 
-export function TMFOdaManager({ onStateChange, initialState }: TMFOdaManagerProps) {
+export function TMFOdaManager({ onStateChange: _onStateChange, initialState: _initialState }: TMFOdaManagerProps) {
   const [domains, setDomains] = useState<DomainWithFunctions[]>([]);
   const [specSyncState, setSpecSyncState] = useState<SpecSyncState | null>(null);
   const [isLoading, setIsLoading] = useState(true);

@@ -1,21 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import {
-  Project,
-  TMFCapability,
-  TMFFunction,
-  ETOMProcess,
-  WorkPackage,
-  Milestone,
-  Risk,
-  Dependency,
-  Document,
-  TMFOdaDomain,
-  SpecSyncItem,
-} from '@/types';
+import { Project, TMFFunction, ETOMProcess, WorkPackage, Milestone, Risk, Dependency, Document, TMFOdaDomain, SpecSyncItem } from '@/types';
 import { dataService } from '@/lib/data-service';
-import { formatDate, calculateEffortTotal, getStatusColor, getSeverityColor } from '@/lib/utils';
+import { formatDate, getStatusColor, getSeverityColor } from '@/lib/utils';
 import { getBuildInfo } from '@/lib/build-info';
 import { getActiveDataSource, isSupabaseEnvConfigured } from '@/lib/data-source';
 import { Button } from '@/components/ui/button';
@@ -39,6 +27,8 @@ import { MiroBoardCreator } from '@/components/miro-board-creator';
 import { BlueDolphinIntegration } from '@/components/blue-dolphin-integration';
 import { BlueDolphinVisualization } from '@/components/blue-dolphin-visualization';
 import { BlueDolphinConfiguration } from '@/components/blue-dolphin-configuration';
+import { BlueDolphinWorkspaceOperations } from '@/components/blue-dolphin-workspace-operations';
+import { SpecSyncBlueDolphinMapping } from '@/components/specsync-blue-dolphin-mapping';
 import { MiroConfiguration } from '@/components/miro-configuration';
 import { SupabaseConfiguration } from '@/components/supabase-configuration';
 import { MiroSetupGuide } from '@/components/miro-setup-guide';
@@ -101,6 +91,8 @@ export default function HomePage() {
   const [showDiagnostics, setShowDiagnostics] = useState(false);
 
   // Handle navigation events from child components
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const handleNavigateToTab = (event: CustomEvent) => {
       setActiveTab(event.detail);
@@ -110,7 +102,7 @@ export default function HomePage() {
     return () => {
       window.removeEventListener('navigate-to-tab', handleNavigateToTab as EventListener);
     };
-  }, []);
+  }, [loading]);
 
   // Handle tab changes and reset expanded states
   const handleTabChange = (tab: string) => {
@@ -133,7 +125,7 @@ export default function HomePage() {
     setSolutionModelSections(newExpanded);
   };
   const [specSyncState, setSpecSyncState] = useState<SpecSyncState | null>(null);
-  const [requirementCounts, setRequirementCounts] = useState<Record<string, number>>({});
+  const [requirementCounts, setRequirementCounts] = useState<Record<string, number>>({}); // used when rendering function cards
   const [useCaseCounts, setUseCaseCounts] = useState<Record<string, number>>({});
   const [isSpecSyncExpanded, setIsSpecSyncExpanded] = useState(false);
   const [isTmfManagerExpanded, setIsTmfManagerExpanded] = useState(false);
@@ -605,13 +597,13 @@ export default function HomePage() {
     toast.showInfo('🗑️ SpecSync data cleared successfully');
   };
 
-  const handleTmfStateChange = useCallback((domains: any[]) => {
+  const handleTmfStateChange = useCallback((domains: Array<{ id: string; name: string; description: string; isSelected: boolean; capabilities: Array<{ id: string; name: string; description: string; isSelected: boolean }> }>) => {
     // Convert UserDomain[] to TMFOdaDomain[] for MiroBoardCreator
     const tmfDomains: TMFOdaDomain[] = domains.map((domain) => ({
       id: domain.id,
       name: domain.name,
       description: domain.description,
-      capabilities: domain.capabilities.map((cap: any) => ({
+      capabilities: domain.capabilities.map((cap) => ({
         id: cap.id,
         name: cap.name,
         description: cap.description,
@@ -678,7 +670,6 @@ export default function HomePage() {
         }
 
         const domain = domainMap.get(domainName)!;
-        const requirementCount = requirementCounts[func.id] || 0;
         const useCaseCount = useCaseCounts[func.id] || 0;
         
         // Get effort data from SET file (estimation page)
@@ -689,11 +680,11 @@ export default function HomePage() {
         let mandateEffort = 0;
         if (cetv22Data && cetv22Data.resourceDemands) {
           // Calculate mandate effort based on resource demands for this domain
-          const domainResourceDemands = cetv22Data.resourceDemands.filter(demand => 
+          const domainResourceDemands = cetv22Data.resourceDemands.filter((demand: { productType: string; jobProfile: string; effortHours: number }) => 
             demand.productType.toLowerCase().includes(domainName.toLowerCase()) ||
             demand.jobProfile.toLowerCase().includes(domainName.toLowerCase())
           );
-          mandateEffort = Math.round(domainResourceDemands.reduce((sum, demand) => sum + demand.effortHours, 0) / 8); // Convert hours to days
+          mandateEffort = Math.round(domainResourceDemands.reduce((sum: number, demand: { effortHours: number }) => sum + demand.effortHours, 0) / 8); // Convert hours to days
         }
 
         // Find requirements that match this TMF function
@@ -714,28 +705,30 @@ export default function HomePage() {
           return functionMatch && domainMatch;
         }) || [];
 
+        const requirementCount = requirementCounts[func.id] ?? matchingRequirements.length;
+
         domain.functions.push({
           id: func.id,
           function_name: func.function_name,
           domain_name: func.domain_name || 'Unknown',
-          vertical: func.vertical,
-          function_id: func.function_id,
-          uid: func.uid,
-          requirementCount: matchingRequirements.length,
+          vertical: func.vertical ?? undefined,
+          function_id: (func.function_id ?? undefined) as unknown as string | undefined,
+          uid: (func.uid ?? undefined) as unknown as string | undefined,
+          requirementCount,
           useCaseCount,
           developmentEffort,
           mandateEffort,
-          requirements: matchingRequirements.map(req => ({
+          requirements: matchingRequirements.map((req) => ({
             id: req.id,
             requirementId: req.requirementId,
-            description: req.description,
-            priority: req.priority,
-            status: req.status,
+            description: req.description ?? '',
+            priority: req.priority ?? '',
+            status: req.status ?? '',
             usecase1: req.usecase1,
           })),
         });
 
-        domain.totalRequirements += matchingRequirements.length;
+        domain.totalRequirements += requirementCount;
       });
 
       return Array.from(domainMap.values());
@@ -805,11 +798,11 @@ export default function HomePage() {
         let mandateEffort = 0;
         if (cetv22Data && cetv22Data.resourceDemands) {
           // Calculate mandate effort based on resource demands for this domain
-          const domainResourceDemands = cetv22Data.resourceDemands.filter(demand => 
+          const domainResourceDemands = cetv22Data.resourceDemands.filter((demand: { productType: string; jobProfile: string; effortHours: number }) => 
             demand.productType.toLowerCase().includes(domainName.toLowerCase()) ||
             demand.jobProfile.toLowerCase().includes(domainName.toLowerCase())
           );
-          mandateEffort = Math.round(domainResourceDemands.reduce((sum, demand) => sum + demand.effortHours, 0) / 8); // Convert hours to days
+          mandateEffort = Math.round(domainResourceDemands.reduce((sum: number, demand: { effortHours: number }) => sum + demand.effortHours, 0) / 8); // Convert hours to days
         }
 
         domain.functions.push({
@@ -823,12 +816,12 @@ export default function HomePage() {
           useCaseCount,
           developmentEffort,
           mandateEffort,
-          requirements: items.map(req => ({
+          requirements: items.map((req) => ({
             id: req.id,
             requirementId: req.requirementId,
-            description: req.description,
-            priority: req.priority,
-            status: req.status,
+            description: req.description ?? '',
+            priority: req.priority ?? '',
+            status: req.status ?? '',
             usecase1: req.usecase1,
           })),
         });
@@ -1278,7 +1271,7 @@ export default function HomePage() {
                                           Requirements ({func.requirements.length})
                                         </div>
                                         <div className="space-y-1 max-h-32 overflow-y-auto">
-                                          {func.requirements.map((req, index) => (
+                                          {func.requirements.map((req, _index) => (
                                             <div key={req.id} className="text-xs bg-gray-50 p-2 rounded">
                                               <div className="font-medium text-gray-700">
                                                 {req.requirementId}
@@ -1518,11 +1511,12 @@ export default function HomePage() {
                     onClick={() =>
                       setSolutionModelSections(
                         new Set([
+                          'object-data',
+                          'requirements-sync',
+                          'workspace-operations',
+                          'visualization',
                           'domain-management',
                           'capabilities',
-                          'requirements-sync',
-                          'object-data',
-                          'visualization',
                         ]),
                       )
                     }
@@ -1538,6 +1532,152 @@ export default function HomePage() {
                   </Button>
                 </div>
               </div>
+
+              {/* Object Data Section */}
+              <Card>
+                <CardHeader
+                  className="cursor-pointer transition-colors hover:bg-gray-50"
+                  onClick={() => toggleSolutionModelSection('object-data')}
+                >
+                  <CardTitle className="flex items-center justify-between">
+                    <span>Object Data</span>
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                      {solutionModelSections.has('object-data') ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </CardTitle>
+                  <CardDescription>
+                    Retrieve and manage Blue Dolphin objects with enhanced metadata
+                  </CardDescription>
+                </CardHeader>
+                {solutionModelSections.has('object-data') && (
+                  <CardContent>
+                    <BlueDolphinIntegration
+                      config={{
+                        protocol: 'ODATA',
+                        apiUrl: 'https://csgipoc.odata.bluedolphin.app',
+                        odataUrl: 'https://csgipoc.odata.bluedolphin.app',
+                        apiKey: '',
+                        username: 'csgipoc',
+                        password: 'ef498b94-732b-46c8-a24c-65fbd27c1482',
+                      }}
+                    />
+                  </CardContent>
+                )}
+              </Card>
+
+              {/* Requirements Synchronization Section */}
+              <Card>
+                <CardHeader
+                  className="cursor-pointer transition-colors hover:bg-gray-50"
+                  onClick={() => toggleSolutionModelSection('requirements-sync')}
+                >
+                  <CardTitle className="flex items-center justify-between">
+                    <span>Requirements Synchronization</span>
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                      {solutionModelSections.has('requirements-sync') ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </CardTitle>
+                  <CardDescription>Synchronize requirements between systems</CardDescription>
+                </CardHeader>
+                {solutionModelSections.has('requirements-sync') && (
+                  <CardContent>
+                    <SpecSyncBlueDolphinMapping
+                      specSyncItems={specSyncItems}
+                      blueDolphinConfig={{
+                        protocol: 'ODATA',
+                        apiUrl: 'https://csgipoc.odata.bluedolphin.app',
+                        odataUrl: 'https://csgipoc.odata.bluedolphin.app',
+                        apiKey: '',
+                        username: 'csgipoc',
+                        password: 'ef498b94-732b-46c8-a24c-65fbd27c1482',
+                      }}
+                    />
+                  </CardContent>
+                )}
+              </Card>
+
+              {/* Workspace Operations Section */}
+              <Card>
+                <CardHeader
+                  className="cursor-pointer transition-colors hover:bg-gray-50"
+                  onClick={() => toggleSolutionModelSection('workspace-operations')}
+                >
+                  <CardTitle className="flex items-center justify-between">
+                    <span>Workspace Operations</span>
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                      {solutionModelSections.has('workspace-operations') ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </CardTitle>
+                  <CardDescription>
+                    Move objects between Blue Dolphin workspaces using REST API
+                  </CardDescription>
+                </CardHeader>
+                {solutionModelSections.has('workspace-operations') && (
+                  <CardContent>
+                    <BlueDolphinWorkspaceOperations
+                      config={{
+                        protocol: 'REST',
+                        apiUrl: 'https://public-api.eu.bluedolphin.app',
+                        odataUrl: 'https://csgipoc.odata.bluedolphin.app',
+                        apiKey: 'f49253d1-32c7-492a-b022-64caab216d49',
+                        username: 'csgipoc',
+                        password: 'ef498b94-732b-46c8-a24c-65fbd27c1482',
+                        userApiKey: '1664f037-6c28-41d7-bd7f-5023c197b169',
+                        workspaceId: '68b8214f5b12ebdcb8e00345',
+                      }}
+                    />
+                  </CardContent>
+                )}
+              </Card>
+
+              {/* Visualization (Blue Dolphin Graph) */}
+              <Card>
+                <CardHeader
+                  className="cursor-pointer transition-colors hover:bg-gray-50"
+                  onClick={() => toggleSolutionModelSection('visualization')}
+                >
+                  <CardTitle className="flex items-center justify-between">
+                    <span>Visualization (Blue Dolphin Graph)</span>
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                      {solutionModelSections.has('visualization') ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </CardTitle>
+                  <CardDescription>
+                    Explore objects as nodes and relationships as links with dedicated visualization
+                    filters
+                  </CardDescription>
+                </CardHeader>
+                {solutionModelSections.has('visualization') && (
+                  <CardContent>
+                    <BlueDolphinVisualization
+                      config={{
+                        protocol: 'ODATA',
+                        apiUrl: 'https://csgipoc.odata.bluedolphin.app',
+                        odataUrl: 'https://csgipoc.odata.bluedolphin.app',
+                        apiKey: '',
+                        username: 'csgipoc',
+                        password: 'ef498b94-732b-46c8-a24c-65fbd27c1482',
+                      }}
+                    />
+                  </CardContent>
+                )}
+              </Card>
 
               {/* Domain Management Section */}
               <Card>
@@ -1589,106 +1729,6 @@ export default function HomePage() {
                     <p className="text-sm text-gray-600">
                       Capability management functionality will be implemented here.
                     </p>
-                  </CardContent>
-                )}
-              </Card>
-
-              {/* Requirements Synchronization Section */}
-              <Card>
-                <CardHeader
-                  className="cursor-pointer transition-colors hover:bg-gray-50"
-                  onClick={() => toggleSolutionModelSection('requirements-sync')}
-                >
-                  <CardTitle className="flex items-center justify-between">
-                    <span>Requirements Synchronization</span>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                      {solutionModelSections.has('requirements-sync') ? (
-                        <ChevronDown className="h-4 w-4" />
-                      ) : (
-                        <ChevronRight className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </CardTitle>
-                  <CardDescription>Synchronize requirements between systems</CardDescription>
-                </CardHeader>
-                {solutionModelSections.has('requirements-sync') && (
-                  <CardContent>
-                    <p className="text-sm text-gray-600">
-                      Requirements synchronization functionality will be implemented here.
-                    </p>
-                  </CardContent>
-                )}
-              </Card>
-
-              {/* Object Data Section */}
-              <Card>
-                <CardHeader
-                  className="cursor-pointer transition-colors hover:bg-gray-50"
-                  onClick={() => toggleSolutionModelSection('object-data')}
-                >
-                  <CardTitle className="flex items-center justify-between">
-                    <span>Object Data</span>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                      {solutionModelSections.has('object-data') ? (
-                        <ChevronDown className="h-4 w-4" />
-                      ) : (
-                        <ChevronRight className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </CardTitle>
-                  <CardDescription>
-                    Retrieve and manage Blue Dolphin objects with enhanced metadata
-                  </CardDescription>
-                </CardHeader>
-                {solutionModelSections.has('object-data') && (
-                  <CardContent>
-                    <BlueDolphinIntegration
-                      config={{
-                        protocol: 'ODATA',
-                        apiUrl: 'https://csgipoc.odata.bluedolphin.app',
-                        odataUrl: 'https://csgipoc.odata.bluedolphin.app',
-                        apiKey: '',
-                        username: 'csgipoc',
-                        password: 'ef498b94-732b-46c8-a24c-65fbd27c1482',
-                      }}
-                    />
-                  </CardContent>
-                )}
-              </Card>
-
-              {/* Visualization (Blue Dolphin Graph) */}
-              <Card>
-                <CardHeader
-                  className="cursor-pointer transition-colors hover:bg-gray-50"
-                  onClick={() => toggleSolutionModelSection('visualization')}
-                >
-                  <CardTitle className="flex items-center justify-between">
-                    <span>Visualization (Blue Dolphin Graph)</span>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                      {solutionModelSections.has('visualization') ? (
-                        <ChevronDown className="h-4 w-4" />
-                      ) : (
-                        <ChevronRight className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </CardTitle>
-                  <CardDescription>
-                    Explore objects as nodes and relationships as links with dedicated visualization
-                    filters
-                  </CardDescription>
-                </CardHeader>
-                {solutionModelSections.has('visualization') && (
-                  <CardContent>
-                    <BlueDolphinVisualization
-                      config={{
-                        protocol: 'ODATA',
-                        apiUrl: 'https://csgipoc.odata.bluedolphin.app',
-                        odataUrl: 'https://csgipoc.odata.bluedolphin.app',
-                        apiKey: '',
-                        username: 'csgipoc',
-                        password: 'ef498b94-732b-46c8-a24c-65fbd27c1482',
-                      }}
-                    />
                   </CardContent>
                 )}
               </Card>

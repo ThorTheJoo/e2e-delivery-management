@@ -1,4 +1,4 @@
-import { supabase, getServerSupabaseClient } from './supabase';
+import { getServerSupabaseClient } from './supabase';
 
 // TMF Reference Data Types
 export interface TMFDomain {

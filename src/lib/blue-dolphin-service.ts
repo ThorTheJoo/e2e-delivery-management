@@ -12,9 +12,7 @@ import {
   BlueDolphinConfig,
   SyncResult,
   SyncOperation,
-  UserApiKeyGenerationRequest,
-  UserApiKeyGenerationResponse,
-} from '@/types/blue-dolphin';
+} from '../types/blue-dolphin';
 
 export abstract class BlueDolphinBaseService {
   protected baseUrl: string;
@@ -96,6 +94,33 @@ export class BlueDolphinRestService extends BlueDolphinBaseService {
   }
 
   // User API Key Management
+  async retrieveUserApiKeys(
+    userKeyManagementApiKey: string,
+    userId: string
+  ): Promise<{ success: boolean; apiKeys?: any[]; error?: string }> {
+    try {
+      const response = await fetch(`${this.baseUrl}/v1/user-api-keys?user_id=${userId}`, {
+        method: 'GET',
+        headers: {
+          'x-api-key': userKeyManagementApiKey,
+          'TENANT': this.tenant,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return { success: true, apiKeys: data.value || data.data || [] };
+      } else {
+        const errorData = await response.json();
+        return { success: false, error: errorData.errors || 'Failed to retrieve API keys' };
+      }
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  }
+
   async generateUserApiKey(
     userKeyManagementApiKey: string,
     userId: string,
@@ -159,12 +184,41 @@ export class BlueDolphinRestService extends BlueDolphinBaseService {
       throw new Error('User API Key not configured');
     }
 
-    const params = new URLSearchParams({
-      workspace_id: this.workspaceId || 'default',
-      ...options
+    // Build query parameters
+    const params = new URLSearchParams();
+    
+    // Add workspace_id if provided in options or config
+    if (options?.workspace_id) {
+      params.append('workspace_id', options.workspace_id);
+    } else if (this.workspaceId) {
+      params.append('workspace_id', this.workspaceId);
+    }
+    
+    // Add other optional parameters
+    if (options?.status) {
+      params.append('status', options.status);
+    }
+    if (options?.filter) {
+      params.append('filter', options.filter);
+    }
+    if (options?.top) {
+      params.append('top', options.top.toString());
+    }
+    if (options?.orderby) {
+      params.append('orderby', options.orderby);
+    }
+
+    const url = `${this.baseUrl}/v1/objects${params.toString() ? '?' + params.toString() : ''}`;
+    
+    console.log('🔍 [Blue Dolphin Service] REST API Request URL:', url);
+    console.log('🔍 [Blue Dolphin Service] Query Parameters:', Object.fromEntries(params.entries()));
+    console.log('🔍 [Blue Dolphin Service] Options received:', options);
+    console.log('🔍 [Blue Dolphin Service] REST API Headers:', {
+      'x-api-key': this.userApiKey ? '***' : 'NOT SET',
+      'TENANT': this.tenant
     });
 
-    const response = await fetch(`${this.baseUrl}/v1/objects?${params}`, {
+    const response = await fetch(url, {
       method: 'GET',
       headers: {
         'x-api-key': this.userApiKey,
@@ -174,12 +228,30 @@ export class BlueDolphinRestService extends BlueDolphinBaseService {
       }
     });
 
+    console.log('REST API Response Status:', response.status);
+    console.log('REST API Response Headers:', Object.fromEntries(response.headers.entries()));
+
     if (!response.ok) {
-      throw new Error(`Failed to fetch objects: ${response.statusText}`);
+      const errorText = await response.text();
+      console.error('REST API Error Response:', errorText);
+      throw new Error(`Failed to fetch objects: ${response.statusText} - ${errorText}`);
     }
 
     const data = await response.json();
-    return data.value || data.data || [];
+    console.log('🔍 [Blue Dolphin Service] REST API Response Data:', data);
+    console.log('🔍 [Blue Dolphin Service] Response structure:', {
+      hasItems: !!data.items,
+      hasValue: !!data.value,
+      hasData: !!data.data,
+      itemsLength: data.items?.length || 0,
+      valueLength: data.value?.length || 0,
+      dataLength: data.data?.length || 0,
+      totalCount: data.total_count || data.totalCount || data['@odata.count'] || 'unknown'
+    });
+    
+    const result = data.items || data.value || data.data || [];
+    console.log('🔍 [Blue Dolphin Service] Returning objects count:', result.length);
+    return result;
   }
 
   async createObject(object: any): Promise<any> {
@@ -218,6 +290,12 @@ export class BlueDolphinRestService extends BlueDolphinBaseService {
       throw new Error('User API Key not configured');
     }
 
+    console.log('REST API Update Object:', {
+      id,
+      object,
+      url: `${this.baseUrl}/v1/objects/${id}`
+    });
+
     const response = await fetch(`${this.baseUrl}/v1/objects/${id}`, {
       method: 'PUT',
       headers: {
@@ -229,12 +307,53 @@ export class BlueDolphinRestService extends BlueDolphinBaseService {
       body: JSON.stringify(object)
     });
 
+    console.log('REST API Update Response Status:', response.status);
+
     if (!response.ok) {
       const errorData = await response.json();
+      console.error('REST API Update Error:', errorData);
       throw new Error(`Failed to update object: ${errorData.errors || response.statusText}`);
     }
 
-    return await response.json();
+    const result = await response.json();
+    console.log('REST API Update Success:', result);
+    return result;
+  }
+
+  // Update object definition
+  async updateObjectDefinition(objectDefinitionId: string, updateData: any): Promise<any> {
+    if (!this.userApiKey) {
+      throw new Error('User API Key not configured');
+    }
+
+    console.log('REST API Update Object Definition:', {
+      objectDefinitionId,
+      updateData,
+      url: `${this.baseUrl}/v1/object-definitions/${objectDefinitionId}`
+    });
+
+    const response = await fetch(`${this.baseUrl}/v1/object-definitions/${objectDefinitionId}`, {
+      method: 'PUT',
+      headers: {
+        'x-api-key': this.userApiKey,
+        'TENANT': this.tenant,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(updateData)
+    });
+
+    console.log('REST API Update Object Definition Response Status:', response.status);
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('REST API Update Object Definition Error:', errorData);
+      throw new Error(`Failed to update object definition: ${errorData.errors || response.statusText}`);
+    }
+
+    const result = await response.json();
+    console.log('REST API Update Object Definition Success:', result);
+    return result;
   }
 
   async deleteObject(id: string): Promise<boolean> {

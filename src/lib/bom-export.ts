@@ -198,7 +198,8 @@ export class BOMExportGenerator {
       if (typeof window !== 'undefined') {
         const raw = localStorage.getItem('complexity-selection');
         if (raw) {
-          const _selection = JSON.parse(raw);
+          const ignored = JSON.parse(raw);
+          void ignored;
           // Calculate multiplier based on complexity selection
           // This is a simplified version - you might want to implement the full complexity calculation
           return 1.0; // Placeholder

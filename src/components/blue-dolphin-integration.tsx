@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,10 +38,29 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
     new Set(['debug', 'raw-data', 'enhanced-analysis']),
   );
   const [bypassCache, setBypassCache] = useState(false);
+  const [availableWorkspaces, setAvailableWorkspaces] = useState<string[]>([]);
+  const [workspacesLoading, setWorkspacesLoading] = useState(false);
+  const [workspacesError, setWorkspacesError] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>('Accepted');
+  const [availableStatuses, setAvailableStatuses] = useState<string[]>([]);
+  const [relSrcStatus, setRelSrcStatus] = useState<string>('Accepted');
+  const [relTgtStatus, setRelTgtStatus] = useState<string>('Accepted');
+  const [exportStatus, setExportStatus] = useState<string>('Accepted');
 
   const loadObjects = useCallback(async () => {
-    if (!config.odataUrl) {
+    // Check if we have the required configuration based on protocol
+    if (config.protocol === 'ODATA' && !config.odataUrl) {
       setError('OData URL not configured');
+      return;
+    }
+    
+    if (config.protocol === 'REST' && !config.userApiKey) {
+      setError('User API Key not configured for REST protocol');
+      return;
+    }
+    
+    if (config.protocol === 'HYBRID' && !config.odataUrl && !config.userApiKey) {
+      setError('Either OData URL or User API Key must be configured for HYBRID protocol');
       return;
     }
 
@@ -49,25 +68,68 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
     setError(null);
 
     try {
-      const action = useEnhancedFields ? 'get-objects-enhanced' : 'get-objects';
+      // Determine action based on protocol and enhanced fields setting
+      let action: string;
+      if (config.protocol === 'REST') {
+        action = 'get-objects-rest';
+      } else if (config.protocol === 'ODATA') {
+        action = useEnhancedFields ? 'get-objects-enhanced' : 'get-objects';
+      } else { // HYBRID - prefer OData if available, fallback to REST
+        if (config.odataUrl) {
+          action = useEnhancedFields ? 'get-objects-enhanced' : 'get-objects';
+        } else {
+          action = 'get-objects-rest';
+        }
+      }
 
-      // Build combined filter including workspace filter
-      let combinedFilter = filter;
-      if (workspaceFilter && workspaceFilter !== 'all') {
-        const workspaceCondition = `Workspace eq '${workspaceFilter}'`;
-        combinedFilter = filter ? `${filter} and ${workspaceCondition}` : workspaceCondition;
+      // Build request data based on protocol
+      let requestData: any = {
+        endpoint: selectedEndpoint,
+        top: resultsLimit,
+        orderby: 'Title asc',
+      };
+
+      if (action === 'get-objects-rest') {
+        // REST API parameters
+        if (workspaceFilter && workspaceFilter !== 'all') {
+          requestData.workspace_id = workspaceFilter;
+        }
+        if (statusFilter && statusFilter !== 'all') {
+          requestData.status = statusFilter;
+        }
+        if (filter) {
+          requestData.filter = filter;
+        }
+      } else {
+        // OData parameters
+        let combinedFilter = filter;
+        const filterParts: string[] = [];
+        
+        if (workspaceFilter && workspaceFilter !== 'all') {
+          filterParts.push(`Workspace eq '${workspaceFilter}'`);
+        }
+        
+        if (statusFilter && statusFilter !== 'all') {
+          filterParts.push(`Status eq '${statusFilter}'`);
+        }
+        
+        if (filter) {
+          filterParts.push(`(${filter})`);
+        }
+        
+        combinedFilter = filterParts.join(' and ');
+        
+        requestData = {
+          ...requestData,
+          filter: combinedFilter,
+          ...(useEnhancedFields && { moreColumns: true }),
+        };
       }
 
       const requestBody = {
         action: action,
         config: config,
-        data: {
-          endpoint: selectedEndpoint,
-          filter: combinedFilter,
-          top: resultsLimit, // Use the selected results limit
-          orderby: 'Title asc',
-          ...(useEnhancedFields && { moreColumns: true }),
-        },
+        data: requestData,
       };
 
       console.log(`Loading objects with ${action}...`, requestBody);
@@ -85,11 +147,25 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
         setObjectTotal(result.total || 0);
         setLastDataUpdate(new Date());
         setLastApiResponse(result);
+        
+        // Extract available statuses from the response
+        const statuses = Array.from(
+          new Set(
+            (result.data || [])
+              .map((obj: any) => obj.Status)
+              .filter((status: any): status is string => 
+                typeof status === 'string' && status.trim() !== ''
+              )
+          )
+        ).sort();
+        setAvailableStatuses(statuses as string[]);
+        
         console.log(
           `✅ Loaded ${result.count} objects with enhanced fields:`,
           result.enhancedFields,
         );
         console.log(`🕒 Data last updated: ${new Date().toISOString()}`);
+        console.log(`📊 Available statuses:`, statuses);
         console.log(`📊 API Response:`, result);
       } else {
         setError(result.error || 'Failed to load objects');
@@ -102,21 +178,14 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
     } finally {
       setLoading(false);
     }
-  }, [
-    config,
-    selectedEndpoint,
-    filter,
-    objectDefinitionFilter,
-    workspaceFilter,
-    useEnhancedFields,
-    resultsLimit,
-  ]);
+  }, [config, selectedEndpoint, filter, workspaceFilter, statusFilter, useEnhancedFields, resultsLimit]);
 
   const clearObjects = () => {
     setObjects([]);
     setObjectTotal(0);
     setError(null);
     setWorkspaceFilter('');
+    setStatusFilter('Accepted');
   };
 
   const toggleSection = (sectionId: string) => {
@@ -190,7 +259,7 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
   const [relName, setRelName] = useState('');
   const [relRawFilter, setRelRawFilter] = useState('');
 
-  const buildRelationsFilter = (): string => {
+  const buildRelationsFilter = useCallback((): string => {
     const parts: string[] = [];
     if (relDefName) parts.push(`RelationshipDefinitionName eq '${relDefName}'`);
     if (relSrcDef) parts.push(`BlueDolphinObjectDefinitionName eq '${relSrcDef}'`);
@@ -206,8 +275,12 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
       parts.push(workspaceCondition);
     }
 
+    // Note: Status filtering for relations would require additional queries
+    // as relations don't have direct status fields. This would need to be
+    // handled by filtering the related objects separately.
+
     return parts.join(' and ');
-  };
+  }, [relDefName, relSrcDef, relTgtWs, relTgtDef, relType, relName, relRawFilter, workspaceFilter]);
 
   const loadRelations = useCallback(async () => {
     if (!config.odataUrl) {
@@ -244,17 +317,7 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
     } finally {
       setRelationsLoading(false);
     }
-  }, [
-    config,
-    relDefName,
-    relSrcDef,
-    relTgtWs,
-    relTgtDef,
-    relType,
-    relName,
-    relRawFilter,
-    relationsTop,
-  ]);
+  }, [config, relDefName, relSrcDef, relTgtWs, relTgtDef, relType, relName, relRawFilter, relationsTop]);
 
   const unique = (arr: (string | undefined)[]) =>
     Array.from(new Set(arr.filter(Boolean) as string[])).sort();
@@ -297,18 +360,21 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
     null,
   );
 
-  const buildObjectsFilterForExport = (): string => {
+  const buildObjectsFilterForExport = useCallback((): string => {
     const parts: string[] = [];
     if (workspaceFilter && workspaceFilter !== 'all') {
       parts.push(`Workspace eq '${workspaceFilter}'`);
+    }
+    if (exportStatus && exportStatus !== 'all') {
+      parts.push(`Status eq '${exportStatus}'`);
     }
     if (exportObjectDefinition) {
       parts.push(`Definition eq '${exportObjectDefinition}'`);
     }
     return parts.join(' and ');
-  };
+  }, [workspaceFilter, exportStatus, exportObjectDefinition]);
 
-  const buildRelationsFilterForExport = (): string => {
+  const buildRelationsFilterForExport = useCallback((): string => {
     const parts: string[] = [];
     if (workspaceFilter && workspaceFilter !== 'all') {
       const both = `(BlueDolphinObjectWorkspaceName eq '${workspaceFilter}' and RelatedBlueDolphinObjectWorkspaceName eq '${workspaceFilter}')`;
@@ -322,9 +388,9 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
       );
     }
     return parts.join(' and ');
-  };
+  }, [workspaceFilter, exportRelationType, exportObjectDefinition, exportWorkspaceScope]);
 
-  const joinRelationsWithObjects = (
+  const joinRelationsWithObjects = useCallback((
     rels: BlueDolphinRelation[],
     objs: BlueDolphinObjectEnhanced[],
   ): JoinedExportRow[] => {
@@ -339,7 +405,7 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
       if (s && t) rows.push({ relation: r, source: s, target: t });
     }
     return rows;
-  };
+  }, []);
 
   const loadExportDataset = useCallback(async () => {
     if (!config.odataUrl) {
@@ -422,14 +488,7 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
     } finally {
       setExportLoading(false);
     }
-  }, [
-    config,
-    workspaceFilter,
-    exportRelationType,
-    exportObjectDefinition,
-    exportWorkspaceScope,
-    exportLimit,
-  ]);
+  }, [config, workspaceFilter, exportRelationType, exportObjectDefinition, exportWorkspaceScope, exportLimit]);
 
   function isEnhancedKey(key: string): boolean {
     return (
@@ -539,10 +598,87 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
     setBypassCache(false); // Reset bypass cache
   }, [loadObjects]);
 
+  const refreshWorkspaces = useCallback(async () => {
+    if (!config.odataUrl) {
+      setWorkspacesError('OData URL not configured');
+      return;
+    }
+
+    setWorkspacesLoading(true);
+    setWorkspacesError(null);
+
+    try {
+      const requestBody = {
+        action: 'get-objects-enhanced',
+        config: config,
+        data: {
+          endpoint: '/Objects',
+          filter: '', // No filter to get all workspaces
+          top: 1000, // Get a large sample to find all workspaces
+          orderby: 'Title asc',
+          moreColumns: false, // We only need the Workspace field
+        },
+      };
+
+      console.log('Refreshing workspaces from OData...', requestBody);
+
+      const response = await fetch('/api/blue-dolphin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Extract unique workspace names from the objects
+        const workspaceNames: string[] = (result.data || [])
+          .map((obj: any) => obj.Workspace)
+          .filter((workspace: any): workspace is string => 
+            typeof workspace === 'string' && workspace.trim() !== ''
+          );
+        
+        const workspaces: string[] = Array.from(new Set(workspaceNames)).sort();
+
+        setAvailableWorkspaces(workspaces as string[]);
+        console.log(`✅ Refreshed ${workspaces.length} workspaces:`, workspaces);
+      } else {
+        setWorkspacesError(result.error || 'Failed to load workspaces');
+        console.error('❌ Failed to load workspaces:', result.error);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      setWorkspacesError(errorMessage);
+      console.error('❌ Error loading workspaces:', error);
+    } finally {
+      setWorkspacesLoading(false);
+    }
+  }, [config]);
+
+  // Auto-refresh workspaces when component mounts
+  useEffect(() => {
+    if (config.odataUrl && availableWorkspaces.length === 0) {
+      refreshWorkspaces();
+    }
+  }, [config.odataUrl, availableWorkspaces.length, refreshWorkspaces]);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Blue Dolphin Integration</h2>
+        <div className="flex items-center space-x-4">
+          <h2 className="text-2xl font-bold">Blue Dolphin Integration</h2>
+          <Badge 
+            variant={config.protocol === 'REST' ? 'default' : config.protocol === 'ODATA' ? 'secondary' : 'outline'}
+            className="text-xs"
+          >
+            {config.protocol} Protocol
+          </Badge>
+          {config.protocol === 'HYBRID' && (
+            <Badge variant="outline" className="text-xs">
+              {config.odataUrl ? 'OData Available' : 'REST Only'}
+            </Badge>
+          )}
+        </div>
         <div className="flex items-center space-x-2">
           <Badge variant={useEnhancedFields ? 'default' : 'secondary'}>
             {useEnhancedFields ? 'Enhanced Fields' : 'Standard Fields'}
@@ -621,7 +757,7 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
               <div>
                 <Label htmlFor="resultsLimit">Results Limit</Label>
                 <Select
@@ -650,7 +786,18 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
                 </div>
               </div>
               <div>
-                <Label htmlFor="workspaceFilter">Workspace Filter</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="workspaceFilter">Workspace Filter</Label>
+                  <Button
+                    onClick={refreshWorkspaces}
+                    disabled={workspacesLoading}
+                    variant="outline"
+                    size="sm"
+                    className="h-6 px-2 text-xs"
+                  >
+                    {workspacesLoading ? 'Refreshing...' : '🔄 Refresh'}
+                  </Button>
+                </div>
                 <Select
                   value={workspaceFilter || 'all'}
                   onValueChange={(value) => setWorkspaceFilter(value === 'all' ? '' : value)}
@@ -660,14 +807,53 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Workspaces</SelectItem>
-                    <SelectItem value="CSG International">CSG International</SelectItem>
-                    <SelectItem value="Product Architecture">Product Architecture</SelectItem>
-                    <SelectItem value="Customer Q">Customer Q</SelectItem>
-                    <SelectItem value="Simulated Case Study">Simulated Case Study</SelectItem>
-                    <SelectItem value="RR">RR</SelectItem>
+                    {availableWorkspaces.map((workspace) => (
+                      <SelectItem key={workspace} value={workspace}>
+                        {workspace}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
-                <div className="mt-1 text-xs text-gray-500">Filter objects by workspace name</div>
+                <div className="mt-1 text-xs text-gray-500">
+                  Filter objects by workspace name
+                  {availableWorkspaces.length > 0 && (
+                    <span className="ml-1 text-green-600">
+                      ({availableWorkspaces.length} workspaces loaded)
+                    </span>
+                  )}
+                </div>
+                {workspacesError && (
+                  <div className="mt-1 text-xs text-red-600">{workspacesError}</div>
+                )}
+              </div>
+              <div>
+                <Label htmlFor="statusFilter">Status Filter</Label>
+                <Select
+                  value={statusFilter || 'all'}
+                  onValueChange={(value) => setStatusFilter(value === 'all' ? '' : value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="All Statuses" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="Accepted">Accepted</SelectItem>
+                    <SelectItem value="Archived">Archived</SelectItem>
+                    {availableStatuses.map((status) => (
+                      <SelectItem key={status} value={status}>
+                        {status}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="mt-1 text-xs text-gray-500">
+                  Filter objects by status
+                  {availableStatuses.length > 0 && (
+                    <span className="ml-1 text-green-600">
+                      ({availableStatuses.length} statuses available)
+                    </span>
+                  )}
+                </div>
               </div>
               <div>
                 <Label htmlFor="textSearch">Text Search (Simple)</Label>
@@ -1343,7 +1529,7 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
             </div>
 
             {/* Filters */}
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
               <div>
                 <Label>RelationshipDefinitionName</Label>
                 <Select
@@ -1393,7 +1579,7 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All</SelectItem>
-                    {uniqueTgtWs.map((v) => (
+                    {availableWorkspaces.map((v) => (
                       <SelectItem key={v} value={v}>
                         {v}
                       </SelectItem>
@@ -1460,11 +1646,67 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
               </div>
             </div>
 
+            {/* Status Filters for Relations */}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div>
+                <Label>Source Object Status</Label>
+                <Select
+                  value={relSrcStatus || 'all'}
+                  onValueChange={(v) => setRelSrcStatus(v === 'all' ? '' : v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="All Statuses" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="Accepted">Accepted</SelectItem>
+                    <SelectItem value="Archived">Archived</SelectItem>
+                    {availableStatuses.map((status) => (
+                      <SelectItem key={`src-${status}`} value={status}>
+                        {status}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="mt-1 text-xs text-gray-500">
+                  Filter by source object status (Note: Requires additional filtering)
+                </div>
+              </div>
+              <div>
+                <Label>Target Object Status</Label>
+                <Select
+                  value={relTgtStatus || 'all'}
+                  onValueChange={(v) => setRelTgtStatus(v === 'all' ? '' : v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="All Statuses" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="Accepted">Accepted</SelectItem>
+                    <SelectItem value="Archived">Archived</SelectItem>
+                    {availableStatuses.map((status) => (
+                      <SelectItem key={`tgt-${status}`} value={status}>
+                        {status}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="mt-1 text-xs text-gray-500">
+                  Filter by target object status (Note: Requires additional filtering)
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center gap-2">
               <Button onClick={loadRelations} disabled={relationsLoading}>
                 {relationsLoading ? 'Loading...' : 'Load Relationships'}
               </Button>
-              <Button variant="outline" onClick={() => setRelations([])}>
+              <Button variant="outline" onClick={() => {
+                setRelations([]);
+                setRelSrcStatus('Accepted');
+                setRelTgtStatus('Accepted');
+              }}>
                 Clear
               </Button>
             </div>
@@ -1583,7 +1825,7 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
         </CardHeader>
         {expandedSections.has('export-csv') && (
           <CardContent className="space-y-4 pt-0">
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
               <div>
                 <Label>Workspace (required)</Label>
                 <Select
@@ -1595,14 +1837,36 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All (disabled)</SelectItem>
-                    <SelectItem value="CSG International">CSG International</SelectItem>
-                    <SelectItem value="Product Architecture">Product Architecture</SelectItem>
-                    <SelectItem value="Customer Q">Customer Q</SelectItem>
-                    <SelectItem value="Simulated Case Study">Simulated Case Study</SelectItem>
-                    <SelectItem value="RR">RR</SelectItem>
+                    {availableWorkspaces.map((workspace) => (
+                      <SelectItem key={workspace} value={workspace}>
+                        {workspace}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <div className="mt-1 text-xs text-gray-500">Applied to Objects and Relations</div>
+              </div>
+              <div>
+                <Label>Object Status</Label>
+                <Select
+                  value={exportStatus || 'all'}
+                  onValueChange={(value) => setExportStatus(value === 'all' ? '' : value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="All Statuses" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="Accepted">Accepted</SelectItem>
+                    <SelectItem value="Archived">Archived</SelectItem>
+                    {availableStatuses.map((status) => (
+                      <SelectItem key={status} value={status}>
+                        {status}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="mt-1 text-xs text-gray-500">Filter objects by status</div>
               </div>
               <div>
                 <Label>Object Type (Definition)</Label>
@@ -1709,6 +1973,7 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
                 onClick={() => {
                   setExportRows([]);
                   setExportError(null);
+                  setExportStatus('Accepted');
                 }}
               >
                 Clear

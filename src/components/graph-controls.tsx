@@ -176,6 +176,57 @@ export function GraphControls({
           </Select>
         </div>
 
+        <div>
+          <Label>Object Status</Label>
+          <Select
+            value={filters.status || 'all'}
+            onValueChange={(v) => setFilters({ status: v === 'all' ? '' : v })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="All Statuses" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="Accepted">Accepted</SelectItem>
+              <SelectItem value="Archived">Archived</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label>Source Object Status</Label>
+          <Select
+            value={filters.sourceStatus || 'all'}
+            onValueChange={(v) => setFilters({ sourceStatus: v === 'all' ? '' : v })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="All Statuses" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="Accepted">Accepted</SelectItem>
+              <SelectItem value="Archived">Archived</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label>Target Object Status</Label>
+          <Select
+            value={filters.targetStatus || 'all'}
+            onValueChange={(v) => setFilters({ targetStatus: v === 'all' ? '' : v })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="All Statuses" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="Accepted">Accepted</SelectItem>
+              <SelectItem value="Archived">Archived</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         <div className="flex items-end">
           <Button onClick={onLoad} disabled={loading}>
             {loading ? 'Loading...' : 'Load Visualization'}

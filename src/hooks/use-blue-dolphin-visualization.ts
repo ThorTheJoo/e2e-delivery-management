@@ -39,6 +39,9 @@ const DEFAULT_FILTERS: VisualizationFilters = {
   targetDefinition: '',
   resultsTop: 250,
   viewMode: 'overview',
+  status: 'Accepted',
+  sourceStatus: 'Accepted',
+  targetStatus: 'Accepted',
 };
 
 export function useBlueDolphinVisualization(

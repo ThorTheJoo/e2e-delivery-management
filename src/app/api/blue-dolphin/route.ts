@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createBlueDolphinService } from '@/lib/blue-dolphin-service';
+import { BlueDolphinRestService, createBlueDolphinService } from '../../../lib/blue-dolphin-service';
 
 function encodeBasicAuth(username: string, password: string): string {
   return Buffer.from(`${username}:${password}`).toString('base64');
@@ -449,7 +449,7 @@ export async function POST(request: NextRequest) {
 
           console.log('Response status:', response.status);
           console.log('Response status text:', response.statusText);
-          console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+          console.log('Response headers:', response.headers);
 
           if (!response.ok) {
             const errorText = await response.text();
@@ -1191,6 +1191,31 @@ export async function POST(request: NextRequest) {
           );
         }
 
+      case 'retrieve-user-api-keys':
+        const { userKeyManagementApiKey: retrieveApiKey, userId: retrieveUserId } = body;
+        
+        if (!retrieveApiKey || !retrieveUserId) {
+          return NextResponse.json(
+            { success: false, error: 'Missing required parameters' },
+            { status: 400 }
+          );
+        }
+
+        try {
+          const service = new BlueDolphinRestService(config);
+          const result = await service.retrieveUserApiKeys(
+            retrieveApiKey,
+            retrieveUserId
+          );
+          
+          return NextResponse.json(result);
+        } catch (error) {
+          return NextResponse.json(
+            { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+            { status: 500 }
+          );
+        }
+
       case 'generate-user-api-key':
         const { userKeyManagementApiKey, userId, keyName, expiryDate } = body;
         
@@ -1322,10 +1347,57 @@ export async function POST(request: NextRequest) {
           );
         }
 
-      case 'update-object':
-        const { objectId, objectData } = body;
+      case 'get-object-details':
+        const { objectId: detailsObjectId } = data || {};
         
-        if (!config.userApiKey || !objectId) {
+        if (!config.userApiKey || !detailsObjectId) {
+          return NextResponse.json(
+            { success: false, error: 'User API Key and Object ID required' },
+            { status: 400 }
+          );
+        }
+
+        try {
+          console.log('🔍 [Blue Dolphin] Retrieving object details for ID:', detailsObjectId);
+          
+          // Make direct API call to Blue Dolphin REST API
+          const response = await fetch(`https://public-api.eu.bluedolphin.app/v1/objects/${detailsObjectId}`, {
+            method: 'GET',
+            headers: {
+              'x-api-key': config.userApiKey,
+              'TENANT': (config as any).tenant || 'csgipoc',
+              'Accept': 'application/json'
+            }
+          });
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error('❌ [Blue Dolphin] Object details retrieval failed:', response.status, response.statusText);
+            console.error('❌ [Blue Dolphin] Error response:', errorText);
+            throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
+          }
+
+          const objectDetails = await response.json();
+          console.log('✅ [Blue Dolphin] Object details retrieved successfully');
+          console.log('📊 [Blue Dolphin] Object details keys:', Object.keys(objectDetails));
+          
+          return NextResponse.json({ 
+            success: true, 
+            data: objectDetails,
+            objectId: detailsObjectId
+          });
+        } catch (error) {
+          console.error('❌ [Blue Dolphin] Object details retrieval failed:', error);
+          return NextResponse.json(
+            { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+            { status: 500 }
+          );
+        }
+
+      case 'update-object':
+        const { objectId: updateObjectId, objectData } = body;
+        
+        if (!config.userApiKey || !updateObjectId) {
           return NextResponse.json(
             { success: false, error: 'User API Key and Object ID required' },
             { status: 400 }
@@ -1334,7 +1406,29 @@ export async function POST(request: NextRequest) {
 
         try {
           const service = new BlueDolphinRestService(config);
-          const result = await service.updateObject(objectId, objectData);
+          const result = await service.updateObject(updateObjectId, objectData);
+          
+          return NextResponse.json({ success: true, data: result });
+        } catch (error) {
+          return NextResponse.json(
+            { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+            { status: 500 }
+          );
+        }
+
+      case 'update-object-definition':
+        const { objectDefinitionId, updateData } = body;
+        
+        if (!config.userApiKey || !objectDefinitionId) {
+          return NextResponse.json(
+            { success: false, error: 'User API Key and Object Definition ID required' },
+            { status: 400 }
+          );
+        }
+
+        try {
+          const service = new BlueDolphinRestService(config);
+          const result = await service.updateObjectDefinition(objectDefinitionId, updateData);
           
           return NextResponse.json({ success: true, data: result });
         } catch (error) {

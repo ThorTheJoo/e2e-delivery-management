@@ -11,20 +11,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
-import {
-  Plus,
-  CheckCircle,
-  Circle,
-  Search,
-  AlertCircle,
-  Info,
-} from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Plus, Search, Info } from 'lucide-react';
 import { TMFFunction, TMFDomain } from '@/types';
 import { analyzeTMFReferenceGaps } from '@/lib/specsync-tmf-utils';
 
@@ -70,6 +58,8 @@ export function EnhancedAddCustomDomainDialog({
     if (open) {
       analyzeMissingItems();
     }
+    // analyzeMissingItems is stable in this component context
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, currentDomains]);
 
   const analyzeMissingItems = async () => {

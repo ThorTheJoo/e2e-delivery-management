@@ -450,7 +450,7 @@ export function BillOfMaterials({
   };
 
   // Legacy export function (kept for backward compatibility)
-  const _exportToCSVLegacy = () => {
+  const ignored = () => {
     // Load persisted complexity selection to compute multiplier (non-breaking)
     let complexityMultiplier = 1;
     let selection: any = null;
