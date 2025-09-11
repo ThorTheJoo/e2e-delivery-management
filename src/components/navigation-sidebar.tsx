@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { 
-  Route, 
-  Lightbulb, 
-  Rocket, 
-  Shield, 
-  ChevronDown, 
+import {
+  Route,
+  Lightbulb,
+  Rocket,
+  Shield,
+  ChevronDown,
   ChevronRight,
   BarChart3,
   Link,
@@ -33,7 +33,7 @@ import {
   Headphones,
   Award,
   Settings,
-  Palette
+  Palette,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -52,7 +52,11 @@ interface NavigationSidebarProps {
   onScrollToSection?: (section: string) => void;
 }
 
-export function NavigationSidebar({ activeTab, onTabChange, onScrollToSection }: NavigationSidebarProps) {
+export function NavigationSidebar({
+  activeTab,
+  onTabChange,
+  onScrollToSection,
+}: NavigationSidebarProps) {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
 
   const navigationItems: NavigationItem[] = [
@@ -66,37 +70,37 @@ export function NavigationSidebar({ activeTab, onTabChange, onScrollToSection }:
           label: 'Project Dashboard',
           icon: <BarChart3 className="h-4 w-4" />,
           action: 'tab',
-          target: 'dashboard'
+          target: 'dashboard',
         },
         {
           id: 'dependencies',
           label: 'Dependencies',
           icon: <Link className="h-4 w-4" />,
           action: 'tab',
-          target: 'dependencies'
+          target: 'dependencies',
         },
         {
           id: 'milestones',
           label: 'Milestones',
           icon: <Flag className="h-4 w-4" />,
           action: 'tab',
-          target: 'milestones'
+          target: 'milestones',
         },
         {
           id: 'documents',
           label: 'Documents',
           icon: <FileText className="h-4 w-4" />,
           action: 'tab',
-          target: 'documents'
+          target: 'documents',
         },
         {
           id: 'risks',
           label: 'Risks',
           icon: <AlertTriangle className="h-4 w-4" />,
           action: 'tab',
-          target: 'risks'
-        }
-      ]
+          target: 'risks',
+        },
+      ],
     },
     {
       id: 'tmf',
@@ -108,30 +112,30 @@ export function NavigationSidebar({ activeTab, onTabChange, onScrollToSection }:
           label: 'TMF ODA Management',
           icon: <Network className="h-4 w-4" />,
           action: 'tab',
-          target: 'tmf'
+          target: 'tmf',
         },
         {
           id: 'tmf-capabilities',
           label: 'TMF Capabilities',
           icon: <FileText className="h-4 w-4" />,
           action: 'tab',
-          target: 'tmf'
+          target: 'tmf',
         },
         {
           id: 'tmf-demo',
           label: 'TMF Demo',
           icon: <Rocket className="h-4 w-4" />,
           action: 'tab',
-          target: 'tmf-demo'
+          target: 'tmf-demo',
         },
         {
           id: 'etom',
           label: 'eTOM Processes',
           icon: <Route className="h-4 w-4" />,
           action: 'tab',
-          target: 'etom'
-        }
-      ]
+          target: 'etom',
+        },
+      ],
     },
     {
       id: 'solution-model',
@@ -143,30 +147,30 @@ export function NavigationSidebar({ activeTab, onTabChange, onScrollToSection }:
           label: 'Blue Dolphin Integration',
           icon: <Server className="h-4 w-4" />,
           action: 'tab',
-          target: 'blue-dolphin-integration'
+          target: 'blue-dolphin-integration',
         },
         {
           id: 'domain-management',
           label: 'Domain Management',
           icon: <Network className="h-4 w-4" />,
           action: 'tab',
-          target: 'domain-management'
+          target: 'domain-management',
         },
         {
           id: 'capability-mapping',
           label: 'Capability Mapping',
           icon: <Link className="h-4 w-4" />,
           action: 'tab',
-          target: 'capability-mapping'
+          target: 'capability-mapping',
         },
         {
           id: 'requirement-sync',
           label: 'Requirement Sync',
           icon: <ArrowLeftRight className="h-4 w-4" />,
           action: 'tab',
-          target: 'requirement-sync'
-        }
-      ]
+          target: 'requirement-sync',
+        },
+      ],
     },
     {
       id: 'presales',
@@ -174,62 +178,69 @@ export function NavigationSidebar({ activeTab, onTabChange, onScrollToSection }:
       icon: <Lightbulb className="h-4 w-4" />,
       children: [
         {
+          id: 'bill-of-materials',
+          label: 'Bill of Materials',
+          icon: <FileText className="h-4 w-4" />,
+          action: 'tab',
+          target: 'bill-of-materials',
+        },
+        {
           id: 'solution-design',
           label: 'Solution Design',
           icon: <PencilRuler className="h-4 w-4" />,
           action: 'tab',
-          target: 'workflow-status'
+          target: 'workflow-status',
         },
         {
           id: 'service-design',
           label: 'Service Design',
           icon: <Cog className="h-4 w-4" />,
           action: 'tab',
-          target: 'workflow-status'
+          target: 'workflow-status',
         },
         {
           id: 'estimation',
           label: 'Estimation',
           icon: <Calculator className="h-4 w-4" />,
           action: 'tab',
-          target: 'estimation'
+          target: 'estimation',
         },
         {
           id: 'work-breakdown',
           label: 'Work Breakdown',
           icon: <Network className="h-4 w-4" />,
           action: 'tab',
-          target: 'workflow-status'
+          target: 'workflow-status',
         },
         {
           id: 'scheduling',
           label: 'Scheduling',
           icon: <Calendar className="h-4 w-4" />,
           action: 'tab',
-          target: 'scheduling'
+          target: 'scheduling',
         },
         {
           id: 'commercial-model',
           label: 'Commercial Model',
           icon: <DollarSign className="h-4 w-4" />,
           action: 'tab',
-          target: 'commercial'
+          target: 'commercial',
         },
         {
           id: 'contracting',
           label: 'Contracting',
           icon: <FileContract className="h-4 w-4" />,
           action: 'tab',
-          target: 'workflow-status'
+          target: 'workflow-status',
         },
         {
           id: 'handover',
           label: 'Handover',
           icon: <Users className="h-4 w-4" />,
           action: 'tab',
-          target: 'workflow-status'
-        }
-      ]
+          target: 'workflow-status',
+        },
+      ],
     },
     {
       id: 'delivery',
@@ -241,79 +252,79 @@ export function NavigationSidebar({ activeTab, onTabChange, onScrollToSection }:
           label: 'Governance',
           icon: <Shield className="h-4 w-4" />,
           action: 'tab',
-          target: 'workflow-status'
+          target: 'workflow-status',
         },
         {
           id: 'definition',
           label: 'Definition',
           icon: <ClipboardList className="h-4 w-4" />,
           action: 'tab',
-          target: 'workflow-status'
+          target: 'workflow-status',
         },
         {
           id: 'architecture-design',
           label: 'Architecture & Design',
           icon: <Compass className="h-4 w-4" />,
           action: 'tab',
-          target: 'workflow-status'
+          target: 'workflow-status',
         },
         {
           id: 'build',
           label: 'Build',
           icon: <Hammer className="h-4 w-4" />,
           action: 'tab',
-          target: 'workflow-status'
+          target: 'workflow-status',
         },
         {
           id: 'integration-testing',
           label: 'Integration Testing',
           icon: <Plug className="h-4 w-4" />,
           action: 'tab',
-          target: 'workflow-status'
+          target: 'workflow-status',
         },
         {
           id: 'migration',
           label: 'Migration',
           icon: <ArrowLeftRight className="h-4 w-4" />,
           action: 'tab',
-          target: 'workflow-status'
+          target: 'workflow-status',
         },
         {
           id: 'cutover',
           label: 'Cutover',
           icon: <ToggleLeft className="h-4 w-4" />,
           action: 'tab',
-          target: 'workflow-status'
+          target: 'workflow-status',
         },
         {
           id: 'release',
           label: 'Release',
           icon: <Send className="h-4 w-4" />,
           action: 'tab',
-          target: 'workflow-status'
+          target: 'workflow-status',
         },
         {
           id: 'production-cutover',
           label: 'Production Cutover',
           icon: <Server className="h-4 w-4" />,
           action: 'tab',
-          target: 'workflow-status'
+          target: 'workflow-status',
         },
         {
           id: 'post-production',
           label: 'Post Production',
           icon: <TrendingUp className="h-4 w-4" />,
           action: 'tab',
-          target: 'workflow-status'
+          target: 'workflow-status',
         },
         {
           id: 'hypercare',
           label: 'Hypercare',
           icon: <Headphones className="h-4 w-4" />,
           action: 'tab',
-          target: 'workflow-status'
-        }
-      ]
+          target: 'workflow-status',
+        },
+      ],
     },
     {
       id: 'managed-services',
@@ -325,23 +336,23 @@ export function NavigationSidebar({ activeTab, onTabChange, onScrollToSection }:
           label: 'Transitioning',
           icon: <ArrowLeftRight className="h-4 w-4" />,
           action: 'tab',
-          target: 'workflow-status'
+          target: 'workflow-status',
         },
         {
           id: 'warranty',
           label: 'Warranty',
           icon: <Award className="h-4 w-4" />,
           action: 'tab',
-          target: 'workflow-status'
+          target: 'workflow-status',
         },
         {
           id: 'operations-handover',
           label: 'Operations Handover',
           icon: <Users className="h-4 w-4" />,
           action: 'tab',
-          target: 'workflow-status'
-        }
-      ]
+          target: 'workflow-status',
+        },
+      ],
     },
     {
       id: 'configurations',
@@ -353,31 +364,45 @@ export function NavigationSidebar({ activeTab, onTabChange, onScrollToSection }:
           label: 'Blue Dolphin Configuration',
           icon: <Server className="h-4 w-4" />,
           action: 'tab',
-          target: 'blue-dolphin-config'
+          target: 'blue-dolphin-config',
         },
         {
           id: 'miro-config',
           label: 'Miro Configuration',
           icon: <Palette className="h-4 w-4" />,
           action: 'tab',
-          target: 'miro-config'
+          target: 'miro-config',
         },
         {
           id: 'miro-setup',
           label: 'Miro Setup Guide',
           icon: <Settings className="h-4 w-4" />,
           action: 'tab',
-          target: 'miro-setup'
+          target: 'miro-setup',
         },
-                        {
-                  id: 'ado-config',
-                  label: 'ADO Configuration',
-                  icon: <Server className="h-4 w-4" />,
-                  action: 'tab',
-                  target: 'ado-config'
-                }
-      ]
-    }
+        {
+          id: 'ado-config',
+          label: 'ADO Configuration',
+          icon: <Server className="h-4 w-4" />,
+          action: 'tab',
+          target: 'ado-config',
+        },
+        {
+          id: 'supabase-config',
+          label: 'Supabase Configuration',
+          icon: <Server className="h-4 w-4" />,
+          action: 'tab',
+          target: 'supabase-config',
+        },
+        {
+          id: 'bom-config',
+          label: 'BOM Configuration',
+          icon: <Settings className="h-4 w-4" />,
+          action: 'tab',
+          target: 'bom-config',
+        },
+      ],
+    },
   ];
 
   const toggleSection = (sectionId: string) => {
@@ -404,23 +429,23 @@ export function NavigationSidebar({ activeTab, onTabChange, onScrollToSection }:
     const isActive = item.action === 'tab' && item.target === activeTab;
 
     return (
-      <div key={item.id} className={cn("space-y-1", level > 0 && "ml-4")}>
+      <div key={item.id} className={cn('space-y-1', level > 0 && 'ml-4')}>
         <button
-          onClick={() => hasChildren ? toggleSection(item.id) : handleNavigationClick(item)}
+          onClick={() => (hasChildren ? toggleSection(item.id) : handleNavigationClick(item))}
           className={cn(
-            "w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer",
-            "hover:bg-accent hover:text-accent-foreground",
-            level === 0 ? "text-foreground" : "text-muted-foreground",
-            isActive && "bg-accent text-accent-foreground",
-            hasChildren ? "hover:bg-accent/50" : ""
+            'flex w-full cursor-pointer items-center rounded-md px-3 py-2 text-sm font-medium transition-colors',
+            'hover:bg-accent hover:text-accent-foreground',
+            level === 0 ? 'text-foreground' : 'text-muted-foreground',
+            isActive && 'bg-accent text-accent-foreground',
+            hasChildren ? 'hover:bg-accent/50' : '',
           )}
         >
-          <div className="flex items-center space-x-2 flex-1 text-left">
+          <div className="flex flex-1 items-center space-x-2 text-left">
             {item.icon}
             <span className="text-left">{item.label}</span>
           </div>
           {hasChildren && (
-            <div className="flex items-center ml-auto">
+            <div className="ml-auto flex items-center">
               {isExpanded ? (
                 <ChevronDown className="h-4 w-4" />
               ) : (
@@ -429,10 +454,10 @@ export function NavigationSidebar({ activeTab, onTabChange, onScrollToSection }:
             </div>
           )}
         </button>
-        
+
         {hasChildren && isExpanded && (
           <div className="space-y-1">
-            {item.children!.map(child => renderNavigationItem(child, level + 1))}
+            {item.children!.map((child) => renderNavigationItem(child, level + 1))}
           </div>
         )}
       </div>
@@ -440,17 +465,15 @@ export function NavigationSidebar({ activeTab, onTabChange, onScrollToSection }:
   };
 
   return (
-    <aside className="w-64 bg-card border-r border-border h-full overflow-y-auto p-4">
+    <aside className="h-full w-64 overflow-y-auto border-r border-border bg-card p-4">
       <div className="mb-6">
         <div className="flex items-center space-x-2 px-3 py-2 text-left">
           <Route className="h-5 w-5 text-primary" />
-          <span className="font-semibold text-lg text-left">Navigation</span>
+          <span className="text-left text-lg font-semibold">Navigation</span>
         </div>
       </div>
-      
-      <nav className="space-y-2">
-        {navigationItems.map(item => renderNavigationItem(item))}
-      </nav>
+
+      <nav className="space-y-2">{navigationItems.map((item) => renderNavigationItem(item))}</nav>
     </aside>
   );
 }

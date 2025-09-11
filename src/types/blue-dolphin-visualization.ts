@@ -41,6 +41,7 @@ export interface VisualizationFilters {
   targetDefinition: string;
   resultsTop: number;
   viewMode: VisualizationViewMode;
+  status: string;
+  sourceStatus: string;
+  targetStatus: string;
 }
-
-

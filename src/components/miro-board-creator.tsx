@@ -4,7 +4,17 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Layout, ExternalLink, Plus, FileText, Network, Loader2, CheckCircle, AlertCircle, LogOut } from 'lucide-react';
+import {
+  Layout,
+  ExternalLink,
+  Plus,
+  FileText,
+  Network,
+  Loader2,
+  CheckCircle,
+  AlertCircle,
+  LogOut,
+} from 'lucide-react';
 import { miroService } from '@/lib/miro-service';
 import { miroAuthService } from '@/lib/miro-auth-service';
 import { Project, TMFOdaDomain, SpecSyncItem } from '@/types';
@@ -23,14 +33,19 @@ interface BoardLinks {
   specSyncBoard?: string;
 }
 
-export function MiroBoardCreator({ project, tmfDomains, specSyncItems, onAuthStatusChange }: MiroBoardCreatorProps) {
+export function MiroBoardCreator({
+  project,
+  tmfDomains,
+  specSyncItems,
+  onAuthStatusChange,
+}: MiroBoardCreatorProps) {
   console.log('=== MIRO BOARD CREATOR DEBUG ===');
   console.log('Project:', project);
   console.log('TMF Domains:', tmfDomains);
   console.log('SpecSync Items:', specSyncItems);
   console.log('SpecSync Items length:', specSyncItems?.length || 0);
   console.log('=== END DEBUG ===');
-  
+
   const [boardLinks, setBoardLinks] = useState<BoardLinks>({});
   const [isCreatingTMF, setIsCreatingTMF] = useState(false);
   const [isCreatingSpecSync, setIsCreatingSpecSync] = useState(false);
@@ -66,16 +81,19 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems, onAuthSta
     const checkAuthStatus = () => {
       // Check both the service and localStorage for authentication status
       const serviceAuthStatus = miroAuthService.isAuthenticated();
-      const localStorageToken = typeof window !== 'undefined' ? localStorage.getItem('miro_access_token') : null;
+      const localStorageToken =
+        typeof window !== 'undefined' ? localStorage.getItem('miro_access_token') : null;
       const miroConfig = typeof window !== 'undefined' ? localStorage.getItem('miroConfig') : null;
-      
+
       // For testing: if we have a config, consider it authenticated
-      const hasConfig = miroConfig ? JSON.parse(miroConfig).clientId && JSON.parse(miroConfig).clientSecret : false;
+      const hasConfig = miroConfig
+        ? JSON.parse(miroConfig).clientId && JSON.parse(miroConfig).clientSecret
+        : false;
       const authStatus = serviceAuthStatus || !!localStorageToken || hasConfig;
-      
+
       setIsAuthenticated(authStatus);
       onAuthStatusChange?.(authStatus);
-      
+
       // If we have a token in localStorage but not in the service, restore it
       if (localStorageToken && !serviceAuthStatus) {
         miroAuthService.setTokenFromUrl(localStorageToken);
@@ -102,25 +120,37 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems, onAuthSta
   const handleCreateTMFBoard = async () => {
     setIsCreatingTMF(true);
     setError(null);
-    
+
     console.log('Creating TMF board with project:', project);
     console.log('TMF domains:', tmfDomains);
-    console.log('Selected domains:', tmfDomains.filter(d => d.isSelected));
-    
+    console.log(
+      'Selected domains:',
+      tmfDomains.filter((d) => d.isSelected),
+    );
+
     try {
       const board = await miroService.createTMFBoard(project, tmfDomains);
-      setBoardLinks(prev => ({ ...prev, tmfBoard: board.viewLink }));
+      setBoardLinks((prev) => ({ ...prev, tmfBoard: board.viewLink }));
     } catch (error) {
       console.error('Failed to create TMF board:', error);
-      
+
       // Check if it's a token-related error
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      if (errorMessage.includes('token') || errorMessage.includes('authentication') || errorMessage.includes('401') || errorMessage.includes('403')) {
-        setError('Miro access token is invalid or expired. Please re-authenticate with Miro in the Configuration tab.');
+      if (
+        errorMessage.includes('token') ||
+        errorMessage.includes('authentication') ||
+        errorMessage.includes('401') ||
+        errorMessage.includes('403')
+      ) {
+        setError(
+          'Miro access token is invalid or expired. Please re-authenticate with Miro in the Configuration tab.',
+        );
         setIsAuthenticated(false);
         onAuthStatusChange?.(false);
       } else {
-        setError('Failed to create TMF Architecture board. Please check your Miro credentials and try again.');
+        setError(
+          'Failed to create TMF Architecture board. Please check your Miro credentials and try again.',
+        );
       }
     } finally {
       setIsCreatingTMF(false);
@@ -130,25 +160,34 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems, onAuthSta
   const handleCreateSpecSyncBoard = async () => {
     setIsCreatingSpecSync(true);
     setError(null);
-    
+
     console.log('Creating SpecSync board with items:', specSyncItems);
     console.log('SpecSync items length:', specSyncItems.length);
     console.log('First few items:', specSyncItems.slice(0, 3));
-    
+
     try {
       const board = await miroService.createSpecSyncBoard(specSyncItems);
-      setBoardLinks(prev => ({ ...prev, specSyncBoard: board.viewLink }));
+      setBoardLinks((prev) => ({ ...prev, specSyncBoard: board.viewLink }));
     } catch (error) {
       console.error('Failed to create SpecSync board:', error);
-      
+
       // Check if it's a token-related error
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      if (errorMessage.includes('token') || errorMessage.includes('authentication') || errorMessage.includes('401') || errorMessage.includes('403')) {
-        setError('Miro access token is invalid or expired. Please re-authenticate with Miro in the Configuration tab.');
+      if (
+        errorMessage.includes('token') ||
+        errorMessage.includes('authentication') ||
+        errorMessage.includes('401') ||
+        errorMessage.includes('403')
+      ) {
+        setError(
+          'Miro access token is invalid or expired. Please re-authenticate with Miro in the Configuration tab.',
+        );
         setIsAuthenticated(false);
         onAuthStatusChange?.(false);
       } else {
-        setError('Failed to create SpecSync Requirements board. Please check your Miro credentials and try again.');
+        setError(
+          'Failed to create SpecSync Requirements board. Please check your Miro credentials and try again.',
+        );
       }
     } finally {
       setIsCreatingSpecSync(false);
@@ -169,9 +208,10 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems, onAuthSta
   };
 
   const totalCapabilities = tmfDomains.reduce((acc, domain) => acc + domain.capabilities.length, 0);
-  const selectedDomains = tmfDomains.filter(domain => domain.isSelected).length;
-  const selectedCapabilities = tmfDomains.reduce((acc, domain) => 
-    acc + domain.capabilities.filter(cap => cap.isSelected).length, 0
+  const selectedDomains = tmfDomains.filter((domain) => domain.isSelected).length;
+  const selectedCapabilities = tmfDomains.reduce(
+    (acc, domain) => acc + domain.capabilities.filter((cap) => cap.isSelected).length,
+    0,
   );
 
   return (
@@ -184,7 +224,8 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems, onAuthSta
             <span>Miro Visual Mapping</span>
           </CardTitle>
           <CardDescription>
-            Create interactive visual boards for TMF domains, capabilities, and SpecSync requirements
+            Create interactive visual boards for TMF domains, capabilities, and SpecSync
+            requirements
           </CardDescription>
         </CardHeader>
       </Card>
@@ -206,29 +247,36 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems, onAuthSta
             )}
           </CardTitle>
           <CardDescription>
-            {isAuthenticated 
+            {isAuthenticated
               ? 'You are authenticated with Miro and can create boards.'
-              : 'Please go to the Miro Configuration tab to connect to Miro first.'
-            }
+              : 'Please go to the Miro Configuration tab to connect to Miro first.'}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {isAuthenticated ? (
             <div className="flex items-center space-x-4">
-              <Badge variant="secondary" className="text-green-700 bg-green-100">
-                <CheckCircle className="h-3 w-3 mr-1" />
+              <Badge variant="secondary" className="bg-green-100 text-green-700">
+                <CheckCircle className="mr-1 h-3 w-3" />
                 Authenticated
               </Badge>
-              <Button variant="outline" onClick={handleLogout} className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                onClick={handleLogout}
+                className="flex items-center space-x-2"
+              >
                 <LogOut className="h-4 w-4" />
                 <span>Disconnect</span>
               </Button>
-              <Button variant="outline" onClick={handleClearTestBoard} className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                onClick={handleClearTestBoard}
+                className="flex items-center space-x-2"
+              >
                 <AlertCircle className="h-4 w-4" />
                 <span>Clear Test Board</span>
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => {
                   console.log('=== Debug Authentication Status ===');
                   console.log('Component isAuthenticated state:', isAuthenticated);
@@ -244,7 +292,8 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems, onAuthSta
           ) : (
             <div className="flex items-center space-x-4">
               <p className="text-sm text-muted-foreground">
-                Please configure and connect to Miro in the Configuration tab before creating boards.
+                Please configure and connect to Miro in the Configuration tab before creating
+                boards.
               </p>
             </div>
           )}
@@ -271,7 +320,7 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems, onAuthSta
             <span>TMF Architecture Board</span>
             {boardLinks.tmfBoard && (
               <Badge variant="secondary" className="ml-2">
-                <CheckCircle className="h-3 w-3 mr-1" />
+                <CheckCircle className="mr-1 h-3 w-3" />
                 Created
               </Badge>
             )}
@@ -282,14 +331,18 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems, onAuthSta
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-3">
               <div className="flex items-center space-x-2">
                 <span className="text-muted-foreground">Domains:</span>
-                <Badge variant="outline">{selectedDomains} / {tmfDomains.length}</Badge>
+                <Badge variant="outline">
+                  {selectedDomains} / {tmfDomains.length}
+                </Badge>
               </div>
               <div className="flex items-center space-x-2">
                 <span className="text-muted-foreground">Capabilities:</span>
-                <Badge variant="outline">{selectedCapabilities} / {totalCapabilities}</Badge>
+                <Badge variant="outline">
+                  {selectedCapabilities} / {totalCapabilities}
+                </Badge>
               </div>
               <div className="flex items-center space-x-2">
                 <span className="text-muted-foreground">Project:</span>
@@ -298,8 +351,8 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems, onAuthSta
             </div>
 
             <div className="flex items-center space-x-4">
-              <Button 
-                onClick={handleCreateTMFBoard} 
+              <Button
+                onClick={handleCreateTMFBoard}
                 disabled={!isAuthenticated || isCreatingTMF || selectedDomains === 0}
                 className="flex items-center space-x-2"
               >
@@ -349,7 +402,7 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems, onAuthSta
             <span>SpecSync Requirements Board</span>
             {boardLinks.specSyncBoard && (
               <Badge variant="secondary" className="ml-2">
-                <CheckCircle className="h-3 w-3 mr-1" />
+                <CheckCircle className="mr-1 h-3 w-3" />
                 Created
               </Badge>
             )}
@@ -360,7 +413,7 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems, onAuthSta
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
               <div className="flex items-center space-x-2">
                 <span className="text-muted-foreground">Requirements:</span>
                 <Badge variant="outline">{specSyncItems.length}</Badge>
@@ -368,14 +421,14 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems, onAuthSta
               <div className="flex items-center space-x-2">
                 <span className="text-muted-foreground">Domains:</span>
                 <Badge variant="outline">
-                  {new Set(specSyncItems.map(item => item.domain)).size}
+                  {new Set(specSyncItems.map((item) => item.domain)).size}
                 </Badge>
               </div>
             </div>
 
             <div className="flex items-center space-x-4">
-              <Button 
-                onClick={handleCreateSpecSyncBoard} 
+              <Button
+                onClick={handleCreateSpecSyncBoard}
                 disabled={!isAuthenticated || isCreatingSpecSync || specSyncItems.length === 0}
                 className="flex items-center space-x-2"
               >
@@ -422,14 +475,12 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems, onAuthSta
         <Card>
           <CardHeader>
             <CardTitle>Board Management</CardTitle>
-            <CardDescription>
-              Manage your created Miro boards
-            </CardDescription>
+            <CardDescription>Manage your created Miro boards</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               {boardLinks.tmfBoard && (
-                <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="flex items-center justify-between rounded-lg border p-3">
                   <div className="flex items-center space-x-3">
                     <Network className="h-4 w-4 text-muted-foreground" />
                     <div>
@@ -441,7 +492,7 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems, onAuthSta
                   </div>
                   <Link href={boardLinks.tmfBoard} target="_blank">
                     <Button variant="outline" size="sm">
-                      <ExternalLink className="h-3 w-3 mr-1" />
+                      <ExternalLink className="mr-1 h-3 w-3" />
                       Open
                     </Button>
                   </Link>
@@ -449,7 +500,7 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems, onAuthSta
               )}
 
               {boardLinks.specSyncBoard && (
-                <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="flex items-center justify-between rounded-lg border p-3">
                   <div className="flex items-center space-x-3">
                     <FileText className="h-4 w-4 text-muted-foreground" />
                     <div>
@@ -461,7 +512,7 @@ export function MiroBoardCreator({ project, tmfDomains, specSyncItems, onAuthSta
                   </div>
                   <Link href={boardLinks.specSyncBoard} target="_blank">
                     <Button variant="outline" size="sm">
-                      <ExternalLink className="h-3 w-3 mr-1" />
+                      <ExternalLink className="mr-1 h-3 w-3" />
                       Open
                     </Button>
                   </Link>

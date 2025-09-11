@@ -1,6 +1,7 @@
 ### Blue Dolphin Visualization — Acceptance Criteria, Testing Plan, Timeline
 
 #### Acceptance criteria
+
 - Data integration
   - Uses `/api/blue-dolphin` with `action: get-objects-enhanced` for both `/Objects` and `/Relations`.
   - Relations request includes `moreColumns: true` and supports workspace scope (both/either).
@@ -22,6 +23,7 @@
   - Keyboard navigation for controls; selection announcements via aria-live.
 
 #### Testing plan
+
 - Unit (TypeScript)
   - Transformer: object→node mapping; relation→link mapping; endpoint resolution; style maps.
   - Utils: workspace color hashing; shape selection; label text calculation sizes.
@@ -36,11 +38,10 @@
   - Keyboard-only navigation; focus management; contrast; screen reader announcements.
 
 #### Timeline (phased)
+
 - Phase 1 — Foundation (2–3 days)
   - Create types, utils, hook skeleton; fetch and cache datasets; basic transform; render minimal graph with labels.
 - Phase 2 — Interactions & filters (2–3 days)
   - Add workspace filter, view modes, selection and sidebar; emphasize neighborhood.
 - Phase 3 — Polish & extensibility (2–3 days)
   - Link labels and arrows polishing; performance tuning; accessibility; logging/telemetry; prepare for hierarchical view plugin.
-
-

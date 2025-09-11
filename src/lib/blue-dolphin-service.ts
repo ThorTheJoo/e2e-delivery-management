@@ -11,9 +11,8 @@ import {
   ODataResponse,
   BlueDolphinConfig,
   SyncResult,
-  SyncOperation
-} from '@/types/blue-dolphin';
-import { TMFOdaDomain, TMFOdaCapability, SpecSyncItem } from '@/types';
+  SyncOperation,
+} from '../types/blue-dolphin';
 
 export abstract class BlueDolphinBaseService {
   protected baseUrl: string;
@@ -31,7 +30,7 @@ export abstract class BlueDolphinBaseService {
   protected getAuthHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      Accept: 'application/json',
     };
 
     if (this.apiKey) {
@@ -43,10 +42,7 @@ export abstract class BlueDolphinBaseService {
     return headers;
   }
 
-  protected async request<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<T> {
+  protected async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
     const headers = {
       ...this.getAuthHeaders(),
@@ -60,17 +56,15 @@ export abstract class BlueDolphinBaseService {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      throw new Error(
-        `Blue Dolphin API Error: ${error.error?.message || response.statusText}`
-      );
+      throw new Error(`Blue Dolphin API Error: ${error.error?.message || response.statusText}`);
     }
 
     return response.json();
   }
 
-  protected buildQueryParams(params: Record<string, string | number | boolean | undefined>): string {
+  protected buildQueryParams(params: Record<string, any>): string {
     const searchParams = new URLSearchParams();
-    
+
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
         if (Array.isArray(value)) {
@@ -86,6 +80,300 @@ export abstract class BlueDolphinBaseService {
 }
 
 export class BlueDolphinRestService extends BlueDolphinBaseService {
+  private userApiKey?: string;
+  private tenant: string;
+  private workspaceId?: string;
+  private objectTypeId?: string;
+
+  constructor(config: BlueDolphinConfig) {
+    super(config);
+    this.userApiKey = config.userApiKey;
+    this.tenant = 'csgipoc'; // Default tenant
+    this.workspaceId = config.workspaceId;
+    this.objectTypeId = config.objectTypeId;
+  }
+
+  // User API Key Management
+  async retrieveUserApiKeys(
+    userKeyManagementApiKey: string,
+    userId: string
+  ): Promise<{ success: boolean; apiKeys?: any[]; error?: string }> {
+    try {
+      const response = await fetch(`${this.baseUrl}/v1/user-api-keys?user_id=${userId}`, {
+        method: 'GET',
+        headers: {
+          'x-api-key': userKeyManagementApiKey,
+          'TENANT': this.tenant,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return { success: true, apiKeys: data.value || data.data || [] };
+      } else {
+        const errorData = await response.json();
+        return { success: false, error: errorData.errors || 'Failed to retrieve API keys' };
+      }
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  }
+
+  async generateUserApiKey(
+    userKeyManagementApiKey: string,
+    userId: string,
+    keyName: string,
+    expiryDate: string
+  ): Promise<{ success: boolean; userApiKey?: string; error?: string }> {
+    try {
+      const response = await fetch(`${this.baseUrl}/v1/user-api-keys`, {
+        method: 'POST',
+        headers: {
+          'x-api-key': userKeyManagementApiKey,
+          'TENANT': this.tenant,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          name: keyName,
+          user_id: userId,
+          expiration_date: expiryDate
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return { success: true, userApiKey: data.key };
+      } else {
+        const errorData = await response.json();
+        return { success: false, error: errorData.errors || 'Unknown error' };
+      }
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  }
+
+  // Test User API Key
+  async testUserApiKey(): Promise<{ success: boolean; error?: string }> {
+    if (!this.userApiKey) {
+      return { success: false, error: 'User API Key not configured' };
+    }
+
+    try {
+      const response = await fetch(`${this.baseUrl}/v1/objects?workspace_id=${this.workspaceId || 'default'}`, {
+        method: 'GET',
+        headers: {
+          'x-api-key': this.userApiKey,
+          'TENANT': this.tenant,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+
+      return { success: response.ok, error: response.ok ? undefined : 'Authentication failed' };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  }
+
+  // CRUD Operations with User API Key
+  async getObjects(options?: any): Promise<any[]> {
+    if (!this.userApiKey) {
+      throw new Error('User API Key not configured');
+    }
+
+    // Build query parameters
+    const params = new URLSearchParams();
+    
+    // Add workspace_id if provided in options or config
+    if (options?.workspace_id) {
+      params.append('workspace_id', options.workspace_id);
+    } else if (this.workspaceId) {
+      params.append('workspace_id', this.workspaceId);
+    }
+    
+    // Add other optional parameters
+    if (options?.status) {
+      params.append('status', options.status);
+    }
+    if (options?.filter) {
+      params.append('filter', options.filter);
+    }
+    if (options?.top) {
+      params.append('top', options.top.toString());
+    }
+    if (options?.orderby) {
+      params.append('orderby', options.orderby);
+    }
+
+    const url = `${this.baseUrl}/v1/objects${params.toString() ? '?' + params.toString() : ''}`;
+    
+    console.log('🔍 [Blue Dolphin Service] REST API Request URL:', url);
+    console.log('🔍 [Blue Dolphin Service] Query Parameters:', Object.fromEntries(params.entries()));
+    console.log('🔍 [Blue Dolphin Service] Options received:', options);
+    console.log('🔍 [Blue Dolphin Service] REST API Headers:', {
+      'x-api-key': this.userApiKey ? '***' : 'NOT SET',
+      'TENANT': this.tenant
+    });
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'x-api-key': this.userApiKey,
+        'TENANT': this.tenant,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
+
+    console.log('REST API Response Status:', response.status);
+    console.log('REST API Response Headers:', Object.fromEntries(response.headers.entries()));
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('REST API Error Response:', errorText);
+      throw new Error(`Failed to fetch objects: ${response.statusText} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    console.log('🔍 [Blue Dolphin Service] REST API Response Data:', data);
+    console.log('🔍 [Blue Dolphin Service] Response structure:', {
+      hasItems: !!data.items,
+      hasValue: !!data.value,
+      hasData: !!data.data,
+      itemsLength: data.items?.length || 0,
+      valueLength: data.value?.length || 0,
+      dataLength: data.data?.length || 0,
+      totalCount: data.total_count || data.totalCount || data['@odata.count'] || 'unknown'
+    });
+    
+    const result = data.items || data.value || data.data || [];
+    console.log('🔍 [Blue Dolphin Service] Returning objects count:', result.length);
+    return result;
+  }
+
+  async createObject(object: any): Promise<any> {
+    if (!this.userApiKey) {
+      throw new Error('User API Key not configured');
+    }
+
+    const response = await fetch(`${this.baseUrl}/v1/objects`, {
+      method: 'POST',
+      headers: {
+        'x-api-key': this.userApiKey,
+        'TENANT': this.tenant,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        object_title: object.title || object.name,
+        object_type_id: this.objectTypeId || '1',
+        workspace_id: this.workspaceId || 'default',
+        description: object.description,
+        definition: object.definition || 'Application Component',
+        ...object
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`Failed to create object: ${errorData.errors || response.statusText}`);
+    }
+
+    return await response.json();
+  }
+
+  async updateObject(id: string, object: any): Promise<any> {
+    if (!this.userApiKey) {
+      throw new Error('User API Key not configured');
+    }
+
+    console.log('REST API Update Object:', {
+      id,
+      object,
+      url: `${this.baseUrl}/v1/objects/${id}`
+    });
+
+    const response = await fetch(`${this.baseUrl}/v1/objects/${id}`, {
+      method: 'PUT',
+      headers: {
+        'x-api-key': this.userApiKey,
+        'TENANT': this.tenant,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(object)
+    });
+
+    console.log('REST API Update Response Status:', response.status);
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('REST API Update Error:', errorData);
+      throw new Error(`Failed to update object: ${errorData.errors || response.statusText}`);
+    }
+
+    const result = await response.json();
+    console.log('REST API Update Success:', result);
+    return result;
+  }
+
+  // Update object definition
+  async updateObjectDefinition(objectDefinitionId: string, updateData: any): Promise<any> {
+    if (!this.userApiKey) {
+      throw new Error('User API Key not configured');
+    }
+
+    console.log('REST API Update Object Definition:', {
+      objectDefinitionId,
+      updateData,
+      url: `${this.baseUrl}/v1/object-definitions/${objectDefinitionId}`
+    });
+
+    const response = await fetch(`${this.baseUrl}/v1/object-definitions/${objectDefinitionId}`, {
+      method: 'PUT',
+      headers: {
+        'x-api-key': this.userApiKey,
+        'TENANT': this.tenant,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(updateData)
+    });
+
+    console.log('REST API Update Object Definition Response Status:', response.status);
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('REST API Update Object Definition Error:', errorData);
+      throw new Error(`Failed to update object definition: ${errorData.errors || response.statusText}`);
+    }
+
+    const result = await response.json();
+    console.log('REST API Update Object Definition Success:', result);
+    return result;
+  }
+
+  async deleteObject(id: string): Promise<boolean> {
+    if (!this.userApiKey) {
+      throw new Error('User API Key not configured');
+    }
+
+    const response = await fetch(`${this.baseUrl}/v1/objects/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'x-api-key': this.userApiKey,
+        'TENANT': this.tenant,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
+
+    return response.ok;
+  }
+
   // Domain operations
   async getDomains(params?: {
     type?: string;
@@ -95,7 +383,7 @@ export class BlueDolphinRestService extends BlueDolphinBaseService {
   }): Promise<ApiResponse<BlueDolphinDomain[]>> {
     const queryParams = this.buildQueryParams(params || {});
     const endpoint = `/api/v1/domains${queryParams ? `?${queryParams}` : ''}`;
-    
+
     return this.request<ApiResponse<BlueDolphinDomain[]>>(endpoint);
   }
 
@@ -110,10 +398,7 @@ export class BlueDolphinRestService extends BlueDolphinBaseService {
     });
   }
 
-  async updateDomain(
-    id: string,
-    domain: Partial<CreateDomainRequest>
-  ): Promise<BlueDolphinDomain> {
+  async updateDomain(id: string, domain: Partial<CreateDomainRequest>): Promise<BlueDolphinDomain> {
     return this.request<BlueDolphinDomain>(`/api/v1/domains/${id}`, {
       method: 'PUT',
       body: JSON.stringify(domain),
@@ -136,7 +421,7 @@ export class BlueDolphinRestService extends BlueDolphinBaseService {
   }): Promise<ApiResponse<BlueDolphinCapability[]>> {
     const queryParams = this.buildQueryParams(params || {});
     const endpoint = `/api/v1/capabilities${queryParams ? `?${queryParams}` : ''}`;
-    
+
     return this.request<ApiResponse<BlueDolphinCapability[]>>(endpoint);
   }
 
@@ -146,7 +431,7 @@ export class BlueDolphinRestService extends BlueDolphinBaseService {
 
   async createCapability(
     domainId: string,
-    capability: CreateCapabilityRequest
+    capability: CreateCapabilityRequest,
   ): Promise<BlueDolphinCapability> {
     return this.request<BlueDolphinCapability>(`/api/v1/domains/${domainId}/capabilities`, {
       method: 'POST',
@@ -166,7 +451,7 @@ export class BlueDolphinRestService extends BlueDolphinBaseService {
   }): Promise<ApiResponse<BlueDolphinRequirement[]>> {
     const queryParams = this.buildQueryParams(params || {});
     const endpoint = `/api/v1/requirements${queryParams ? `?${queryParams}` : ''}`;
-    
+
     return this.request<ApiResponse<BlueDolphinRequirement[]>>(endpoint);
   }
 
@@ -186,7 +471,7 @@ export class BlueDolphinRestService extends BlueDolphinBaseService {
   }): Promise<ApiResponse<BlueDolphinUseCase[]>> {
     const queryParams = this.buildQueryParams(params || {});
     const endpoint = `/api/v1/usecases${queryParams ? `?${queryParams}` : ''}`;
-    
+
     return this.request<ApiResponse<BlueDolphinUseCase[]>>(endpoint);
   }
 
@@ -200,7 +485,7 @@ export class BlueDolphinRestService extends BlueDolphinBaseService {
   }): Promise<ApiResponse<BlueDolphinApplicationFunction[]>> {
     const queryParams = this.buildQueryParams(params || {});
     const endpoint = `/api/v1/application-functions${queryParams ? `?${queryParams}` : ''}`;
-    
+
     return this.request<ApiResponse<BlueDolphinApplicationFunction[]>>(endpoint);
   }
 }
@@ -229,9 +514,7 @@ export class BlueDolphinODataService extends BlueDolphinBaseService {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      throw new Error(
-        `Blue Dolphin OData Error: ${error.error?.message || response.statusText}`
-      );
+      throw new Error(`Blue Dolphin OData Error: ${error.error?.message || response.statusText}`);
     }
 
     return response.json();
@@ -246,10 +529,9 @@ export class BlueDolphinODataService extends BlueDolphinBaseService {
     top?: number;
     skip?: number;
     moreColumns?: boolean;
-  }): Promise<ODataResponse<Record<string, unknown>>> {
-    
+  }): Promise<ODataResponse<any>> {
     const queryParams = new URLSearchParams();
-    
+
     // Add MoreColumns parameter if enabled
     if (options.moreColumns) {
       queryParams.append('MoreColumns', 'true');
@@ -261,7 +543,7 @@ export class BlueDolphinODataService extends BlueDolphinBaseService {
         queryParams.append('$select', options.select.join(','));
       }
     }
-    
+
     // Standard OData parameters
     if (options.filter) queryParams.append('$filter', options.filter);
     if (options.orderby) queryParams.append('$orderby', options.orderby);
@@ -269,7 +551,7 @@ export class BlueDolphinODataService extends BlueDolphinBaseService {
     if (options.skip) queryParams.append('$skip', options.skip.toString());
 
     const endpoint = `${options.endpoint}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-    return this.odataRequest<ODataResponse<Record<string, unknown>>>(endpoint);
+    return this.odataRequest<ODataResponse<any>>(endpoint);
   }
 
   // Domain operations
@@ -283,14 +565,14 @@ export class BlueDolphinODataService extends BlueDolphinBaseService {
   }): Promise<ODataResponse<BlueDolphinDomain>> {
     const queryParams = this.buildODataQueryParams(options || {});
     const endpoint = `/Domains${queryParams ? `?${queryParams}` : ''}`;
-    
+
     return this.odataRequest<ODataResponse<BlueDolphinDomain>>(endpoint);
   }
 
   async getDomainById(id: string, expand?: string[]): Promise<BlueDolphinDomain> {
     const queryParams = expand ? this.buildODataQueryParams({ expand }) : '';
     const endpoint = `/Domains('${id}')${queryParams ? `?${queryParams}` : ''}`;
-    
+
     return this.odataRequest<BlueDolphinDomain>(endpoint);
   }
 
@@ -319,7 +601,7 @@ export class BlueDolphinODataService extends BlueDolphinBaseService {
 
     const queryParams = this.buildODataQueryParams(queryOptions);
     const endpoint = `/Capabilities${queryParams ? `?${queryParams}` : ''}`;
-    
+
     return this.odataRequest<ODataResponse<BlueDolphinCapability>>(endpoint);
   }
 
@@ -352,7 +634,7 @@ export class BlueDolphinODataService extends BlueDolphinBaseService {
 
     const queryParams = this.buildODataQueryParams(queryOptions);
     const endpoint = `/Requirements${queryParams ? `?${queryParams}` : ''}`;
-    
+
     return this.odataRequest<ODataResponse<BlueDolphinRequirement>>(endpoint);
   }
 
@@ -381,7 +663,7 @@ export class BlueDolphinODataService extends BlueDolphinBaseService {
 
     const queryParams = this.buildODataQueryParams(queryOptions);
     const endpoint = `/UseCases${queryParams ? `?${queryParams}` : ''}`;
-    
+
     return this.odataRequest<ODataResponse<BlueDolphinUseCase>>(endpoint);
   }
 
@@ -389,25 +671,18 @@ export class BlueDolphinODataService extends BlueDolphinBaseService {
   async getDomainCount(filter?: string): Promise<number> {
     const queryParams = filter ? `?$filter=${encodeURIComponent(filter)}` : '';
     const endpoint = `/Domains/$count${queryParams}`;
-    
+
     return this.odataRequest<number>(endpoint);
   }
 
   async getCapabilityCount(filter?: string): Promise<number> {
     const queryParams = filter ? `?$filter=${encodeURIComponent(filter)}` : '';
     const endpoint = `/Capabilities/$count${queryParams}`;
-    
+
     return this.odataRequest<number>(endpoint);
   }
 
-  private buildODataQueryParams(options: {
-    filter?: string;
-    select?: string[];
-    orderby?: string;
-    top?: number;
-    skip?: number;
-    expand?: string[];
-  }): string {
+  private buildODataQueryParams(options: Record<string, any>): string {
     const params: string[] = [];
 
     if (options.filter) params.push(`$filter=${encodeURIComponent(options.filter)}`);
@@ -433,7 +708,7 @@ export class BlueDolphinSyncService {
   }
 
   // Sync TMF domains from E2E to Blue Dolphin
-  async syncDomainsToBlueDolphin(domains: TMFOdaDomain[]): Promise<SyncResult> {
+  async syncDomainsToBlueDolphin(domains: any[]): Promise<SyncResult> {
     const operations: SyncOperation[] = [];
     const errors: string[] = [];
     let syncedCount = 0;
@@ -446,7 +721,7 @@ export class BlueDolphinSyncService {
         entityId: domain.id,
         status: 'PENDING',
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
 
       try {
@@ -485,10 +760,7 @@ export class BlueDolphinSyncService {
   }
 
   // Sync capabilities from E2E to Blue Dolphin
-  async syncCapabilitiesToBlueDolphin(
-    domainId: string,
-    capabilities: TMFOdaCapability[]
-  ): Promise<SyncResult> {
+  async syncCapabilitiesToBlueDolphin(domainId: string, capabilities: any[]): Promise<SyncResult> {
     const operations: SyncOperation[] = [];
     const errors: string[] = [];
     let syncedCount = 0;
@@ -501,7 +773,7 @@ export class BlueDolphinSyncService {
         entityId: capability.id,
         status: 'PENDING',
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
 
       try {
@@ -514,10 +786,12 @@ export class BlueDolphinSyncService {
           type: 'TMF_ODA_CAPABILITY',
           level: 'LEVEL_1', // Default level
           metadata: {
-            effortEstimate: `${capability.baseEffort?.businessAnalyst + 
-              capability.baseEffort?.solutionArchitect + 
-              capability.baseEffort?.developer + 
-              capability.baseEffort?.qaEngineer} PD`,
+            effortEstimate: `${
+              capability.baseEffort?.businessAnalyst +
+              capability.baseEffort?.solutionArchitect +
+              capability.baseEffort?.developer +
+              capability.baseEffort?.qaEngineer
+            } PD`,
             complexity: 'MEDIUM',
           },
         });
@@ -544,9 +818,7 @@ export class BlueDolphinSyncService {
   }
 
   // Sync requirements from SpecSync to Blue Dolphin
-  async syncRequirementsToBlueDolphin(
-    requirements: SpecSyncItem[]
-  ): Promise<SyncResult> {
+  async syncRequirementsToBlueDolphin(requirements: any[]): Promise<SyncResult> {
     const operations: SyncOperation[] = [];
     const errors: string[] = [];
     let syncedCount = 0;
@@ -559,7 +831,7 @@ export class BlueDolphinSyncService {
         entityId: requirement.id,
         status: 'PENDING',
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
 
       try {
@@ -568,7 +840,8 @@ export class BlueDolphinSyncService {
 
         await this.restService.createRequirement({
           name: requirement.rephrasedRequirementId || requirement.requirementId,
-          description: requirement.description || requirement.usecase1 || 'No description available',
+          description:
+            requirement.description || requirement.usecase1 || 'No description available',
           type: 'FUNCTIONAL_REQUIREMENT',
           priority: 'MEDIUM', // Default priority
           metadata: {
@@ -585,7 +858,9 @@ export class BlueDolphinSyncService {
         operation.status = 'FAILED';
         operation.error = error instanceof Error ? error.message : 'Unknown error';
         operation.updatedAt = new Date().toISOString();
-        errors.push(`Failed to sync requirement ${requirement.rephrasedRequirementId}: ${operation.error}`);
+        errors.push(
+          `Failed to sync requirement ${requirement.rephrasedRequirementId}: ${operation.error}`,
+        );
       }
 
       operations.push(operation);
@@ -600,7 +875,7 @@ export class BlueDolphinSyncService {
   }
 
   // Get domains from Blue Dolphin and map to E2E format
-  async getDomainsFromBlueDolphin(): Promise<TMFOdaDomain[]> {
+  async getDomainsFromBlueDolphin(): Promise<any[]> {
     const response = await this.odataService.getDomains({
       filter: "Type eq 'TMF_ODA_DOMAIN' and Status eq 'ACTIVE'",
       expand: ['Capabilities'],
@@ -610,18 +885,20 @@ export class BlueDolphinSyncService {
       id: domain.id,
       name: domain.name,
       description: domain.description,
-      capabilities: ((domain as BlueDolphinDomain & { Capabilities?: BlueDolphinCapability[] }).Capabilities?.map((cap: BlueDolphinCapability) => ({
-        id: cap.id,
-        name: cap.name,
-        description: cap.description,
-        domainId: cap.domainId,
-        isSelected: false,
-        createdAt: cap.createdAt,
-        updatedAt: cap.updatedAt,
-      })) || []) as TMFOdaCapability[],
-      isSelected: false,
-      createdAt: domain.createdAt,
-      updatedAt: domain.updatedAt,
+      capabilities:
+        (domain as any).Capabilities?.map((cap: any) => ({
+          id: cap.id,
+          name: cap.name,
+          description: cap.description,
+          segments: [],
+          baseEffort: {
+            businessAnalyst: 5,
+            solutionArchitect: 3,
+            developer: 10,
+            qaEngineer: 2,
+          },
+          complexityFactors: {},
+        })) || [],
     }));
   }
 }
@@ -637,7 +914,7 @@ export function createBlueDolphinService(config: BlueDolphinConfig) {
       return {
         rest: new BlueDolphinRestService(config),
         odata: new BlueDolphinODataService(config),
-        sync: new BlueDolphinSyncService(config)
+        sync: new BlueDolphinSyncService(config),
       };
     default:
       throw new Error(`Unsupported protocol: ${config.protocol}`);

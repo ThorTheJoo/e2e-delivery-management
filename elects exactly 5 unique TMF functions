@@ -1,0 +1,38 @@
+warning: in the working copy of 'src/app/api/blue-dolphin/route.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/app/page.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/app/tmf-demo/page.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/bill-of-materials.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/blue-dolphin-configuration.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/bom-configuration.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/navigation-sidebar.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/specsync-import.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/supabase-configuration.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/tmf-oda-manager-new.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/ui/collapsible.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/ui/separator.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/lib/blue-dolphin-service.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/lib/bom-export.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/lib/build-info-generated.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/lib/field-discovery.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/lib/specsync-tmf-utils.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/lib/specsync-utils.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/lib/tmf-reference-service-new.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/types/blue-dolphin.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/types/index.ts', LF will be replaced by CRLF the next time Git touches it
+BOM-CONFIGURATION-IMPLEMENTATION.md
+CHANGELOG.md
+README.md
+TMF-REFERENCE-IMPLEMENTATION.md
+load-tmf-reference-data.js
+package.json
+setup-tmf-reference-data.js
+src/app/api/blue-dolphin/route.ts
+src/components/blue-dolphin-configuration.tsx
+src/components/specsync-import.tsx
+src/components/tmf-domain-capability-manager.tsx
+src/hooks/use-toast.ts
+src/lib/blue-dolphin-service.ts
+src/lib/bom-config-storage.ts
+src/lib/build-info-generated.ts
+src/lib/specsync-tmf-utils.ts
+src/types/blue-dolphin.ts

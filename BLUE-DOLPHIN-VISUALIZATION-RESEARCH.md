@@ -1,9 +1,11 @@
 ### Blue Dolphin Visualization — Research Validation (React Force Graph 2D)
 
 #### Purpose
+
 - Validate feasibility of an interactive force-directed graph using `react-force-graph-2d` within Next.js 14 (App Router), TypeScript, Tailwind, and Shadcn UI.
 
 #### Summary of findings
+
 - **Rendering engine (Canvas 2D)**: `ForceGraph2D` supports high-perf drawing for 1k–5k nodes and several thousand links on modern hardware when tuned. Target of 1k nodes / 2k links at 60fps is achievable with pragmatic styling and physics settings.
 - **SSR**: Library accesses `window`. Must dynamically import on the client: Next.js `next/dynamic` with `{ ssr: false }`.
 - **Custom node rendering**: `nodeCanvasObject(node, ctx, scale)` enables drawing arbitrary shapes (circle, rectangle, diamond, hexagon), borders, and always-visible labels with background rectangles.
@@ -16,6 +18,7 @@
 - **Performance**: Use `cooldownTicks=100`, memoize renderers, keep stroke effects minimal, batch color computations, and avoid heavy per-frame work.
 
 #### Capabilities mapped to requirements
+
 - **Nodes: shapes and workspace colors**: YES — draw via `nodeCanvasObject` with shape-specific canvas paths and color palette keyed by `workspace`.
 - **Links: styles by type (solid/dashed/dotted), width, arrows, colors**: YES — combine `linkCanvasObject` for dash patterns and `linkWidth/linkColor` with arrow props.
 - **Always-visible labels with backgrounds**: YES — measure text (`ctx.measureText`) and paint rounded rect behind text before `ctx.fillText`.
@@ -26,6 +29,7 @@
 - **SSR caveat**: Must use dynamic import; the component is client-only.
 
 #### Key API surfaces (React Force Graph 2D)
+
 - Data props: `graphData={{ nodes, links }}`, `nodeId`, `linkSource`, `linkTarget`.
 - Styling hooks: `nodeCanvasObject`, `nodePointerAreaPaint`, `linkCanvasObject`.
 - Style props: `nodeRelSize`, `nodeColor`, `linkColor`, `linkWidth`, `cooldownTicks`, `d3AlphaDecay`, `d3VelocityDecay`.
@@ -33,6 +37,7 @@
 - Events: `onNodeClick`, `onLinkClick`, `onEngineStop`, `onZoom`, `onBackgroundClick`.
 
 #### Example: Next.js dynamic import (SSR off)
+
 ```typescript
 // Pseudocode for client-only render in App Router
 import dynamic from 'next/dynamic';
@@ -40,6 +45,7 @@ const ForceGraph2D = dynamic(() => import('react-force-graph-2d'), { ssr: false 
 ```
 
 #### Example: Always-visible node label with background (Canvas)
+
 ```typescript
 // Pseudocode only — final implementation will live in `blue-dolphin-graph.tsx`
 function paintNode(node, ctx, scale) {
@@ -53,18 +59,24 @@ function paintNode(node, ctx, scale) {
   const padding = 2 / scale;
   const textWidth = ctx.measureText(label).width;
   ctx.fillStyle = 'rgba(255,255,255,0.95)';
-  ctx.fillRect(node.x - textWidth/2 - padding, node.y - 6/scale - padding, textWidth + 2*padding, 12/scale + 2*padding);
+  ctx.fillRect(
+    node.x - textWidth / 2 - padding,
+    node.y - 6 / scale - padding,
+    textWidth + 2 * padding,
+    12 / scale + 2 * padding,
+  );
   ctx.fillStyle = '#0f172a'; // slate-900
-  ctx.fillText(label, node.x - textWidth/2, node.y + 4/scale);
+  ctx.fillText(label, node.x - textWidth / 2, node.y + 4 / scale);
 }
 ```
 
 #### Example: Link styles (dashed/dotted) and arrows
+
 ```typescript
 function paintLink(link, ctx, scale) {
   ctx.save();
-  if (link.style === 'dashed') ctx.setLineDash([6/scale, 6/scale]);
-  if (link.style === 'dotted') ctx.setLineDash([2/scale, 4/scale]);
+  if (link.style === 'dashed') ctx.setLineDash([6 / scale, 6 / scale]);
+  if (link.style === 'dotted') ctx.setLineDash([2 / scale, 4 / scale]);
   ctx.strokeStyle = link.color;
   ctx.lineWidth = link.width ?? 3;
   ctx.beginPath();
@@ -77,18 +89,19 @@ function paintLink(link, ctx, scale) {
 ```
 
 #### Performance notes
+
 - Prefer constant-time per-node paint: precompute `color`, `size`, `shape` in the data transform.
 - Avoid per-frame string concatenations; cache fonts, colors, and label widths if needed.
 - Consider reducing alpha decay and setting `cooldownTicks=100` for faster stabilization.
 - Avoid `linkDirectionalParticles` for large graphs (expensive).
 
 #### Accessibility plan summary
+
 - Provide DOM-based controls (filters, search, focus cycle) and a details panel.
 - Announce selection changes via `aria-live` in the sidebar.
 - Offer high-contrast theme and large-text option.
 
 #### References
+
 - React Force Graph repo and docs: `https://github.com/vasturiano/react-force-graph`
 - 2D Canvas customization examples: node/link canvas object, pointer area paint (see repo examples)
-
-

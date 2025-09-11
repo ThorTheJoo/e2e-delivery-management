@@ -1,0 +1,1292 @@
+﻿Domain,Vertical,AF Lev.1,AF Lev.2,Rephrased Function Name,Function ID,UID
+Market & Sales Domain,Operations Readiness & Support,Sales and Sales Force Management,Sales Territory Management,Sales Territory Assignment,1282,2073
+Market & Sales Domain,Strategy Management,Market Strategy Management,Market Sales and Channel Development,Points of Sales Management,386,2075
+Market & Sales Domain,Business Value Development,Advertising Management,Advertisement Management,Advertisement Monitoring,1318,2105
+Market & Sales Domain,Business Value Development,Advertising Management,Advertisement Management,Advertisement Information Management,1319,2106
+Market & Sales Domain,Business Value Development,Advertising Management,Advertisement Management,Advertisement Performance Analysis,1320,2107
+Market & Sales Domain,Operations Readiness & Support,Sales Commissioning Management,Sales Account Management,Sales Account Assigning,390,2111
+Market & Sales Domain,Business Value Development,Marketing Campaign Development,Marketing Campaign Workflow Design,Campaign Workflow Approving,349,2567
+Market & Sales Domain,Operations Readiness & Support,Marketing Campaign Management,Marketing Campaign Execution,Campaign to Customer Profile Alignment,350,2570
+Market & Sales Domain,Operations Readiness & Support,Marketing Campaign Management,Marketing Campaign Performance Tracking and Analysis,Campaign In Execution Updating,353,2573
+Market & Sales Domain,Strategy Management,Marketing Strategic Analysis,Market and Channel Analysis,Market and Channel Data Analysis,1091,2576
+Market & Sales Domain,Business Value Development,Advertising Management,Advertisement Management,Advertisement Placement,1315,2578
+Market & Sales Domain,Fulfillment,Sales Management,Sales Lead Management,Funnel Assigning,375,2579
+Market & Sales Domain,Fulfillment,Sales Management,Opportunity Management,Sales Product Support,395,2593
+Market & Sales Domain,Fulfillment,Sales Management,Opportunity Management,Product Customization Offering Management,379,2597
+Market & Sales Domain,Fulfillment,Sales Management,Opportunity Management,Solution Design Creation,928,2600
+Market & Sales Domain,Strategy Management,Market Strategy Management,Market and Channel Strategy Definition,Market Sales Segmentation Definition,1101,2607
+Market & Sales Domain,Assurance,Sales Performance Management,Market and Channel Performance Tracking,Market and Channel Measurement,1098,2610
+Market & Sales Domain,Fulfillment,Sales Management,Opportunity Management,Automatic Solution Validation,930,2614
+Market & Sales Domain,Fulfillment,Sales Management,Opportunity Management,Solution Pricing,931,2615
+Market & Sales Domain,Fulfillment,Sales Management,Opportunity Management,Calculation Rules Retrieval,932,2616
+Market & Sales Domain,Fulfillment,Sales Management,Opportunity Management,Sales Job Quick Reference Guiding,393,3050
+Market & Sales Domain,Fulfillment,Sales Management,Opportunity Management,Price Optimization,933,3250
+Market & Sales Domain,Fulfillment,Sales Management,Opportunity Management,Sales Negotiation Support,934,3252
+Market & Sales Domain,Fulfillment,Sales Management,Opportunity Management,Solution Requirements Capturing,935,3253
+Market & Sales Domain,Fulfillment,Sales Management,Opportunity Management,Sales Quote Management,1063,3254
+Market & Sales Domain,Fulfillment,Sales Management,Framework Agreement Management,Customer Framework Agreement Approval,1180,3404
+Market & Sales Domain,Operations Readiness & Support,Sales and Sales Force Management,Sales Force Management,Sales Force Objectives follow-up,1278,3422
+Market & Sales Domain,Strategy Management,Market Strategy Management,Marketing Campaign Plan Definition,Market Strategy Plan Design,1093,3428
+Market & Sales Domain,Strategy Management,Market Strategy Management,Marketing Campaign Plan Definition,Market and Channel Forecasts Identification,1092,3431
+Market & Sales Domain,Strategy Management,Market Strategy Management,Marketing Campaign Plan Definition,Marketing Campaign Roadmap Definition,1094,3432
+Market & Sales Domain,Strategy Management,Marketing Strategic Analysis,Marketing Campaign Analysis,Marketing Information Sharing,354,3435
+Market & Sales Domain,Business Value Development,Marketing Campaign Development,Marketing Campaign Design,Marketing Message Definition,1096,3440
+Market & Sales Domain,Business Value Development,Marketing Campaign Development,Marketing Campaign Design,Campaign Preparation,347,3443
+Market & Sales Domain,Operations Readiness & Support,Sales and Sales Force Management,Sales Force Management,Sales Force Objectives Definition,1279,3722
+Market & Sales Domain,Strategy Management,Market Strategy Management,Market Sales and Channel Development,Direct Sales Force Management,373,3724
+Market & Sales Domain,Strategy Management,Market Strategy Management,Market and Channel Strategy Definition,Market and Channel Sales Forecasts Determination,1100,3726
+Market & Sales Domain,Strategy Management,Marketing Strategic Analysis,Marketing Campaign Analysis,Marketing Insight Campaign Reporting,355,3727
+Market & Sales Domain,Strategy Management,Marketing Strategic Analysis,Marketing Campaign Analysis,Marketing Campaign Product Tracking,410,3728
+Market & Sales Domain,Business Value Development,Marketing Campaign Development,Marketing Campaign Design,Campaign Template Creation,348,3729
+Market & Sales Domain,Business Value Development,Marketing Campaign Development,Marketing Campaign Design,Campaign Creation,346,3730
+Market & Sales Domain,Business Value Development,Advertising Management,Advertisement Management,Advertisement Design,1316,3732
+Market & Sales Domain,Business Value Development,Advertising Management,Advertisement Management,Advertisement Delivery,1317,3733
+Market & Sales Domain,Operations Readiness & Support,Sales Commissioning Management,Sales Account Management,Sales Account Planning,391,3734
+Market & Sales Domain,Operations Readiness & Support,Sales Commissioning Management,Sales Account Management,Telesales Tools Support,397,3735
+Market & Sales Domain,Operations Readiness & Support,Sales Commissioning Management,Sales Commission Repository Management,Sales Commission Reporting,358,3736
+Market & Sales Domain,Fulfillment,Sales Management,Sales Lead Management,Funnel Leads Tracking,376,3737
+Market & Sales Domain,Fulfillment,Sales Management,Sales Lead Management,Sales Lead Capturing,726,3738
+Market & Sales Domain,Fulfillment,Sales Management,Opportunity Management,Sales Aids Support,394,3739
+Market & Sales Domain,Assurance,Sales Performance Management,Sales Reporting,Sales Order Reporting,388,3741
+Market & Sales Domain,Operations Readiness & Support,Sales and Sales Force Management,Sales Force Management,Sales Force Forecast Definition,1277,3899
+Market & Sales Domain,Operations Readiness & Support,Sales and Sales Force Management,Sales Territory Management,Sales Territory Definition,1276,3900
+Market & Sales Domain,Strategy Management,Market Strategy Management,Market Information Management,Market Information Gathering,1280,3901
+Market & Sales Domain,Strategy Management,Market Strategy Management,Market Sales and Channel Development,Sales Forecast Analyzing,370,3902
+Market & Sales Domain,Strategy Management,Market Strategy Management,Market and Channel Strategy Definition,Sales Behaviors Modeling,1102,3903
+Market & Sales Domain,Strategy Management,Market Strategy Management,Marketing Campaign Plan Definition,Marketing Campaign Contact Rule Definition,1095,3904
+Market & Sales Domain,Strategy Management,Marketing Strategic Analysis,Marketing Campaign Analysis,Campaign Performance Analyzing,345,3905
+Market & Sales Domain,Strategy Management,Marketing Strategic Analysis,Market and Channel Analysis,Market and Channel Data Collection,1090,3906
+Market & Sales Domain,Business Value Development,Marketing Campaign Development,Marketing Campaign Design,Marketing Campaign Policy Rules Definition,1097,3907
+Market & Sales Domain,Operations Readiness & Support,Marketing Campaign Management,Marketing Campaign Execution,Campaign Workflow Execution,352,3908
+Market & Sales Domain,Operations Readiness & Support,Marketing Campaign Management,Marketing Campaign Performance Tracking and Analysis,Real-time Campaign Performance Tracking,356,3909
+Market & Sales Domain,Business Value Development,Sales Commission Management,Sales Commission Development,Sales Commission Management,357,3910
+Market & Sales Domain,Business Value Development,Advertising Management,Advertisement Management,Advertisement Targeting Specification,1314,3911
+Market & Sales Domain,Operations Readiness & Support,Sales Commissioning Management,Sales Account Management,Sales Opportunities Dispatching,371,3912
+Market & Sales Domain,Operations Readiness & Support,Sales Commissioning Management,Sales Commission Calculation,Commissioning Management,392,3913
+Market & Sales Domain,Operations Readiness & Support,Sales Commissioning Management,Sales Commission Repository Management,Commission Statements Browsing,367,3914
+Market & Sales Domain,Fulfillment,Sales Management,Sales Lead Management,Funnel Creation,374,3915
+Market & Sales Domain,Fulfillment,Sales Management,Framework Agreement Management,Customer Framework Agreement Definition,1179,3916
+Market & Sales Domain,Assurance,Sales Performance Management,Sales Reporting,Sales and Marketing Reporting,389,3917
+Market & Sales Domain,Business Value Development,Marketing Campaign Development,Marketing Campaign Workflow Design,Campaign Workflow Initiation,351,4082
+Market & Sales Domain,Fulfillment,Sales Management,Opportunity Management,Sales Opportunity Management,372,4083
+Market & Sales Domain,Assurance,Sales Performance Management,Sales Analysis,Sales Metrics Calculation,387,4084
+Market & Sales Domain,Assurance,Sales Performance Management,Market and Channel Performance Tracking,Market and Channel Performance Follow-up,1099,4109
+Product Domain,Business Value Development,Product Specification & Offering Management,Ordering Rules Development,Customer Order Rules Configuration,721,2004
+Product Domain,Business Value Development,Product Specification & Offering Management,Ordering Rules Development,Centralized Ordering Rules Management,210,2005
+Product Domain,Assurance,Product Performance Management,Product Performance Reporting,Open SLA Issues Reporting,295,2006
+Product Domain,Assurance,Product Performance Management,Product Performance Analysis,Product Performance Analysis,1206,2007
+Product Domain,Assurance,Product Problem Management,Product Trouble Ticket Management,Customer Support Case Management,169,2011
+Product Domain,Assurance,Product Problem Management,Product Trouble Ticket Management,Customer Problem Status On-Request Reporting,224,2012
+Product Domain,Strategy Management,Product Specification & Offering Strategy Definition & Analysis,Product Specification & Offering Strategy Management,Product Strategy to Proposition Alignment,417,2130
+Product Domain,Business Value Development,Product Specification & Offering Management,Product Test Specification Development,Product Test Configuration Design,1074,2131
+Product Domain,Billing,Product Usage Management,Product Balance Management,Account Balance Thresholds Actions Configuration,46,2264
+Product Domain,Billing,Product Usage Management,Product Balance Management,Balance Information Reporting,47,2265
+Product Domain,Billing,Product Usage Management,Product Balance Management,Charge Calculation Balance Updating,48,2266
+Product Domain,Billing,Product Usage Management,Product Balance Management,Balance Management Spending-limits Enforcement,49,2267
+Product Domain,Billing,Product Usage Management,Product Balance Management,Balance Management Activities Logging,50,2268
+Product Domain,Billing,Product Usage Management,Product Balance Management,Balance Replenishment,51,2269
+Product Domain,Billing,Product Usage Management,Product Balance Management,Roll-over and Cyclic Balance Policies Configuration,52,2270
+Product Domain,Billing,Product Usage Management,Product Balance Management,Charges To Multiple Balances Splitting,53,2271
+Product Domain,Billing,Product Usage Management,Product Balance Management,Multiple Simultaneous Balance Updating,54,2272
+Product Domain,Billing,Rating and Follow up,Bill Calculation,Bill Charges Aggregation,183,2276
+Product Domain,Billing,Rating and Follow up,Tariff Calculation and Rating,Event Charge/Credit Calculation,126,2277
+Product Domain,Billing,Rating and Follow up,Tariff Calculation and Rating,Calculated Charges/Credits Proration,127,2280
+Product Domain,Billing,Rating and Follow up,Tariff Calculation and Rating,Late Arrival Usage Charges/Credits Recalculation,128,2282
+Product Domain,Billing,Rating and Follow up,Bill Calculation,Customer Access Bill Statement Splitting,254,2283
+Product Domain,Assurance,Product Problem Management,Product Trouble Ticket Management,Case Correlation,98,2317
+Product Domain,Assurance,Product Problem Management,Product Trouble Ticket Management,Case Reporting,100,2318
+Product Domain,Assurance,Product Problem Management,Product Trouble Ticket Management,Case Tracking Case State Reporting,105,2319
+Product Domain,Assurance,Product Problem Management,Product Trouble Ticket Management,Case Management Information Retrieval,107,2320
+Product Domain,Assurance,Product Problem Management,Product Trouble Ticket Management,Case Tracking,110,2321
+Product Domain,Assurance,Product Problem Management,Product Trouble Ticket Management,Case Management Change Notification,1059,2326
+Product Domain,Assurance,Product Problem Management,Product Trouble Ticket Resolution,Customer SLA Violation Quantification,298,2331
+Product Domain,Business Value Development,Product Specification & Offering Management,Product Specification & Offering Development,Product Modeling Support,407,2344
+Product Domain,Billing,Rating and Follow up,Tariff Calculation and Rating,Commitment Tracking Result Determining,158,2346
+Product Domain,Billing,Rating and Follow up,Tariff Calculation and Rating,Commitment Tracking Terms & Conditions Evaluation,159,2347
+Product Domain,Billing,Rating and Follow up,Tariff Calculation and Rating,Commitment Tracking Data Collection,160,2348
+Product Domain,Billing,Rating and Follow up,Tariff Calculation and Rating,Charging/Rating Recalculation,186,2349
+Product Domain,Billing,Rating and Follow up,Tariff Calculation and Rating,Discount Calculation,300,2379
+Product Domain,Assurance,Product Problem Management,Product Trouble Ticket Management,Problem Resolution Support,402,2390
+Product Domain,Operations Readiness & Support,Product Management,Loyalty Events Management,Loyalty Product Events Collection,1128,2401
+Product Domain,Fulfillment,Product Configuration & Activation,Offer and Product Configuration,Mass Transaction Ordering,343,2403
+Product Domain,Billing,Rating and Follow up,Bill Calculation,Customer Bill Usage and Charges Viewing,256,2404
+Product Domain,Operations Readiness & Support,Product Management,Product Repository Management,Assigned Products Maintenance,180,2419
+Product Domain,Fulfillment,Product Configuration & Activation,Offer and Product Configuration,Customer Order Capturing,120,2428
+Product Domain,Business Value Development,Product Specification & Offering Management,Product Specification & Offering Development,Product Specification and Offering Change Auditing,1078,2431
+Product Domain,Assurance,Product Problem Management,Product Problem Diagnose,Customer Problem Resolution Support,219,2439
+Product Domain,Assurance,Product Problem Management,Product Trouble Ticket Orchestration,Service Trouble Ticket Identification,1211,2440
+Product Domain,Assurance,Product Problem Management,Product Trouble Ticket Management,Case Definition and Configuration,99,2445
+Product Domain,Operations Readiness & Support,Product Management,Product Repository Management,Product Storage,197,2458
+Product Domain,Billing,Rating and Follow up,Tariff Calculation and Rating,Bill-time Fee Calculation,58,2475
+Product Domain,Billing,Rating and Follow up,Tariff Calculation and Rating,Split Bill Charge Distribution,60,2477
+Product Domain,Business Value Development,Product Specification & Offering Management,Product Specification & Offering Development,External Product Offering Development,1292,2484
+Product Domain,Fulfillment,Product Configuration & Activation,Offer and Product Configuration,Offer and Product Configuration,207,2486
+Product Domain,Fulfillment,Product Configuration & Activation,Offer and Product Configuration,Inter Product Dependency Identification,182,2498
+Product Domain,Fulfillment,Product Configuration & Activation,Offer and Product Configuration,Customer Loyalty Subscription Configuration,236,2499
+Product Domain,Assurance,Product Performance Management,Product Performance Commitment Follow-up,Customer SLA Issue Customer Validation,291,2508
+Product Domain,Assurance,Product Performance Management,Product Performance Commitment Follow-up,Customer SLA Issue Receiving,292,2509
+Product Domain,Assurance,Product Performance Management,Product Performance Commitment Follow-up,Customer SLA Issue Service / Entitlement Validation,293,2510
+Product Domain,Assurance,Product Problem Management,Product Problem Diagnose,Subscribed Products' Services and Resources Verification,222,2514
+Product Domain,Assurance,Product Performance Management,Product Performance Commitment Follow-up,Customer SLA Service to Contract Analyzing,287,2516
+Product Domain,Assurance,Product Performance Management,Product Performance Commitment Follow-up,Customer SLA Analysis Preparation,288,2517
+Product Domain,Billing,Product Usage Management,Product Balance Management,Balance Data Retrieval,43,2519
+Product Domain,Assurance,Product Performance Management,Product Performance Commitment Follow-up,Customer SLA Issue Information Collection,290,2520
+Product Domain,Business Value Development,Product Specification & Offering Management,Product Specification Lifecycle Management,Product Specification Version Control,1342,2581
+Product Domain,Operations Readiness & Support,Product Test Management,Product Test Execution,Product Test Execution,1131,2584
+Product Domain,Assurance,Product Problem Management,Product Trouble Ticket Management,Case Tracking Threshold Notification,106,2623
+Product Domain,Business Value Development,Product Specification & Offering Management,Product Specification & Offering Development,Marketing & Offer Strategies Implementation (Deleted),405,2627
+Product Domain,Business Value Development,Product Specification & Offering Management,Product Specification & Offering Development,New Product Introduction and Maintenance (Deleted),406,2628
+Product Domain,Business Value Development,Product Specification & Offering Management,Product Specification & Offering Development,Product Requirement Specification (Deleted),409,2631
+Product Domain,Assurance,Product Performance Management,Product Performance Reporting,Service Level Performance Reporting,294,2633
+Product Domain,Business Value Development,Product Specification & Offering Management,Product Supervision Policy Management,Product Performance Severity Definition,1205,2640
+Product Domain,Strategy Management,Product Specification & Offering Strategy Definition & Analysis,Product Specification & Offering Strategy Management,Product Propositions Operations Planning,416,2641
+Product Domain,Business Value Development,Product Specification & Offering Management,Product Specification & Offering Development,Product Specification Design,1076,2937
+Product Domain,Assurance,Product Problem Management,Product Trouble Ticket Orchestration,Related Customer Facing Service Determination,1210,3401
+Product Domain,Fulfillment,Product Configuration & Activation,Offer and Product Configuration,Customer Product Proposal Creation,320,3549
+Product Domain,Fulfillment,Product Configuration & Activation,Product Activation,Mass Product Pre-activation,1199,3580
+Product Domain,Strategy Management,Product Analysis,Product Profitability Analysis,Product Revenue Reporting,414,3584
+Product Domain,Strategy Management,Product Analysis,Product QoS Analysis,Customer QoS Satisfaction Reporting,1127,3589
+Product Domain,Strategy Management,Product Specification & Offering Strategy Definition & Analysis,Product Specification & Offering Strategy Analysis,Product Specification Performance Management,1340,3593
+Product Domain,Business Value Development,Product Specification & Offering Management,Product Specification & Offering Development,Product Offering Design,1077,3601
+Product Domain,Business Value Development,Product Specification & Offering Management,Product Specification & Offering Development,Product Compatibility Checking,263,3602
+Product Domain,Business Value Development,Product Specification & Offering Management,Product Specification & Offering Development,Customer Loyalty Rules Management,238,3603
+Product Domain,Business Value Development,Product Specification & Offering Management,Product Specification & Offering Development,External Product Specification Development,1291,3604
+Product Domain,Operations Readiness & Support,Product Management,Product Agreement Management,Product Agreement Storage,363,3618
+Product Domain,Operations Readiness & Support,Product Operational Analysis,Product Usage Tracking,Product Specification Usage Forecast,1193,3628
+Product Domain,Operations Readiness & Support,Product Operational Analysis,Pushed Offer Management,Product Specification & Offering Simulation,1196,3631
+Product Domain,Assurance,Product Performance Management,Product Performance Supervision,Product Performance Supervision,1208,3635
+Product Domain,Fulfillment,Product Configuration & Activation,Offer and Product Configuration,Customer SLA Preferences Capturing,278,3752
+Product Domain,Strategy Management,Product Analysis,Product Profitability Analysis,Product Cost Management,412,3778
+Product Domain,Strategy Management,Product Analysis,Product Profitability Analysis,Product Cost Reporting,413,3779
+Product Domain,Strategy Management,Product Analysis,Product Diagnostic and Test Quality Loop,Product Test Analysis,1124,3780
+Product Domain,Strategy Management,Product Specification & Offering Strategy Definition & Analysis,Product Specification & Offering Strategy Management,Product Strategy/Propositions Creation,418,3782
+Product Domain,Business Value Development,Product Specification & Offering Management,Product Specification & Offering Development,Product Catalog Browsing,123,3785
+Product Domain,Business Value Development,Product Specification & Offering Management,Product Test Specification Development,Product Test Restitution Design,1075,3786
+Product Domain,Business Value Development,Product Specification & Offering Management,Product Specification Lifecycle Management,Product Specification Recalls Support,1293,3788
+Product Domain,Operations Readiness & Support,Product Management,Loyalty Account Management,Customer Loyalty Communication,237,3790
+Product Domain,Operations Readiness & Support,Product Test Management,Product Test Execution,Product Test Authorization Check,1130,3793
+Product Domain,Operations Readiness & Support,Product Operational Analysis,Product Usage Tracking,Product Specification Usage On-the-fly Analysis,1194,3795
+Product Domain,Assurance,Product Performance Management,Product Performance Reporting,SLA Violation Notification,296,3798
+Product Domain,Assurance,Product Performance Management,Product Performance Commitment Follow-up,Customer SLA Monitoring,289,3799
+Product Domain,Assurance,Product Problem Management,Product Problem Diagnose,Knowledge Support Access,270,3800
+Product Domain,Assurance,Product Problem Management,Product Problem Diagnose,Customer Problem Performance and Quality Data Diagnostics,1060,3801
+Product Domain,Assurance,Product Problem Management,Product Trouble Ticket Orchestration,Product Trouble Ticket Prioritization,1212,3802
+Product Domain,Assurance,Product Problem Management,Product Trouble Ticket Management,Archived Cases Retrieval,97,3803
+Product Domain,Billing,Product Usage Management,Product Balance Management,Temporary Balance Units Reservation,44,3804
+Product Domain,Billing,Product Usage Management,Product Balance Management,Minimum Allowable Balance Setting,45,3805
+Product Domain,Billing,Rating and Follow up,Bill Calculation,Currency Conversion,184,3806
+Product Domain,Billing,Rating and Follow up,Bill Calculation,Customer Usage and Charges Report Access,253,3807
+Product Domain,Billing,Rating and Follow up,Tariff Calculation and Rating,Charging Event Accumulation,125,3808
+Product Domain,Fulfillment,Product Configuration & Activation,Product Activation,Customer Loyalty Subscription Activation,1200,3951
+Product Domain,Strategy Management,Product Analysis,Product Usage Analysis,Business Operational Usage Analyzing,695,3952
+Product Domain,Strategy Management,Product Analysis,Product Diagnostic and Test Quality Loop,Product Test Improvement Identification,1125,3953
+Product Domain,Strategy Management,Product Analysis,Product QoS Analysis,Product QoS Dashboard Analysis,1126,3954
+Product Domain,Strategy Management,Product Specification & Offering Strategy Definition & Analysis,Product Specification & Offering Strategy Analysis,Product Strategy Performance Reporting,419,3955
+Product Domain,Strategy Management,Product Specification & Offering Strategy Definition & Analysis,Product Specification & Offering Strategy Management,Product Strategy Linking,415,3956
+Product Domain,Business Value Development,Product Specification & Offering Management,Product Supervision Policy Management,Product Supervision Policy Indicators Definition,1204,3957
+Product Domain,Business Value Development,Product Specification & Offering Management,Ordering Rules Development,Order Rules Retrieval,722,3958
+Product Domain,Business Value Development,Product Specification & Offering Management,Product Specification & Offering Development,Product Specification and Offering Repository Management,1079,3959
+Product Domain,Business Value Development,Product Specification & Offering Management,Product Specification & Offering Realization,Product Specification Change Notification,1341,3960
+Product Domain,Business Value Development,Product Specification & Offering Management,Product Test Specification Development,Product Test Specification Design,1073,3961
+Product Domain,Business Value Development,Product Specification & Offering Management,Product Specification & Offering Development,Product Agreement Specification Design,360,3962
+Product Domain,Business Value Development,Product Specification & Offering Management,Product Specification Lifecycle Management,Product Retirement,408,3963
+Product Domain,Operations Readiness & Support,Product Management,Loyalty Account Management,Customer Loyalty Score Balance Management,198,3964
+Product Domain,Operations Readiness & Support,Product Management,Product Repository Management,Product Configuration Check,1201,3965
+Product Domain,Operations Readiness & Support,Product Management,Loyalty Events Management,Loyalty Product Rules Application,1129,3966
+Product Domain,Operations Readiness & Support,Product Management,Product Agreement Management,Product Agreement Implementation,361,3967
+Product Domain,Operations Readiness & Support,Product Test Management,Product Test Execution,Product Test Reporting,1132,3968
+Product Domain,Operations Readiness & Support,Product Operational Analysis,Fraud Detection,Product Fraud Detection,1133,3969
+Product Domain,Operations Readiness & Support,Product Operational Analysis,Product Usage Tracking,Product Usage Collection,1134,3970
+Product Domain,Operations Readiness & Support,Product Operational Analysis,Pushed Offer Management,Pushed Offer Identification,1195,3971
+Product Domain,Assurance,Product Performance Management,Product Performance Supervision,Product Performance Measurement,1207,3972
+Product Domain,Assurance,Product Performance Management,Product Performance Analysis,Product Capacity Analyzing,411,3973
+Product Domain,Assurance,Product Performance Management,Product Performance Reporting,Customer Service Access,244,3974
+Product Domain,Assurance,Product Performance Management,Product Performance Commitment Follow-up,Customer SLA Violation Tracking,299,3975
+Product Domain,Assurance,Product Problem Management,Product Problem Diagnose,Root Cause Diagnostics,218,3977
+Product Domain,Assurance,Product Problem Management,Product Trouble Ticket Orchestration,Related Resource Determination,1209,3978
+Product Domain,Assurance,Product Problem Management,Product Trouble Ticket Management,Case Archiving,96,3979
+Product Domain,Billing,Product Usage Management,Product Balance Management,Balance Expiration Dates Setting,42,3980
+Product Domain,Billing,Rating and Follow up,Bill Calculation,On Demand Bill Calculation,61,3981
+Product Domain,Billing,Rating and Follow up,Tariff Calculation and Rating,Price and Discount Calculation,55,3982
+Product Domain,Strategy Management,Product Analysis,Product Profitability Analysis,Product Group Profitability Reporting,846,4087
+Product Domain,Fulfillment,Product Configuration & Activation,Offer and Product Configuration,Product Order Initialization,1123,4088
+Product Domain,Assurance,Product Problem Management,Product Trouble Ticket Resolution,Customer SLA Violation Remedy Initiation,297,4110
+Customer Domain,"Assurance,Billing,Fulfillment",Welcome and Interaction,Customer Interaction Management,Customer Interaction Logging,196,2000
+Customer Domain,"Assurance,Billing,Fulfillment",Customer Loyalty and Retention,Customer Value Management,Customer Value Model Development,1118,2001
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Repository Management,Customer Order Reporting,172,2002
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Repository Management,Customer Support Jeopardy Notification,175,2003
+Customer Domain,Billing,Customer Financial Management,Loan Management,Loan Closure,1256,2050
+Customer Domain,Billing,Customer Financial Management,Loan Management,Loan Transfer,1258,2051
+Customer Domain,Billing,Customer Financial Management,Bill Dispute,Bill Dispute Investigation Support,38,2054
+Customer Domain,Billing,Customer Financial Management,Bill Dispute,Bill Dispute Customer Notification,39,2055
+Customer Domain,"Assurance,Billing,Fulfillment",Customer Loyalty and Retention,Loyalty Program Management,Loyalty Program Rewards Specification,1298,2088
+Customer Domain,"Assurance,Billing,Fulfillment",Customer Loyalty and Retention,Loyalty Program Management,Loyalty Program Partnerships Management,1299,2089
+Customer Domain,"Assurance,Billing,Fulfillment",Customer Loyalty and Retention,Customer Risk Management,Customer Credit Management,187,2092
+Customer Domain,"Assurance,Billing,Fulfillment",Customer Loyalty and Retention,Customer Risk Management,Customer Churn Risk Identification,243,2093
+Customer Domain,"Assurance,Billing,Fulfillment",Welcome and Interaction,Customer Context Management,Internal Recommended Action Guiding,240,2100
+Customer Domain,"Assurance,Billing,Fulfillment",Welcome and Interaction,Customer Context Management,Customer Support Conversational Guiding,280,2101
+Customer Domain,"Assurance,Billing,Fulfillment",Customer Loyalty and Retention,Loyalty Program Management,Loyalty Program Rules and Mechanisms Specification,1295,2128
+Customer Domain,Assurance,Customer Problem Support,Customer Assistance,Customer Inquiries and Issues to Partner Responding,636,2129
+Customer Domain,Strategy Management,Customer Strategic Analysis,Customer Behavior Analysis,Customer Behavior Change Analyzing,229,2133
+Customer Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Aggregated Function TBD,Aggregated Function TBD L2,Catalog Entity Integrity Rules Control (deleted),10,2232
+Customer Domain,Billing,Customer Financial Management,Payment Management,Collection Payment Plan Monitoring,157,2252
+Customer Domain,Billing,Invoice Management,Invoicing,Bill Image Presentation,65,2254
+Customer Domain,Billing,Customer Financial Management,Payment Management,Customer Support Payment Management,171,2255
+Customer Domain,Billing,Customer Financial Management,Bill Dispute,Customer Bill Dispute Management,249,2259
+Customer Domain,Billing,Customer Financial Management,Bill Dispute,Agreed-upon Dispute Adjustment,301,2260
+Customer Domain,Billing,Customer Financial Management,Bill Dispute,Customer Disputes Registration,302,2261
+Customer Domain,Billing,Invoice Management,Invoicing,Unbilled Invoice Items Listing,66,2284
+Customer Domain,Billing,Invoice Management,Invoicing,Usage Summary and Details Presentation,67,2285
+Customer Domain,Billing,Invoice Management,Invoicing,Billing Event Error Correction,78,2286
+Customer Domain,Billing,Invoice Management,Invoicing,Billing Event Error Identification,79,2287
+Customer Domain,Billing,Invoice Management,Invoicing,Billing Event Error Re-distribution,80,2288
+Customer Domain,Billing,Invoice Management,Invoicing,Unbilled Events Categorization,81,2289
+Customer Domain,Billing,Invoice Management,Billing Account Administration,Billing Account Price Plan Determining,72,2290
+Customer Domain,Billing,Invoice Management,Billing Account Administration,Billing Account Reporting,73,2291
+Customer Domain,Billing,Invoice Management,Billing Account Administration,Shared Allowances Charging,74,2292
+Customer Domain,Billing,Invoice Management,Billing Account Administration,Billing Accounts Creation,75,2293
+Customer Domain,Billing,Invoice Management,Billing Account Administration,Billing Account Structure Configuration,76,2294
+Customer Domain,Billing,Invoice Management,Billing Account Administration,Billing Account Information Configuration,77,2295
+Customer Domain,Billing,Invoice Management,Billing Account Administration,Customer Bill Viewing,245,2296
+Customer Domain,Billing,Invoice Management,Billing Account Administration,Customer Billing Cost Center Analyzing,247,2297
+Customer Domain,Billing,Invoice Management,Billing Account Administration,Customer Billing Hierarchies Management,248,2298
+Customer Domain,Billing,Invoice Management,Invoicing,Billing Event Processing Distribution,85,2300
+Customer Domain,Billing,Invoice Management,Invoicing,Billing Event Processing Enrichment,86,2301
+Customer Domain,Billing,Invoice Management,Invoicing,Billing Event Processing Guiding,87,2302
+Customer Domain,Billing,Invoice Management,Invoicing,Billing Event Mediation,88,2303
+Customer Domain,Billing,Invoice Management,Invoicing,Invoice Balance Calculation,309,2304
+Customer Domain,Billing,Invoice Management,Invoicing,Billing Event Aggregation,89,2307
+Customer Domain,Billing,Invoice Management,Invoicing,Billing Event Processing Analyzing,90,2308
+Customer Domain,Billing,Invoice Management,Invoicing,Customer Bill Usage Classification,246,2309
+Customer Domain,Billing,Invoice Management,Invoicing,Customer Billing Usage and Charges Reporting,250,2310
+Customer Domain,Billing,Invoice Management,Invoicing,Customer Billing Approving,258,2311
+Customer Domain,Operations Readiness & Support,Customer Information Support,Collect and Qualify Customer Information,Customer Information Searching,122,2312
+Customer Domain,Operations Readiness & Support,Customer Information Support,Personalize Customer Interaction,Customer Relation Map Exposure  (Deleted),92,2313
+Customer Domain,"Assurance,Billing,Fulfillment",Welcome and Interaction,Customer Interaction Management,Solicitation Policy Execution,1115,2314
+Customer Domain,Operations Readiness & Support,Customer Information Support,Collect and Qualify Customer Information,Guided Customer Information Capturing,124,2315
+Customer Domain,Operations Readiness & Support,Customer Information Support,Collect and Qualify Customer Information,Customer Hierarchy and Group Management,195,2316
+Customer Domain,Assurance,Customer Problem Support,Customer Case Workflow Management,Case Workflow Orchestration,111,2322
+Customer Domain,Assurance,Customer Problem Support,Customer Case Workflow Management,Customer Problem Verification and Closure,1338,2323
+Customer Domain,Assurance,Customer Problem Support,Customer Assistance,Customer Problem Receiving,221,2332
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Eligibility Validation,Product Availability Checking,262,2341
+Customer Domain,Operations Readiness & Support,Customer Information Support,Collect and Qualify Customer Information,Background Customer Profiling,228,2342
+Customer Domain,Operations Readiness & Support,Customer Information Support,Collect and Qualify Customer Information,Customer Value Profile Segmentation,232,2343
+Customer Domain,Operations Readiness & Support,Customer Information Support,Collect and Qualify Customer Information,Customer Actions Profile Updating,233,2345
+Customer Domain,Billing,Invoice Management,Dunning,Pause/Resume Collection Treatment,134,2350
+Customer Domain,Billing,Invoice Management,Dunning,Collection Flows Creation,138,2351
+Customer Domain,Billing,Invoice Management,Dunning,Collection Rules Definition,139,2352
+Customer Domain,Billing,Invoice Management,Dunning,Collection Treatment Evaluation,140,2353
+Customer Domain,Billing,Invoice Management,Dunning,Collection Execution Monitoring,141,2355
+Customer Domain,Billing,Invoice Management,Dunning,Manual Collection Treatment Assigning,143,2359
+Customer Domain,Billing,Invoice Management,Dunning,Financial Customer Score Updating,144,2360
+Customer Domain,Billing,Invoice Management,Dunning,Debt Management Financial Scoring,145,2361
+Customer Domain,Billing,Invoice Management,Dunning,Debt Management Penalty Automatic Charging,146,2362
+Customer Domain,Billing,Invoice Management,Dunning,Collection Treatment,147,2364
+Customer Domain,Billing,Invoice Management,Dunning,Collection Treatment Manual Intervention,148,2365
+Customer Domain,Billing,Invoice Management,Dunning,Dunning Strategy Initialization,149,2366
+Customer Domain,Billing,Invoice Management,Dunning,Dunning and Dunning Event Management,150,2367
+Customer Domain,Billing,Invoice Management,Dunning,Collection Dunning Monitoring,151,2368
+Customer Domain,Billing,Invoice Management,Dunning,Collection Penalty Charges Generation,152,2369
+Customer Domain,Billing,Invoice Management,Dunning,Collection Issue Write Off Closing,154,2370
+Customer Domain,Billing,Invoice Management,Dunning,External Collection Agency Passing,155,2371
+Customer Domain,Billing,Invoice Management,Dunning,Collection Decision Monitoring,166,2372
+Customer Domain,Billing,Invoice Management,Dunning,Customer Penalties Viewing,252,2373
+Customer Domain,Billing,Customer Financial Management,Payment Management,Customer Loyalty Prize Selection,200,2374
+Customer Domain,Billing,Customer Financial Management,Payment Management,Customer Bill Payment,251,2377
+Customer Domain,Billing,Customer Financial Management,Payment Management,Bank Interface Direct Debit Payment Receiving,321,2378
+Customer Domain,"Assurance,Billing,Fulfillment",Welcome and Interaction,Customer Interaction Management,Customer Interaction Information Capturing,189,2383
+Customer Domain,"Assurance,Billing,Fulfillment",Welcome and Interaction,Customer Interaction Management,Customer Business Event Capturing,190,2386
+Customer Domain,"Assurance,Billing,Fulfillment",Welcome and Interaction,Customer Interaction Management,Customer Relationship/Context Event Data Accumulation,191,2389
+Customer Domain,Billing,Customer Financial Management,Bill Dispute,Dispute Progress Tracking,303,2391
+Customer Domain,Billing,Customer Financial Management,Payment Management,Payment Transaction Refunding,322,2392
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Repository Management,Customer Order Administration,178,2393
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Repository Management,Customer Order Versioning,212,2395
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Repository Management,Pending Customer Orders Maintenance,213,2396
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Completion,Calculated Order Data Enrichment,717,2398
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Repository Management,Customer Order Management,366,2399
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Completion,Customer Order Distribution,1325,2402
+Customer Domain,"Assurance,Billing,Fulfillment",Welcome and Interaction,Customer Interaction Management,Customer Support Workflow Guiding,284,2410
+Customer Domain,"Assurance,Billing,Fulfillment",Welcome and Interaction,Customer Interaction Management,Customer Outbound Interaction Initiation,1241,2411
+Customer Domain,"Assurance,Billing,Fulfillment",Welcome and Interaction,Customer Interaction Management,Customer Inbound Interaction Handling,1242,2412
+Customer Domain,Operations Readiness & Support,Customer Information Support,Customer Information Management,Customer Profile Access,235,2413
+Customer Domain,Strategy Management,Customer Strategic Analysis,Customer Behavior Analysis,Customer Value Profile Prediction,231,2415
+Customer Domain,Operations Readiness & Support,Customer Information Support,Collect and Qualify Customer Information,Customer Profile Signature Creation,234,2416
+Customer Domain,"Assurance,Billing,Fulfillment",Welcome and Interaction,Customer Interaction Management,Interaction Channel Infrastructure Operation,1309,2417
+Customer Domain,Billing,Customer Financial Management,Payment Management,Payment Interface Management,323,2421
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Orchestration,Retro-active Order Orchestration,215,2427
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Orchestration,Orchestration Customer Order Error Resolution,1070,2430
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Repository Management,Customer Order Establishment Tracking,217,2432
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Repository Management,External Call Center Access,259,2433
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Repository Management,Order Status Viewing,272,2434
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Repository Management,Customer Order Storage,719,2438
+Customer Domain,Operations Readiness & Support,Customer Information Support,Customer Information Management,Customer Data Fencing,369,2446
+Customer Domain,Operations Readiness & Support,Customer Information Support,Customer Information Management,Customer/Prospect Data Acquisition,364,2447
+Customer Domain,Operations Readiness & Support,Customer Information Support,Collect and Qualify Customer Information,Customer Value Profile Calculation,1069,2449
+Customer Domain,Operations Readiness & Support,Customer Information Support,Collect and Qualify Customer Information,Customer Experience Network and Device Event Collection,192,2453
+Customer Domain,Operations Readiness & Support,Customer Information Support,Customer Information Management,Customer Information Management,400,2456
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Eligibility Validation,Customer Credit Eligibility Validation,1071,2457
+Customer Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Aggregated Function TBD,Aggregated Function TBD L2,Recommendation Action Support Integration,242,2463
+Customer Domain,Billing,Invoice Management,Invoicing,Invoice Charges Compilation,310,2467
+Customer Domain,Billing,Invoice Management,Invoicing,Invoice Items Listing,62,2468
+Customer Domain,Billing,Invoice Management,Invoicing,Invoice Listing,63,2469
+Customer Domain,Billing,Customer Financial Management,Bill Dispute,Disputed Charge Approved Adjustment,304,2470
+Customer Domain,Billing,Invoice Management,Invoicing,Invoice Totals Calculation,311,2471
+Customer Domain,Billing,Customer Financial Management,Payment Management,Financial Transaction Settlement,324,2472
+Customer Domain,Billing,Invoice Management,Risk Mitigation Measures Enforcement,Risk Mitigation Actions Triggering,1114,2473
+Customer Domain,Billing,Invoice Management,Invoicing,Invoice Detail Collection,312,2479
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Repository Management,Shopping Cart Purchasing Access,277,2480
+Customer Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Aggregated Function TBD,Aggregated Function TBD L2,External Access Mass Activation,271,2492
+Customer Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Aggregated Function TBD,Aggregated Function TBD L2,Customer Support Information Distribution,279,2500
+Customer Domain,"Assurance,Billing,Fulfillment",Welcome and Interaction,Queue Management,Customer Interaction Assignment,1121,2501
+Customer Domain,"Assurance,Billing,Fulfillment",Welcome and Interaction,Queue Management,Contact Queuing,163,2502
+Customer Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Aggregated Function TBD,Aggregated Function TBD L2,Customer Support Back-office Integration,283,2504
+Customer Domain,"Assurance,Billing,Fulfillment",Welcome and Interaction,Customer Interaction Management,Customer Self-service Portal Access,1310,2505
+Customer Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Aggregated Function TBD,Aggregated Function TBD L2,Short-Cut Action Launching,285,2506
+Customer Domain,Billing,Customer Financial Management,Payment Management,Deposit Management,33,2524
+Customer Domain,Billing,Customer Financial Management,Payment Management,Collection Payment Agreement Monitoring,153,2525
+Customer Domain,Billing,Invoice Management,Invoicing,Billing Administration,316,2530
+Customer Domain,Billing,Invoice Management,Invoicing,Invoice Tax Calculation,329,2531
+Customer Domain,Billing,Invoice Management,Invoicing,Billing Management Integration,399,2532
+Customer Domain,Billing,Invoice Management,Invoicing,Billing Cycle Coordination,1337,2533
+Customer Domain,Billing,Customer Financial Management,Payment Management,Financial Institution Reconciliation,325,2542
+Customer Domain,Billing,Customer Financial Management,Payment Management,Financial Institution Payment Authorization Linking,326,2543
+Customer Domain,Billing,Customer Financial Management,Payment Management,Payment Details Access,327,2544
+Customer Domain,Billing,Customer Financial Management,Payment Management,Financial Institution Security Verification,328,2545
+Customer Domain,Billing,Customer Financial Management,Payment Management,Customer Support Invoice Payment,936,2546
+Customer Domain,Billing,Customer Financial Management,Payment Management,Customer Support Prepaid Recharge Payment,937,2547
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Repository Management,Customer Ordering External Access,265,2587
+Customer Domain,Operations Readiness & Support,Customer Information Support,Personalize Customer Interaction,Customer Treatment Decision Automation,201,2590
+Customer Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Aggregated Function TBD,Aggregated Function TBD L2,Single Point of Contact Access,385,2606
+Customer Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Aggregated Function TBD,Aggregated Function TBD L2,Virtual Network Operator Brand Personalization,404,2626
+Customer Domain,Billing,Customer Financial Management,Loan Management,Loan Underwriting,1253,2855
+Customer Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Aggregated Function TBD,Aggregated Function TBD L2,Partner Account Creation and Management,655,2874
+Customer Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Aggregated Function TBD,Aggregated Function TBD L2,Collaboration Blogging,706,2904
+Customer Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Aggregated Function TBD,Aggregated Function TBD L2,Collaboration Calendar Coordination,707,2905
+Customer Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Aggregated Function TBD,Aggregated Function TBD L2,Collaboration Document Storage,708,2906
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Quotation,Customer Order Quote Calculation,1109,3051
+Customer Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Aggregated Function TBD,Aggregated Function TBD L2,Operations Portal Server Support,731,3055
+Customer Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Aggregated Function TBD,Aggregated Function TBD L2,Care-Center Efficiency Support,732,3056
+Customer Domain,Billing,Invoice Management,Dunning,Collection Agent Reassigning,130,3258
+Customer Domain,Billing,Invoice Management,Dunning,Collection Information Retrieval,131,3259
+Customer Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Aggregated Function TBD,Aggregated Function TBD L2,Access Path Procurement,938,3260
+Customer Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Aggregated Function TBD,Aggregated Function TBD L2,Partner Workflow Creation,1054,3395
+Customer Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Aggregated Function TBD,Aggregated Function TBD L2,Partner Workflow Configuration,1055,3396
+Customer Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Aggregated Function TBD,Aggregated Function TBD L2,Partner Workflow Execution,1056,3397
+Customer Domain,Operations Readiness & Support,Customer Information Support,Customer Information Management,Customer Details Management,225,3411
+Customer Domain,Fulfillment,Customer Order Management,Voucher Activation Management,Voucher Activation,1112,3418
+Customer Domain,Operations Readiness & Support,Customer Information Support,Collect and Qualify Customer Information,Customer Observations Inference Analyzing,94,3534
+Customer Domain,Operations Readiness & Support,Customer Behavior Management,Customer Behavior Tracking,Customer Digital Interaction Tracking,1107,3539
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Delivery Preparation,Order Preparation,1203,3544
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Completion,Product Order Data Collection,181,3552
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Completion,Customer Order Entry Finalization,204,3553
+Customer Domain,Assurance,Customer Problem Support,Customer Case Workflow Management,Case Jeopardy Escalation,102,3558
+Customer Domain,Billing,Invoice Management,Billing Account Administration,Charge To Billing Account Distribution,70,3565
+Customer Domain,"Assurance,Billing,Fulfillment",Customer Loyalty and Retention,Customer Value Management,Customer Value Segmentation,1120,3572
+Customer Domain,"Assurance,Billing,Fulfillment",Welcome and Interaction,Customer Request Management,Customer Request Qualification,1275,3577
+Customer Domain,Billing,Invoice Management,Billing Account Administration,Charge To Billing Account Identification,69,3621
+Customer Domain,"Assurance,Billing,Fulfillment",Welcome and Interaction,Customer Interaction Management,Contact Channel Work Assigning,162,3627
+Customer Domain,Strategy Management,Customer Strategic Analysis,Customer Loyalty and Retention Analysis,Customer Relationship Analysis,1343,3742
+Customer Domain,Business Value Development,Customer Behavior Development,Customer Risk Mitigation Definition,Customer Risk Mitigation Scenario Definition,1104,3744
+Customer Domain,Operations Readiness & Support,Customer Information Support,Collect and Qualify Customer Information,Customer Probable Behavior Determining,95,3745
+Customer Domain,Operations Readiness & Support,Customer Information Support,Collect and Qualify Customer Information,Customer Registration,121,3746
+Customer Domain,Operations Readiness & Support,Customer Information Support,Customer Information Management,Customer Information Presentation,282,3747
+Customer Domain,Operations Readiness & Support,Customer Behavior Management,Customer Behavior Tracking,Customer Behavior Tracking,1108,3748
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Repository Management,Customer Order Activity Supervision,211,3751
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Eligibility Validation,Product Offer to Customer Verification,727,3753
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Completion,Order Data Enrichment,716,3755
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Validation,Customer Order Cancellation,209,3756
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Orchestration,Customer Order Work Item Decomposition,724,3757
+Customer Domain,Assurance,Customer Problem Support,Customer Case Workflow Management,Case Transferring,104,3758
+Customer Domain,Assurance,Customer Problem Support,Customer Case Workflow Management,Case Workflow Sequencing,108,3759
+Customer Domain,Billing,Customer Financial Management,Loan Management,Loan Collateral Association,1254,3761
+Customer Domain,Billing,Customer Financial Management,Loan Management,Loan Payments Reconciliation,1255,3762
+Customer Domain,Billing,Customer Financial Management,Bill Dispute,Customer Support Bill and Dispute Access,170,3763
+Customer Domain,Billing,Customer Financial Management,Payment Management,Collection Payment Planning,156,3764
+Customer Domain,Billing,Invoice Management,Dunning,Start/Stop of Account Collection Treatment,132,3765
+Customer Domain,Billing,Invoice Management,Billing Account Administration,Billing Account Prepaid Automatic Replenishment,71,3767
+Customer Domain,Billing,Invoice Management,Invoicing,Balance Statement Data Retrieval,64,3768
+Customer Domain,"Assurance,Billing,Fulfillment",Customer Loyalty and Retention,Loyalty Program Management,Loyalty Program Monitoring,1296,3769
+Customer Domain,"Assurance,Billing,Fulfillment",Customer Loyalty and Retention,Loyalty Program Management,Loyalty Program Performance Assessment,1297,3770
+Customer Domain,"Assurance,Billing,Fulfillment",Welcome and Interaction,Customer Interaction Management,Customer Support Collaboration Access,165,3773
+Customer Domain,"Assurance,Billing,Fulfillment",Welcome and Interaction,Customer Interaction Management,Voice Channel Contact Routing,168,3774
+Customer Domain,"Assurance,Billing,Fulfillment",Welcome and Interaction,Customer Context Management,Customer Support Guiding,281,3775
+Customer Domain,Strategy Management,Customer Strategic Analysis,Customer Experience Analysis,Customer Experience Coordination,161,3918
+Customer Domain,Strategy Management,Customer Strategic Analysis,Customer Loyalty and Retention Analysis,Loyalty and Retention Management Support,194,3919
+Customer Domain,Strategy Management,Customer Strategic Analysis,Customer Behavior Analysis,Recommended Action Result Analysis,241,3920
+Customer Domain,Business Value Development,Customer Behavior Development,Dunning Scenario Definition,Dunning Scenario Specification Design,1273,3921
+Customer Domain,Business Value Development,Customer Behavior Development,Customer Risk Mitigation Definition,Customer Risk Profile Definition,1103,3922
+Customer Domain,Business Value Development,Customer Behavior Development,Customer Billing Definition,Billing Specification Definition,1105,3923
+Customer Domain,Operations Readiness & Support,Customer Information Support,Collect and Qualify Customer Information,Customer Profile Updating,91,3924
+Customer Domain,Operations Readiness & Support,Customer Information Support,Customer Information Management,Customer Preferences Administration,226,3925
+Customer Domain,Operations Readiness & Support,Customer Information Support,Personalize Customer Interaction,Interaction Channel Identification,1117,3927
+Customer Domain,Operations Readiness & Support,Customer Behavior Management,Customer Behavior Tracking,Customer Direct Interaction Tracking,1106,3928
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Repository Management,Ordering Customer Order Error Resolution,174,3929
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Quotation,Customer Order Quote Creation,1110,3930
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Completion,Customer Order Take-over Management,177,3931
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Change Management,Customer Order Change Management,208,3932
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Validation,Customer Order Validation,718,3933
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Orchestration,Customer Order Orchestration,214,3934
+Customer Domain,Fulfillment,Customer Order Management,Voucher Activation Management,Voucher Validity Check,1111,3935
+Customer Domain,Assurance,Customer Problem Support,Customer Assistance,Customer Problem Validation,220,3936
+Customer Domain,Billing,Customer Financial Management,Loan Management,Loan Information Management,1252,3937
+Customer Domain,Billing,Customer Financial Management,Bill Dispute,Bill Dispute Initiation,37,3938
+Customer Domain,Billing,Customer Financial Management,Payment Management,Advance Payment Acceptance,30,3939
+Customer Domain,Billing,Invoice Management,Dunning,Collection Automation,129,3940
+Customer Domain,Billing,Invoice Management,Risk Mitigation Measures Enforcement,Risk Mitigation Threshold Calculation,1113,3941
+Customer Domain,Billing,Invoice Management,Invoicing,Billing Initialization,32,3942
+Customer Domain,"Assurance,Billing,Fulfillment",Customer Loyalty and Retention,Loyalty Program Management,Loyalty Program Strategy Definition,1294,3943
+Customer Domain,"Assurance,Billing,Fulfillment",Customer Loyalty and Retention,Customer Risk Management,Customer Credit Risk Management,188,3944
+Customer Domain,"Assurance,Billing,Fulfillment",Customer Loyalty and Retention,Personalize Customer Profile,Customer Relationship Personalization,1116,3945
+Customer Domain,"Assurance,Billing,Fulfillment",Customer Loyalty and Retention,Customer Value Management,New Customer Scoring Prediction,1119,3946
+Customer Domain,"Assurance,Billing,Fulfillment",Welcome and Interaction,Customer Interaction Management,Customer Behavior Tracking,93,3947
+Customer Domain,"Assurance,Billing,Fulfillment",Welcome and Interaction,Customer Context Management,Recommendation to Customer Notification,239,3948
+Customer Domain,"Assurance,Billing,Fulfillment",Welcome and Interaction,Queue Management,Customer Interaction Progress Management,1122,3949
+Customer Domain,"Assurance,Billing,Fulfillment",Welcome and Interaction,Customer Request Management,Customer Request Information Capture,1274,3950
+Customer Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Aggregated Function TBD,Aggregated Function TBD L2,Work Item Decomposition,970,4066
+Customer Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Aggregated Function TBD,Aggregated Function TBD L2,Work Item Decomposition Configuration,971,4067
+Customer Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Aggregated Function TBD,Aggregated Function TBD L2,Work Item Execution,977,4068
+Customer Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Aggregated Function TBD,Aggregated Function TBD L2,Work Item Orchestration Instance Lifecycle Management,972,4069
+Customer Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Aggregated Function TBD,Aggregated Function TBD L2,Work Item Policy Control Configuration,994,4070
+Customer Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Aggregated Function TBD,Aggregated Function TBD L2,Work Item Sequence Control,973,4071
+Customer Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Aggregated Function TBD,Aggregated Function TBD L2,Work Item Sequence Control Configuration,974,4072
+Customer Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Aggregated Function TBD,Aggregated Function TBD L2,Work Item Sequence Execution,975,4073
+Customer Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Aggregated Function TBD,Aggregated Function TBD L2,Work Item Sequence Execution Configuration,976,4074
+Customer Domain,Business Value Development,Customer Information Specification Management,Customer Information Specification Development,Customer Value Profiling Design,230,4075
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Eligibility Validation,Customer Order Eligibility Validation,205,4076
+Customer Domain,Assurance,Customer Problem Support,Customer Case Workflow Management,Case Workflow Creation,101,4077
+Customer Domain,Billing,Invoice Management,Billing Account Administration,Charges to Billing Statement Identification,68,4078
+Customer Domain,Fulfillment,Customer Order Management,Customer Order Delivery Preparation,Delivery Items Identification,1202,4114
+Service Domain,Operations Readiness & Support,Service Management,Service Reconciliation,Manual Service Reconciliation Support,1216,2013
+Service Domain,Operations Readiness & Support,Service Management,Service Delivery Management,Service Delivery Operation,1312,2015
+Service Domain,Operations Readiness & Support,Service Management,Service Delivery Management,Service Delivery Information Management,1313,2016
+Service Domain,Fulfillment,Service Order Management,Service Availability,Service Parameters Reservation,592,2017
+Service Domain,Fulfillment,Service Order Management,Service Order Repository Management,Service order Storage,594,2018
+Service Domain,Fulfillment,Service Order Management,Service Order Repository Management,Service Order Tracking,599,2019
+Service Domain,Operations Readiness & Support,Service Test Management,Service Test Analysis,Service Diagnostic and Test Analysis,1189,2104
+Service Domain,Strategy Management,Service Analysis,Service Quality and Performance Analysis,Service Performance Data Analyzing,602,2135
+Service Domain,Fulfillment,Service Configuration & Activation,Service Configuration,Cross Services Dependencies Configuration,589,2563
+Service Domain,Capability Management,Service Capability Management,Service Deployment and Retirement,Service Deployment and Retirement,1151,2731
+Service Domain,Operations Readiness & Support,Service Management,Service Usage Analysis,Service Usage Analysis,1191,2735
+Service Domain,Business Value Development,Service Specification Development,Service Specification Design,New Service Catalog Updating (Deleted),567,2789
+Service Domain,Operations Readiness & Support,Service Management,Service Repository Management,Service to Resource Relationship Synchronization,629,2796
+Service Domain,Business Value Development,Service Test Specification Development,Service Test Policy Management,Service End to End Testing Configuration,578,2797
+Service Domain,Operations Readiness & Support,Service Test Management,Service Test Conducting,Service Problem Test Initiation,609,2798
+Service Domain,Fulfillment,Service Order Management,Service Order Orchestration,Service Order Orchestration,598,2803
+Service Domain,Fulfillment,Service Configuration & Activation,Service Configuration,Service Configuration,590,2804
+Service Domain,Fulfillment,Service Order Management,Service Order Orchestration,Service Task Item Decomposition,963,2807
+Service Domain,Fulfillment,Service Order Management,Service Order Delivery Preparation,Service Order Needs Identification,1217,2809
+Service Domain,Fulfillment,Service Order Management,Service Order Orchestration,Service Work Item Sequence Execution,968,2810
+Service Domain,Fulfillment,Service Order Management,Service Order Completion,Service Order Completion,595,2811
+Service Domain,Fulfillment,Service Order Management,Service Order Orchestration,Service Orchestration Configuration,588,2813
+Service Domain,Fulfillment,Service Order Management,Service Order Initialization,Service Order Request Consistency Check,1219,2814
+Service Domain,Fulfillment,Service Order Management,Service Order Orchestration,Service Data Collection,734,2815
+Service Domain,Fulfillment,Service Order Management,Service Order Orchestration,Service Work Item Sequence Execution Configuration,969,2817
+Service Domain,Fulfillment,Service Order Management,Service Order Orchestration,Service Parameters Allocation,591,2818
+Service Domain,Fulfillment,Service Order Management,Service Order Initialization,Service Delivery Due Date Calculation,571,2819
+Service Domain,Strategy Management,Service Analysis,Service Quality and Performance Analysis,Service Quality Analyzing,631,2820
+Service Domain,Strategy Management,Service Analysis,Service Quality and Performance Analysis,Service Quality Correlation,635,2821
+Service Domain,Assurance,Service Quality and Performance Management,Service Quality and Performance Repository Management,Service Quality Reporting,624,2822
+Service Domain,Strategy Management,Service Analysis,Service Quality and Performance Analysis,Service Quality Comparison,633,2823
+Service Domain,Billing,Service Usage Management,Service Usage Guiding,Service Usage Assignment,1150,2824
+Service Domain,Assurance,Service Quality and Performance Management,Service Quality and Performance Repository Management,Service Problem Monitoring Model Data Definition,954,2825
+Service Domain,Operations Readiness & Support,Service Test Management,Service Test Conducting,Service End to End Test Results Analyzing,580,2826
+Service Domain,Strategy Management,Service Analysis,Service Quality and Performance Analysis,Service Quality Improvement Analyzing,619,2827
+Service Domain,Assurance,Service Problem Management,Service Problem Repository Management,Service Problem Tracking & Management,615,2830
+Service Domain,Assurance,Service Problem Management,Service Problem Resolution,Service Assurance Control Calculation,979,2833
+Service Domain,Assurance,Service Problem Management,Service Problem Resolution,Service Assurance Trouble Mitigation,980,2834
+Service Domain,Assurance,Service Quality and Performance Management,Service Quality and Performance Repository Management,Service Problem Monitoring Model Data Integration,955,2839
+Service Domain,Business Value Development,Service Specification Development,Service Specification Design,Service Task Item Policy Control Configuration,995,2840
+Service Domain,Assurance,Service Quality and Performance Management,Service Quality and Performance Repository Management,Service Problem Messages Monitoring,982,2841
+Service Domain,Business Value Development,Service Quality and Performance Development,Service Quality Development,Service Quality Indicator Development (Deleted),623,2842
+Service Domain,Assurance,Service Quality and Performance Management,Service Quality and Performance Repository Management,Service Problem Correction Reporting,984,2843
+Service Domain,Fulfillment,Service Configuration & Activation,Service Activation,Mass Service Pre-activation,342,2845
+Service Domain,Operations Readiness & Support,Service Management,Service Repository Management,Service Topology Discovery,1344,2847
+Service Domain,Operations Readiness & Support,Service Management,Service Repository Management,Service Repository Updating,593,2849
+Service Domain,Strategy Management,Service Analysis,Service Quality and Performance Analysis,Service Assurance Deviation Monitoring,978,2850
+Service Domain,Assurance,Service Problem Management,Service Problem Repository Management,Service Problem Automatic Correction,612,2851
+Service Domain,Strategy Management,Service Analysis,Service Quality and Performance Analysis,Service Problem to Topology Correlation,1068,2852
+Service Domain,Strategy Management,Service Analysis,Service Quality and Performance Analysis,Service Quality Trend Analyzing,634,2853
+Service Domain,Fulfillment,Service Order Management,Service Availability,Service Availability Validation,586,3057
+Service Domain,Operations Readiness & Support,Service Management,Service Repository Management,Service Instance Lifecycle Management,965,3286
+Service Domain,Operations Readiness & Support,Service Management,Service Impact Assessment,Service Impact Identification,1139,3287
+Service Domain,Assurance,Service Quality and Performance Management,Service Quality and Performance Repository Management,Service Performance Data Collection,603,3300
+Service Domain,Assurance,Service Problem Management,Service Problem Policy Management,Service Problem Resolution Design,1144,3302
+Service Domain,Assurance,Service Quality and Performance Management,Service Quality and Performance Supervision,Service Performance Monitoring,605,3304
+Service Domain,Strategy Management,Service Analysis,Service Quality and Performance Analysis,Service Root Problem Analyzing,608,3319
+Service Domain,Business Value Development,Service Specification Development,Service Specification Design,Service Specification Repository Management,1081,3334
+Service Domain,Assurance,Service Problem Management,Service Problem Policy Management,Service Problem Diagnostic Design,1143,3407
+Service Domain,Assurance,Service Quality and Performance Management,Service Quality and Performance Repository Management,Service Performance Reporting,606,3408
+Service Domain,Strategy Management,Service Strategy Management,Service Strategy Design and Planning,Service Strategy Planning,1198,3652
+Service Domain,Capability Management,Service Capability Management,Service Test Resource Check,Service Test Operation Control,625,3659
+Service Domain,Business Value Development,Service Quality and Performance Development,Service Performance Development,Service Problem Monitoring Model Definition,952,3664
+Service Domain,Business Value Development,Service Specification Development,Service Specification Design,Service Specification Change Auditing,1080,3670
+Service Domain,Business Value Development,Service Test Specification Development,Service Test Policy Management,Service Test Specification and Scenario Management,1136,3676
+Service Domain,Business Value Development,Service Test Specification Development,Service Test Policy Management,Service Test Result Analysis Policy Configuration,566,3679
+Service Domain,Business Value Development,Service Test Specification Development,Service Test Policy Management,Service Testing Rules Management,573,3680
+Service Domain,Operations Readiness & Support,Service Management,Service Repository Management,Service Data Retrieval,576,3684
+Service Domain,Operations Readiness & Support,Service Management,Service Repository Management,Onboarded Service Integration Configuration,964,3685
+Service Domain,Operations Readiness & Support,Service Management,Service Audit,Customer Facing Service and Network Equipment Comparison,1214,3688
+Service Domain,Operations Readiness & Support,Service Test Management,Service Test Conducting,Automated Service Test Invocation,581,3695
+Service Domain,Assurance,Service Problem Management,Service Trouble Analysis,Service Problem Diagnose Supporting,1145,3698
+Service Domain,Assurance,Service Problem Management,Service Trouble Tracking and Business Value Development,Service Trouble Grouping,1148,3700
+Service Domain,Strategy Management,Service Strategy Management,Service Strategy Design and Planning,Service Strategy Design,1197,3809
+Service Domain,Strategy Management,Service Analysis,Service Quality and Performance Analysis,Service Performance Root Cause Analyzing,601,3811
+Service Domain,Strategy Management,Service Analysis,Service Quality and Performance Analysis,Service Performance Event Correlation,604,3812
+Service Domain,Business Value Development,Service Specification Development,Service Specification Design,Technical Solution Design,1085,3815
+Service Domain,Business Value Development,Service Specification Development,Service Specification Design,Know-How Specification Design,1084,3816
+Service Domain,Business Value Development,Service Test Specification Development,Service Test Policy Management,Service End to End Test Scheduling,577,3817
+Service Domain,Business Value Development,Service Test Specification Development,Service Test Policy Management,Service Test Reporting Rules Management,1138,3818
+Service Domain,Operations Readiness & Support,Service Management,Service Repository Management,Service to Resource Relationship Management,628,3820
+Service Domain,Operations Readiness & Support,Service Test Management,Service Test Conducting,Manual Service Test Invocation,582,3823
+Service Domain,Fulfillment,Service Configuration & Activation,Service Activation,Service Configuration Activation,585,3825
+Service Domain,Fulfillment,Service Order Management,Service Availability,Technical Solution Cost Calculation,1233,3829
+Service Domain,Fulfillment,Service Order Management,Service Order Initialization,Internal Service Order Initialization,1220,3830
+Service Domain,Fulfillment,Service Order Management,Service Order Orchestration,Service Order Transfer Supervision,596,3832
+Service Domain,Fulfillment,Service Order Management,Service Technical Solution Identification,Service Termination Points Determining,632,3833
+Service Domain,Assurance,Service Problem Management,Service Problem Repository Management,Service Problem Receiving,613,3834
+Service Domain,Assurance,Service Problem Management,Service Problem Repository Management,Service Problem Reporting,614,3835
+Service Domain,Assurance,Service Problem Management,Service Problem Resolution,Service Problem Manual Correction Support,1067,3836
+Service Domain,Assurance,Service Quality and Performance Management,Service Quality and Performance Repository Management,Service Quality Data Sources Establishing,622,3838
+Service Domain,Strategy Management,Service Strategy Management,Service Strategy Design and Planning,Service Test Strategy Management,627,3983
+Service Domain,Strategy Management,Service Analysis,Service Diagnostic and Test Relevance Quality Loop,Service Diagnostic and Test Improvement,1190,3984
+Service Domain,Strategy Management,Service Analysis,Service Quality and Performance Analysis,Service Performance Data Analyzing,572,3985
+Service Domain,Capability Management,Service Capability Management,Service Deployment and Retirement,Service Deployment Constraint Management,1152,3986
+Service Domain,Business Value Development,Service Quality and Performance Development,Service Performance Development,Service Problem Monitoring Model Establishing,953,3988
+Service Domain,Business Value Development,Service Quality and Performance Development,Service Quality Development,Service Quality Model Definition,621,3989
+Service Domain,Business Value Development,Service Specification Development,Service Specification Design,Service Specification to Supplier Product Specification Relationship Design,1086,3990
+Service Domain,Business Value Development,Service Specification Development,Technical Solution Policy Management,Technical Solution Policy Design,1135,3991
+Service Domain,Business Value Development,Service Test Specification Development,Service Test Policy Management,Service Test Rules Management,1137,3992
+Service Domain,Operations Readiness & Support,Service Management,Service Repository Management,Service-Resource Relationship Management Notifications,630,3993
+Service Domain,Operations Readiness & Support,Service Management,Service Impact Assessment,Service Impact Resolution Management,1140,3994
+Service Domain,Operations Readiness & Support,Service Management,Service Reconciliation,Automatic Service Reconciliation,1215,3995
+Service Domain,Operations Readiness & Support,Service Test Management,Service Test Analysis,Service Problem Test Analyzing,607,3996
+Service Domain,Operations Readiness & Support,Service Test Management,Service Test Conducting,Service End to End Testing,579,3997
+Service Domain,Operations Readiness & Support,Service Test Management,Service Test Reporting,Service Test Results Reporting,575,3998
+Service Domain,Operations Readiness & Support,Service Test Management,Service Test Repository Management,Service Testing Management,626,3999
+Service Domain,Fulfillment,Service Configuration & Activation,Service Configuration,Solution Services Design Management,570,4000
+Service Domain,Fulfillment,Service Order Management,Service Order Delivery Preparation,Service Order Decomposition,733,4001
+Service Domain,Fulfillment,Service Order Management,Service Availability,Service Feasibility Checking,319,4002
+Service Domain,Fulfillment,Service Order Management,Service Order Completion,Service Order Validation,600,4003
+Service Domain,Fulfillment,Service Order Management,Service Order Initialization,Service Order Initiation,1061,4004
+Service Domain,Fulfillment,Service Order Management,Service Order Repository Management,Activation Notification,583,4005
+Service Domain,Fulfillment,Service Order Management,Service Order Orchestration,Service Activation Planning,584,4006
+Service Domain,Fulfillment,Service Order Management,Installed Resources Identification,Installed Resources Identification,1141,4007
+Service Domain,Fulfillment,Service Order Management,Service Technical Solution Identification,Access Provider Selection,735,4008
+Service Domain,Assurance,Service Problem Management,Service Problem Repository Management,Service Problem Configuration Verification,611,4009
+Service Domain,Assurance,Service Problem Management,Service Problem Resolution,Service Problem Prioritization,610,4010
+Service Domain,Assurance,Service Problem Management,Service Problem Policy Management,Service Problem Types and Rules Design,1142,4011
+Service Domain,Assurance,Service Problem Management,Service Trouble Analysis,Service Problem Resolution,1146,4012
+Service Domain,Assurance,Service Problem Management,Service Trouble Tracking and Business Value Development,Service Trouble Lifecycle Management,1147,4013
+Service Domain,Assurance,Service Quality and Performance Management,Service Performance Management,Service Performance Planning,1345,4014
+Service Domain,Assurance,Service Quality and Performance Management,Service Quality and Performance Repository Management,Service Quality Collection & Monitoring,620,4015
+Service Domain,Assurance,Service Quality and Performance Management,Service Quality and Performance Supervision,Service Problem SLA Monitoring,983,4016
+Service Domain,Billing,Service Usage Management,Service Usage Guiding,Service Usage Identification,1149,4017
+Service Domain,Capability Management,Service Capability Management,Service Test Resource Check,Service Test Resources Availability Management,574,4103
+Service Domain,Fulfillment,Service Configuration & Activation,Service Activation,Service Activation,341,4104
+Service Domain,Operations Readiness & Support,Service Management,Service Audit,Customer Facing Service and Service Platforms Comparison,1213,4105
+Service Domain,Operations Readiness & Support,Service Management,Service Delivery Management,Service Delivery Control,1311,4106
+Service Domain,Operations Readiness & Support,Service Management,Service Usage Analysis,Service Usage Forecast,1192,4111
+Resource Domain,Business Value Development,Supply Chain Development,Stock Item Management,Stock Item Correlation Definition,1222,2020
+Resource Domain,Fulfillment,Resource Order Management,Resource Order Initialization,Internal Resource Order Initialization,1224,2022
+Resource Domain,Assurance,Resource Trouble Management,Resource Trouble Repository Management,Resource Trouble Grouping,1225,2024
+Resource Domain,Assurance,Resource Trouble Management,Resource Trouble Repository Management,Resource Trouble Lifecycle Management,1226,2025
+Resource Domain,Assurance,Resource Trouble Management,Resource Trouble Ticket Management,Resource Trouble Assignment Coordination,1227,2026
+Resource Domain,Strategy Management,Resource Strategic Analysis,Resource Diagnostic and Test Quality Loop,Resource Diagnostic and Test Analysis,1155,2044
+Resource Domain,Operations Readiness & Support,Resource Management,Resource Mediation,Resource Data Pattern Recognition,466,2048
+Resource Domain,Capability Management,Network Development,Network Planning and Building,Network Planning Handoff Support,1264,2057
+Resource Domain,Capability Management,Network Development,Network Planning and Building,Network Space and Power Management,1265,2058
+Resource Domain,Capability Management,Network Development,Network Access Management,Network Access Planning,1267,2061
+Resource Domain,Capability Management,Network Development,Network Change Management,Network Change Lifecycle Tracking,1284,2063
+Resource Domain,Capability Management,Network Development,Network Change Management,Network Change Information Management,1285,2064
+Resource Domain,Assurance,Network Performance Management,Network Capacity Management,Network Capacity Planning,1269,2065
+Resource Domain,Assurance,Network Performance Management,Network Capacity Management,Network Capacity Tuning,1270,2066
+Resource Domain,Capability Management,Network Development,Network Change Management,Network Change Verification and Closure,1287,2077
+Resource Domain,Capability Management,Network Development,Network Change Management,Network Change Reporting,1288,2078
+Resource Domain,Fulfillment,Resource Provisioning,Resource Provisioning Design,Resource Provisioning Physical Design,1351,2082
+Resource Domain,Assurance,Network Performance Management,Network Traffic Management,Network Traffic Control,1290,2083
+Resource Domain,Assurance,Resource Trouble Management,Resource Trouble Ticket Management,Resource Problem Reception,1347,2137
+Resource Domain,Assurance,Resource Trouble Management,Resource Trouble Ticket Management,Resource Problem Tracking and Management,1348,2138
+Resource Domain,Fulfillment,Resource Provisioning,Resource Provisioning Monitoring,Resource Deployment,1244,2140
+Resource Domain,Operations Readiness & Support,Resource Management,World Simulator,Visual Rendering,1402,2188
+Resource Domain,Operations Readiness & Support,Resource Management,World Simulator,Simulation Event Management,1403,2189
+Resource Domain,Operations Readiness & Support,Resource Management,World Simulator,Simulation Data Logger,1404,2190
+Resource Domain,Operations Readiness & Support,Resource Management,World Simulator,Simulation Data Analysis,1405,2191
+Resource Domain,Operations Readiness & Support,Resource Management,World Simulator,Simulation User Interaction,1406,2192
+Resource Domain,Operations Readiness & Support,Resource Test Management,Resource Test Conducting,Resource Test Operation Control,505,2196
+Resource Domain,Operations Readiness & Support,Resource Management,AI Model Manager,AI Model Cataloging,1411,2197
+Resource Domain,Operations Readiness & Support,Resource Management,World Simulator,Physics Simulator,1399,2200
+Resource Domain,Operations Readiness & Support,Resource Management,World Simulator,Agent Management,1400,2201
+Resource Domain,Assurance,Resource Performance Management,Resource Alarm Management,Alarm Correlation,420,2642
+Resource Domain,Operations Readiness & Support,Resource Test Management,Resource Test Analysis,Resource End to End Test Results Analyzing,515,2643
+Resource Domain,Assurance,Resource Performance Management,Resource Alarm Repository Management,Network Fault Reporting,422,2644
+Resource Domain,Assurance,Resource Performance Management,Resource Alarm Repository Management,Fault Assurance Metrics Generation,423,2645
+Resource Domain,Assurance,Resource Performance Management,Resource Alarm Repository Management,Operational Status Monitoring,424,2646
+Resource Domain,Fulfillment,Resource Order Management,Resource Order Orchestration,Resource Activation Orchestration,446,2647
+Resource Domain,Operations Readiness & Support,Resource Management,Resource Repository Management,Resource Topology Verification,456,2648
+Resource Domain,Assurance,Resource Performance Management,Resource Performance Supervision,Physical Infrastructure Shortfall Identification,427,2649
+Resource Domain,Strategy Management,Resource Strategy Management,Resource Strategy Design and Planning,Resource Demand Analyzing,524,2650
+Resource Domain,Operations Readiness & Support,Resource Management,Location Management,Location Structure Data Configuration,433,2651
+Resource Domain,Operations Readiness & Support,Resource Management,Location Management,Location Data Integrity Management,434,2652
+Resource Domain,Operations Readiness & Support,Resource Management,Regulated Logical Resources Management,Number Aging,436,2655
+Resource Domain,Operations Readiness & Support,Resource Management,Regulated Logical Resources Management,Number Assigning,437,2656
+Resource Domain,Operations Readiness & Support,Resource Management,Regulated Logical Resources Management,Number Searching,439,2657
+Resource Domain,Operations Readiness & Support,Resource Management,Regulated Logical Resources Management,Number Tracking and Reporting,440,2658
+Resource Domain,Operations Readiness & Support,Resource Management,Regulated Logical Resources Management,Number Portability Orchestration,743,2659
+Resource Domain,Operations Readiness & Support,Resource Management,Regulated Logical Resources Management,Number Portability Risk & Effectiveness Management,744,2660
+Resource Domain,Operations Readiness & Support,Resource Management,Regulated Logical Resources Management,Number Portability Validation,745,2661
+Resource Domain,Operations Readiness & Support,Resource Management,Regulated Logical Resources Management,Number Acquisition,1062,2662
+Resource Domain,Strategy Management,Resource Strategy Management,Resource Strategy Design and Planning,Strategic Planning Results Storage,527,2663
+Resource Domain,Operations Readiness & Support,Resource Management,Resource Repository Management,Resource Information Model Creation,468,2664
+Resource Domain,Fulfillment,Resource Order Management,Resource Order Orchestration,Resource Change Project management,450,2668
+Resource Domain,Operations Readiness & Support,Resource Management,Resource Availability Management,Resource Availability Checking,568,2670
+Resource Domain,Fulfillment,Resource Order Management,Resource Order Orchestration,Resource Commissioning,452,2672
+Resource Domain,Fulfillment,Resource Order Management,Resource Order Orchestration,Resource Configuration Verification,455,2674
+Resource Domain,Operations Readiness & Support,Resource Management,Resource Repository Management,Resource Repository Retrieval,470,2675
+Resource Domain,Operations Readiness & Support,Resource Management,Resource Repository Management,Resource Repository Updating,471,2676
+Resource Domain,Fulfillment,Resource Order Management,Resource Order Orchestration,Resource Configuration Plan Composing,485,2677
+Resource Domain,Operations Readiness & Support,Resource Management,Resource Repository Management,Resource Repository Update Notification,472,2678
+Resource Domain,Operations Readiness & Support,Resource Management,Resource Simulation,New Resources Designing Support,461,2679
+Resource Domain,Operations Readiness & Support,Resource Management,Resource Simulation,Resource Design What-if Analyzing,463,2680
+Resource Domain,Operations Readiness & Support,Resource Management,AI Model Manager,AI Model Version Management,1408,2683
+Resource Domain,Operations Readiness & Support,Resource Management,AI Model Manager,AI Model Deployment Management,1409,2685
+Resource Domain,Operations Readiness & Support,Resource Management,Resource Repository Management,Network Overviews Presentation,442,2687
+Resource Domain,Operations Readiness & Support,Resource Management,Resource Repository Management,Resource Configuration Change Logging,453,2688
+Resource Domain,Business Value Development,Resource Specification Management,Resource Specification Development,Resource Catalog Entities Management,951,2689
+Resource Domain,Operations Readiness & Support,Resource Management,Resource Repository Management,Voucher Reporting,562,2690
+Resource Domain,Operations Readiness & Support,Resource Management,Resource Simulation,Graphical Resource Presentation,459,2691
+Resource Domain,Operations Readiness & Support,Resource Management,Resource Repository Management,Voucher Life Cycle Management,564,2692
+Resource Domain,Operations Readiness & Support,Resource Management,Resource Repository Management,Resource Data Repository Synchronization,738,2693
+Resource Domain,Fulfillment,Supply Chain Fulfillment,Stock Movements Management,Resource Logistics Management,473,2695
+Resource Domain,Fulfillment,Supply Chain Fulfillment,Stock Movements Management,Resource Distribution (Deleted),477,2699
+Resource Domain,Fulfillment,Supply Chain Fulfillment,Stock Movements Management,Resource Problem Replenishment Distribution (Deleted),478,2700
+Resource Domain,Fulfillment,Supply Chain Fulfillment,Stock Movements Management,Resource Supply Chain Management,479,2701
+Resource Domain,Fulfillment,Supply Chain Fulfillment,Stock Movements Management,Stock Balancing with Distribution (Deleted),480,2702
+Resource Domain,Fulfillment,Supply Chain Fulfillment,Stock Movements Management,Warehouse Stock Level Projection (Deleted),481,2703
+Resource Domain,Fulfillment,Resource Order Management,Resource Order Initialization,Cross Resource Dependencies Configuration,486,2706
+Resource Domain,Fulfillment,Resource Order Management,Resource Order Orchestration,Resource Order Management,492,2707
+Resource Domain,Fulfillment,Resource Order Management,Resource Order Initialization,Resource Order Request Consistency Check,1223,2708
+Resource Domain,Operations Readiness & Support,Resource Management,Resource Audit and Discovery,Resource Onboarding Configuration,956,2709
+Resource Domain,Operations Readiness & Support,Resource Management,Resource Audit and Discovery,Resource Instantiation Management,957,2710
+Resource Domain,Fulfillment,Resource Order Management,Resource Order Completion,Resource Order Completion,495,2712
+Resource Domain,Fulfillment,Resource Order Management,Resource Order Completion,Resource Order Data Collection,490,2713
+Resource Domain,Fulfillment,Resource Order Management,Resource Order Orchestration,Resource Order Dependencies Management,493,2714
+Resource Domain,Fulfillment,Resource Order Management,Resource Order Orchestration,Resource Order Jeopardy Tracking,494,2715
+Resource Domain,Fulfillment,Resource Order Management,Resource Order Orchestration,Tactical Resource Planning,529,2716
+Resource Domain,Fulfillment,Resource Order Management,Resource Order Completion,Resource Order Validation,503,2717
+Resource Domain,Fulfillment,Resource Order Management,Resource Order Tracking and Business Value Development,Resource Order Status Reporting,497,2718
+Resource Domain,Assurance,Resource Performance Management,Resource Performance Supervision,Resource Performance Data Analyzing,498,2720
+Resource Domain,Assurance,Resource Performance Management,Resource Performance Supervision,Resource Performance Data Aggregation and Trend Analyzing,499,2721
+Resource Domain,Assurance,Resource Performance Management,Resource Performance Supervision,Resource Performance Event Correlation,501,2723
+Resource Domain,Assurance,Resource Performance Management,Resource Performance Supervision,Resource Performance Data Accumulation,502,2724
+Resource Domain,Operations Readiness & Support,Resource Test Management,Resource Test Conducting,Manual Resource Test Operation Control,517,2726
+Resource Domain,Operations Readiness & Support,Resource Test Management,Resource Test Inventory Management,Resource Test Data Retrieval,511,2730
+Resource Domain,Operations Readiness & Support,Resource Test Management,Resource Test Inventory Management,Resource Test Storage,986,2733
+Resource Domain,Operations Readiness & Support,Resource Test Management,Resource Test Analysis,Support Resource Statistical Analyzing,990,2737
+Resource Domain,Operations Readiness & Support,Resource Test Management,Resource Test Conducting,Resource Test Scope Definition,518,2739
+Resource Domain,Operations Readiness & Support,Resource Test Management,Resource Test Conducting,Resource Test Load Generation,987,2740
+Resource Domain,Business Value Development,Resource Specification Management,Resource Trouble Policy Management,Resource Trouble Resolution Design,1163,2741
+Resource Domain,Fulfillment,Supply Chain Fulfillment,Stock Inventory Management,Stock Inventory Administration,521,2742
+Resource Domain,Fulfillment,Supply Chain Fulfillment,Stock Inventory Management,Warehouse Inventory Information Recording (Deleted),522,2744
+Resource Domain,Fulfillment,Supply Chain Fulfillment,Stock Level Management,Stock Item Requests Identification,476,2745
+Resource Domain,Strategy Management,Resource Strategic Analysis,Supply Chain Planning Analysis,Supply Demand Forecasting,748,2748
+Resource Domain,Fulfillment,Resource Order Management,Resource Order Orchestration,Resource Task Item Decomposition,958,2751
+Resource Domain,Billing,Resource Usage Management,Resource Usage Errors Management,Usage Event Error Categorization,530,2752
+Resource Domain,Billing,Resource Usage Management,Resource Usage Errors Management,Usage Event Error Correction,531,2753
+Resource Domain,Billing,Resource Usage Management,Resource Usage Errors Management,Usage Event Error Cause Analyzing,532,2754
+Resource Domain,Billing,Resource Usage Management,Resource Usage Errors Management,Erroneous Usage Event Re-distribution,533,2755
+Resource Domain,Billing,Resource Usage Management,Resource Usage Collection,Usage Event Collection,534,2756
+Resource Domain,Billing,Resource Usage Management,Resource Usage Mediation,Usage Event Correlation,535,2757
+Resource Domain,Billing,Resource Usage Management,Resource Usage Collection,Usage Event Distribution,536,2758
+Resource Domain,Billing,Resource Usage Management,Resource Usage Mediation,Usage Event Enrichment,537,2759
+Resource Domain,Billing,Resource Usage Management,Resource Usage Mediation,Usage Event Guiding,538,2760
+Resource Domain,Billing,Resource Usage Management,Resource Usage Mediation,Usage Event Mediation,539,2761
+Resource Domain,Operations Readiness & Support,Work Order Management,Work Order Assignment and Plan,Dynamic Work Order Assigning,542,2763
+Resource Domain,Operations Readiness & Support,Work Order Management,Work Order Assignment and Plan,Periodic Bulk Work Order Assigning,543,2764
+Resource Domain,Operations Readiness & Support,Work Order Management,Work Order Assignment and Plan,Work Order Coordination,545,2765
+Resource Domain,Operations Readiness & Support,Work Order Management,Work Order Tracking and Business Value Development,Work Order Information Transferring,547,2766
+Resource Domain,Operations Readiness & Support,Work Order Management,Work Order Assignment and Plan,Work Order Re-assigning,549,2767
+Resource Domain,Operations Readiness & Support,Work Order Management,Work Order Establishment,Work Order Manual Activities Determining,540,2770
+Resource Domain,Operations Readiness & Support,Work Order Management,Work Order Tracking and Business Value Development,Work Order Closing,544,2773
+Resource Domain,Operations Readiness & Support,Work Order Management,Work Order Tracking and Business Value Development,Workflow Delay Jeopardy Analyzing,739,2774
+Resource Domain,Fulfillment,Supply Chain Fulfillment,Stock Movements Management,Voucher Distribution (Deleted),563,2785
+Resource Domain,Operations Readiness & Support,Resource Management,Resource Availability Management,Network Facility Selection,569,2790
+Resource Domain,Operations Readiness & Support,Work Order Management,Work Order Tracking and Business Value Development,Work Order Status Monitoring,551,3063
+Resource Domain,Assurance,Resource Trouble Management,Resource Trouble Repository Management,Resource Performance Reporting,740,3064
+Resource Domain,Assurance,Resource Trouble Management,Resource Trouble Resolution,Resource Fault Correction & Restoration Support,741,3065
+Resource Domain,Operations Readiness & Support,Resource Management,Regulated Logical Resources Management,Number Porting,1249,3067
+Resource Domain,Fulfillment,Supply Chain Fulfillment,Stock Movements Management,Procurement Requisition to Order Management,750,3074
+Resource Domain,Fulfillment,Supply Chain Fulfillment,Stock Movements Management,Shipment Management,752,3076
+Resource Domain,Fulfillment,Supply Chain Fulfillment,Stock Inventory Control,Stock Item Inventory Check,1072,3077
+Resource Domain,Fulfillment,Supply Chain Fulfillment,Stock Movements Management,Material Warehousing,754,3078
+Resource Domain,Fulfillment,Supply Chain Fulfillment,Stock Movements Management,Supply Chain Order Shipment Tracking,755,3079
+Resource Domain,Assurance,Resource Performance Management,Resource Performance Supervision,Vulnerability Assessment Planning,901,3224
+Resource Domain,Assurance,Resource Trouble Management,Resource Trouble Resolution,Software Update Planning,902,3225
+Resource Domain,Assurance,Resource Performance Management,Resource Performance Supervision,Anomaly Monitoring,903,3226
+Resource Domain,Assurance,Resource Performance Management,Resource Performance Supervision,Anomaly Monitoring Data Analyzing,904,3227
+Resource Domain,Fulfillment,Supply Chain Fulfillment,Stock Level Management,Stock Item Level Tracking and Replenishment,523,3261
+Resource Domain,Billing,Resource Usage Management,Resource Fraud Detection,Fraud & Anomaly Detection,940,3262
+Resource Domain,Operations Readiness & Support,Resource Management,Resource Geographical Association,Resource Geographical Coverage Management,1251,3278
+Resource Domain,Fulfillment,Resource Order Management,Resource Order Orchestration,Resource Work Item Sequence Execution,961,3280
+Resource Domain,Fulfillment,Resource Order Management,Resource Order Orchestration,Resource Work Item Sequence Execution Configuration,962,3283
+Resource Domain,Business Value Development,Resource Specification Management,Resource Trouble Policy Management,Resource Trouble Diagnostic Design,1162,3318
+Resource Domain,Operations Readiness & Support,Resource Test Management,Resource Test Conducting,Resource Response Capture Measurement,988,3324
+Resource Domain,Assurance,Resource Performance Management,Resource Performance Supervision,Resource End-To-End Performance Supervision,991,3328
+Resource Domain,Operations Readiness & Support,Resource Management,Resource Allocation,Resource Parameters Allocation,488,3403
+Resource Domain,Assurance,Resource Performance Management,Resource Performance Supervision,Resource Performance Event Filtering,1066,3406
+Resource Domain,Operations Readiness & Support,Resource Management,Location Management,Pre-formatted Location Information Presentation,430,3633
+Resource Domain,Strategy Management,Resource Strategic Analysis,Resource Infrastructure Analysis,Strategic Sites Determining,526,3706
+Resource Domain,Strategy Management,Resource Strategic Analysis,Resource Infrastructure Analysis,Strategic Network Sizing Decision Support,528,3707
+Resource Domain,Strategy Management,Resource Strategy Management,Resource Strategy Design and Planning,Network Forecasting,441,3709
+Resource Domain,Capability Management,Resource Capability Management,Resource Test Resources Check,Resource Test Resources Availability Management,509,3710
+Resource Domain,Business Value Development,Resource Specification Management,Resource Test Policy and Schedule Management,Resource Testing Rules Configuration,506,3712
+Resource Domain,Business Value Development,Resource Specification Management,Resource Test Policy and Schedule Management,Resource Test Result Analysis Policy Configuration,519,3713
+Resource Domain,Business Value Development,Resource Specification Management,Resource Specification Development,Resource Specification Repository Management,1083,3715
+Resource Domain,Business Value Development,Resource Specification Management,Resource Specification Development,Resource Specification to Supplier Product Specification Relationship Design,1088,3716
+Resource Domain,Business Value Development,Resource Specification Management,Resource Specification Development,Resource Specification Action Skill Design,1089,3717
+Resource Domain,Business Value Development,Resource Specification Management,Resource Specification Development,Resource Specification Change Auditing,1082,3718
+Resource Domain,Business Value Development,Resource Specification Management,Resource Specification Development,Resource Task Item Policy Control Configuration,996,3719
+Resource Domain,Business Value Development,Resource Specification Management,Resource Specification Development,Logical and Software Resources Designing,1064,3720
+Resource Domain,Capability Management,Network Development,Network Planning and Building,Physical Network Planning,1261,3840
+Resource Domain,Capability Management,Network Development,Network Planning and Building,Configurable Network Planning,1262,3841
+Resource Domain,Capability Management,Network Development,Network Planning and Building,Network Strategic Planning and Engineering,1263,3842
+Resource Domain,Capability Management,Network Development,Network Change Management,Network Change Notification,1286,3843
+Resource Domain,Strategy Management,Resource Strategy Management,Resource Strategy Design and Planning,Design Automation,443,3848
+Resource Domain,Strategy Management,Resource Strategy Management,Resource Strategy Design and Planning,Network Planning Analyzing,444,3849
+Resource Domain,Capability Management,Resource Capability Management,Resource Deployment and Retirement,Resource Deployment and Retirement,1157,3850
+Resource Domain,Business Value Development,Resource Specification Management,Resource Supervision Policy Development,Resource Supervision Measure Definition,1159,3851
+Resource Domain,Business Value Development,Resource Specification Management,Resource Test Policy and Schedule Management,Resource End to End Test Configuration,513,3852
+Resource Domain,Business Value Development,Resource Specification Management,Resource Specification Development,Resource Data Transformation/Parsing Rules Configuration,467,3854
+Resource Domain,Operations Readiness & Support,Resource Management,Location Management,Location Information Updating,431,3855
+Resource Domain,Operations Readiness & Support,Resource Management,Location Management,Location Information Searching,432,3856
+Resource Domain,Operations Readiness & Support,Resource Management,Regulated Logical Resources Management,Number Reservation,438,3857
+Resource Domain,Operations Readiness & Support,Resource Management,Resource Repository Management,Resource Configuration Management,454,3859
+Resource Domain,Operations Readiness & Support,Resource Management,Resource Simulation,Resource for Service Deployment Designing,458,3860
+Resource Domain,Operations Readiness & Support,Resource Management,Resource Simulation,Multi-layer Design and Modeling Support,460,3861
+Resource Domain,Operations Readiness & Support,Resource Management,AI Model Manager,AI Model Integration,1410,3862
+Resource Domain,Operations Readiness & Support,Resource Management,World Simulator,Agent Interaction Handling,1401,3863
+Resource Domain,Operations Readiness & Support,Resource Test Management,Resource Test Conducting,Resource End to End Test Execution,514,3864
+Resource Domain,Operations Readiness & Support,Resource Test Management,Resource Test Conducting,Automated Resource Test Invocation,516,3865
+Resource Domain,Business Value Development,Supply Chain Development,Stock Item Management,Stock Item Definition,1221,4018
+Resource Domain,Capability Management,Network Development,Network Planning and Building,Network Construction and Engineering,1260,4019
+Resource Domain,Capability Management,Network Development,Network Change Management,Network Change Capture,1283,4020
+Resource Domain,Fulfillment,Resource Provisioning,Resource Provisioning Design,Resource Provisioning Logical Design,1350,4021
+Resource Domain,Fulfillment,Resource Provisioning,Resource Provisioning Monitoring,Resource Provisioning Oversight,1243,4022
+Resource Domain,Fulfillment,Resource Provisioning,Resource Configuration,Resource Configuration Implementation,1245,4023
+Resource Domain,Fulfillment,Resource Provisioning,Resource Activation,Resource Activation and Deactivation,1246,4024
+Resource Domain,Strategy Management,Resource Strategic Analysis,Resource Diagnostic and Test Quality Loop,Resource Diagnostic and Test Rules Improvement,1156,4025
+Resource Domain,Strategy Management,Resource Strategic Analysis,Resource Infrastructure Analysis,Network Deployment Optimization,525,4026
+Resource Domain,Strategy Management,Resource Strategic Analysis,Supply Chain Planning Analysis,Supply Sourcing Planning,749,4027
+Resource Domain,,Resource,Strategic,Analysis,1154,4028
+Resource Domain,Strategy Management,Resource Strategy Management,Resource Strategy Design and Planning,Radio Planning,428,4029
+Resource Domain,Capability Management,Resource Capability Management,Resource Deployment and Retirement,Resource Deployment Constraint Management,1158,4030
+Resource Domain,Business Value Development,Resource Specification Management,Resource Allocation Policy Development,Number Portability Policy Management,742,4031
+Resource Domain,Business Value Development,Resource Specification Management,Resource Supervision Policy Development,Resource Supervision Rules Definition,1160,4032
+Resource Domain,Business Value Development,Resource Specification Management,Resource Test Policy and Schedule Management,Resource End to End Test Scheduling,512,4033
+Resource Domain,Business Value Development,Resource Specification Management,Resource Trouble Policy Management,Resource Trouble Types and Rules Design,1161,4034
+Resource Domain,Business Value Development,Resource Specification Management,Resource Specification Development,Resource Specification Design,1087,4035
+Resource Domain,Business Value Development,Work Specification Management,Work Specification Development,Work Specification Classification,553,4036
+Resource Domain,Operations Readiness & Support,Resource Management,Resource Availability Management,Resource Availability Validation,448,4037
+Resource Domain,Operations Readiness & Support,Resource Management,Location Management,Location Change History Management,429,4038
+Resource Domain,Operations Readiness & Support,Resource Management,Regulated Logical Resources Management,Number Inventory Establishing,435,4039
+Resource Domain,Operations Readiness & Support,Resource Management,Resource Allocation,Resource Parameters Reservation,487,4040
+Resource Domain,Operations Readiness & Support,Resource Management,Resource Audit and Discovery,Network Resources Scanning,464,4041
+Resource Domain,Operations Readiness & Support,Resource Management,Resource Geographical Association,Resource Locating,1250,4042
+Resource Domain,Operations Readiness & Support,Resource Management,Resource Mediation,Resource Data Translation,465,4043
+Resource Domain,Operations Readiness & Support,Resource Management,Resource Repository Management,Physical Implementation Information Capturing,426,4044
+Resource Domain,Operations Readiness & Support,Resource Management,Resource Simulation,Resource Architecture Modeling Support,457,4045
+Resource Domain,Operations Readiness & Support,Resource Management,AI Model Manager,AI Model Repository Manager,1407,4046
+Resource Domain,Operations Readiness & Support,Resource Test Management,Resource Test Conducting,Resource Test Devices Accessing,504,4048
+Resource Domain,Operations Readiness & Support,Resource Test Management,Resource Test Inventory Management,Resource Test Results Management,508,4049
+Resource Domain,Operations Readiness & Support,Resource Test Management,Resource Test Reporting,Resource Testing Results Reporting,510,4050
+Resource Domain,Operations Readiness & Support,Resource Test Management,Resource Test Analysis,Root Cause Analyzing,421,4051
+Resource Domain,Operations Readiness & Support,Work Order Management,Work Order Assignment and Plan,Work Order Assignment Dispatching,541,4052
+Resource Domain,Operations Readiness & Support,Work Order Management,Work Order Establishment,Work Orders Initiation,548,4053
+Resource Domain,Assurance,Network Performance Management,Network Capacity Management,Network Capacity Analysis,1268,4054
+Resource Domain,Assurance,Network Performance Management,Network Traffic Management,Network Traffic Monitoring,1289,4055
+Resource Domain,Fulfillment,Resource Order Management,Resource Order Completion,Resource Order Initiation,491,4056
+Resource Domain,Fulfillment,Resource Order Management,Resource Order Initialization,Resource Order Configuration,484,4057
+Resource Domain,Fulfillment,Resource Order Management,Resource Order Orchestration,Local Tactical Plans Implementation,425,4058
+Resource Domain,Fulfillment,Supply Chain Fulfillment,Stock Inventory Control,Stock Item Receiving Management,753,4059
+Resource Domain,Fulfillment,Supply Chain Fulfillment,Stock Inventory Management,Stock Item Tracking,520,4060
+Resource Domain,Fulfillment,Supply Chain Fulfillment,Stock Level Management,Stock Item Request Management,939,4061
+Resource Domain,Capability Management,Resource Capability Management,Resource Specification Capability Development,Resource Capability Specification Management,737,4089
+Resource Domain,Capability Management,Resource Capability Management,Resource Test Resources Check,Resource Test Head Capacity Management,507,4090
+Resource Domain,Operations Readiness & Support,Resource Management,Resource Repository Reconciliation,Resource Inventory Reconciliation,469,4091
+Resource Domain,Fulfillment,Resource Order Management,Resource Order Tracking and Business Value Development,Resource Order Tracking,496,4092
+Resource Domain,Assurance,Resource Trouble Management,Resource Trouble Analysis,Resource Trouble Cause Identification,1186,4093
+Resource Domain,Assurance,Resource Trouble Management,Resource Trouble Analysis,Resource Trouble Resolution,1187,4094
+Resource Domain,Assurance,Resource Trouble Management,Resource Trouble Repository Management,Resource Trouble Ticket Reporting,1169,4095
+Resource Domain,Assurance,Resource Trouble Management,Resource Trouble Repository Management,Resource Trouble Ticket Repository Management,1166,4096
+Resource Domain,Assurance,Resource Trouble Management,Resource Trouble Ticket Management,Resource Trouble Identification,1167,4098
+Resource Domain,Assurance,Resource Trouble Management,Resource Trouble Ticket Management,Resource Trouble Ticket Escalation Management,1185,4099
+Resource Domain,Fulfillment,Supply Chain Fulfillment,Logistic Availability,Stock Item Assignment,1165,4100
+Resource Domain,Fulfillment,Supply Chain Fulfillment,Logistic Availability,Stock Item Availability Check,1164,4101
+Resource Domain,Operations Readiness & Support,Work Order Management,Work Order Tracking and Business Value Development,Work Order Updating,552,4102
+Resource Domain,Capability Management,Network Development,Network Access Management,Network Sourcing,1266,4112
+Business Partner Domain,Operations Readiness & Support,Business Partner Management,Collect and Qualify Business Partner Information,Business Partner Information Collection,1236,2035
+Business Partner Domain,Operations Readiness & Support,Business Partner Management,Collect and Qualify Business Partner Information,Qualify Business Partner Information,1237,2036
+Business Partner Domain,Operations Readiness & Support,Business Partner Management,Business Partner Product Repository Management,Business Partner Product Relationship Management,1239,2037
+Business Partner Domain,Operations Readiness & Support,Business Partner Management,Business Partner Onboarding,Business Partner Technical Onboarding,1321,2112
+Business Partner Domain,"Assurance,Billing,Fulfillment",Business Partner Welcome and Interaction,Business Partner Interaction Management,Business Partner Portal Access,1346,2136
+Business Partner Domain,Fulfillment,Business Partner Order Management,Business Partner Order Validation,Voucher Ordering,565,2787
+Business Partner Domain,Assurance,Business Partner Performance Management,Business Partner Trouble Ticket Management,Operational Issues Integration,637,2856
+Business Partner Domain,Assurance,Business Partner Performance Management,Business Partner Performance Evaluation,Partner Performance Management,638,2857
+Business Partner Domain,Assurance,Business Partner Performance Management,Business Partner Trouble Ticket Management,Partner Problems Receiving,639,2858
+Business Partner Domain,Billing,Business Partner Invoice Management,Settlement Management,Settlement Adjustment and Billed Charges Collection,640,2859
+Business Partner Domain,Billing,Business Partner Rating,Business Partner Bill Calculation,Statistics on Supplier/Partner Activities Collection,641,2860
+Business Partner Domain,Billing,Business Partner Invoice Management,Settlement Management,Supplier/Partner Settlements,643,2862
+Business Partner Domain,Billing,Business Partner Invoice Management,Settlement Management,Supplier/Partner Settlements Reporting,644,2863
+Business Partner Domain,Fulfillment,Business Partner Order Management,Business Partner Order Validation,Purchase Requisition Management,646,2865
+Business Partner Domain,Fulfillment,Business Partner Order Management,Business Partner Order Validation,Partner Order Management,647,2866
+Business Partner Domain,Business Value Development,Business Partner Product Specification and Offering Management,Business Partner Product Specification and Offering Onboarding,Product Sourcing Registration,649,2868
+Business Partner Domain,Business Value Development,Business Partner Product Specification and Offering Management,Business Partner Product Specification and Offering Onboarding,Partner Product Certification,650,2869
+Business Partner Domain,Business Value Development,Business Partner Product Specification and Offering Management,Business Partner Product Specification and Offering Onboarding,Product Onboarding Support,651,2870
+Business Partner Domain,Billing,Business Partner Invoice Management,Business Partner Invoice Matching,Supplier/Partner Invoice Reconciliation,652,2871
+Business Partner Domain,Operations Readiness & Support,Business Partner Management,Business Partner Agreement Management,Contract Management,653,2872
+Business Partner Domain,"Assurance,Billing,Fulfillment",Business Partner Welcome and Interaction,Business Partner Relationship Management,Potential Partner Identification,654,2873
+Business Partner Domain,Assurance,Business Partner Performance Management,Business Partner Trouble Ticket Management,Partner Billing and Settlement Disputes Management,656,2875
+Business Partner Domain,Billing,Business Partner Rating,Business Partner Bill Calculation,Partner Record Automated Error Correction,657,2876
+Business Partner Domain,Billing,Business Partner Financial Management,Business Partner Payment Management,Partner Payments Management,658,2877
+Business Partner Domain,Billing,Business Partner Invoice Management,Business Partner Invoicing,Automated Billing/Settlement Monitoring,659,2878
+Business Partner Domain,Billing,Business Partner Invoice Management,Business Partner Invoicing,Partner Invoice Management,660,2879
+Business Partner Domain,Billing,Business Partner Rating,Business Partner Bill Calculation,Partner Business Event Processing,661,2880
+Business Partner Domain,Business Value Development,Business Partner Product Specification and Offering Management,Business Partner Product Specification and Offering Onboarding,Sourcing Reference Data Collection,662,2881
+Business Partner Domain,Operations Readiness & Support,Business Partner Management,Business Partner Role Repository Management,Partner Workflow Management,746,3070
+Business Partner Domain,Operations Readiness & Support,Business Partner Management,Business Partner Role Repository Management,Partnership Reporting,747,3071
+Business Partner Domain,Fulfillment,Business Partner Order Management,Goods Receipt,Procurement Order Monitoring,751,3075
+Business Partner Domain,Strategy Management,Purchasing Strategy Management,Purchasing Strategy Definition,Partner Collaboration Constraints Collection,1026,3367
+Business Partner Domain,Strategy Management,Purchasing Strategy Management,Purchasing Strategy Definition,Partner Strategy Development,1027,3368
+Business Partner Domain,Strategy Management,Purchasing Strategy Management,Purchasing Strategy Definition,Partner Strategy Lifecycle Management,1028,3369
+Business Partner Domain,Strategy Management,Purchasing Strategy Management,Purchasing Strategy Definition,Partner Strategy Implementation Planning,1029,3370
+Business Partner Domain,Strategy Management,Purchasing Strategy Management,Purchasing Strategy Definition,Partner Strategy Implementation,1030,3371
+Business Partner Domain,Strategy Management,Purchasing Strategy Analysis,Purchasing Implementation Analysis,Partner Strategy Assessing,1031,3372
+Business Partner Domain,"Assurance,Billing,Fulfillment",Business Partner Welcome and Interaction,Business Partner Relationship Management,Partner Group and Hierarchy Definition,1032,3373
+Business Partner Domain,"Assurance,Billing,Fulfillment",Business Partner Welcome and Interaction,Business Partner Relationship Management,Partner Group and Hierarchy Assigning,1033,3374
+Business Partner Domain,Operations Readiness & Support,Business Partner Management,Business Partner Role Repository Management,Partner Profile Management,1034,3375
+Business Partner Domain,"Assurance,Billing,Fulfillment",Business Partner Welcome and Interaction,Business Partner Relationship Management,Partner Preferences Management,1035,3376
+Business Partner Domain,Operations Readiness & Support,Business Partner Management,Business Partner Role Repository Management,Partner Profile Enquiry and Filtering,1036,3377
+Business Partner Domain,Operations Readiness & Support,Business Partner Management,Business Partner Role Repository Management,Partner Profile Storage,1037,3378
+Business Partner Domain,Operations Readiness & Support,Business Partner Management,Business Partner Role Repository Management,Partner Financial Information Collection,1038,3379
+Business Partner Domain,Strategy Management,Business Partner Strategy Analysis,Business Partner Financial Analysis,Partner Financial Risk Analyzing,1039,3380
+Business Partner Domain,Strategy Management,Business Partner Strategy Analysis,Business Partner Financial Analysis,Partner Financial Risk Scoring,1040,3381
+Business Partner Domain,"Assurance,Billing,Fulfillment",Business Partner Welcome and Interaction,Business Partner Interaction Management,Partner Interaction Journalizing,1041,3382
+Business Partner Domain,Operations Readiness & Support,Business Partner Management,Business Partner Agreement Management,Partner Agreement Creation,1042,3383
+Business Partner Domain,Operations Readiness & Support,Business Partner Management,Business Partner Agreement Management,Partner Agreement Storage and Searching,1043,3384
+Business Partner Domain,Operations Readiness & Support,Business Partner Management,Business Partner Agreement Management,Partner Agreement Implementation,1044,3385
+Business Partner Domain,Operations Readiness & Support,Business Partner Management,Business Partner Agreement Management,Partner Agreement Tracking,1045,3386
+Business Partner Domain,Strategy Management,Purchasing Strategy Management,Purchasing Tender Management,Tender Development,1046,3387
+Business Partner Domain,Strategy Management,Purchasing Strategy Management,Purchasing Tender Management,Tender Workflow Guiding,1047,3388
+Business Partner Domain,Strategy Management,Purchasing Strategy Management,Purchasing Tender Management,Tender Tracking and Reporting,1048,3389
+Business Partner Domain,Strategy Management,Purchasing Strategy Management,Purchasing Tender Management,Tender to Partner Qualification,1049,3390
+Business Partner Domain,Business Value Development,Business Partner Product Specification and Offering Management,Business Partner Product Specification and Offering Onboarding,Product Onboarding Management,1050,3391
+Business Partner Domain,Operations Readiness & Support,Business Partner Management,Business Partner Role Repository Management,Onboarded Product Partner Collaboration,1051,3392
+Business Partner Domain,Operations Readiness & Support,Business Partner Management,Business Partner Role Repository Management,Onboarded Product Licensing,1052,3393
+Business Partner Domain,Business Value Development,Business Partner Product Specification and Offering Management,Business Partner Product Specification and Offering Onboarding,Onboarded Product Workflows Definition,1053,3394
+Business Partner Domain,Billing,Business Partner Financial Management,Business Partner Payment Management,Procurement Order Payment,1065,3405
+Business Partner Domain,Fulfillment,Business Partner Order Management,Business Partner Order Repository Management,Business Partner Order Lifecycle Management,1173,4062
+Business Partner Domain,Strategy Management,Purchasing Strategy Analysis,Sourcing Savings Management,Cost Avoidance Management,1170,4063
+Business Partner Domain,Strategy Management,Purchasing Strategy Analysis,Sourcing Savings Management,Cost Reduction Management,1188,4064
+Business Partner Domain,Strategy Management,Purchasing Strategy Management,Purchasing Needs Forecast,Purchasing Needs Forecasts,1171,4065
+Business Partner Domain,Fulfillment,Business Partner Order Management,Business Partner Order Repository Management,Business Partner Order Storage Management,1172,4113
+Business Partner Domain,Fulfillment,Business Partner Order Management,Goods Receipt,Goods Receipt Check,1174,4115
+Business Partner Domain,Billing,Business Partner Rating,Business Partner Rating and Revenue Sharing,Business Partner Revenue Sharing Identification,1176,4116
+Business Partner Domain,Billing,Business Partner Rating,Business Partner Rating and Revenue Sharing,Business Partner Revenue Sharing Enforcement,1177,4117
+Business Partner Domain,Billing,Business Partner Rating,Business Partner Rating and Revenue Sharing,Business Partner Settlement Management,1178,4118
+Business Partner Domain,Fulfillment,Business Partner Order Management,Goods Receipt,Goods Return management,1175,4119
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Security Management,Security Strategy Definition and Management,Enterprise Security Risk Identification,1228,2027
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Security Management,Security Strategy Definition and Management,Security Rules Definition,1229,2028
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Security Management,Security Strategy Definition and Management,Security Rules Implementation,1230,2029
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Security Management,Security Strategy Definition and Management,Security Crisis Management,1231,2030
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Security Management,Security Strategy Definition and Management,Security Context Monitoring,1232,2031
+Enterprise Domain,Billing,Asset Management,Loan Securitization AF,Loan Securitization,1259,2056
+Enterprise Domain,Billing,Asset Management,Intellectual Property Management,IP Licensing and Sales,1324,2115
+Enterprise Domain,Operations Readiness & Support,Workforce Operational Management,Workforce Activity Tracking,Work List Management,1326,2117
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Enterprise Information Management,Enterprise Collaboration,Enterprise Email,1349,2139
+Enterprise Domain,Billing,Accounting Management,General Ledger,Account Receivable General Ledger Posting,25,2247
+Enterprise Domain,Billing,Accounting Management,General Ledger,Account Receivable Debit/Credit Matching,26,2248
+Enterprise Domain,Billing,Accounting Management,General Ledger,Account Receivable Direct Debiting,27,2249
+Enterprise Domain,Billing,Accounting Management,General Ledger,Account Receivable Balance Transferring,28,2250
+Enterprise Domain,Billing,Accounting Management,Subledger Accounting,Accounting Event Creation,29,2251
+Enterprise Domain,Billing,Accounting Management,Subledger Accounting,Payments to Accounts Crediting,31,2253
+Enterprise Domain,Billing,Accounting Management,Subledger Accounting,Customer Account Management,34,2256
+Enterprise Domain,Billing,Accounting Management,General Ledger,Accounts Receivable Charge Posting,35,2257
+Enterprise Domain,Billing,Accounting Management,Subledger Accounting,Customer's Account Adjustment,36,2258
+Enterprise Domain,Billing,Accounting Management,General Ledger,Billing Financial transaction creation,57,2279
+Enterprise Domain,Operations Readiness & Support,Workforce Operational Management,Workforce Organization,Care-center Workforce Training,112,2333
+Enterprise Domain,Operations Readiness & Support,Workforce Operational Management,Workforce Organization,Care-center Compliance Management,113,2334
+Enterprise Domain,Operations Readiness & Support,Workforce Operational Management,Workforce Schedule Management,Care-center Case Queuing,114,2335
+Enterprise Domain,Operations Readiness & Support,Workforce Operational Management,Workforce Organization,Care-center Workforce Administration,115,2336
+Enterprise Domain,Operations Readiness & Support,Workforce Operational Management,Workforce Organization,Center Activity Management,116,2337
+Enterprise Domain,Operations Readiness & Support,Financial Management,Budget Management,Center Budget Management,117,2338
+Enterprise Domain,Operations Readiness & Support,Workforce Operational Management,Workforce Activity Tracking,Center Quality Management,118,2339
+Enterprise Domain,Operations Readiness & Support,Workforce Operational Management,Workforce Activity Tracking,Center Time Management,119,2340
+Enterprise Domain,Operations Readiness & Support,Workforce Operational Management,Workforce Schedule Management,Off-Line Contact Channel Management,167,2388
+Enterprise Domain,Billing,Accounting Management,General Ledger,Journal Entry Accumulation,313,2534
+Enterprise Domain,Billing,Accounting Management,General Ledger,Financial Code Assigning,314,2535
+Enterprise Domain,Billing,Accounting Management,General Ledger,Journal Record Creation,315,2536
+Enterprise Domain,Billing,Accounting Management,General Ledger,Partner Account Receivables and Collection Access,403,2624
+Enterprise Domain,Operations Readiness & Support,Workforce Operational Management,Workforce Organization,Resource Change Project Collaboration,449,2671
+Enterprise Domain,Operations Readiness & Support,Financial Management,Budget Management,Resource Change Expenditure Authorization and Control,451,2673
+Enterprise Domain,Operations Readiness & Support,Workforce Operational Management,Workforce Schedule Management,Workforce Management,482,2704
+Enterprise Domain,Operations Readiness & Support,Workforce Operational Management,Workforce Schedule Management,Workforce Appointment Schedule Configuration,554,2776
+Enterprise Domain,Operations Readiness & Support,Workforce Operational Management,Workforce Schedule Management,Workload Forecasting,555,2777
+Enterprise Domain,Operations Readiness & Support,Workforce Operational Management,Workforce Schedule Management,Workforce Availability Management,556,2778
+Enterprise Domain,Operations Readiness & Support,Workforce Operational Management,Workforce Schedule Management,Workforce Training Management,557,2779
+Enterprise Domain,Operations Readiness & Support,Workforce Operational Management,Workforce Schedule Management,Workforce Dispatchability Management,558,2780
+Enterprise Domain,Operations Readiness & Support,Workforce Operational Management,Workforce Schedule Management,Geographical Work Areas Configuration,559,2781
+Enterprise Domain,Operations Readiness & Support,Workforce Operational Management,Workforce Activity Tracking,Workforce Management Reporting,560,2782
+Enterprise Domain,Operations Readiness & Support,Workforce Operational Management,Workforce Schedule Management,Workforce Scheduling,561,2783
+Enterprise Domain,Billing,Accounting Management,General Ledger,Account Proof and Balance Reporting,728,3052
+Enterprise Domain,Billing,Accounting Management,General Ledger,Tax Information Reporting,729,3053
+Enterprise Domain,Billing,Accounting Management,General Ledger,Account Data to Business Intelligence Reporting,730,3054
+Enterprise Domain,Assurance,Enterprise Revenue Assurance,Revenue Assurance Rules Definition,Revenue Assurance Control Configuration,757,3081
+Enterprise Domain,Assurance,Enterprise Revenue Assurance,Revenue Assurance Management,Revenue Assurance Control,758,3082
+Enterprise Domain,Assurance,Enterprise Revenue Assurance,Revenue Assurance Problem Management,Revenue Assurance Problem Management,759,3083
+Enterprise Domain,Assurance,Enterprise Revenue Assurance,Revenue Assurance Problem Management,Revenue Assurance Problem Tracking,760,3084
+Enterprise Domain,Assurance,Enterprise Revenue Assurance,Revenue Assurance Problem Management,Revenue Assurance Problem Resolution Verification,761,3085
+Enterprise Domain,Assurance,Enterprise Revenue Assurance,Revenue Assurance Management,Revenue Assurance Data Collection,762,3086
+Enterprise Domain,Assurance,Enterprise Revenue Assurance,Revenue Assurance Problem Management,Revenue Assurance Anomaly Monitoring,763,3087
+Enterprise Domain,Assurance,Enterprise Revenue Assurance,Revenue Assurance Problem Management,Revenue Assurance Anomaly Analyzing,764,3088
+Enterprise Domain,Assurance,Enterprise Revenue Assurance,Revenue Assurance Problem Management,Revenue Assurance Correction Initiation,765,3089
+Enterprise Domain,Assurance,Enterprise Revenue Assurance,Revenue Assurance Problem Management,Revenue Assurance Recovery Initiation,766,3090
+Enterprise Domain,Assurance,Enterprise Revenue Assurance,Revenue Assurance Management,Revenue Assurance Reporting,767,3091
+Enterprise Domain,Billing,Human Resource Expense Management,Payroll Management,Payroll Wage Calculation,768,3092
+Enterprise Domain,Billing,Human Resource Expense Management,Payroll Management,Payroll Salary Calculation,769,3093
+Enterprise Domain,Billing,Human Resource Expense Management,Payroll Management,Payroll Withholdings and Deductions Calculation,770,3094
+Enterprise Domain,Billing,Human Resource Expense Management,Payroll Management,Paycheck Generation,771,3095
+Enterprise Domain,Billing,Human Resource Expense Management,Payroll Management,Payroll Reporting,772,3096
+Enterprise Domain,"Assurance,Operations Readiness & Support",Human Resource Assurance,Human Resource Performance Management,Personnel Performance Goal Setting,773,3097
+Enterprise Domain,"Assurance,Operations Readiness & Support",Human Resource Assurance,Human Resource Performance Management,Personnel Performance Goal Analyzing,774,3098
+Enterprise Domain,"Assurance,Operations Readiness & Support",Human Resource Assurance,Human Resource Performance Management,Personnel Performance Feedback Management,775,3099
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Regulatory Rules Management,Regulatory Rules Application Tracking,Governmental & Regulatory Tracking,776,3100
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Regulatory Rules Management,Regulatory Rules Application Tracking,Governmental & Regulatory Reporting,777,3101
+Enterprise Domain,"Assurance,Billing,Fulfillment,Strategy Management","Human Resource Administration, Compensation and Benefits Management",Working Time Management,Time Attendance Management,778,3102
+Enterprise Domain,"Assurance,Billing,Fulfillment,Strategy Management","Human Resource Administration, Compensation and Benefits Management",Working Time Management,Time & Attendance Reporting,779,3103
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Human Resource Human Capital Management,External and Internal (Mobility) Recruitment,Staff Recruiting Support,780,3104
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Human Resource Human Capital Management,External and Internal (Mobility) Recruitment,Staff Onboarding,781,3105
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Human Resource Human Capital Management,External and Internal (Mobility) Recruitment,Recruitment and Staffing Reporting,782,3106
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Human Resource Social Management,Ethics & Compliance Management,Ethics & Compliance Management,783,3107
+Enterprise Domain,"Assurance,Billing,Fulfillment,Strategy Management","Human Resource Administration, Compensation and Benefits Management",Employee Repository Management,Employee Records Administration,784,3108
+Enterprise Domain,"Assurance,Billing,Fulfillment,Strategy Management","Human Resource Administration, Compensation and Benefits Management",Employee Repository Management,Employee Records Search and Retrieval,785,3109
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Human Resource Human Capital Management,Evaluations and Career Management,Awards & Recognition Guideline Management,786,3110
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Human Resource Human Capital Management,Evaluations and Career Management,Awards & Recognition Assigning,787,3111
+Enterprise Domain,"Assurance,Billing,Fulfillment,Strategy Management","Human Resource Administration, Compensation and Benefits Management",Individual Remuneration Policy Management,Salary Planning,788,3112
+Enterprise Domain,"Assurance,Billing,Fulfillment,Strategy Management","Human Resource Administration, Compensation and Benefits Management",Individual Remuneration Policy Management,Salary Update and Compensation,789,3113
+Enterprise Domain,"Assurance,Billing,Fulfillment,Strategy Management","Human Resource Administration, Compensation and Benefits Management",Individual Remuneration Policy Management,Salary Analytics and Reporting,790,3114
+Enterprise Domain,"Assurance,Billing,Fulfillment,Strategy Management","Human Resource Administration, Compensation and Benefits Management",Human Resource Communication Management,Corporate Communications,791,3115
+Enterprise Domain,"Assurance,Billing,Fulfillment,Strategy Management","Human Resource Administration, Compensation and Benefits Management",Human Resource Communication Management,Community Involvement Interaction Management,792,3116
+Enterprise Domain,"Assurance,Billing,Fulfillment,Strategy Management","Human Resource Administration, Compensation and Benefits Management",Human Resource Administration,Labor Relations Support,793,3117
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Human Resource Human Capital Management,Training Management,Corporate Training Planning,794,3118
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Human Resource Human Capital Management,Training Management,Corporate Training Development,795,3119
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Human Resource Human Capital Management,Training Management,Corporate Training Analytics and Reporting,796,3120
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Human Resource Social Management,Social Protection Management,Employee Benefits Development,797,3121
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Human Resource Social Management,Social Protection Management,Employee Benefits Use Analyzing,798,3122
+Enterprise Domain,Billing,Accounting Management,General Ledger,General Ledger Secure Access,799,3123
+Enterprise Domain,Billing,Accounting Management,General Ledger,General Ledger Chart of Accounts Maintenance,800,3124
+Enterprise Domain,Billing,Accounting Management,General Ledger,General Ledger Compliance,801,3125
+Enterprise Domain,Billing,Accounting Management,General Ledger,General Ledger Integration,802,3126
+Enterprise Domain,Billing,Accounting Management,General Ledger,Multi-ledger Financial Reporting,803,3127
+Enterprise Domain,Billing,Accounting Management,General Ledger,General Ledger Transaction Retrieval,804,3128
+Enterprise Domain,Billing,Accounting Management,General Ledger,General Ledger Month-end Closing,805,3129
+Enterprise Domain,Billing,Accounting Management,General Ledger,Financial Reference Data Maintenance,806,3130
+Enterprise Domain,Billing,Accounting Management,General Ledger,Financial Data Error Correction,807,3131
+Enterprise Domain,Billing,Accounting Management,General Ledger,Financial Batch Validation,808,3132
+Enterprise Domain,Billing,Accounting Management,General Ledger,Financial Data Translation,809,3133
+Enterprise Domain,Billing,Accounting Management,General Ledger,Financial Transaction Routing,810,3134
+Enterprise Domain,Billing,Accounting Management,General Ledger,Accounts Payable Invoice Management,811,3135
+Enterprise Domain,Billing,Accounting Management,General Ledger,Accounts Payable Global Accounting,812,3136
+Enterprise Domain,Billing,Accounting Management,General Ledger,Accounts Payable Supplier Management,813,3137
+Enterprise Domain,Billing,Accounting Management,General Ledger,Invoice and Payment Status Retrieval,814,3138
+Enterprise Domain,Billing,Accounting Management,General Ledger,Electronic Payment Integration,815,3139
+Enterprise Domain,Billing,Accounting Management,General Ledger,Total Cost of Ownership Tracking,816,3140
+Enterprise Domain,Billing,Accounting Management,General Ledger,Fixed Assets Depreciation Calculation,817,3141
+Enterprise Domain,Billing,Accounting Management,General Ledger,Fixed Assets Journalizing,818,3142
+Enterprise Domain,Billing,Accounting Management,General Ledger,Financial Systems Application Integration,819,3143
+Enterprise Domain,Billing,Accounting Management,General Ledger,Fixed Assets Reporting,820,3144
+Enterprise Domain,Operations Readiness & Support,Financial Management,Budget Management,Project Accounting Budget Creation,821,3145
+Enterprise Domain,Operations Readiness & Support,Financial Management,Budget Management,Project Expenditure Posting,822,3146
+Enterprise Domain,Operations Readiness & Support,Financial Management,Budget Management,Project Accounting Reporting,823,3147
+Enterprise Domain,Operations Readiness & Support,Financial Management,Budget Management,Project Accounting Comparison,824,3148
+Enterprise Domain,Operations Readiness & Support,Financial Management,Budget Management,Project Accounting Cost Distribution,825,3149
+Enterprise Domain,Operations Readiness & Support,Financial Management,Budget Management,Project Accounting Transaction Control,826,3150
+Enterprise Domain,Operations Readiness & Support,Financial Management,Budget Management,Project Accounting Budgetary Control,827,3151
+Enterprise Domain,Operations Readiness & Support,Financial Management,Budget Management,Project Accounting Asset Amortization,828,3152
+Enterprise Domain,Billing,Human Resource Expense Management,Travel Expense Management,Expense Data Downloading,829,3153
+Enterprise Domain,Billing,Human Resource Expense Management,Travel Expense Management,Expense Reports Electronic Attachments Management,830,3154
+Enterprise Domain,Billing,Human Resource Expense Management,Travel Expense Management,Duplicate Reimbursement Detection,831,3155
+Enterprise Domain,Billing,Human Resource Expense Management,Travel Expense Management,Expense Reports Approval Routing,832,3156
+Enterprise Domain,Billing,Human Resource Expense Management,Travel Expense Management,Employee Expense Reimbursement to Accounts Payable Integration,833,3157
+Enterprise Domain,Billing,Accounting Management,Lease Management,Capital Lease Contract Tracking,834,3158
+Enterprise Domain,Billing,Accounting Management,Lease Management,Capital Lease Complex Transaction Management,835,3159
+Enterprise Domain,Billing,Accounting Management,Lease Management,Capital Lease Reporting,836,3160
+Enterprise Domain,Billing,Accounting Management,General Ledger,General Ledger Reporting,837,3161
+Enterprise Domain,Billing,Accounting Management,General Ledger,Accounts Payable Reporting,838,3162
+Enterprise Domain,Billing,Accounting Management,General Ledger,Financial Data Reporting,839,3163
+Enterprise Domain,Billing,Accounting Management,General Ledger,Affiliate Billing Reporting,840,3164
+Enterprise Domain,Billing,Accounting Management,General Ledger,Cost Allocations Reporting,841,3165
+Enterprise Domain,Billing,Accounting Management,General Ledger,Revenue Eliminations Reporting,842,3166
+Enterprise Domain,Billing,Accounting Management,General Ledger,Business Unit Profitability Reporting,843,3167
+Enterprise Domain,Billing,Accounting Management,General Ledger,Business Unit Financial Reporting,844,3168
+Enterprise Domain,Operations Readiness & Support,Financial Management,Budget Management,Budget to Actual Variance Reporting,845,3169
+Enterprise Domain,Billing,Accounting Management,Tax Management,Sales & Use Tax Calculation,847,3171
+Enterprise Domain,Billing,Accounting Management,Tax Management,Income Tax Calculation,848,3172
+Enterprise Domain,Billing,Accounting Management,Tax Management,Property Tax Calculation,850,3173
+Enterprise Domain,Billing,Accounting Management,Tax Management,Gross Receipt Tax Calculation,851,3174
+Enterprise Domain,Billing,Accounting Management,Tax Management,Corporate Tax 1099 Processing,852,3175
+Enterprise Domain,Billing,Accounting Management,Tax Management,Network Asset Leasing Calculation,853,3176
+Enterprise Domain,Billing,Accounting Management,Tax Management,Corporate Tax to Accounts Payable Integration,854,3177
+Enterprise Domain,Billing,Bank Management,Treasury Management,Corporate Treasury Bank Accounts Tracking,855,3178
+Enterprise Domain,Billing,Bank Management,Treasury Management,Foreign Exchange Rates Management,856,3179
+Enterprise Domain,Billing,Bank Management,Treasury Management,Cash Position Management,857,3180
+Enterprise Domain,Billing,Bank Management,Treasury Management,Intercompany Cash Settlement,858,3181
+Enterprise Domain,Billing,Bank Management,Treasury Management,Bank Statement Reconciliation,859,3182
+Enterprise Domain,Billing,Bank Management,Treasury Management,Replacement Check Approving,860,3183
+Enterprise Domain,Billing,Bank Management,Treasury Management,Unclaimed Checks Escheatment,861,3184
+Enterprise Domain,Billing,Bank Management,Treasury Management,Unclaimed Payable Funds Recovery,862,3185
+Enterprise Domain,Billing,Bank Management,Treasury Management,Reconciliation & Escheatment to Accounts Payable Integration,863,3186
+Enterprise Domain,Billing,Accounting Management,General Ledger,Investment Accounts Reconciliation,864,3187
+Enterprise Domain,Billing,Accounting Management,General Ledger,Accounts Payable Reconciliation,865,3188
+Enterprise Domain,Billing,Accounting Management,General Ledger,Accounts Receivable Reconciliation,866,3189
+Enterprise Domain,Billing,Accounting Management,General Ledger,Payroll Function Reconciliation,867,3190
+Enterprise Domain,Billing,Accounting Management,General Ledger,Fixed Assets Reconciliation,868,3191
+Enterprise Domain,Billing,Accounting Management,General Ledger,Balance Sheet and Income Statement Accounts Reconciliation,869,3192
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Enterprise Risk Management,Enterprise Audit Management,Audit Findings Documentation,870,3193
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Enterprise Risk Management,Enterprise Audit Management,SOX Compliance Auditing,871,3194
+Enterprise Domain,Billing,Accounting Management,Regulatory Accounting,Cost Allocations Regulatory Accounting,872,3195
+Enterprise Domain,Billing,Accounting Management,Regulatory Accounting,Affiliate Billing Regulatory Accounting,873,3196
+Enterprise Domain,Billing,Accounting Management,Regulatory Accounting,International Settlements Regulatory Accounting,874,3197
+Enterprise Domain,Billing,Asset Management,Corporate Real Estate (Buildings),Real Estate Property Management,875,3198
+Enterprise Domain,Billing,Asset Management,Corporate Real Estate (Buildings),Building Portfolios Management,876,3199
+Enterprise Domain,Billing,Asset Management,Corporate Real Estate (Buildings),Property Lease Management,877,3200
+Enterprise Domain,Billing,Asset Management,Corporate Real Estate (Buildings),Real Estate Facility Management,878,3201
+Enterprise Domain,Billing,Asset Management,Corporate Real Estate (Buildings),Property Floor Plan Management,879,3202
+Enterprise Domain,Billing,Asset Management,Corporate Real Estate (Buildings),Property Utilization Management,880,3203
+Enterprise Domain,Billing,Asset Management,Corporate Real Estate (Buildings),Space/Cost of Fixed Assets Planning,881,3204
+Enterprise Domain,Billing,Asset Management,Corporate Real Estate (Buildings),Real Estate Asset Capital Budgeting,882,3205
+Enterprise Domain,Billing,Asset Management,Corporate Real Estate (Buildings),Real Estate Market and Location Analyzing,883,3206
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Human Resource Social Management,Safety and Working Environment Management,Real Estate HSE Regulation and Auditing Support,884,3207
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Human Resource Social Management,Safety and Working Environment Management,Real Estate HSE Policies/Objectives Planning,885,3208
+Enterprise Domain,Billing,Asset Management,Corporate Real Estate (Buildings),Real Estate Construction Management,886,3209
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Enterprise Risk Management,Damage Risk Management,Damage Claim Filing,887,3210
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Enterprise Risk Management,Damage Risk Management,Damage Claim Administration,888,3211
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Enterprise Risk Management,Damage Risk Management,Damage Claim Consequences Analyzing,889,3212
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Enterprise Risk Management,Damage Risk Management,Damage Claim to Accounting Integration,890,3213
+Enterprise Domain,Billing,Asset Management,Vehicle Fleet Management (Transport),Fleet Lifecycle and Maintenance Planning,891,3214
+Enterprise Domain,Billing,Asset Management,Vehicle Fleet Management (Transport),Fleet Tracing and Monitoring,892,3215
+Enterprise Domain,Billing,Asset Management,Vehicle Fleet Management (Transport),Fleet Security and Efficiency Management,893,3216
+Enterprise Domain,Billing,Asset Management,Vehicle Fleet Management (Transport),Fleet Logistic Optimization,894,3217
+Enterprise Domain,"Assurance,Billing,Fulfillment,Strategy Management","Human Resource Administration, Compensation and Benefits Management",Employee Repository Management,Unique Employee Number Registration,895,3218
+Enterprise Domain,"Assurance,Billing,Fulfillment,Strategy Management","Human Resource Administration, Compensation and Benefits Management",Employee Repository Management,Identification Card Management,896,3219
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Security Management,Lawful Interception,Lawful Interception,905,3228
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Enterprise Risk Management,Patent and Invention Management,"Patent, Invention & Trademark Management",907,3230
+Enterprise Domain,"Assurance,Billing,Fulfillment,Strategy Management","Human Resource Administration, Compensation and Benefits Management",Social Relationships Piloting,Enterprise Collaboration Support,908,3231
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Regulatory Rules Management,Regulatory Rules Repository Management,Regulatory & Compliance Monitoring,941,3263
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Regulatory Rules Management,Regulatory Rules Repository Management,Regulatory & Compliance Documentation,942,3264
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Regulatory Rules Management,Regulatory Rules Repository Management,Regulatory & Compliance Reporting,943,3265
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Regulatory Rules Management,Legal Support,Legal Assistance Support,944,3266
+Enterprise Domain,"Assurance,Billing,Fulfillment,Strategy Management","Human Resource Administration, Compensation and Benefits Management",Employee Relationship Management,Administrative Advertising,946,3268
+Enterprise Domain,Billing,Human Resource Expense Management,Travel Expense Management,Online Travel Booking,950,3272
+Enterprise Domain,Billing,Asset Management,Intellectual Property Management,Intellectual Asset Management,997,3336
+Enterprise Domain,Billing,Asset Management,Intellectual Property Management,Intellectual Asset Usage Tracking,998,3338
+Enterprise Domain,Billing,Asset Management,Intellectual Property Management,Intellectual Asset Sharing Policies Management,999,3339
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Enterprise Information Management,Enterprise Knowledge Management,Enterprise Processes Information Management,1000,3340
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Enterprise Information Management,Enterprise Knowledge Management,Collaboration Information Updating,1001,3341
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Enterprise Information Management,Enterprise Knowledge Management,Collaboration Tools Management,1002,3342
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Enterprise Information Management,Enterprise Knowledge Management,Knowledge Lifecycle Management,1003,3343
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Enterprise Information Management,Enterprise Knowledge Management,Knowledge Sharing Policy Processing,1004,3344
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Enterprise Information Management,Enterprise Knowledge Management,Knowledge Sharing,1005,3345
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Enterprise Information Management,Enterprise Knowledge Management,Knowledge Tailoring,1006,3346
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Enterprise Information Management,Enterprise Knowledge Management,Knowledge Identification,1007,3347
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Enterprise Information Management,Enterprise Knowledge Management,Knowledge Labeling,1008,3348
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Enterprise Information Management,Enterprise Knowledge Management,Acquired Knowledge Storage,1009,3349
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Human Resource Social Management,Social Protection Management,Employee Benefits Administration,1057,3398
+Enterprise Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Human Resource Social Management,Social Protection Management,Employee Benefits Management Reporting,1058,3399
+Enterprise Domain,Operations Readiness & Support,Workforce Operational Management,Workforce Appointment Management,Workforce Agenda Booking,1184,4079
+Enterprise Domain,Operations Readiness & Support,Workforce Operational Management,Workforce Appointment Management,Workforce Availability Check,1183,4080
+Shared Domain,"Assurance,Fulfillment,Billing,Strategy Management,Business Value Development,Operations Readiness & Support",Party Management,Party Repository Management,Individual Information Management,1234,2033
+Shared Domain,"Assurance,Fulfillment,Billing,Strategy Management,Business Value Development,Operations Readiness & Support",Party Management,Party Repository Management,Organization Information Management,1235,2034
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Identification and Permission Management,Identification and Authentication,Identity Verification,1240,2038
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Identification and Permission Management,Digital Identity Management,Credentials Establishment,1247,2045
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Identification and Permission Management,Digital Identity Management,Credentials Query,1248,2046
+Shared Domain,Operations Readiness & Support,Systems and Applications Management,Systems Administration,User Provisioning,1301,2094
+Shared Domain,Operations Readiness & Support,Systems and Applications Management,Systems Administration,User Auditing,1303,2095
+Shared Domain,Operations Readiness & Support,Systems and Applications Management,Systems Administration,Systems Monitoring,1304,2096
+Shared Domain,Operations Readiness & Support,Systems and Applications Management,Systems Administration,Applications Administration,1305,2097
+Shared Domain,Operations Readiness & Support,Systems and Applications Management,Systems Infrastructure Management,Software License Management,1306,2098
+Shared Domain,Operations Readiness & Support,Systems and Applications Management,Systems and Applications Support,Helpdesk Support,1307,2099
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management,Shared Domain,Business Value Development",Content Management,Content Delivery Management,Content Presentation,1322,2113
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Data Analytics,Analytics Information Support,Reference and Metadata Management,1323,2114
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Data Analytics,Analytics Information Support,Data Aggregation and Normalization,1327,2118
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Data Analytics,Business Intelligence,BI Data Modeling,1328,2119
+Shared Domain,Assurance,Anomaly Management,Anomaly Detection,Anomaly Pattern Collection,1352,2142
+Shared Domain,Assurance,Anomaly Management,Anomaly Detection,Anomaly Normal Description Capture,1353,2143
+Shared Domain,Assurance,Anomaly Management,Anomaly Detection,Anomaly Pattern Correlation,1354,2144
+Shared Domain,Assurance,Anomaly Management,Anomaly Detection,Anomaly Learning,1355,2145
+Shared Domain,Assurance,Anomaly Management,Anomaly Detection,Anomaly Alerting,1356,2146
+Shared Domain,Assurance,Anomaly Management,Anomaly Detection,Anomaly Reporting,1357,2147
+Shared Domain,Assurance,Anomaly Management,Anomaly Detection,Anomaly Pattern Analysis,1358,2148
+Shared Domain,Assurance,Anomaly Management,Anomaly Detection,Univariate Anomaly Detection,1359,2149
+Shared Domain,Assurance,Anomaly Management,Anomaly Detection,Multi Variate Anomaly Detection,1360,2150
+Shared Domain,Assurance,Anomaly Management,Anomaly Detection,Anomaly Model Selection,1361,2151
+Shared Domain,Assurance,Anomaly Management,Anomaly Detection,Realtime Anomaly Inferencing,1362,2152
+Shared Domain,Assurance,Anomaly Management,Anomaly Detection,Anomaly Batch Inferencing,1363,2153
+Shared Domain,Assurance,Anomaly Management,Anomaly Detection,Anomaly Pattern Matching,1364,2154
+Shared Domain,Assurance,Anomaly Management,Anomaly Prediction,Prediction Data Collection,1365,2155
+Shared Domain,Assurance,Anomaly Management,Anomaly Prediction,Anomaly Prediction Description Capture,1366,2156
+Shared Domain,Assurance,Anomaly Management,Anomaly Prediction,Anomaly Prediction Data Preprocessing,1367,2157
+Shared Domain,Assurance,Anomaly Management,Anomaly Prediction,Anomaly Prediction Model Training,1368,2158
+Shared Domain,Assurance,Anomaly Management,Anomaly Prediction,Anomaly Prediction,1369,2159
+Shared Domain,Assurance,Anomaly Management,Anomaly Prediction,Anomaly Prediction Result Interpreter,1370,2160
+Shared Domain,Assurance,Anomaly Management,Anomaly Prediction,Anomaly Prediction Alerting,1371,2161
+Shared Domain,Assurance,Anomaly Management,Anomaly Prediction,Anomaly Prediction Model Updater,1372,2162
+Shared Domain,Assurance,Anomaly Management,Anomaly Prediction,Anomaly Prediction Reporting,1373,2163
+Shared Domain,Assurance,Anomaly Management,Anomaly Prediction,Anomaly Prediction Reporting Visualization,1374,2164
+Shared Domain,Assurance,Anomaly Management,Anomaly Mitigation,Anomaly Cause Indication,1375,2165
+Shared Domain,Assurance,Anomaly Management,Anomaly Mitigation,Anomaly Mitigation Pattern Correlation,1376,2166
+Shared Domain,Assurance,Anomaly Management,Anomaly Mitigation,Anomaly Mitigation Planner,1377,2167
+Shared Domain,Assurance,Anomaly Management,Anomaly Mitigation,Anomaly Mitigation Learning,1378,2168
+Shared Domain,Assurance,Anomaly Management,Anomaly Mitigation,Anomaly Mitigation Reporter,1379,2169
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Data Analytics,Pattern Detection,Pattern Context Monitoring,1380,2170
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Data Analytics,Pattern Detection,Pattern Detection Context Capture,1381,2171
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Data Analytics,Pattern Detection,Pattern Descriptor,1382,2172
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Data Analytics,Pattern Detection,Pattern Discovery,1383,2173
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Data Analytics,Pattern Detection,Pattern Change History,1384,2174
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Data Analytics,Pattern Detection,Pattern Change Monitoring,1385,2175
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Data Analytics,Pattern Detection,Pattern Event Monitoring,1386,2176
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Data Analytics,Pattern Detection,Pattern Learning Management,1387,2177
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Communications,Natural Language Processor,AI Language Model Provider,1388,2178
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Communications,Natural Language Processor,Natural Language Interpreter,1389,2179
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Communications,Natural Language Processor,Natural Language Tokenizer,1390,2180
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Communications,Natural Language Processor,Natural Language Speech Recognition,1391,2181
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Communications,Natural Language Processor,Natural Language Prompt Manager,1392,2182
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Communications,Natural Language Processor,Natural Language Response Manager,1393,2183
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Communications,Natural Language Processor,Natural Language Tagger,1394,2184
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Communications,Natural Language Processor,Natural Language Named Entity Recognition,1395,2185
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Communications,Natural Language Processor,Text Classification,1396,2186
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Communications,Natural Language Processor,Information Extractor,1397,2187
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Master Data Management,Data Repository Management,Repository Entity Relations Configuration,3,2225
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Master Data Management,Data Repository Management,Repository Entity Grouping Configuration,4,2226
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Master Data Management,Data Repository Management,Repository Entity Data Model Configuration,6,2228
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Master Data Management,Data Repository Management,Repository Entity Hierarchy Management,11,2233
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Master Data Management,Data Repository Management,Repository Entity Revision Control,13,2235
+Shared Domain,Fulfillment,Fallout Management,Fallout Correction Management,Fallout Automated Correction,16,2238
+Shared Domain,Fulfillment,Fallout Management,Fallout Correction Management,Fallout Correction Information Collection,17,2239
+Shared Domain,Fulfillment,Fallout Management,Fallout Repository Management,Fallout Management to Fulfillment Application Accessing,18,2240
+Shared Domain,Fulfillment,Fallout Management,Fallout Correction Management,Fallout Manual Correction Queuing,19,2241
+Shared Domain,Fulfillment,Fallout Management,Fallout Repository Management,Fallout Notification,20,2242
+Shared Domain,Fulfillment,Fallout Management,Fallout Correction Management,Fallout Orchestration,21,2243
+Shared Domain,Fulfillment,Fallout Management,Fallout Repository Management,Fallout Reporting,22,2244
+Shared Domain,Fulfillment,Fallout Management,Fallout Repository Management,Fallout Dashboard System Log-in Accessing,23,2245
+Shared Domain,Fulfillment,Fallout Management,Fallout Correction Management,Pre-populated Fallout Information Presentation,24,2246
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Identification and Permission Management,Digital Identity Management,Anonymous User Account Creation,260,2481
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management,Shared Domain,Business Value Development",Content Management,Document Management,Archive Administration,305,2526
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management,Shared Domain,Business Value Development",Content Management,Document Management,Archiving Data Storage,306,2527
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management,Shared Domain,Business Value Development",Content Management,Document Management,Archived Data Retrieval,307,2528
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management,Shared Domain,Business Value Development",Content Management,Document Management,Transactional Document Delivering,308,2529
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management,Shared Domain,Business Value Development",Content Management,Document Management,Bills and Letter Template Creation,330,2551
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management,Shared Domain,Business Value Development",Content Management,Document Management,Transactional Document Rules for Input to Template Binding Configuration,331,2552
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management,Shared Domain,Business Value Development",Content Management,Document Management,Transactional Document Input Data Sourcing Configuration,332,2553
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management,Shared Domain,Business Value Development",Content Management,Document Management,Transactional Document Template Resource Configuration,333,2554
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management,Shared Domain,Business Value Development",Content Management,Document Management,Transactional Document Template Usage Business Rules Configuration,334,2555
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management,Shared Domain,Business Value Development",Content Management,Document Management,Transactional Document Multiple Account Aggregation,335,2556
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management,Shared Domain,Business Value Development",Content Management,Document Management,Transactional Document Regional Requirements Appliance,336,2557
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management,Shared Domain,Business Value Development",Content Management,Document Management,Transactional Document Information Formatting,337,2558
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management,Shared Domain,Business Value Development",Content Management,Document Management,Transactional Document Legend Generation,338,2559
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management,Shared Domain,Business Value Development",Content Management,Document Management,Transactional Document Marketing Information Incorporation,339,2560
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management,Shared Domain,Business Value Development",Content Management,Document Management,Transactional Document Data Sending,340,2561
+Shared Domain,Business Value Development,Privacy Development,Privacy Definition  Management,Privacy Profile Type Creation,664,2883
+Shared Domain,Business Value Development,Privacy Development,Privacy Definition  Management,Privacy Profile Rules Configuration,665,2884
+Shared Domain,Operations Readiness & Support,Privacy Management,Privacy Repository Management,Privacy Data Browsing Access,666,2885
+Shared Domain,Operations Readiness & Support,Privacy Management,Privacy Repository Management,Privacy Data Updating Access,667,2886
+Shared Domain,Operations Readiness & Support,Privacy Management,Privacy Repository Management,Privacy Consent Agreement Obtaining,668,2887
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Data Analytics,Business Intelligence,Business Intelligence Guided Searching,690,2888
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Data Analytics,Business Intelligence,Business Intelligence Interactive Analyzing,691,2889
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Data Analytics,Business Intelligence,Business Operational Trend Analyzing,693,2891
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Data Analytics,Business Intelligence,Business Operational Statistics Analyzing,694,2892
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Data Analytics,Business Intelligence,Business Intelligence User Integration,696,2894
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Data Analytics,Business Intelligence,Business Intelligence Offline Document Delivering,697,2895
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Data Analytics,Business Intelligence,Business Metrics/KPIs Rules Evaluation,700,2898
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Data Analytics,Business Intelligence,Business Operational Follow-up Planning,701,2899
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Data Analytics,Business Intelligence,Business Operational Strategy Management Planning,703,2901
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Data Analytics,Business Intelligence,Business Operational Analytics Result Presentation,704,2902
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Data Analytics,Business Intelligence,Business Intelligence Analysis Result Notification,705,2903
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management,Shared Domain,Business Value Development",Content Management,Records Management,Content Management Data Versioning,709,2907
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management,Shared Domain,Business Value Development",Content Management,Records Management,Content Management Archiving,710,2908
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management,Shared Domain,Business Value Development",Content Management,Records Management,eLearning Interactive Lecturing,711,2909
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management,Shared Domain,Business Value Development",Content Management,Records Management,eLearning Course Administration,712,2910
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management,Shared Domain,Business Value Development",Content Management,Records Management,Content Management Data Composing,713,2911
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management,Shared Domain,Business Value Development",Content Management,Records Management,Content Management Meta-Data Support,714,2912
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Identification and Permission Management,Permission Control,Building Access Control,897,3220
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Identification and Permission Management,Roles & Permission Definition,Application Security Management,898,3221
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Identification and Permission Management,Identification and Authentication,Single Sign-On Access Control,899,3222
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Identification and Permission Management,Permission Control,Authorization Control,900,3223
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Identification and Permission Management,Identification and Authentication,PKI and Digital Certificates Systems Integration,906,3229
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Master Data Management,Data Structure Definition,Data Architecture Management,909,3232
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Master Data Management,Data Structure Definition,Data Procedures and Practices Management,910,3233
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Master Data Management,Data Repository Management,Data Management Data Storage,911,3234
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Master Data Management,Data Repository Management,Management Data Retrieval,914,3237
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Master Data Management,Data Repository Management,Management Data Integration Access,917,3240
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management,Shared Domain,Business Value Development",Content Management,Content Repository Management,Content Management Authoring Support,920,3243
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management,Shared Domain,Business Value Development",Content Management,Content Repository Management,Content Management Data Compilation,921,3244
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management,Shared Domain,Business Value Development",Content Management,Content Repository Management,Content Management Data Acquisition Integration,922,3245
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management,Shared Domain,Business Value Development",Content Management,Content Repository Management,Content Management Data Access,925,3248
+Shared Domain,Operations Readiness & Support,Privacy Management,Privacy Control,Record Retention Management,945,3267
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Project Management,Project Planning,Project Planning,947,3269
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Project Management,Project Repository Management,Project Follow-up Management,948,3270
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Project Management,Project Repository Management,Project Reporting,949,3271
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Master Data Management,Data Repository Management,Entity Management Notification,992,3329
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Master Data Management,Data Repository Management,Entity Management Reporting,993,3330
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Master Data Management,Data Repository Management,Data Storage Management,1010,3351
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Master Data Management,Data Structure Definition,Data Store Content Structure Configuration,1011,3352
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Master Data Management,Data Repository Management,Data Entity Lifecycle Management,1013,3354
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Master Data Management,Data Repository Management,Data Entity Access,1014,3355
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Master Data Management,Data Repository Management,Data Entity Archiving,1015,3356
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Master Data Management,Data Repository Management,Data Management Interface Access,1016,3357
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Master Data Management,Data Repository Management,Data Distribution,1017,3358
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Master Data Management,Data Repository Management,Data Distribution Configuration,1018,3359
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Master Data Management,Data Structure Definition,Data Compliance and Policy Configuration,1019,3360
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Master Data Management,Data Structure Definition,Data Compliance and Policy Distribution,1020,3361
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Master Data Management,Data Repository Management,Compliance and Policy Management Access,1021,3362
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Master Data Management,Data Repository Management,Data Transformation,1022,3363
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Master Data Management,Data Repository Management,Data Formatting,1023,3364
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Master Data Management,Data Repository Management,Transformation and Formatting Configuration,1024,3365
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Identification and Permission Management,Identification and Authentication,Application Access,1025,3366
+Shared Domain,"Operations Readiness & Support,Business Value Development,Strategy Management,Capability Management,Billing,Fulfillment,Assurance",Data Analytics,Business Intelligence,Environment Creator,1398,4047
+Shared Domain,Fulfillment,Fallout Management,Fallout Correction Management,Fallout Rule Based Error Correction,756,4081
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Identification and Permission Management,Role and Permission Assignment / Configuration,Party Role Assignment,1181,4107
+Shared Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",Identification and Permission Management,Role and Permission Assignment / Configuration,Permission Perimeter Configuration,1182,4108
+Integration Domain,Operations Readiness & Support,"Business Requirements, Process & Rules Management",Business Rules Management,Business Rules Creation,1329,2120
+Integration Domain,Operations Readiness & Support,"Business Requirements, Process & Rules Management",Business Rules Management,Business Rules Storage,1330,2121
+Integration Domain,Operations Readiness & Support,"Business Requirements, Process & Rules Management",Business Rules Management,Business Rules Version Control,1331,2122
+Integration Domain,Operations Readiness & Support,"Business Requirements, Process & Rules Management",Business Rules Management,Business Rules Translation to Execution,1332,2123
+Integration Domain,Operations Readiness & Support,"Business Requirements, Process & Rules Management",Business Process Management,Business Process Storage,1333,2124
+Integration Domain,Operations Readiness & Support,"Business Requirements, Process & Rules Management",Business Process Management,Business Process Simulation,1334,2125
+Integration Domain,Operations Readiness & Support,API Implementation Management,API Implementation Information Management,API Implementation Metadata Management,1335,2126
+Integration Domain,Operations Readiness & Support,API Implementation Management,API Implementation Information Management,API Implementation Operational Information Management,1336,2127
+Integration Domain,Fulfillment,Fulfillment Integration Management,Customer Fulfillment Access Management,Customer Order Capturing Access,176,2397
+Integration Domain,Fulfillment,Fulfillment Integration Management,Resource Fullfilment Access Management,External Access Equipment Management,267,2488
+Integration Domain,Fulfillment,Fulfillment Integration Management,Customer Fulfillment Access Management,Guided Eligible Product Selection,268,2489
+Integration Domain,Assurance,Assurance Integration Management,Customer Assurance Access Management,Fulfillment and SLA Report Access,276,2497
+Integration Domain,Business Value Development,Lifecycle Integration Management,Product Lifecycle Acces,External Product Information Exposure,368,2589
+Integration Domain,Fulfillment,Fulfillment Integration Management,Customer Fulfillment Access Management,External Sales Functions Accessing,377,2598
+Integration Domain,Fulfillment,Fulfillment Integration Management,Customer Fulfillment Access Management,Sales Tools Accessing,378,2599
+Integration Domain,Fulfillment,Fulfillment Integration Management,Service Fulfillment Access Management,Service Order Exposure,597,2816
+Integration Domain,Operations Readiness & Support,"Business Requirements, Process & Rules Management",Business Process Implementation,BPM Workflow Sequencing,674,2917
+Integration Domain,Operations Readiness & Support,"Business Requirements, Process & Rules Management",Business Process Development,Business Process Designing,675,2918
+Integration Domain,Operations Readiness & Support,"Business Requirements, Process & Rules Management",Business Process Implementation,Business Process Management Activity Monitoring,676,2919
+Integration Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",API Management,API Gateway Management,API Lifecycle Management Access Control,669,2920
+Integration Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",API Management,API Gateway Management,API Gateway Caching,677,2921
+Integration Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",API Management,API Gateway Management,API Gateway Routing,679,2923
+Integration Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",API Management,API Gateway Management,API Gateway Event Routing,681,2925
+Integration Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",API Management,API Gateway Management,API Lifecycle Monitoring,685,2928
+Integration Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",API Management,API Development,API Catalog Management,686,2929
+Integration Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",API Management,API Development,API Operation Configuration,688,2930
+Integration Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",API Management,API Development,API Developers Interaction,689,2931
+Integration Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",API Management,API Gateway Management,API Gateway Protocol Data Transformation,678,3310
+Integration Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",API Management,API Gateway Management,API Authentication,680,3311
+Integration Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",API Management,API Gateway Management,API Gateway Diagnosis,682,3312
+Integration Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",API Management,API Gateway Management,API Gateway Log Reporting,683,3313
+Integration Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",API Management,API Development,API Gateway Protocol Header Transformation,985,3314
+Integration Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",API Management,API Development,API Retirement Management,687,3316
+Integration Domain,"Assurance,Billing,Fulfillment,Operations Readiness & Support,Strategy Management",API Management,API Gateway Management,API Gateway Logging,684,3322
+Integration Domain,Fulfillment,Fulfillment Integration Management,Customer Fulfillment Access Management,Quote Price Support Access,274,3419

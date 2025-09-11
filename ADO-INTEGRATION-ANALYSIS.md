@@ -7,6 +7,7 @@ This document provides a comprehensive analysis and planning guide for implement
 ## Current Application Context
 
 ### **Data Sources Available**
+
 Our application currently has rich data sources that can be leveraged for ADO integration:
 
 1. **TMF ODA Domains & Capabilities**: Structured domain-capability hierarchies
@@ -15,6 +16,7 @@ Our application currently has rich data sources that can be leveraged for ADO in
 4. **Blue Dolphin Integration**: Future source for integration and test case data
 
 ### **Key Data Structures**
+
 ```typescript
 // TMF ODA Domain Structure
 interface TMFOdaDomain {
@@ -47,24 +49,28 @@ interface SpecSyncItem {
 Based on our data structures and ADO best practices, we propose the following mapping:
 
 #### **1. Epic Level - Project/Initiative**
+
 - **Source**: Project metadata + TMF ODA Domains
 - **ADO Type**: Epic
 - **Rationale**: Each major BSS transformation initiative becomes an epic
 - **Fields**: Title, Description, Business Value, Risk, Tags
 
 #### **2. Feature Level - TMF ODA Domains**
+
 - **Source**: TMFOdaDomain objects
 - **ADO Type**: Feature
 - **Rationale**: Each TMF domain represents a major functional area
 - **Fields**: Title, Description, Acceptance Criteria, Business Value, Tags
 
 #### **3. User Story Level - TMF Capabilities**
+
 - **Source**: TMFOdaCapability objects
 - **ADO Type**: User Story
 - **Rationale**: Each capability represents a deliverable feature
 - **Fields**: Title, Description, Story Points, Acceptance Criteria, Tags
 
 #### **4. Task Level - SpecSync Requirements**
+
 - **Source**: SpecSyncItem objects
 - **ADO Type**: Task
 - **Rationale**: Individual requirements become implementation tasks
@@ -107,8 +113,8 @@ function generateEpicFromProject(project: Project, domains: TMFOdaDomain[]): ADO
       'Custom.ProjectId': project.id,
       'Custom.Customer': project.customer,
       'Custom.Duration': project.duration,
-      'Custom.TeamSize': project.teamSize
-    }
+      'Custom.TeamSize': project.teamSize,
+    },
   };
 }
 ```
@@ -131,8 +137,8 @@ function generateFeatureFromDomain(domain: TMFOdaDomain): ADOWorkItem {
       'System.Tags': `TMF-Domain;${domain.name};Feature`,
       'Custom.DomainId': domain.id,
       'Custom.CapabilityCount': domain.capabilities.length,
-      'Custom.TMFLevel': 'Domain'
-    }
+      'Custom.TMFLevel': 'Domain',
+    },
   };
 }
 ```
@@ -155,8 +161,8 @@ function generateUserStoryFromCapability(capability: TMFOdaCapability): ADOWorkI
       'System.Tags': `TMF-Capability;${capability.name};UserStory`,
       'Custom.CapabilityId': capability.id,
       'Custom.DomainId': capability.domainId,
-      'Custom.TMFLevel': 'Capability'
-    }
+      'Custom.TMFLevel': 'Capability',
+    },
   };
 }
 ```
@@ -168,10 +174,12 @@ function generateTaskFromSpecSyncItem(item: SpecSyncItem): ADOWorkItem {
   return {
     type: 'task',
     title: `${item.rephrasedRequirementId} - ${item.functionName}`,
-    description: item.usecase1 || item.description || `Implement ${item.functionName} functionality`,
+    description:
+      item.usecase1 || item.description || `Implement ${item.functionName} functionality`,
     fields: {
       'System.Title': `${item.rephrasedRequirementId} - ${item.functionName}`,
-      'System.Description': item.usecase1 || item.description || `Implement ${item.functionName} functionality`,
+      'System.Description':
+        item.usecase1 || item.description || `Implement ${item.functionName} functionality`,
       'Microsoft.VSTS.Scheduling.RemainingWork': calculateRemainingWork(item),
       'Microsoft.VSTS.Scheduling.Activity': determineActivity(item),
       'System.AreaPath': getADOAreaPath(),
@@ -184,8 +192,8 @@ function generateTaskFromSpecSyncItem(item: SpecSyncItem): ADOWorkItem {
       'Custom.Capability': item.capability,
       'Custom.Usecase': item.usecase1,
       'Custom.Priority': item.priority || 'Medium',
-      'Custom.Status': item.status || 'New'
-    }
+      'Custom.Status': item.status || 'New',
+    },
   };
 }
 ```
@@ -199,23 +207,23 @@ const tmfCustomFields = {
   'Custom.TMFLevel': {
     type: 'String',
     description: 'TMF ODA level (Domain, Capability, Function)',
-    allowedValues: ['Domain', 'Capability', 'Function']
+    allowedValues: ['Domain', 'Capability', 'Function'],
   },
   'Custom.DomainId': {
     type: 'String',
     description: 'TMF ODA Domain ID',
-    format: 'UUID'
+    format: 'UUID',
   },
   'Custom.CapabilityId': {
     type: 'String',
     description: 'TMF ODA Capability ID',
-    format: 'UUID'
+    format: 'UUID',
   },
   'Custom.CapabilityCount': {
     type: 'Integer',
     description: 'Number of capabilities in domain',
-    minValue: 0
-  }
+    minValue: 0,
+  },
 };
 ```
 
@@ -226,38 +234,43 @@ const specSyncCustomFields = {
   'Custom.RequirementId': {
     type: 'String',
     description: 'Original SpecSync requirement ID',
-    format: 'FUNC_XXX.X'
+    format: 'FUNC_XXX.X',
   },
   'Custom.RephrasedRequirementId': {
     type: 'String',
     description: 'Rephrased requirement ID for clarity',
-    format: 'FUNC_XXX.X'
+    format: 'FUNC_XXX.X',
   },
   'Custom.Domain': {
     type: 'String',
     description: 'Business domain (Customer, Product, Revenue, etc.)',
-    allowedValues: ['Customer Management', 'Product Management', 'Revenue Management', 'Service Management']
+    allowedValues: [
+      'Customer Management',
+      'Product Management',
+      'Revenue Management',
+      'Service Management',
+    ],
   },
   'Custom.FunctionName': {
     type: 'String',
     description: 'TMF function name',
-    format: 'Free text'
+    format: 'Free text',
   },
   'Custom.Capability': {
     type: 'String',
     description: 'Associated TMF capability',
-    format: 'Free text'
+    format: 'Free text',
   },
   'Custom.Usecase': {
     type: 'String',
     description: 'Primary use case description',
-    format: 'Free text'
+    format: 'Free text',
   },
   'Custom.Priority': {
     type: 'String',
     description: 'Requirement priority',
-    allowedValues: ['Low', 'Medium', 'High', 'Critical']
-  }
+    allowedValues: ['Low', 'Medium', 'High', 'Critical'],
+  },
 };
 ```
 
@@ -268,23 +281,23 @@ const projectCustomFields = {
   'Custom.ProjectId': {
     type: 'String',
     description: 'Internal project ID',
-    format: 'UUID'
+    format: 'UUID',
   },
   'Custom.Customer': {
     type: 'String',
     description: 'Customer name',
-    format: 'Free text'
+    format: 'Free text',
   },
   'Custom.Duration': {
     type: 'String',
     description: 'Project duration',
-    format: 'X months'
+    format: 'X months',
   },
   'Custom.TeamSize': {
     type: 'Integer',
     description: 'Project team size',
-    minValue: 1
-  }
+    minValue: 1,
+  },
 };
 ```
 
@@ -296,34 +309,34 @@ const projectCustomFields = {
 function generateWorkItemRelationships(
   project: Project,
   domains: TMFOdaDomain[],
-  specSyncItems: SpecSyncItem[]
+  specSyncItems: SpecSyncItem[],
 ): ADORelationship[] {
   const relationships: ADORelationship[] = [];
-  
+
   // 1. Link all features (domains) to epic (project)
-  domains.forEach(domain => {
+  domains.forEach((domain) => {
     relationships.push({
       source: `Feature:${domain.name}`,
       target: `Epic:${project.name}`,
       type: 'Child',
-      relationshipType: 'System.LinkTypes.Hierarchy-Forward'
+      relationshipType: 'System.LinkTypes.Hierarchy-Forward',
     });
   });
-  
+
   // 2. Link user stories (capabilities) to features (domains)
-  domains.forEach(domain => {
-    domain.capabilities.forEach(capability => {
+  domains.forEach((domain) => {
+    domain.capabilities.forEach((capability) => {
       relationships.push({
         source: `UserStory:${capability.name}`,
         target: `Feature:${domain.name}`,
         type: 'Child',
-        relationshipType: 'System.LinkTypes.Hierarchy-Forward'
+        relationshipType: 'System.LinkTypes.Hierarchy-Forward',
       });
     });
   });
-  
+
   // 3. Link tasks (SpecSync items) to user stories (capabilities)
-  specSyncItems.forEach(item => {
+  specSyncItems.forEach((item) => {
     // Find matching capability based on function name or capability field
     const matchingCapability = findMatchingCapability(item, domains);
     if (matchingCapability) {
@@ -331,11 +344,11 @@ function generateWorkItemRelationships(
         source: `Task:${item.rephrasedRequirementId}`,
         target: `UserStory:${matchingCapability.name}`,
         type: 'Child',
-        relationshipType: 'System.LinkTypes.Hierarchy-Forward'
+        relationshipType: 'System.LinkTypes.Hierarchy-Forward',
       });
     }
   });
-  
+
   return relationships;
 }
 ```
@@ -345,27 +358,28 @@ function generateWorkItemRelationships(
 ```typescript
 function generateCrossReferenceRelationships(
   specSyncItems: SpecSyncItem[],
-  domains: TMFOdaDomain[]
+  domains: TMFOdaDomain[],
 ): ADORelationship[] {
   const relationships: ADORelationship[] = [];
-  
+
   // Link related SpecSync items based on domain and function
-  specSyncItems.forEach(item => {
-    const relatedItems = specSyncItems.filter(other => 
-      other.id !== item.id &&
-      (other.domain === item.domain || other.functionName === item.functionName)
+  specSyncItems.forEach((item) => {
+    const relatedItems = specSyncItems.filter(
+      (other) =>
+        other.id !== item.id &&
+        (other.domain === item.domain || other.functionName === item.functionName),
     );
-    
-    relatedItems.forEach(related => {
+
+    relatedItems.forEach((related) => {
       relationships.push({
         source: `Task:${item.rephrasedRequirementId}`,
         target: `Task:${related.rephrasedRequirementId}`,
         type: 'Related',
-        relationshipType: 'System.LinkTypes.Related'
+        relationshipType: 'System.LinkTypes.Related',
       });
     });
   });
-  
+
   return relationships;
 }
 ```
@@ -377,6 +391,7 @@ function generateCrossReferenceRelationships(
 Based on our existing tab structure, we propose adding an "ADO Integration" tab with the following components:
 
 #### **1. Configuration Panel**
+
 ```typescript
 interface ADOConfiguration {
   organization: string;
@@ -398,18 +413,21 @@ interface ADOConfiguration {
 ```
 
 #### **2. Data Source Selection**
+
 - **TMF ODA Domains**: Checkbox list of available domains
 - **TMF ODA Capabilities**: Checkbox list of available capabilities
 - **SpecSync Requirements**: Filter by domain, priority, status
 - **Project Metadata**: Project selection and configuration
 
 #### **3. Preview System**
+
 - **Epic Preview**: Shows generated epic with fields
 - **Feature Preview**: Shows generated features with relationships
 - **User Story Preview**: Shows generated user stories with story points
 - **Task Preview**: Shows generated tasks with effort estimates
 
 #### **4. Export Options**
+
 - **JSON Payload**: Export complete ADO payload
 - **Direct API**: Push directly to ADO (future enhancement)
 - **Template Export**: Export as ADO template files
@@ -450,6 +468,7 @@ interface PreviewPanel {
 Based on the [Microsoft ADO REST API documentation](https://learn.microsoft.com/en-us/rest/api/azure/devops/wit/work-items/create?view=azure-devops-rest-7.1&tabs=HTTP), we'll use:
 
 #### **Core Endpoints**
+
 ```typescript
 const adoEndpoints = {
   baseUrl: 'https://dev.azure.com/{organization}/{project}',
@@ -457,20 +476,21 @@ const adoEndpoints = {
     create: '/_apis/wit/workitems/${type}?api-version=7.1',
     update: '/_apis/wit/workitems/{id}?api-version=7.1',
     get: '/_apis/wit/workitems/{id}?api-version=7.1',
-    delete: '/_apis/wit/workitems/{id}?api-version=7.1'
+    delete: '/_apis/wit/workitems/{id}?api-version=7.1',
   },
   workItemTypes: {
     list: '/_apis/wit/workItemTypes?api-version=7.1',
-    get: '/_apis/wit/workItemTypes/{type}?api-version=7.1'
+    get: '/_apis/wit/workItemTypes/{type}?api-version=7.1',
   },
   fields: {
     list: '/_apis/wit/fields?api-version=7.1',
-    get: '/_apis/wit/fields/{fieldName}?api-version=7.1'
-  }
+    get: '/_apis/wit/fields/{fieldName}?api-version=7.1',
+  },
 };
 ```
 
 #### **Authentication Methods**
+
 1. **Personal Access Token (PAT)**: Base64 encoded credentials
 2. **OAuth 2.0**: For future enterprise integration
 3. **Service Principal**: For automated deployments
@@ -499,16 +519,19 @@ interface ADOCreateRequest {
 When Blue Dolphin integration becomes available, we can extend the ADO integration to include:
 
 #### **1. Integration Objects**
+
 - **Source Systems**: CRM, Billing, Order Management
 - **Target Systems**: New BSS platforms
 - **Integration Patterns**: APIs, ETL, Real-time sync
 
 #### **2. Test Case Objects**
+
 - **Unit Tests**: Component-level testing
 - **Integration Tests**: System-level testing
 - **End-to-End Tests**: Business process testing
 
 #### **3. Enhanced Work Item Mapping**
+
 ```typescript
 // Future mapping when Blue Dolphin data is available
 interface EnhancedWorkItemMapping {
@@ -526,11 +549,11 @@ interface AdvancedRelationships {
   // Integration relationships
   'System.LinkTypes.Dependency': IntegrationDependency[];
   'System.LinkTypes.Related': RelatedRequirements[];
-  
+
   // Test relationships
   'Microsoft.VSTS.Common.TestedBy': TestCase[];
   'Microsoft.VSTS.Common.Tests': TestScenario[];
-  
+
   // Business relationships
   'System.LinkTypes.Hierarchy-Reverse': ParentWorkItems[];
   'System.LinkTypes.Duplicate': DuplicateRequirements[];
@@ -540,6 +563,7 @@ interface AdvancedRelationships {
 ## Implementation Phases
 
 ### **Phase 1: Core Integration (Current Focus)**
+
 - ✅ Basic ADO integration structure
 - ✅ Work item generation from TMF and SpecSync data
 - ✅ JSON payload export
@@ -547,18 +571,21 @@ interface AdvancedRelationships {
 - ✅ Configuration management
 
 ### **Phase 2: Direct API Integration**
+
 - 🔄 Direct ADO API calls
 - 🔄 Real-time work item creation
 - 🔄 Authentication management
 - 🔄 Error handling and retry logic
 
 ### **Phase 3: Advanced Features**
+
 - 📋 Blue Dolphin integration
 - 📋 Test case mapping
 - 📋 Integration object mapping
 - 📋 Advanced relationship types
 
 ### **Phase 4: Enterprise Features**
+
 - 📋 Bulk operations
 - 📋 Template management
 - 📋 Reporting and analytics
@@ -592,6 +619,7 @@ interface AdvancedRelationships {
 The ADO integration analysis reveals a comprehensive approach to transforming our TMF ODA domains, capabilities, and SpecSync requirements into structured Azure DevOps work items. The proposed mapping strategy provides clear traceability from high-level domains down to individual requirements, while maintaining flexibility for future enhancements.
 
 Key benefits of this integration:
+
 - **Structured Project Management**: Clear hierarchy from epics to tasks
 - **Traceability**: Full traceability from TMF domains to SpecSync requirements
 - **Flexibility**: Adaptable to different project types and organizations
@@ -602,7 +630,8 @@ The implementation should follow the phased approach outlined, starting with cor
 
 ---
 
-**Next Steps**: 
+**Next Steps**:
+
 1. Review and validate the proposed mapping strategy
 2. Design the UI components for the ADO integration tab
 3. Implement the core work item generation logic

@@ -7,35 +7,39 @@ This guide provides comprehensive documentation for integrating with Blue Dolphi
 ## OData Feed Configuration
 
 ### Base Endpoint
+
 ```
 https://public-api.eu.bluedolphin.app/odata/v4
 ```
 
 ### Authentication
+
 ```typescript
 // API Key Authentication
 const headers = {
-  'Authorization': 'Bearer YOUR_API_KEY',
-  'Accept': 'application/json',
+  Authorization: 'Bearer YOUR_API_KEY',
+  Accept: 'application/json',
   'OData-MaxVersion': '4.0',
-  'OData-Version': '4.0'
+  'OData-Version': '4.0',
 };
 
 // Basic Authentication (Alternative)
 const headers = {
-  'Authorization': 'Basic ' + btoa('username:password'),
-  'Accept': 'application/json',
+  Authorization: 'Basic ' + btoa('username:password'),
+  Accept: 'application/json',
   'OData-MaxVersion': '4.0',
-  'OData-Version': '4.0'
+  'OData-Version': '4.0',
 };
 ```
 
 ## Enhanced Object Retrieval with MoreColumns
 
 ### MoreColumns Parameter
+
 The `MoreColumns=true` parameter enables retrieval of additional metadata columns that are not included in the standard object response. This is equivalent to the Excel Power Query `MoreColumns=true` functionality.
 
 #### Basic MoreColumns Usage
+
 ```typescript
 // Enable additional columns
 GET /odata/v4/Objects?MoreColumns=true
@@ -45,15 +49,18 @@ GET /odata/v4/Objects?$filter=Definition eq 'Application Component'&MoreColumns=
 ```
 
 #### ⚠️ CRITICAL: Field Selection Conflict
+
 **Important Discovery**: When using `MoreColumns=true`, the `$select` parameter is **ignored** by the Blue Dolphin service. The service will return all available fields including enhanced ones.
 
 **Incorrect Usage (Will Not Work):**
+
 ```typescript
 // This will NOT return enhanced fields - $select overrides MoreColumns
 GET /odata/v4/Objects?$select=Id,Title&MoreColumns=true
 ```
 
 **Correct Usage:**
+
 ```typescript
 // This WILL return enhanced fields - no $select parameter
 GET /odata/v4/Objects?MoreColumns=true&$top=100
@@ -63,9 +70,11 @@ GET /odata/v4/Objects?$filter=Definition eq 'Business Process'&MoreColumns=true&
 ```
 
 #### Expanded More Columns Properties
+
 When `MoreColumns=true` is enabled, the following additional properties become available:
 
 ##### Object Properties
+
 - `Object_Properties_Name` - Object name property
 - `Object_Properties_AMEFF_Import_Identifier` - AMEFF import identifier
 - `Object_Properties_Deliverable_Object_Status` - Deliverable status
@@ -81,10 +90,12 @@ When `MoreColumns=true` is enabled, the following additional properties become a
 - `Object_Properties_Base_Implementation_Costs` - Implementation costs
 
 ##### Deliverable Status Properties
+
 - `Deliverable_Object_Status_Status` - Current deliverable status
 - `Deliverable_Object_Status_Architectural_Decision_Log` - ADL information
 
 ##### AMEFF Properties
+
 - `Ameff_properties_Reportx3AModelx3ACoverx3ABackground` - Model cover background
 - `Ameff_properties_Reportx3AModelx3AHeaderx3ABackground` - Model header background
 - `Ameff_properties_Reportx3AModelx3AHidex3AApplication` - Hide application in reports
@@ -112,10 +123,12 @@ When `MoreColumns=true` is enabled, the following additional properties become a
 - `Ameff_properties_Compliance` - Compliance information
 
 ##### Resource and Rate Properties
+
 - `Resource_x26_Rate_Role_required_to_deliver_this_servicex3F` - Required delivery role
 - `Resource_x26_Rate_Rate` - Resource rate information
 
 ##### External Design Properties
+
 - `External_Design_Description_Service` - External service description
 - `External_Design_User_Interface` - External UI design
 
@@ -124,30 +137,39 @@ When `MoreColumns=true` is enabled, the following additional properties become a
 Our command-line testing confirmed the following:
 
 **Test 1: Standard Query (Baseline)**
+
 ```bash
 curl "https://csgipoc.odata.bluedolphin.app/Objects?$top=2&$select=Id,Title,Definition,Status"
 ```
+
 **Result**: Basic fields only (4 fields)
 
 **Test 2: MoreColumns=true with Select Fields**
+
 ```bash
 curl "https://csgipoc.odata.bluedolphin.app/Objects?$top=2&$select=Id,Title,Definition,Status&MoreColumns=true"
 ```
+
 **Result**: Same as baseline - **MoreColumns parameter ignored when $select is specified**
 
 **Test 3: MoreColumns=true without Select Fields**
+
 ```bash
 curl "https://csgipoc.odata.bluedolphin.app/Objects?$top=2&MoreColumns=true"
 ```
+
 **Result**: **Significantly enhanced response with 45+ additional fields**
 
 **Test 4: MoreColumns=true with Object Type Filter**
+
 ```bash
 curl "https://csgipoc.odata.bluedolphin.app/Objects?$filter=Definition eq 'Business Process'&$top=2&MoreColumns=true"
 ```
+
 **Result**: **Maximum enhanced fields available for Business Process objects**
 
 #### Implementation Example
+
 ```typescript
 // Enhanced object retrieval with MoreColumns support
 const enhancedObjectsRequest = {
@@ -158,12 +180,13 @@ const enhancedObjectsRequest = {
     filter: "Definition eq 'Business Process'", // Use Business Process for max fields
     top: 100,
     // NOTE: Do NOT include select parameter when using MoreColumns=true
-    moreColumns: true // Enable additional columns
-  }
+    moreColumns: true, // Enable additional columns
+  },
 };
 ```
 
 #### Response Structure with MoreColumns
+
 ```json
 {
   "@odata.context": "https://csgipoc.odata.bluedolphin.app/$metadata#Objects",
@@ -212,14 +235,23 @@ const enhancedObjectsRequest = {
 ### Comparison: Current vs Enhanced Implementation
 
 #### Current Implementation (Limited Fields)
+
 ```typescript
 select: [
-  'Id', 'Title', 'Definition', 'Description', 'ArchimateType', 
-  'Status', 'CreatedOn', 'ChangedOn', 'Workspace'
-]
+  'Id',
+  'Title',
+  'Definition',
+  'Description',
+  'ArchimateType',
+  'Status',
+  'CreatedOn',
+  'ChangedOn',
+  'Workspace',
+];
 ```
 
 #### Enhanced Implementation (With MoreColumns)
+
 ```typescript
 // When using MoreColumns=true, DO NOT use $select parameter
 // The service will return all available fields including enhanced ones
@@ -256,6 +288,7 @@ Our command-line testing has confirmed:
 - 🔍 Business Process objects show the most comprehensive enhanced field set
 
 ### Export CSV (Objects + Relations) Cross-Reference
+
 - UI spec: `BLUE-DOLPHIN-EXPORT-CSV-UI.md`
 - API spec: `BLUE-DOLPHIN-EXPORT-CSV-API.md`
 - Data Dictionary: `BLUE-DOLPHIN-EXPORT-CSV-DATA-DICTIONARY.md`
@@ -265,11 +298,13 @@ Our command-line testing has confirmed:
 ### 1. Domain Management
 
 #### Get All Domains
+
 ```typescript
-GET /odata/v4/Domains
+GET / odata / v4 / Domains;
 ```
 
 **Response:**
+
 ```json
 {
   "@odata.context": "https://public-api.eu.bluedolphin.app/odata/v4/$metadata#Domains",
@@ -292,11 +327,13 @@ GET /odata/v4/Domains
 ```
 
 #### Get Domain by ID
+
 ```typescript
-GET /odata/v4/Domains('domain-123')
+GET / odata / v4 / Domains('domain-123');
 ```
 
 #### Filter Domains
+
 ```typescript
 // Filter by type
 GET /odata/v4/Domains?$filter=Type eq 'TMF_ODA_DOMAIN'
@@ -309,17 +346,20 @@ GET /odata/v4/Domains?$filter=Type eq 'TMF_ODA_DOMAIN' and Status eq 'ACTIVE'
 ```
 
 #### Select Specific Fields
+
 ```typescript
 GET /odata/v4/Domains?$select=Id,Name,Description,Type
 ```
 
 #### Order Results
+
 ```typescript
 GET /odata/v4/Domains?$orderby=Name asc
 GET /odata/v4/Domains?$orderby=CreatedAt desc
 ```
 
 #### Pagination
+
 ```typescript
 GET /odata/v4/Domains?$top=20&$skip=40
 ```
@@ -327,16 +367,19 @@ GET /odata/v4/Domains?$top=20&$skip=40
 ### 2. Capability Management
 
 #### Get Capabilities
+
 ```typescript
-GET /odata/v4/Capabilities
+GET / odata / v4 / Capabilities;
 ```
 
 #### Get Capabilities by Domain
+
 ```typescript
-GET /odata/v4/Domains('domain-123')/Capabilities
+GET / odata / v4 / Domains('domain-123') / Capabilities;
 ```
 
 #### Filter Capabilities
+
 ```typescript
 // Filter by domain
 GET /odata/v4/Capabilities?$filter=DomainId eq 'domain-123'
@@ -349,6 +392,7 @@ GET /odata/v4/Capabilities?$filter=DomainId eq 'domain-123' and Level eq 'LEVEL_
 ```
 
 #### Expand Related Data
+
 ```typescript
 // Include domain information with capabilities
 GET /odata/v4/Capabilities?$expand=Domain
@@ -360,11 +404,13 @@ GET /odata/v4/Capabilities?$expand=Domain,Requirements,UseCases
 ### 3. Requirement Management
 
 #### Get Requirements
+
 ```typescript
-GET /odata/v4/Requirements
+GET / odata / v4 / Requirements;
 ```
 
 #### Filter Requirements
+
 ```typescript
 // Filter by domain
 GET /odata/v4/Requirements?$filter=DomainId eq 'domain-123'
@@ -380,6 +426,7 @@ GET /odata/v4/Requirements?$filter=Priority eq 'HIGH'
 ```
 
 #### Complex Queries
+
 ```typescript
 // Multiple filters with ordering
 GET /odata/v4/Requirements?$filter=DomainId eq 'domain-123' and Priority eq 'HIGH'&$orderby=CreatedAt desc&$top=50
@@ -391,11 +438,13 @@ GET /odata/v4/Requirements?$filter=contains(Description, 'product catalog')
 ### 4. Use Case Management
 
 #### Get Use Cases
+
 ```typescript
-GET /odata/v4/UseCases
+GET / odata / v4 / UseCases;
 ```
 
 #### Filter Use Cases
+
 ```typescript
 // Filter by domain
 GET /odata/v4/UseCases?$filter=DomainId eq 'domain-123'
@@ -405,6 +454,7 @@ GET /odata/v4/UseCases?$filter=contains(Actors, 'Business User')
 ```
 
 #### Expand Use Case Details
+
 ```typescript
 // Include related requirements
 GET /odata/v4/UseCases?$expand=Requirements
@@ -416,11 +466,13 @@ GET /odata/v4/UseCases?$expand=Domain,Capability,Requirements
 ### 5. Application Function Management
 
 #### Get Application Functions
+
 ```typescript
-GET /odata/v4/ApplicationFunctions
+GET / odata / v4 / ApplicationFunctions;
 ```
 
 #### Filter Application Functions
+
 ```typescript
 // Filter by type
 GET /odata/v4/ApplicationFunctions?$filter=Type eq 'MICROSERVICE'
@@ -434,6 +486,7 @@ GET /odata/v4/ApplicationFunctions?$filter=Technology eq 'JAVA_SPRING'
 ### 1. Complex Filtering
 
 #### Logical Operators
+
 ```typescript
 // AND operator
 GET /odata/v4/Domains?$filter=Type eq 'TMF_ODA_DOMAIN' and Status eq 'ACTIVE'
@@ -446,6 +499,7 @@ GET /odata/v4/Requirements?$filter=not(Status eq 'ARCHIVED')
 ```
 
 #### Comparison Operators
+
 ```typescript
 // Equals
 GET /odata/v4/Domains?$filter=Type eq 'TMF_ODA_DOMAIN'
@@ -461,6 +515,7 @@ GET /odata/v4/Requirements?$filter=CreatedAt le 2024-01-15T00:00:00Z
 ```
 
 #### String Functions
+
 ```typescript
 // Contains
 GET /odata/v4/Requirements?$filter=contains(Description, 'catalog')
@@ -478,6 +533,7 @@ GET /odata/v4/Requirements?$filter=length(Description) gt 100
 ### 2. Aggregation Functions
 
 #### Count
+
 ```typescript
 // Count all domains
 GET /odata/v4/Domains/$count
@@ -487,6 +543,7 @@ GET /odata/v4/Domains/$count?$filter=Type eq 'TMF_ODA_DOMAIN'
 ```
 
 #### Group By
+
 ```typescript
 // Group capabilities by level
 GET /odata/v4/Capabilities?$apply=groupby((Level), aggregate(Id with countdistinct as TotalCapabilities))
@@ -495,12 +552,14 @@ GET /odata/v4/Capabilities?$apply=groupby((Level), aggregate(Id with countdistin
 ### 3. Search and Full-Text Search
 
 #### Search Across Multiple Fields
+
 ```typescript
 // Search in name and description
 GET /odata/v4/Domains?$filter=contains(Name, 'Product') or contains(Description, 'Product')
 ```
 
 #### Full-Text Search (if supported)
+
 ```typescript
 // Full-text search
 GET /odata/v4/Requirements?$search='product catalog management'
@@ -523,10 +582,10 @@ export class BlueDolphinODataService {
   private async request<T>(endpoint: string): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
     const headers = {
-      'Authorization': `Bearer ${this.apiKey}`,
-      'Accept': 'application/json',
+      Authorization: `Bearer ${this.apiKey}`,
+      Accept: 'application/json',
       'OData-MaxVersion': '4.0',
-      'OData-Version': '4.0'
+      'OData-Version': '4.0',
     };
 
     const response = await fetch(url, { headers });
@@ -549,7 +608,7 @@ export class BlueDolphinODataService {
     expand?: string[];
   }): Promise<{ value: Domain[] }> {
     const queryParams = new URLSearchParams();
-    
+
     if (options?.filter) queryParams.append('$filter', options.filter);
     if (options?.select) queryParams.append('$select', options.select.join(','));
     if (options?.orderby) queryParams.append('$orderby', options.orderby);
@@ -559,17 +618,17 @@ export class BlueDolphinODataService {
 
     const queryString = queryParams.toString();
     const endpoint = `/odata/v4/Domains${queryString ? `?${queryString}` : ''}`;
-    
+
     return this.request(endpoint);
   }
 
   async getDomainById(id: string, expand?: string[]): Promise<Domain> {
     const queryParams = new URLSearchParams();
     if (expand) queryParams.append('$expand', expand.join(','));
-    
+
     const queryString = queryParams.toString();
     const endpoint = `/odata/v4/Domains('${id}')${queryString ? `?${queryString}` : ''}`;
-    
+
     return this.request(endpoint);
   }
 
@@ -583,13 +642,16 @@ export class BlueDolphinODataService {
     expand?: string[];
   }): Promise<{ value: Capability[] }> {
     const queryParams = new URLSearchParams();
-    
+
     if (options?.domainId) {
       queryParams.append('$filter', `DomainId eq '${options.domainId}'`);
     }
     if (options?.filter) {
       const existingFilter = queryParams.get('$filter');
-      queryParams.set('$filter', existingFilter ? `${existingFilter} and ${options.filter}` : options.filter);
+      queryParams.set(
+        '$filter',
+        existingFilter ? `${existingFilter} and ${options.filter}` : options.filter,
+      );
     }
     if (options?.select) queryParams.append('$select', options.select.join(','));
     if (options?.orderby) queryParams.append('$orderby', options.orderby);
@@ -599,7 +661,7 @@ export class BlueDolphinODataService {
 
     const queryString = queryParams.toString();
     const endpoint = `/odata/v4/Capabilities${queryString ? `?${queryString}` : ''}`;
-    
+
     return this.request(endpoint);
   }
 
@@ -614,16 +676,16 @@ export class BlueDolphinODataService {
     expand?: string[];
   }): Promise<{ value: Requirement[] }> {
     const queryParams = new URLSearchParams();
-    
+
     const filters: string[] = [];
     if (options?.domainId) filters.push(`DomainId eq '${options.domainId}'`);
     if (options?.capabilityId) filters.push(`CapabilityId eq '${options.capabilityId}'`);
     if (options?.filter) filters.push(options.filter);
-    
+
     if (filters.length > 0) {
       queryParams.append('$filter', filters.join(' and '));
     }
-    
+
     if (options?.select) queryParams.append('$select', options.select.join(','));
     if (options?.orderby) queryParams.append('$orderby', options.orderby);
     if (options?.top) queryParams.append('$top', options.top.toString());
@@ -632,7 +694,7 @@ export class BlueDolphinODataService {
 
     const queryString = queryParams.toString();
     const endpoint = `/odata/v4/Requirements${queryString ? `?${queryString}` : ''}`;
-    
+
     return this.request(endpoint);
   }
 
@@ -646,13 +708,16 @@ export class BlueDolphinODataService {
     expand?: string[];
   }): Promise<{ value: UseCase[] }> {
     const queryParams = new URLSearchParams();
-    
+
     if (options?.domainId) {
       queryParams.append('$filter', `DomainId eq '${options.domainId}'`);
     }
     if (options?.filter) {
       const existingFilter = queryParams.get('$filter');
-      queryParams.set('$filter', existingFilter ? `${existingFilter} and ${options.filter}` : options.filter);
+      queryParams.set(
+        '$filter',
+        existingFilter ? `${existingFilter} and ${options.filter}` : options.filter,
+      );
     }
     if (options?.select) queryParams.append('$select', options.select.join(','));
     if (options?.orderby) queryParams.append('$orderby', options.orderby);
@@ -662,7 +727,7 @@ export class BlueDolphinODataService {
 
     const queryString = queryParams.toString();
     const endpoint = `/odata/v4/UseCases${queryString ? `?${queryString}` : ''}`;
-    
+
     return this.request(endpoint);
   }
 
@@ -670,20 +735,20 @@ export class BlueDolphinODataService {
   async getDomainCount(filter?: string): Promise<number> {
     const queryParams = new URLSearchParams();
     if (filter) queryParams.append('$filter', filter);
-    
+
     const queryString = queryParams.toString();
     const endpoint = `/odata/v4/Domains/$count${queryString ? `?${queryString}` : ''}`;
-    
+
     return this.request(endpoint);
   }
 
   async getCapabilityCount(filter?: string): Promise<number> {
     const queryParams = new URLSearchParams();
     if (filter) queryParams.append('$filter', filter);
-    
+
     const queryString = queryParams.toString();
     const endpoint = `/odata/v4/Capabilities/$count${queryString ? `?${queryString}` : ''}`;
-    
+
     return this.request(endpoint);
   }
 }
@@ -704,7 +769,7 @@ export function useBlueDolphinOData<T>(
     top?: number;
     skip?: number;
     expand?: string[];
-  }
+  },
 ) {
   const [data, setData] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
@@ -736,7 +801,7 @@ export function useBlueDolphinOData<T>(
         }
 
         setData(result.value);
-        
+
         // Get total count if needed
         if (options?.top || options?.skip) {
           const count = await blueDolphinODataService.getDomainCount(options?.filter);
@@ -765,14 +830,14 @@ export function useBlueDolphinOData<T>(
 const domainsWithCapabilities = await blueDolphinODataService.getDomains({
   filter: "Type eq 'TMF_ODA_DOMAIN' and Status eq 'ACTIVE'",
   expand: ['Capabilities'],
-  orderby: 'Name asc'
+  orderby: 'Name asc',
 });
 
 // Get domains created in the last 30 days
 const recentDomains = await blueDolphinODataService.getDomains({
-  filter: "CreatedAt gt 2024-01-01T00:00:00Z",
+  filter: 'CreatedAt gt 2024-01-01T00:00:00Z',
   select: ['Id', 'Name', 'CreatedAt'],
-  orderby: 'CreatedAt desc'
+  orderby: 'CreatedAt desc',
 });
 ```
 
@@ -783,13 +848,13 @@ const recentDomains = await blueDolphinODataService.getDomains({
 const domainCapabilities = await blueDolphinODataService.getCapabilities({
   domainId: 'domain-123',
   expand: ['Requirements', 'UseCases'],
-  orderby: 'Level asc, Name asc'
+  orderby: 'Level asc, Name asc',
 });
 
 // Get high-priority capabilities
 const highPriorityCapabilities = await blueDolphinODataService.getCapabilities({
   filter: "Level eq 'LEVEL_1' or Level eq 'LEVEL_2'",
-  select: ['Id', 'Name', 'Level', 'DomainId']
+  select: ['Id', 'Name', 'Level', 'DomainId'],
 });
 ```
 
@@ -801,13 +866,13 @@ const capabilityRequirements = await blueDolphinODataService.getRequirements({
   capabilityId: 'cap-456',
   filter: "Status eq 'ACTIVE'",
   expand: ['UseCases'],
-  orderby: 'Priority desc'
+  orderby: 'Priority desc',
 });
 
 // Get requirements containing specific keywords
 const searchRequirements = await blueDolphinODataService.getRequirements({
   filter: "contains(Description, 'product catalog') or contains(Name, 'catalog')",
-  select: ['Id', 'Name', 'Description', 'Priority', 'DomainId', 'CapabilityId']
+  select: ['Id', 'Name', 'Description', 'Priority', 'DomainId', 'CapabilityId'],
 });
 ```
 
@@ -818,13 +883,13 @@ const searchRequirements = await blueDolphinODataService.getRequirements({
 const domainUseCases = await blueDolphinODataService.getUseCases({
   domainId: 'domain-123',
   expand: ['Domain', 'Capability', 'Requirements'],
-  orderby: 'Name asc'
+  orderby: 'Name asc',
 });
 
 // Get use cases with specific actors
 const businessUserUseCases = await blueDolphinODataService.getUseCases({
   filter: "contains(Actors, 'Business User')",
-  select: ['Id', 'Name', 'Title', 'Actors', 'DomainId']
+  select: ['Id', 'Name', 'Title', 'Actors', 'DomainId'],
 });
 ```
 
@@ -836,14 +901,14 @@ const businessUserUseCases = await blueDolphinODataService.getUseCases({
 // Use $select to limit returned fields
 const lightweightDomains = await blueDolphinODataService.getDomains({
   select: ['Id', 'Name', 'Type'],
-  filter: "Type eq 'TMF_ODA_DOMAIN'"
+  filter: "Type eq 'TMF_ODA_DOMAIN'",
 });
 
 // Use pagination for large datasets
 const paginatedCapabilities = await blueDolphinODataService.getCapabilities({
   top: 50,
   skip: 100,
-  orderby: 'Name asc'
+  orderby: 'Name asc',
 });
 ```
 
@@ -856,14 +921,14 @@ class BlueDolphinODataCache {
 
   async get<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
     const cached = this.cache.get(key);
-    
+
     if (cached && Date.now() - cached.timestamp < this.TTL) {
       return cached.data;
     }
 
     const data = await fetcher();
     this.cache.set(key, { data, timestamp: Date.now() });
-    
+
     return data;
   }
 
@@ -876,6 +941,7 @@ class BlueDolphinODataCache {
 ## Error Handling
 
 ### OData Error Response
+
 ```json
 {
   "error": {
@@ -893,16 +959,17 @@ class BlueDolphinODataCache {
 ```
 
 ### Error Handling in Service
+
 ```typescript
 private handleODataError(error: any): never {
   if (error.error?.code === 'InvalidFilterClause') {
     throw new Error(`Invalid filter: ${error.error.message}`);
   }
-  
+
   if (error.error?.code === 'ResourceNotFound') {
     throw new Error('Resource not found');
   }
-  
+
   throw new Error(`OData Error: ${error.error?.message || 'Unknown error'}`);
 }
 ```
@@ -910,24 +977,28 @@ private handleODataError(error: any): never {
 ## Best Practices
 
 ### 1. Query Optimization
+
 - Use `$select` to limit returned fields
 - Implement pagination for large datasets
 - Use appropriate filters to reduce data transfer
 - Cache frequently accessed data
 
 ### 2. Error Handling
+
 - Handle OData-specific error codes
 - Implement retry logic for transient errors
 - Provide meaningful error messages
 - Log errors with query context
 
 ### 3. Performance
+
 - Monitor query execution times
 - Use batch operations when possible
 - Implement request caching
 - Optimize filter expressions
 
 ### 4. Security
+
 - Validate all query parameters
 - Sanitize user input
 - Use appropriate authentication
@@ -951,6 +1022,7 @@ While objects are fetched from `/odata/v4/Objects` (v4), the Excel feed for rela
 - Supports `MoreColumns=true`
 
 ### Key Relationship Fields
+
 - `RelationshipId` (stable relationship identifier)
 - `BlueDolphinObjectItemId` (source object ID)
 - `RelatedBlueDolphinObjectItemId` (target object ID)
@@ -961,9 +1033,11 @@ While objects are fetched from `/odata/v4/Objects` (v4), the Excel feed for rela
 - `IsRelationshipDirectionAlternative` (direction indicator)
 
 ### Directional Pairing
+
 Rows often appear as forward/backward pairs (same `RelationshipId`) with swapped object IDs and complementary names (e.g., composed of ↔ composed in).
 
 ### ArchiMate Mapping (from e2e_architecture_context_full.md)
+
 - `Type=composition` → ArchiMate Composition (Structural)
 - `Type=flow` → Flow (Dynamic)
 - `Type=association` → Association (Structural)
@@ -972,6 +1046,7 @@ Rows often appear as forward/backward pairs (same `RelationshipId`) with swapped
 - `Type=usedby` ↔ Serving (Dependency) — labels: serves / served by
 
 Object definition names map to ArchiMate elements/layers:
+
 - Application: Application Component, Application Interface, Data Object
 - Strategy: Capability
 - Motivation: Principle, Goal
@@ -979,6 +1054,7 @@ Object definition names map to ArchiMate elements/layers:
 - Technology: Technology Service, Node
 
 ### Validated Filters (Relations)
+
 - `RelationshipDefinitionName`
 - `BlueDolphinObjectDefinitionName`
 - `RelatedBlueDolphinObjectWorkspaceName`
@@ -987,10 +1063,12 @@ Object definition names map to ArchiMate elements/layers:
 - `Name`
 
 Example (PowerShell):
+
 ```powershell
 $h = @{ 'Accept'='application/json'; 'OData-Version'='2.0'; 'OData-MaxVersion'='2.0'; 'Authorization'='Basic <BASE64>' }
 (Invoke-WebRequest -Uri "https://csgipoc.odata.bluedolphin.app/Relations?`$filter=Type eq 'composition'&`$top=5&MoreColumns=true" -Headers $h).Content
 ```
 
 ### Enrichment Pattern
+
 Use `BlueDolphinObjectItemId` and `RelatedBlueDolphinObjectItemId` to fetch object details from `/Objects` and enrich relationship records for UI/analysis. Consolidate by `RelationshipId` when presenting bidirectional relationships.

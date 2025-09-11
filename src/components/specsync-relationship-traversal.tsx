@@ -1,0 +1,663 @@
+'use client';
+
+import React, { useState, useMemo, useCallback } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Collapsible } from '@/components/ui/collapsible';
+import { Download, Loader2, AlertCircle } from 'lucide-react';
+import { BlueDolphinConfig } from '@/types/blue-dolphin';
+import { 
+  MappingResult, 
+  TraversalResult, 
+  TraversalResultWithPayloads,
+  HierarchicalObject 
+} from '@/types/blue-dolphin-relationships';
+import { BlueDolphinRelationshipService } from '@/lib/blue-dolphin-relationship-service';
+
+interface SpecSyncRelationshipTraversalProps {
+  mappingResults: MappingResult[];
+  blueDolphinConfig: BlueDolphinConfig;
+  workspaceFilter: string;
+}
+
+export function SpecSyncRelationshipTraversal({ 
+  mappingResults, 
+  blueDolphinConfig, 
+  workspaceFilter 
+}: SpecSyncRelationshipTraversalProps) {
+  const [traversalResults, setTraversalResults] = useState<TraversalResult[]>([]);
+  const [isTraversing, setIsTraversing] = useState(false);
+  const [isExtracting, setIsExtracting] = useState(false);
+  const [traversingFunction, setTraversingFunction] = useState<string | null>(null);
+  const [extractingFunction, setExtractingFunction] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // Initialize relationship service with dynamic workspace detection
+  const relationshipService = useMemo(() => {
+    // Use the workspace from the first mapping result if available
+    const detectedWorkspace = mappingResults.length > 0 
+      ? mappingResults[0].blueDolphinObject.Workspace || workspaceFilter
+      : workspaceFilter;
+    
+    console.log(`🏢 Using workspace: ${detectedWorkspace} (from mapping results: ${mappingResults.length > 0})`);
+    
+    return new BlueDolphinRelationshipService(blueDolphinConfig, detectedWorkspace);
+  }, [blueDolphinConfig, workspaceFilter, mappingResults]);
+
+  /**
+   * Main traversal function
+   */
+  const traverseRelationships = useCallback(async (mappingResult: MappingResult) => {
+    setIsTraversing(true);
+    setTraversingFunction(mappingResult.specSyncFunctionName);
+    setError(null);
+
+    console.log(`🚀 Starting relationship traversal for: ${mappingResult.specSyncFunctionName}`);
+    console.log(`📊 Application Function: ${mappingResult.blueDolphinObject.Title}`);
+    console.log(`🏢 Workspace: ${workspaceFilter}`);
+
+    try {
+      const result = await relationshipService.traverseRelationships(mappingResult);
+      
+      console.log(`✅ Traversal completed for: ${mappingResult.specSyncFunctionName}`);
+      console.log(`📈 Results:`, {
+        businessProcesses: result.businessProcesses.topLevel.length + result.businessProcesses.childLevel.length + result.businessProcesses.grandchildLevel.length,
+        applicationServices: result.applicationServices.topLevel.length + result.applicationServices.childLevel.length + result.applicationServices.grandchildLevel.length,
+        applicationInterfaces: result.applicationInterfaces.topLevel.length + result.applicationInterfaces.childLevel.length + result.applicationInterfaces.grandchildLevel.length,
+        relatedFunctions: result.relatedApplicationFunctions.length
+      });
+
+      setTraversalResults(prev => {
+        // Remove any existing result for this function
+        const filtered = prev.filter(r => r.specSyncFunctionName !== mappingResult.specSyncFunctionName);
+        return [...filtered, result];
+      });
+
+    } catch (error) {
+      console.error(`❌ Traversal failed for ${mappingResult.specSyncFunctionName}:`, error);
+      setError(error instanceof Error ? error.message : 'Traversal failed');
+    } finally {
+      setIsTraversing(false);
+      setTraversingFunction(null);
+    }
+  }, [relationshipService, workspaceFilter]);
+
+  /**
+   * Extract full payloads with extended properties and download CSV
+   */
+  const extractFullPayloads = useCallback(async (traversalResult: TraversalResult) => {
+    setIsExtracting(true);
+    setExtractingFunction(traversalResult.specSyncFunctionName);
+    setError(null);
+
+    console.log(`🔍 Starting full payload extraction for: ${traversalResult.specSyncFunctionName}`);
+    console.log(`📊 Objects to extract: ${traversalResult.traversalMetadata.totalObjectsFound}`);
+
+    try {
+      const result = await relationshipService.extractFullPayloads(traversalResult);
+      
+      console.log(`✅ Full payload extraction completed for: ${traversalResult.specSyncFunctionName}`);
+      console.log(`📈 Payload metadata:`, result.payloadMetadata);
+
+      // Generate and download CSV directly
+      const csvData = generateFullPayloadCSV(result);
+      const csv = convertToCSV(csvData);
+      downloadCSV(csv, `specsync-full-payload-extraction-${traversalResult.specSyncFunctionName}-${Date.now()}.csv`);
+      
+      console.log(`📊 Downloaded full payload CSV with ${csvData.length} rows`);
+
+    } catch (error) {
+      console.error(`❌ Full payload extraction failed for ${traversalResult.specSyncFunctionName}:`, error);
+      setError(error instanceof Error ? error.message : 'Full payload extraction failed');
+    } finally {
+      setIsExtracting(false);
+      setExtractingFunction(null);
+    }
+  }, [relationshipService]);
+
+  /**
+   * Export results to CSV
+   */
+  const exportResults = useCallback(() => {
+    if (traversalResults.length === 0) return;
+
+    console.log('📤 Exporting traversal results to CSV');
+
+    const csvData = traversalResults.flatMap(result => {
+      const rows = [];
+
+      // Application Function
+      rows.push({
+        'SpecSync Function': result.specSyncFunctionName,
+        'Application Function': result.applicationFunction.Title,
+        'Object Type': 'Application Function',
+        'Object Title': result.applicationFunction.Title,
+        'Object Level': 'Root',
+        'Workspace': result.applicationFunction.Workspace,
+        'Relationship Type': 'N/A',
+        'Relationship Path': 'N/A'
+      });
+
+      // Business Processes
+      [...result.businessProcesses.topLevel, ...result.businessProcesses.childLevel, ...result.businessProcesses.grandchildLevel].forEach(obj => {
+        rows.push({
+          'SpecSync Function': result.specSyncFunctionName,
+          'Application Function': result.applicationFunction.Title,
+          'Object Type': 'Business Process',
+          'Object Title': obj.Title,
+          'Object Level': obj.hierarchyLevel,
+          'Workspace': obj.Workspace,
+          'Relationship Type': obj.relationshipType || 'N/A',
+          'Relationship Path': obj.relationshipPath.join(' → ')
+        });
+      });
+
+      // Application Services
+      [...result.applicationServices.topLevel, ...result.applicationServices.childLevel, ...result.applicationServices.grandchildLevel].forEach(obj => {
+        rows.push({
+          'SpecSync Function': result.specSyncFunctionName,
+          'Application Function': result.applicationFunction.Title,
+          'Object Type': 'Application Service',
+          'Object Title': obj.Title,
+          'Object Level': obj.hierarchyLevel,
+          'Workspace': obj.Workspace,
+          'Relationship Type': obj.relationshipType || 'N/A',
+          'Relationship Path': obj.relationshipPath.join(' → ')
+        });
+      });
+
+      // Application Interfaces
+      [...result.applicationInterfaces.topLevel, ...result.applicationInterfaces.childLevel, ...result.applicationInterfaces.grandchildLevel].forEach(obj => {
+        rows.push({
+          'SpecSync Function': result.specSyncFunctionName,
+          'Application Function': result.applicationFunction.Title,
+          'Object Type': 'Application Interface',
+          'Object Title': obj.Title,
+          'Object Level': obj.hierarchyLevel,
+          'Workspace': obj.Workspace,
+          'Relationship Type': obj.relationshipType || 'N/A',
+          'Relationship Path': obj.relationshipPath.join(' → ')
+        });
+      });
+
+      // Related Application Functions
+      result.relatedApplicationFunctions.forEach(obj => {
+        rows.push({
+          'SpecSync Function': result.specSyncFunctionName,
+          'Application Function': result.applicationFunction.Title,
+          'Object Type': 'Related Application Function',
+          'Object Title': obj.Title,
+          'Object Level': obj.hierarchyLevel,
+          'Workspace': obj.Workspace,
+          'Relationship Type': obj.relationshipType || 'N/A',
+          'Relationship Path': obj.relationshipPath.join(' → ')
+        });
+      });
+
+      return rows;
+    });
+
+    const csv = convertToCSV(csvData);
+    downloadCSV(csv, `specsync-relationship-traversal-${Date.now()}.csv`);
+    
+    console.log(`📊 Exported ${csvData.length} rows to CSV`);
+  }, [traversalResults]);
+
+  /**
+   * Generate CSV data for full payload results with all enhanced fields
+   */
+  const generateFullPayloadCSV = useCallback((result: TraversalResultWithPayloads) => {
+    const rows = [];
+
+    // Helper function to create a comprehensive row with all enhanced fields
+    const createComprehensiveRow = (obj: any, objectType: string, objectLevel: string, relationshipType: string = 'N/A', relationshipPath: string = 'N/A') => {
+      const baseRow = {
+        'SpecSync Function': result.specSyncFunctionName,
+        'Application Function': result.applicationFunction.Title,
+        'Object Type': objectType,
+        'Object Title': obj.Title,
+        'Object Level': objectLevel,
+        'Workspace': obj.Workspace,
+        'Status': obj.Status,
+        'Description': obj.Description || '',
+        'Relationship Type': relationshipType,
+        'Relationship Path': relationshipPath,
+        'Enhanced Fields Count': Object.keys(obj).filter(key => 
+          key.startsWith('Object_Properties_') || 
+          key.startsWith('Deliverable_Object_Status_') || 
+          key.startsWith('Ameff_properties_')
+        ).length
+      };
+
+      // Add all enhanced fields dynamically
+      const enhancedFields = Object.keys(obj).filter(key => 
+        key.startsWith('Object_Properties_') || 
+        key.startsWith('Deliverable_Object_Status_') || 
+        key.startsWith('Ameff_properties_')
+      );
+
+      enhancedFields.forEach(field => {
+        baseRow[field] = obj[field] || '';
+      });
+
+      return baseRow;
+    };
+
+    // Application Function with full payload
+    rows.push(createComprehensiveRow(
+      result.applicationFunction, 
+      'Application Function', 
+      'Root'
+    ));
+
+    // Business Processes with full payload
+    [...result.businessProcesses.topLevel, ...result.businessProcesses.childLevel, ...result.businessProcesses.grandchildLevel].forEach(obj => {
+      rows.push(createComprehensiveRow(
+        obj, 
+        'Business Process', 
+        obj.hierarchyLevel,
+        obj.relationshipType || 'N/A',
+        obj.relationshipPath?.join(' → ') || 'N/A'
+      ));
+    });
+
+    // Application Services with full payload
+    [...result.applicationServices.topLevel, ...result.applicationServices.childLevel, ...result.applicationServices.grandchildLevel].forEach(obj => {
+      rows.push(createComprehensiveRow(
+        obj, 
+        'Application Service', 
+        obj.hierarchyLevel,
+        obj.relationshipType || 'N/A',
+        obj.relationshipPath?.join(' → ') || 'N/A'
+      ));
+    });
+
+    // Application Interfaces with full payload
+    [...result.applicationInterfaces.topLevel, ...result.applicationInterfaces.childLevel, ...result.applicationInterfaces.grandchildLevel].forEach(obj => {
+      rows.push(createComprehensiveRow(
+        obj, 
+        'Application Interface', 
+        obj.hierarchyLevel,
+        obj.relationshipType || 'N/A',
+        obj.relationshipPath?.join(' → ') || 'N/A'
+      ));
+    });
+
+    // Related Application Functions with full payload
+    result.relatedApplicationFunctions.forEach(obj => {
+      rows.push(createComprehensiveRow(
+        obj, 
+        'Related Application Function', 
+        obj.hierarchyLevel,
+        obj.relationshipType || 'N/A',
+        obj.relationshipPath?.join(' → ') || 'N/A'
+      ));
+    });
+
+    return rows;
+  }, []);
+
+  /**
+   * Clear all results
+   */
+  const clearResults = useCallback(() => {
+    setTraversalResults([]);
+    setError(null);
+    console.log('🧹 Cleared all traversal results');
+  }, []);
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h3 className="text-lg font-semibold">Relationship Traversal</h3>
+          <p className="text-sm text-gray-600">
+            Discover related Application Services, Business Processes, and Application Interfaces
+          </p>
+        </div>
+        <div className="flex gap-2">
+          {traversalResults.length > 0 && (
+            <>
+              <Button onClick={exportResults} variant="outline" size="sm">
+                <Download className="w-4 h-4 mr-2" />
+                Export Basic CSV
+              </Button>
+              <Button onClick={clearResults} variant="outline" size="sm">
+                Clear Results
+              </Button>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Error Display */}
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {/* Debug Information */}
+      {mappingResults.length > 0 && (
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            <div className="space-y-1">
+              <div><strong>Debug Info:</strong></div>
+              <div>• Mapping Results: {mappingResults.length}</div>
+              <div>• Workspace: {mappingResults[0]?.blueDolphinObject.Workspace || 'Unknown'}</div>
+              <div>• Object ID: {mappingResults[0]?.blueDolphinObject.ID || 'Unknown'}</div>
+              <div>• Object Type: {mappingResults[0]?.blueDolphinObject.Definition || 'Unknown'}</div>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Mapping Results with Traverse Buttons */}
+      <div className="space-y-3">
+        <h4 className="font-medium">Available Functions for Traversal</h4>
+        {mappingResults.map((result, index) => (
+          <Card key={index} className="p-4">
+            <div className="flex justify-between items-start">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <h5 className="font-medium">{result.specSyncFunctionName}</h5>
+                  <Badge variant="outline" className="text-xs">
+                    {result.matchType} ({Math.round(result.confidence * 100)}%)
+                  </Badge>
+                </div>
+                <p className="text-sm text-gray-600 mb-1">{result.blueDolphinObject.Title}</p>
+                <div className="flex gap-2">
+                  <Badge variant="secondary" className="text-xs">
+                    {result.blueDolphinObject.Workspace}
+                  </Badge>
+                  <Badge variant="outline" className="text-xs">
+                    {result.blueDolphinObject.Status}
+                  </Badge>
+                </div>
+              </div>
+              <Button
+                onClick={() => traverseRelationships(result)}
+                disabled={isTraversing}
+                size="sm"
+                variant="outline"
+              >
+                {isTraversing && traversingFunction === result.specSyncFunctionName ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Traversing...
+                  </>
+                ) : (
+                  'Traverse Relationships'
+                )}
+              </Button>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      {/* Traversal Results */}
+      {traversalResults.length > 0 && (
+        <div className="space-y-6">
+          <h4 className="font-medium">Traversal Results</h4>
+          {traversalResults.map((result, index) => (
+            <TraversalResultCard 
+              key={index} 
+              result={result}
+              onExtractFullPayloads={extractFullPayloads}
+              isExtracting={isExtracting && extractingFunction === result.specSyncFunctionName}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Individual traversal result card component
+ */
+function TraversalResultCard({ 
+  result,
+  onExtractFullPayloads,
+  isExtracting
+}: { 
+  result: TraversalResult;
+  onExtractFullPayloads: (result: TraversalResult) => void;
+  isExtracting: boolean;
+}) {
+  const totalObjects = 
+    result.businessProcesses.topLevel.length + result.businessProcesses.childLevel.length + result.businessProcesses.grandchildLevel.length +
+    result.applicationServices.topLevel.length + result.applicationServices.childLevel.length + result.applicationServices.grandchildLevel.length +
+    result.applicationInterfaces.topLevel.length + result.applicationInterfaces.childLevel.length + result.applicationInterfaces.grandchildLevel.length +
+    result.relatedApplicationFunctions.length;
+
+  return (
+    <Card className="p-4">
+      <CardHeader>
+        <CardTitle className="text-base flex items-center justify-between">
+          <span>
+            {result.specSyncFunctionName} → {result.applicationFunction.Title}
+          </span>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="text-xs">
+              {totalObjects} objects found
+            </Badge>
+            <Button
+              onClick={() => onExtractFullPayloads(result)}
+              disabled={isExtracting}
+              size="sm"
+              variant="default"
+            >
+              {isExtracting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Extracting...
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 mr-2" />
+                  Extract Full Payloads
+                </>
+              )}
+            </Button>
+          </div>
+        </CardTitle>
+        <div className="text-xs text-gray-500">
+          Processing time: {result.traversalMetadata.processingTimeMs}ms | 
+          Max depth: {result.traversalMetadata.maxDepthReached} | 
+          Cache hit rate: {Math.round(result.traversalMetadata.cacheHitRate * 100)}%
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Business Processes */}
+        <HierarchicalSection
+          title="Business Processes"
+          color="green"
+          icon="🏢"
+          data={result.businessProcesses}
+        />
+
+        {/* Application Services */}
+        <HierarchicalSection
+          title="Application Services"
+          color="blue"
+          icon="⚙️"
+          data={result.applicationServices}
+        />
+
+        {/* Application Interfaces */}
+        <HierarchicalSection
+          title="Application Interfaces"
+          color="purple"
+          icon="🔌"
+          data={result.applicationInterfaces}
+        />
+
+        {/* Related Application Functions */}
+        {result.relatedApplicationFunctions.length > 0 && (
+          <HierarchicalSection
+            title="Related Application Functions"
+            color="orange"
+            icon="🔧"
+            data={{
+              topLevel: result.relatedApplicationFunctions,
+              childLevel: [],
+              grandchildLevel: []
+            }}
+          />
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+
+/**
+ * Hierarchical section component
+ */
+function HierarchicalSection({
+  title,
+  color,
+  icon,
+  data
+}: {
+  title: string;
+  color: string;
+  icon: string;
+  data: {
+    topLevel: HierarchicalObject[];
+    childLevel: HierarchicalObject[];
+    grandchildLevel: HierarchicalObject[];
+  };
+}) {
+  const totalCount = data.topLevel.length + data.childLevel.length + data.grandchildLevel.length;
+
+  if (totalCount === 0) return null;
+
+  const colorClasses = {
+    green: 'text-green-700 bg-green-50 border-green-200',
+    blue: 'text-blue-700 bg-blue-50 border-blue-200',
+    purple: 'text-purple-700 bg-purple-50 border-purple-200',
+    orange: 'text-orange-700 bg-orange-50 border-orange-200'
+  };
+
+  return (
+    <Collapsible
+      title={`${icon} ${title} (${totalCount})`}
+      defaultCollapsed={false}
+      className="border rounded-lg"
+      headerClassName="p-3 hover:bg-gray-50"
+      contentClassName="p-3 pt-0"
+    >
+      <div className="space-y-3">
+        {/* Top Level */}
+        {data.topLevel.length > 0 && (
+          <div className="ml-0">
+            <h6 className={`font-medium text-sm mb-2 px-2 py-1 rounded border ${colorClasses[color as keyof typeof colorClasses]}`}>
+              Top Level ({data.topLevel.length})
+            </h6>
+            <ObjectList objects={data.topLevel} level="top" />
+          </div>
+        )}
+
+        {/* Child Level */}
+        {data.childLevel.length > 0 && (
+          <div className="ml-4">
+            <h6 className={`font-medium text-sm mb-2 px-2 py-1 rounded border ${colorClasses[color as keyof typeof colorClasses]}`}>
+              Child Level ({data.childLevel.length})
+            </h6>
+            <ObjectList objects={data.childLevel} level="child" />
+          </div>
+        )}
+
+        {/* Grandchild Level */}
+        {data.grandchildLevel.length > 0 && (
+          <div className="ml-8">
+            <h6 className={`font-medium text-sm mb-2 px-2 py-1 rounded border ${colorClasses[color as keyof typeof colorClasses]}`}>
+              Grandchild Level ({data.grandchildLevel.length})
+            </h6>
+            <ObjectList objects={data.grandchildLevel} level="grandchild" />
+          </div>
+        )}
+      </div>
+    </Collapsible>
+  );
+}
+
+/**
+ * Object list component
+ */
+function ObjectList({ 
+  objects, 
+  level 
+}: { 
+  objects: HierarchicalObject[]; 
+  level: 'top' | 'child' | 'grandchild';
+}) {
+  if (objects.length === 0) return null;
+
+  const levelStyles = {
+    top: 'border-l-2 border-green-500',
+    child: 'border-l-2 border-blue-500',
+    grandchild: 'border-l-2 border-purple-500'
+  };
+
+  return (
+    <div className="space-y-1">
+      {objects.map((obj, index) => (
+        <div 
+          key={obj.ID} 
+          className={`p-2 rounded text-xs bg-gray-50 ${levelStyles[level]}`}
+        >
+          <div className="font-medium truncate" title={obj.Title}>
+            {obj.Title}
+          </div>
+          <div className="text-gray-500 text-xs mt-1">
+            {obj.Workspace} • {obj.Status}
+            {obj.relationshipType && ` • ${obj.relationshipType}`}
+          </div>
+          {obj.relationshipPath.length > 0 && (
+            <div className="text-gray-400 text-xs mt-1 truncate">
+              Path: {obj.relationshipPath.join(' → ')}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Helper functions for CSV export
+ */
+function convertToCSV(data: any[]): string {
+  if (data.length === 0) return '';
+  
+  const headers = Object.keys(data[0]);
+  const csvRows = [headers.join(',')];
+  
+  for (const row of data) {
+    const values = headers.map(header => {
+      const value = row[header] || '';
+      return `"${value.toString().replace(/"/g, '""')}"`;
+    });
+    csvRows.push(values.join(','));
+  }
+  
+  return csvRows.join('\n');
+}
+
+function downloadCSV(csv: string, filename: string) {
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  window.URL.revokeObjectURL(url);
+}
