@@ -264,11 +264,7 @@
       "type": "REST",
       "status": "Designed",
       "description": "Customer data management API",
-      "endpoints": [
-        "/customers",
-        "/customers/{id}",
-        "/customers/{id}/orders"
-      ],
+      "endpoints": ["/customers", "/customers/{id}", "/customers/{id}/orders"],
       "authentication": "OAuth 2.0",
       "rateLimit": "1000 requests/minute",
       "sla": "99.9% uptime"
@@ -278,11 +274,7 @@
       "type": "SOAP",
       "status": "Pending",
       "description": "Payment processing integration",
-      "endpoints": [
-        "/process-payment",
-        "/refund",
-        "/status"
-      ],
+      "endpoints": ["/process-payment", "/refund", "/status"],
       "authentication": "API Key",
       "rateLimit": "500 requests/minute",
       "sla": "99.95% uptime"

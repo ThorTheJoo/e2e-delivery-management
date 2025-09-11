@@ -29,7 +29,7 @@ export class TMFReferenceService {
       description: 'Manages market analysis, sales processes, and customer acquisition strategies',
       category: 'Business',
       version: '1.0',
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     },
     {
       id: 'domain-2',
@@ -37,7 +37,7 @@ export class TMFReferenceService {
       description: 'Handles product lifecycle, specifications, and offering management',
       category: 'Business',
       version: '1.0',
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     },
     {
       id: 'domain-3',
@@ -45,7 +45,7 @@ export class TMFReferenceService {
       description: 'Manages customer relationships, interactions, and experience',
       category: 'Business',
       version: '1.0',
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     },
     {
       id: 'domain-4',
@@ -53,7 +53,7 @@ export class TMFReferenceService {
       description: 'Manages service lifecycle, fulfillment, and assurance',
       category: 'Business',
       version: '1.0',
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     },
     {
       id: 'domain-5',
@@ -61,7 +61,7 @@ export class TMFReferenceService {
       description: 'Manages network and IT resources, inventory, and allocation',
       category: 'Technical',
       version: '1.0',
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     },
     {
       id: 'domain-6',
@@ -69,8 +69,8 @@ export class TMFReferenceService {
       description: 'Manages partner relationships, agreements, and collaboration',
       category: 'Business',
       version: '1.0',
-      created_at: new Date().toISOString()
-    }
+      created_at: new Date().toISOString(),
+    },
   ];
 
   private static readonly REFERENCE_CAPABILITIES: TMFReferenceCapability[] = [
@@ -83,7 +83,7 @@ export class TMFReferenceService {
       category: 'Sales',
       level: 'Level 2',
       version: '1.0',
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     },
     {
       id: 'cap-2',
@@ -93,7 +93,7 @@ export class TMFReferenceService {
       category: 'Sales',
       level: 'Level 2',
       version: '1.0',
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     },
     {
       id: 'cap-3',
@@ -103,7 +103,7 @@ export class TMFReferenceService {
       category: 'Marketing',
       level: 'Level 2',
       version: '1.0',
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     },
 
     // Product Domain Capabilities
@@ -115,7 +115,7 @@ export class TMFReferenceService {
       category: 'Product',
       level: 'Level 2',
       version: '1.0',
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     },
     {
       id: 'cap-5',
@@ -125,7 +125,7 @@ export class TMFReferenceService {
       category: 'Product',
       level: 'Level 2',
       version: '1.0',
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     },
     {
       id: 'cap-6',
@@ -135,7 +135,7 @@ export class TMFReferenceService {
       category: 'Product',
       level: 'Level 2',
       version: '1.0',
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     },
     {
       id: 'cap-6a',
@@ -145,7 +145,7 @@ export class TMFReferenceService {
       category: 'Product',
       level: 'Level 2',
       version: '1.0',
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     },
 
     // Customer Domain Capabilities
@@ -157,7 +157,7 @@ export class TMFReferenceService {
       category: 'Customer',
       level: 'Level 2',
       version: '1.0',
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     },
     {
       id: 'cap-8',
@@ -167,7 +167,7 @@ export class TMFReferenceService {
       category: 'Customer',
       level: 'Level 2',
       version: '1.0',
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     },
     {
       id: 'cap-9',
@@ -177,7 +177,7 @@ export class TMFReferenceService {
       category: 'Customer',
       level: 'Level 2',
       version: '1.0',
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     },
 
     // Service Domain Capabilities
@@ -189,7 +189,7 @@ export class TMFReferenceService {
       category: 'Service',
       level: 'Level 2',
       version: '1.0',
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     },
     {
       id: 'cap-11',
@@ -199,7 +199,7 @@ export class TMFReferenceService {
       category: 'Service',
       level: 'Level 2',
       version: '1.0',
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     },
     {
       id: 'cap-12',
@@ -209,7 +209,7 @@ export class TMFReferenceService {
       category: 'Service',
       level: 'Level 2',
       version: '1.0',
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     },
 
     // Resource Domain Capabilities
@@ -221,7 +221,7 @@ export class TMFReferenceService {
       category: 'Resource',
       level: 'Level 2',
       version: '1.0',
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     },
     {
       id: 'cap-14',
@@ -231,7 +231,7 @@ export class TMFReferenceService {
       category: 'Resource',
       level: 'Level 2',
       version: '1.0',
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     },
     {
       id: 'cap-15',
@@ -241,7 +241,7 @@ export class TMFReferenceService {
       category: 'Resource',
       level: 'Level 2',
       version: '1.0',
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     },
 
     // Partner Domain Capabilities
@@ -253,7 +253,7 @@ export class TMFReferenceService {
       category: 'Partner',
       level: 'Level 2',
       version: '1.0',
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     },
     {
       id: 'cap-17',
@@ -263,7 +263,7 @@ export class TMFReferenceService {
       category: 'Partner',
       level: 'Level 2',
       version: '1.0',
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     },
     {
       id: 'cap-18',
@@ -273,8 +273,8 @@ export class TMFReferenceService {
       category: 'Partner',
       level: 'Level 2',
       version: '1.0',
-      created_at: new Date().toISOString()
-    }
+      created_at: new Date().toISOString(),
+    },
   ];
 
   // Get all reference domains
@@ -290,9 +290,11 @@ export class TMFReferenceService {
   }
 
   // Get reference capabilities by domain
-  static async getReferenceCapabilitiesByDomain(domainId: string): Promise<TMFReferenceCapability[]> {
+  static async getReferenceCapabilitiesByDomain(
+    domainId: string,
+  ): Promise<TMFReferenceCapability[]> {
     try {
-      const capabilities = this.REFERENCE_CAPABILITIES.filter(cap => cap.domain_id === domainId);
+      const capabilities = this.REFERENCE_CAPABILITIES.filter((cap) => cap.domain_id === domainId);
       return Promise.resolve(capabilities);
     } catch (error) {
       console.error('Error fetching reference capabilities:', error);

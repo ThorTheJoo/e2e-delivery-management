@@ -39,32 +39,16 @@
       "has_data": true,
       "row_count": 32,
       "col_count": 3,
-      "key_fields": [
-        "Tabs in Blue",
-        "Column_2",
-        "Column_3"
-      ],
+      "key_fields": ["Tabs in Blue", "Column_2", "Column_3"],
       "data_preview": [
-        [
-          "",
-          "",
-          ""
-        ],
-        [
-          "",
-          "Instructions",
-          "This sheet"
-        ],
+        ["", "", ""],
+        ["", "Instructions", "This sheet"],
         [
           "",
           "Attributes",
           "Populate all fields in Blue for applicable products.  This is the only tab that requires input. "
         ],
-        [
-          "",
-          "",
-          ""
-        ]
+        ["", "", ""]
       ],
       "structure": {
         "header_patterns": {},
@@ -88,48 +72,14 @@
         "Column_7"
       ],
       "data_preview": [
-        [
-          "Project Name",
-          "BSS Transformation",
-          "",
-          "",
-          "",
-          "",
-          ""
-        ],
-        [
-          "SFDC Type",
-          "Type 2b",
-          "",
-          "",
-          "",
-          "",
-          ""
-        ],
-        [
-          "Customer Facing Language",
-          "English",
-          "",
-          "",
-          "",
-          "",
-          ""
-        ],
-        [
-          "Region",
-          "AMER",
-          "",
-          "",
-          "",
-          "",
-          ""
-        ]
+        ["Project Name", "BSS Transformation", "", "", "", "", ""],
+        ["SFDC Type", "Type 2b", "", "", "", "", ""],
+        ["Customer Facing Language", "English", "", "", "", "", ""],
+        ["Region", "AMER", "", "", "", "", ""]
       ],
       "structure": {
         "header_patterns": {
-          "name_fields": [
-            0
-          ]
+          "name_fields": [0]
         },
         "data_patterns": {},
         "formulas": [],
@@ -151,33 +101,9 @@
         "Column_7"
       ],
       "data_preview": [
-        [
-          "Project Name",
-          "BSS Transformation",
-          "",
-          "",
-          "",
-          "",
-          ""
-        ],
-        [
-          "Project Type",
-          "Type 2b",
-          "",
-          "",
-          "",
-          "",
-          ""
-        ],
-        [
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          ""
-        ],
+        ["Project Name", "BSS Transformation", "", "", "", "", ""],
+        ["Project Type", "Type 2b", "", "", "", "", ""],
+        ["", "", "", "", "", "", ""],
         [
           "Phase Attributes",
           "Phase 1",
@@ -190,9 +116,7 @@
       ],
       "structure": {
         "header_patterns": {
-          "name_fields": [
-            0
-          ]
+          "name_fields": [0]
         },
         "data_patterns": {},
         "formulas": [],
@@ -1273,33 +1197,9 @@
         "Column_7"
       ],
       "data_preview": [
-        [
-          "Project Name",
-          "BSS Transformation",
-          "",
-          "",
-          "",
-          "",
-          ""
-        ],
-        [
-          "Project Type",
-          "Type 2b",
-          "",
-          "",
-          "",
-          "",
-          ""
-        ],
-        [
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          ""
-        ],
+        ["Project Name", "BSS Transformation", "", "", "", "", ""],
+        ["Project Type", "Type 2b", "", "", "", "", ""],
+        ["", "", "", "", "", "", ""],
         [
           "Phase Attributes",
           "Phase 1",
@@ -1312,9 +1212,7 @@
       ],
       "structure": {
         "header_patterns": {
-          "name_fields": [
-            0
-          ]
+          "name_fields": [0]
         },
         "data_patterns": {},
         "formulas": [],
@@ -6466,10 +6364,7 @@
       ],
       "structure": {
         "header_patterns": {
-          "name_fields": [
-            79,
-            95
-          ]
+          "name_fields": [79, 95]
         },
         "data_patterns": {},
         "formulas": [],
@@ -8189,10 +8084,7 @@
       ],
       "structure": {
         "header_patterns": {
-          "name_fields": [
-            79,
-            95
-          ]
+          "name_fields": [79, 95]
         },
         "data_patterns": {},
         "formulas": [],
@@ -9902,10 +9794,7 @@
       ],
       "structure": {
         "header_patterns": {
-          "name_fields": [
-            77,
-            93
-          ]
+          "name_fields": [77, 93]
         },
         "data_patterns": {},
         "formulas": [],
@@ -11640,10 +11529,7 @@
       ],
       "structure": {
         "header_patterns": {
-          "name_fields": [
-            81,
-            98
-          ]
+          "name_fields": [81, 98]
         },
         "data_patterns": {},
         "formulas": [],
@@ -13018,10 +12904,7 @@
       ],
       "structure": {
         "header_patterns": {
-          "name_fields": [
-            30,
-            36
-          ]
+          "name_fields": [30, 36]
         },
         "data_patterns": {},
         "formulas": [],
@@ -13070,15 +12953,7 @@
           "",
           ""
         ],
-        [
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          ""
-        ]
+        ["", "", "", "", "", "", ""]
       ],
       "structure": {
         "header_patterns": {},
@@ -13767,20 +13642,7 @@
           "Month x & beyond",
           "Notes"
         ],
-        [
-          "Governance",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          ""
-        ],
+        ["Governance", "", "", "", "", "", "", "", "", "", "", ""],
         [
           "CDE",
           "Type 3",
@@ -13896,9 +13758,7 @@
       ],
       "structure": {
         "header_patterns": {
-          "financial_fields": [
-            9
-          ]
+          "financial_fields": [9]
         },
         "data_patterns": {},
         "formulas": [],
@@ -13910,48 +13770,16 @@
       "has_data": true,
       "row_count": 341,
       "col_count": 5,
-      "key_fields": [
-        "Factor Name",
-        "Value",
-        "Column_3",
-        "Column_4",
-        "Column_5"
-      ],
+      "key_fields": ["Factor Name", "Value", "Column_3", "Column_4", "Column_5"],
       "data_preview": [
-        [
-          "WeekDays",
-          "5",
-          "",
-          "",
-          ""
-        ],
-        [
-          "Utilization",
-          "0.85",
-          "",
-          "",
-          ""
-        ],
-        [
-          "",
-          "",
-          "",
-          "",
-          ""
-        ],
-        [
-          "CSG SFDC Region",
-          "CSG SFDC Territory",
-          "",
-          "",
-          ""
-        ]
+        ["WeekDays", "5", "", "", ""],
+        ["Utilization", "0.85", "", "", ""],
+        ["", "", "", "", ""],
+        ["CSG SFDC Region", "CSG SFDC Territory", "", "", ""]
       ],
       "structure": {
         "header_patterns": {
-          "name_fields": [
-            0
-          ]
+          "name_fields": [0]
         },
         "data_patterns": {},
         "formulas": [],
@@ -13979,36 +13807,8 @@
         "Skill 9"
       ],
       "data_preview": [
-        [
-          "E2E Solution Architect",
-          "CDU",
-          "Architect Sr",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          ""
-        ],
-        [
-          "Solution Integrity (ESA)",
-          "CDU",
-          "Architect Sr",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          ""
-        ],
+        ["E2E Solution Architect", "CDU", "Architect Sr", "", "", "", "", "", "", "", "", "", ""],
+        ["Solution Integrity (ESA)", "CDU", "Architect Sr", "", "", "", "", "", "", "", "", "", ""],
         [
           "E2E Solution Business Owner",
           "CDU",
@@ -14024,21 +13824,7 @@
           "",
           ""
         ],
-        [
-          "CDE",
-          "CDU",
-          "Management",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          ""
-        ]
+        ["CDE", "CDU", "Management", "", "", "", "", "", "", "", "", "", ""]
       ],
       "structure": {
         "header_patterns": {},
@@ -14058,275 +13844,139 @@
         "name": "Instructions",
         "rows": 32,
         "columns": 3,
-        "key_fields": [
-          "Tabs in Blue",
-          "Column_2",
-          "Column_3"
-        ]
+        "key_fields": ["Tabs in Blue", "Column_2", "Column_3"]
       },
       {
         "name": "Attributes",
         "rows": 293,
         "columns": 7,
-        "key_fields": [
-          "Customer Name",
-          "Digital Telco",
-          "Column_3",
-          "Column_4",
-          "Column_5"
-        ]
+        "key_fields": ["Customer Name", "Digital Telco", "Column_3", "Column_4", "Column_5"]
       },
       {
         "name": "Summary",
         "rows": 47,
         "columns": 7,
-        "key_fields": [
-          "Customer Name",
-          "Digital Telco",
-          "Column_3",
-          "Column_4",
-          "Column_5"
-        ]
+        "key_fields": ["Customer Name", "Digital Telco", "Column_3", "Column_4", "Column_5"]
       },
       {
         "name": "Project View",
         "rows": 57,
         "columns": 207,
-        "key_fields": [
-          "Column_1",
-          "Weeks",
-          "1",
-          "1",
-          "2"
-        ]
+        "key_fields": ["Column_1", "Weeks", "1", "1", "2"]
       },
       {
         "name": "TurboProformaInput",
         "rows": 123,
         "columns": 7,
-        "key_fields": [
-          "Customer Name",
-          "Digital Telco",
-          "Column_3",
-          "Column_4",
-          "Column_5"
-        ]
+        "key_fields": ["Customer Name", "Digital Telco", "Column_3", "Column_4", "Column_5"]
       },
       {
         "name": "Ph1Demand",
         "rows": 85,
         "columns": 223,
-        "key_fields": [
-          "Column_1",
-          "Column_2",
-          "Column_3",
-          "Column_4",
-          "Column_5"
-        ]
+        "key_fields": ["Column_1", "Column_2", "Column_3", "Column_4", "Column_5"]
       },
       {
         "name": "Ph2Demand",
         "rows": 85,
         "columns": 224,
-        "key_fields": [
-          "Column_1",
-          "Column_2",
-          "Column_3",
-          "Column_4",
-          "Column_5"
-        ]
+        "key_fields": ["Column_1", "Column_2", "Column_3", "Column_4", "Column_5"]
       },
       {
         "name": "Ph3Demand",
         "rows": 85,
         "columns": 224,
-        "key_fields": [
-          "Column_1",
-          "Column_2",
-          "Column_3",
-          "Column_4",
-          "Column_5"
-        ]
+        "key_fields": ["Column_1", "Column_2", "Column_3", "Column_4", "Column_5"]
       },
       {
         "name": "Ph4Demand",
         "rows": 85,
         "columns": 224,
-        "key_fields": [
-          "Column_1",
-          "Column_2",
-          "Column_3",
-          "Column_4",
-          "Column_5"
-        ]
+        "key_fields": ["Column_1", "Column_2", "Column_3", "Column_4", "Column_5"]
       },
       {
         "name": "Governance",
         "rows": 19,
         "columns": 111,
-        "key_fields": [
-          "Governance",
-          "Column_2",
-          "Column_3",
-          "Column_4",
-          "Column_5"
-        ]
+        "key_fields": ["Governance", "Column_2", "Column_3", "Column_4", "Column_5"]
       },
       {
         "name": "GovDemand",
         "rows": 629,
         "columns": 223,
-        "key_fields": [
-          "Column_1",
-          "Column_2",
-          "Column_3",
-          "Column_4",
-          "Column_5"
-        ]
+        "key_fields": ["Column_1", "Column_2", "Column_3", "Column_4", "Column_5"]
       },
       {
         "name": "Encompass",
         "rows": 76,
         "columns": 111,
-        "key_fields": [
-          "Encompass",
-          "Column_2",
-          "Column_3",
-          "Column_4",
-          "Column_5"
-        ]
+        "key_fields": ["Encompass", "Column_2", "Column_3", "Column_4", "Column_5"]
       },
       {
         "name": "ENCDemand",
         "rows": 2917,
         "columns": 223,
-        "key_fields": [
-          "Column_1",
-          "Column_2",
-          "Column_3",
-          "Column_4",
-          "Column_5"
-        ]
+        "key_fields": ["Column_1", "Column_2", "Column_3", "Column_4", "Column_5"]
       },
       {
         "name": "Ascendon",
         "rows": 55,
         "columns": 109,
-        "key_fields": [
-          "Ascendon",
-          "Column_2",
-          "Column_3",
-          "Column_4",
-          "Column_5"
-        ]
+        "key_fields": ["Ascendon", "Column_2", "Column_3", "Column_4", "Column_5"]
       },
       {
         "name": "ASCDemand",
         "rows": 2085,
         "columns": 223,
-        "key_fields": [
-          "Column_1",
-          "Column_2",
-          "Column_3",
-          "Column_4",
-          "Column_5"
-        ]
+        "key_fields": ["Column_1", "Column_2", "Column_3", "Column_4", "Column_5"]
       },
       {
         "name": "CMA",
         "rows": 20,
         "columns": 114,
-        "key_fields": [
-          "CMA",
-          "Column_2",
-          "Column_3",
-          "Column_4",
-          "Column_5"
-        ]
+        "key_fields": ["CMA", "Column_2", "Column_3", "Column_4", "Column_5"]
       },
       {
         "name": "CMADemand",
         "rows": 629,
         "columns": 223,
-        "key_fields": [
-          "Column_1",
-          "Column_2",
-          "Column_3",
-          "Column_4",
-          "Column_5"
-        ]
+        "key_fields": ["Column_1", "Column_2", "Column_3", "Column_4", "Column_5"]
       },
       {
         "name": "ManagedService",
         "rows": 30,
         "columns": 42,
-        "key_fields": [
-          "Column_1",
-          "Column_2",
-          "Column_3",
-          "Column_4",
-          "Column_5"
-        ]
+        "key_fields": ["Column_1", "Column_2", "Column_3", "Column_4", "Column_5"]
       },
       {
         "name": "GovRefData",
         "rows": 55,
         "columns": 28,
-        "key_fields": [
-          "Column_1",
-          "Column_2",
-          "Column_3",
-          "Column_4",
-          "Column_5"
-        ]
+        "key_fields": ["Column_1", "Column_2", "Column_3", "Column_4", "Column_5"]
       },
       {
         "name": "ENCRefData",
         "rows": 259,
         "columns": 28,
-        "key_fields": [
-          "Column_1",
-          "Column_2",
-          "Column_3",
-          "Column_4",
-          "Column_5"
-        ]
+        "key_fields": ["Column_1", "Column_2", "Column_3", "Column_4", "Column_5"]
       },
       {
         "name": "ASCRefData",
         "rows": 172,
         "columns": 27,
-        "key_fields": [
-          "Column_1",
-          "Column_2",
-          "Column_3",
-          "Column_4",
-          "Column_5"
-        ]
+        "key_fields": ["Column_1", "Column_2", "Column_3", "Column_4", "Column_5"]
       },
       {
         "name": "CMARefData",
         "rows": 52,
         "columns": 27,
-        "key_fields": [
-          "Column_1",
-          "Column_2",
-          "Column_3",
-          "Column_4",
-          "Column_5"
-        ]
+        "key_fields": ["Column_1", "Column_2", "Column_3", "Column_4", "Column_5"]
       },
       {
         "name": "MSRefData",
         "rows": 269,
         "columns": 12,
-        "key_fields": [
-          "Column_1",
-          "Column_2",
-          "Column_3",
-          "Column_4",
-          "Column_5"
-        ]
+        "key_fields": ["Column_1", "Column_2", "Column_3", "Column_4", "Column_5"]
       },
       {
         "name": "JobProfiles",
@@ -14344,25 +13994,13 @@
         "name": "LookupValues",
         "rows": 341,
         "columns": 5,
-        "key_fields": [
-          "Factor Name",
-          "Value",
-          "Column_3",
-          "Column_4",
-          "Column_5"
-        ]
+        "key_fields": ["Factor Name", "Value", "Column_3", "Column_4", "Column_5"]
       },
       {
         "name": "Sheet2",
         "rows": 53,
         "columns": 13,
-        "key_fields": [
-          "Project Role",
-          "Solution Unit",
-          "Job",
-          "Column_4",
-          "Skill 1"
-        ]
+        "key_fields": ["Project Role", "Solution Unit", "Job", "Column_4", "Skill 1"]
       }
     ],
     "estimated_purpose": "Cost Estimation Template",

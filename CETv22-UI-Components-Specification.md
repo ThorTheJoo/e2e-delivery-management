@@ -3,6 +3,7 @@
 ## Component Library Requirements
 
 ### Base UI Components
+
 ```typescript
 // Required UI primitives
 - Card (CardHeader, CardContent, CardTitle)
@@ -14,6 +15,7 @@
 ```
 
 ### Styling System
+
 - **Tailwind CSS**: Utility-first styling
 - **CSS Variables**: For theming and customization
 - **Responsive Design**: Mobile-first approach
@@ -22,6 +24,7 @@
 ## Domain Breakdown Component
 
 ### CETv22ResourceDashboard Structure
+
 ```typescript
 interface CETv22ResourceDashboardProps {
   resourceAnalysis: CETv22ResourceAnalysis;
@@ -32,6 +35,7 @@ interface CETv22ResourceDashboardProps {
 ### Visual Design Specifications
 
 #### 1. Domain Card Layout
+
 ```typescript
 // Each domain gets a card with:
 - Domain name (large heading)
@@ -42,6 +46,7 @@ interface CETv22ResourceDashboardProps {
 ```
 
 #### 2. Progress Bar Styling
+
 ```css
 /* Domain share progress bar */
 .progress-bar {
@@ -60,6 +65,7 @@ interface CETv22ResourceDashboardProps {
 ```
 
 #### 3. Role Breakdown Items
+
 ```typescript
 // Each role shows:
 - Role name (left aligned)
@@ -70,16 +76,19 @@ interface CETv22ResourceDashboardProps {
 ### Responsive Behavior
 
 #### Desktop (1024px+)
+
 - 2-column grid for domain cards
 - Full role breakdown visible
 - Large progress bars
 
 #### Tablet (768px-1023px)
+
 - Single column layout
 - Condensed role breakdown
 - Medium progress bars
 
 #### Mobile (<768px)
+
 - Stacked layout
 - Collapsible role sections
 - Compact progress indicators
@@ -87,6 +96,7 @@ interface CETv22ResourceDashboardProps {
 ## Component Implementation
 
 ### Domain Breakdown Section
+
 ```typescript
 {resourceAnalysis.domainBreakdown?.length > 0 ? (
   <Card>
@@ -107,7 +117,7 @@ interface CETv22ResourceDashboardProps {
                 <div className="text-sm text-muted-foreground">Total Hours</div>
               </div>
             </div>
-            
+
             {/* Domain share progress bar */}
             <div className="mb-3">
               <div className="flex items-center justify-between text-sm text-muted-foreground mb-1">
@@ -121,7 +131,7 @@ interface CETv22ResourceDashboardProps {
                 />
               </div>
             </div>
-            
+
             {/* Role breakdown */}
             <div className="space-y-2">
               <h4 className="font-medium text-sm text-gray-700">Role Breakdown:</h4>
@@ -149,6 +159,7 @@ interface CETv22ResourceDashboardProps {
 ```
 
 ### Empty State Component
+
 ```typescript
 <Card>
   <CardHeader>
@@ -174,6 +185,7 @@ interface CETv22ResourceDashboardProps {
 ## Accessibility Features
 
 ### ARIA Labels
+
 ```typescript
 // Progress bars
 <div
@@ -186,11 +198,13 @@ interface CETv22ResourceDashboardProps {
 ```
 
 ### Keyboard Navigation
+
 - Tab order through domain cards
 - Enter/Space to expand role breakdowns
 - Arrow keys for progress bar navigation
 
 ### Screen Reader Support
+
 - Semantic HTML structure
 - Descriptive labels
 - Status announcements for data loading
@@ -198,6 +212,7 @@ interface CETv22ResourceDashboardProps {
 ## Animation and Transitions
 
 ### Loading States
+
 ```typescript
 // Skeleton loading for domain cards
 <div className="animate-pulse">
@@ -207,6 +222,7 @@ interface CETv22ResourceDashboardProps {
 ```
 
 ### Progress Bar Animations
+
 ```css
 .progress-fill {
   transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
@@ -214,6 +230,7 @@ interface CETv22ResourceDashboardProps {
 ```
 
 ### Hover Effects
+
 ```css
 .domain-card:hover {
   transform: translateY(-2px);
@@ -225,11 +242,13 @@ interface CETv22ResourceDashboardProps {
 ## Color Scheme
 
 ### Primary Colors
+
 - **Blue-600**: `#2563eb` (Progress bars, totals)
 - **Gray-600**: `#4b5563` (Text, labels)
 - **Gray-200**: `#e5e7eb` (Background bars)
 
 ### Status Colors
+
 - **Green-600**: `#16a34a` (Success states)
 - **Red-600**: `#dc2626` (Error states)
 - **Yellow-600**: `#ca8a04` (Warning states)
@@ -237,6 +256,7 @@ interface CETv22ResourceDashboardProps {
 ## Performance Optimizations
 
 ### Component Memoization
+
 ```typescript
 const DomainCard = React.memo(({ domain, index }) => {
   // Component implementation
@@ -244,12 +264,14 @@ const DomainCard = React.memo(({ domain, index }) => {
 ```
 
 ### Virtual Scrolling
+
 ```typescript
 // For large domain lists
 import { FixedSizeList as List } from 'react-window';
 ```
 
 ### Lazy Loading
+
 ```typescript
 // Load role breakdowns on demand
 const [expandedDomains, setExpandedDomains] = useState<Set<number>>(new Set());
@@ -258,16 +280,19 @@ const [expandedDomains, setExpandedDomains] = useState<Set<number>>(new Set());
 ## Testing Requirements
 
 ### Visual Regression Tests
+
 - Component snapshots
 - Responsive breakpoints
 - Dark mode variants
 
 ### Interaction Tests
+
 - Click handlers
 - Keyboard navigation
 - Accessibility compliance
 
 ### Performance Tests
+
 - Large dataset rendering
 - Memory usage
 - Animation smoothness

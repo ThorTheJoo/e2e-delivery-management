@@ -13,20 +13,36 @@ Based on analysis of Excel Power Query capabilities, we've identified that Blue 
 #### Current vs Enhanced Field Comparison
 
 **Current Implementation (Limited Fields):**
+
 ```typescript
 select: [
-  'Id', 'Title', 'Definition', 'Description', 'ArchimateType', 
-  'Status', 'CreatedOn', 'ChangedOn', 'Workspace'
-]
+  'Id',
+  'Title',
+  'Definition',
+  'Description',
+  'ArchimateType',
+  'Status',
+  'CreatedOn',
+  'ChangedOn',
+  'Workspace',
+];
 ```
 
 **Enhanced Implementation (With MoreColumns):**
+
 ```typescript
 select: [
   // Standard fields (existing)
-  'Id', 'Title', 'Definition', 'Description', 'ArchimateType', 
-  'Status', 'CreatedOn', 'ChangedOn', 'Workspace',
-  
+  'Id',
+  'Title',
+  'Definition',
+  'Description',
+  'ArchimateType',
+  'Status',
+  'CreatedOn',
+  'ChangedOn',
+  'Workspace',
+
   // Enhanced properties (new)
   'Object_Properties_Name',
   'Object_Properties_AMEFF_Import_Identifier',
@@ -49,13 +65,14 @@ select: [
   'Object_Properties_Supplied_By',
   'Object_Properties_Questions',
   'Object_Properties_Action_Items',
-  'Object_Properties_Base_Implementation_Costs'
-]
+  'Object_Properties_Base_Implementation_Costs',
+];
 ```
 
 #### Excel Query Analysis
 
 The Excel Power Query implementation shows the following structure:
+
 ```m
 let
     Source = OData.Feed("https://csgipoc.odata.bluedolphin.app", null, [MoreColumns=true]),
@@ -66,6 +83,7 @@ in
 ```
 
 **Key Findings:**
+
 1. **MoreColumns=true** parameter enables additional metadata
 2. **Nested "More Columns" structure** contains expanded properties
 3. **Significantly more fields** available than current implementation
@@ -74,18 +92,21 @@ in
 #### Implementation Strategy
 
 **Phase 1: API Enhancement**
+
 1. Add `MoreColumns=true` support to the Blue Dolphin service
 2. Update the select fields array to include new properties
 3. Modify the API route to handle enhanced queries
 4. Test with small result sets (top=2) to validate
 
 **Phase 2: UI Enhancement**
+
 1. Update object card components to display new fields
 2. Add filtering capabilities for new properties
 3. Implement field selection controls
 4. Add data export functionality for enhanced data
 
 **Phase 3: Performance Optimization**
+
 1. Implement field selection controls
 2. Add caching for frequently accessed properties
 3. Optimize response handling for large datasets
@@ -94,6 +115,7 @@ in
 #### Technical Implementation Details
 
 **Updated Blue Dolphin Service:**
+
 ```typescript
 // Enhanced object retrieval with MoreColumns support
 async getObjectsWithMoreColumns(options: {
@@ -105,14 +127,14 @@ async getObjectsWithMoreColumns(options: {
   skip?: number;
   moreColumns?: boolean;
 }): Promise<ODataResponse<any>> {
-  
+
   const queryParams = new URLSearchParams();
-  
+
   // Add MoreColumns parameter if enabled
   if (options.moreColumns) {
     queryParams.append('MoreColumns', 'true');
   }
-  
+
   // Standard OData parameters
   if (options.filter) queryParams.append('$filter', options.filter);
   if (options.select && options.select.length > 0) {
@@ -128,11 +150,12 @@ async getObjectsWithMoreColumns(options: {
 ```
 
 **Updated API Route:**
+
 ```typescript
 case 'get-objects-enhanced':
   try {
     const { endpoint, filter, top = 2, skip = 0, select, orderby, moreColumns } = data || {};
-    
+
     // Build enhanced query with MoreColumns support
     const queryParams = new URLSearchParams();
     if (moreColumns) queryParams.append('MoreColumns', 'true');
@@ -143,11 +166,11 @@ case 'get-objects-enhanced':
     if (skip) queryParams.append('$skip', skip.toString());
 
     const url = `${baseUrl}${endpoint}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-    
+
     // Make request and return enhanced data
     const response = await fetch(url, { headers });
     const result = await response.json();
-    
+
     return NextResponse.json({
       success: true,
       data: result.value || result || [],
@@ -161,6 +184,7 @@ case 'get-objects-enhanced':
 ```
 
 **Enhanced Type Definitions:**
+
 ```typescript
 export interface BlueDolphinObjectEnhanced extends BlueDolphinObject {
   // Enhanced properties
@@ -192,6 +216,7 @@ export interface BlueDolphinObjectEnhanced extends BlueDolphinObject {
 #### Testing Strategy
 
 **Initial Testing (Top=2):**
+
 ```typescript
 // Test enhanced query with minimal results
 const testRequest = {
@@ -202,17 +227,21 @@ const testRequest = {
     filter: "Definition eq 'Application Component'",
     top: 2, // Small result set for testing
     select: [
-      'Id', 'Title', 'Definition', 'Status',
+      'Id',
+      'Title',
+      'Definition',
+      'Status',
       'Object_Properties_Name',
       'Deliverable_Object_Status_Status',
-      'Ameff_properties_Domain'
+      'Ameff_properties_Domain',
     ],
-    moreColumns: true
-  }
+    moreColumns: true,
+  },
 };
 ```
 
 **Validation Steps:**
+
 1. Verify `MoreColumns=true` parameter is accepted
 2. Confirm additional fields are returned in response
 3. Validate field data types and values
@@ -222,6 +251,7 @@ const testRequest = {
 #### Benefits and Considerations
 
 **Benefits:**
+
 - **Richer Data Model**: Access to comprehensive object metadata
 - **Better Reporting**: More fields for analysis and reporting
 - **Enhanced Filtering**: Filter by additional properties like compliance, costs
@@ -229,6 +259,7 @@ const testRequest = {
 - **Better Integration**: More data points for external system integration
 
 **Considerations:**
+
 - **Performance Impact**: More fields may increase response size
 - **Data Mapping**: Need to update UI components to display new fields
 - **Error Handling**: Some fields may be null or undefined
@@ -412,7 +443,7 @@ export abstract class BlueDolphinBaseService {
   protected getAuthHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      Accept: 'application/json',
     };
 
     if (this.apiKey) {
@@ -424,10 +455,7 @@ export abstract class BlueDolphinBaseService {
     return headers;
   }
 
-  protected async request<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<T> {
+  protected async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
     const headers = {
       ...this.getAuthHeaders(),
@@ -441,9 +469,7 @@ export abstract class BlueDolphinBaseService {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      throw new Error(
-        `Blue Dolphin API Error: ${error.error?.message || response.statusText}`
-      );
+      throw new Error(`Blue Dolphin API Error: ${error.error?.message || response.statusText}`);
     }
 
     return response.json();
@@ -451,7 +477,7 @@ export abstract class BlueDolphinBaseService {
 
   protected buildQueryParams(params: Record<string, any>): string {
     const searchParams = new URLSearchParams();
-    
+
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
         if (Array.isArray(value)) {
@@ -496,7 +522,7 @@ export class BlueDolphinRestService extends BlueDolphinBaseService {
   }): Promise<ApiResponse<BlueDolphinDomain[]>> {
     const queryParams = this.buildQueryParams(params || {});
     const endpoint = `/api/v1/domains${queryParams ? `?${queryParams}` : ''}`;
-    
+
     return this.request<ApiResponse<BlueDolphinDomain[]>>(endpoint);
   }
 
@@ -511,10 +537,7 @@ export class BlueDolphinRestService extends BlueDolphinBaseService {
     });
   }
 
-  async updateDomain(
-    id: string,
-    domain: Partial<CreateDomainRequest>
-  ): Promise<BlueDolphinDomain> {
+  async updateDomain(id: string, domain: Partial<CreateDomainRequest>): Promise<BlueDolphinDomain> {
     return this.request<BlueDolphinDomain>(`/api/v1/domains/${id}`, {
       method: 'PUT',
       body: JSON.stringify(domain),
@@ -537,7 +560,7 @@ export class BlueDolphinRestService extends BlueDolphinBaseService {
   }): Promise<ApiResponse<BlueDolphinCapability[]>> {
     const queryParams = this.buildQueryParams(params || {});
     const endpoint = `/api/v1/capabilities${queryParams ? `?${queryParams}` : ''}`;
-    
+
     return this.request<ApiResponse<BlueDolphinCapability[]>>(endpoint);
   }
 
@@ -547,7 +570,7 @@ export class BlueDolphinRestService extends BlueDolphinBaseService {
 
   async createCapability(
     domainId: string,
-    capability: CreateCapabilityRequest
+    capability: CreateCapabilityRequest,
   ): Promise<BlueDolphinCapability> {
     return this.request<BlueDolphinCapability>(`/api/v1/domains/${domainId}/capabilities`, {
       method: 'POST',
@@ -567,7 +590,7 @@ export class BlueDolphinRestService extends BlueDolphinBaseService {
   }): Promise<ApiResponse<BlueDolphinRequirement[]>> {
     const queryParams = this.buildQueryParams(params || {});
     const endpoint = `/api/v1/requirements${queryParams ? `?${queryParams}` : ''}`;
-    
+
     return this.request<ApiResponse<BlueDolphinRequirement[]>>(endpoint);
   }
 
@@ -587,7 +610,7 @@ export class BlueDolphinRestService extends BlueDolphinBaseService {
   }): Promise<ApiResponse<BlueDolphinUseCase[]>> {
     const queryParams = this.buildQueryParams(params || {});
     const endpoint = `/api/v1/usecases${queryParams ? `?${queryParams}` : ''}`;
-    
+
     return this.request<ApiResponse<BlueDolphinUseCase[]>>(endpoint);
   }
 
@@ -601,7 +624,7 @@ export class BlueDolphinRestService extends BlueDolphinBaseService {
   }): Promise<ApiResponse<BlueDolphinApplicationFunction[]>> {
     const queryParams = this.buildQueryParams(params || {});
     const endpoint = `/api/v1/application-functions${queryParams ? `?${queryParams}` : ''}`;
-    
+
     return this.request<ApiResponse<BlueDolphinApplicationFunction[]>>(endpoint);
   }
 }
@@ -649,9 +672,7 @@ export class BlueDolphinODataService extends BlueDolphinBaseService {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      throw new Error(
-        `Blue Dolphin OData Error: ${error.error?.message || response.statusText}`
-      );
+      throw new Error(`Blue Dolphin OData Error: ${error.error?.message || response.statusText}`);
     }
 
     return response.json();
@@ -668,14 +689,14 @@ export class BlueDolphinODataService extends BlueDolphinBaseService {
   }): Promise<ODataResponse<BlueDolphinDomain>> {
     const queryParams = this.buildODataQueryParams(options);
     const endpoint = `/Domains${queryParams ? `?${queryParams}` : ''}`;
-    
+
     return this.odataRequest<ODataResponse<BlueDolphinDomain>>(endpoint);
   }
 
   async getDomainById(id: string, expand?: string[]): Promise<BlueDolphinDomain> {
     const queryParams = expand ? this.buildODataQueryParams({ expand }) : '';
     const endpoint = `/Domains('${id}')${queryParams ? `?${queryParams}` : ''}`;
-    
+
     return this.odataRequest<BlueDolphinDomain>(endpoint);
   }
 
@@ -704,7 +725,7 @@ export class BlueDolphinODataService extends BlueDolphinBaseService {
 
     const queryParams = this.buildODataQueryParams(queryOptions);
     const endpoint = `/Capabilities${queryParams ? `?${queryParams}` : ''}`;
-    
+
     return this.odataRequest<ODataResponse<BlueDolphinCapability>>(endpoint);
   }
 
@@ -737,7 +758,7 @@ export class BlueDolphinODataService extends BlueDolphinBaseService {
 
     const queryParams = this.buildODataQueryParams(queryOptions);
     const endpoint = `/Requirements${queryParams ? `?${queryParams}` : ''}`;
-    
+
     return this.odataRequest<ODataResponse<BlueDolphinRequirement>>(endpoint);
   }
 
@@ -766,7 +787,7 @@ export class BlueDolphinODataService extends BlueDolphinBaseService {
 
     const queryParams = this.buildODataQueryParams(queryOptions);
     const endpoint = `/UseCases${queryParams ? `?${queryParams}` : ''}`;
-    
+
     return this.odataRequest<ODataResponse<BlueDolphinUseCase>>(endpoint);
   }
 
@@ -774,14 +795,14 @@ export class BlueDolphinODataService extends BlueDolphinBaseService {
   async getDomainCount(filter?: string): Promise<number> {
     const queryParams = filter ? `?$filter=${encodeURIComponent(filter)}` : '';
     const endpoint = `/Domains/$count${queryParams}`;
-    
+
     return this.odataRequest<number>(endpoint);
   }
 
   async getCapabilityCount(filter?: string): Promise<number> {
     const queryParams = filter ? `?$filter=${encodeURIComponent(filter)}` : '';
     const endpoint = `/Capabilities/$count${queryParams}`;
-    
+
     return this.odataRequest<number>(endpoint);
   }
 
@@ -890,7 +911,7 @@ export function useBlueDolphinOData<T>(
     top?: number;
     skip?: number;
     expand?: string[];
-  }
+  },
 ) {
   const [data, setData] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1073,10 +1094,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(response);
   } catch (error) {
     console.error('Blue Dolphin API error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch domains' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch domains' }, { status: 500 });
   }
 }
 
@@ -1087,10 +1105,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(domain);
   } catch (error) {
     console.error('Blue Dolphin API error:', error);
-    return NextResponse.json(
-      { error: 'Failed to create domain' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create domain' }, { status: 500 });
   }
 }
 ```
@@ -1101,52 +1116,34 @@ export async function POST(request: NextRequest) {
 import { NextRequest, NextResponse } from 'next/server';
 import { blueDolphinRestService } from '@/lib/blue-dolphin-rest-service';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const domain = await blueDolphinRestService.getDomainById(params.id);
     return NextResponse.json(domain);
   } catch (error) {
     console.error('Blue Dolphin API error:', error);
-    return NextResponse.json(
-      { error: 'Domain not found' },
-      { status: 404 }
-    );
+    return NextResponse.json({ error: 'Domain not found' }, { status: 404 });
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const body = await request.json();
     const domain = await blueDolphinRestService.updateDomain(params.id, body);
     return NextResponse.json(domain);
   } catch (error) {
     console.error('Blue Dolphin API error:', error);
-    return NextResponse.json(
-      { error: 'Failed to update domain' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update domain' }, { status: 500 });
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     await blueDolphinRestService.deleteDomain(params.id);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Blue Dolphin API error:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete domain' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete domain' }, { status: 500 });
   }
 }
 ```
@@ -1162,7 +1159,7 @@ import { blueDolphinODataService } from '@/lib/blue-dolphin-odata-service';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    
+
     const options = {
       filter: searchParams.get('$filter') || undefined,
       select: searchParams.get('$select')?.split(',') || undefined,
@@ -1176,10 +1173,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(response);
   } catch (error) {
     console.error('Blue Dolphin OData error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch domains' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch domains' }, { status: 500 });
   }
 }
 ```
@@ -1232,7 +1226,7 @@ export class BlueDolphinSyncService {
   // Sync capabilities from E2E to Blue Dolphin
   async syncCapabilitiesToBlueDolphin(
     domainId: string,
-    capabilities: TMFOdaCapability[]
+    capabilities: TMFOdaCapability[],
   ): Promise<{
     success: boolean;
     syncedCount: number;
@@ -1249,10 +1243,12 @@ export class BlueDolphinSyncService {
           type: 'TMF_ODA_CAPABILITY',
           level: 'LEVEL_1', // Default level
           metadata: {
-            effortEstimate: `${capability.baseEffort.businessAnalyst + 
-              capability.baseEffort.solutionArchitect + 
-              capability.baseEffort.developer + 
-              capability.baseEffort.qaEngineer} PD`,
+            effortEstimate: `${
+              capability.baseEffort.businessAnalyst +
+              capability.baseEffort.solutionArchitect +
+              capability.baseEffort.developer +
+              capability.baseEffort.qaEngineer
+            } PD`,
             complexity: 'MEDIUM',
           },
         });
@@ -1270,9 +1266,7 @@ export class BlueDolphinSyncService {
   }
 
   // Sync requirements from SpecSync to Blue Dolphin
-  async syncRequirementsToBlueDolphin(
-    requirements: SpecSyncItem[]
-  ): Promise<{
+  async syncRequirementsToBlueDolphin(requirements: SpecSyncItem[]): Promise<{
     success: boolean;
     syncedCount: number;
     errors: string[];
@@ -1317,19 +1311,20 @@ export class BlueDolphinSyncService {
       id: domain.id,
       name: domain.name,
       description: domain.description,
-      capabilities: domain.Capabilities?.map((cap) => ({
-        id: cap.id,
-        name: cap.name,
-        description: cap.description,
-        segments: [],
-        baseEffort: {
-          businessAnalyst: 5,
-          solutionArchitect: 3,
-          developer: 10,
-          qaEngineer: 2,
-        },
-        complexityFactors: {},
-      })) || [],
+      capabilities:
+        domain.Capabilities?.map((cap) => ({
+          id: cap.id,
+          name: cap.name,
+          description: cap.description,
+          segments: [],
+          baseEffort: {
+            businessAnalyst: 5,
+            solutionArchitect: 3,
+            developer: 10,
+            qaEngineer: 2,
+          },
+          complexityFactors: {},
+        })) || [],
     }));
   }
 }
@@ -1418,12 +1413,12 @@ export class BlueDolphinErrorHandler {
   static handleError(error: any, context: string) {
     // Log error with context
     console.error(`Blue Dolphin Error [${context}]:`, error);
-    
+
     // Send to monitoring service (e.g., Sentry)
     if (process.env.NODE_ENV === 'production') {
       // Sentry.captureException(error, { tags: { context } });
     }
-    
+
     // Return user-friendly error message
     return {
       message: 'An error occurred while communicating with Blue Dolphin',
@@ -1446,14 +1441,14 @@ class BlueDolphinCache {
 
   async get<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
     const cached = this.cache.get(key);
-    
+
     if (cached && Date.now() - cached.timestamp < this.TTL) {
       return cached.data;
     }
 
     const data = await fetcher();
     this.cache.set(key, { data, timestamp: Date.now() });
-    
+
     return data;
   }
 
@@ -1472,6 +1467,7 @@ This implementation guide provides a comprehensive foundation for integrating wi
 ## Relationships Integration (Documentation-Only)
 
 ### Feed and Protocol
+
 - **Endpoint**: `https://csgipoc.odata.bluedolphin.app/Relations`
 - **Protocol**: OData v2.0 (Excel Relations_table)
 - **Headers**: `Accept: application/json`, `OData-Version: 2.0`, `OData-MaxVersion: 2.0`
@@ -1479,6 +1475,7 @@ This implementation guide provides a comprehensive foundation for integrating wi
 - **Enhanced Data**: `MoreColumns=true` supported
 
 ### Core Fields
+
 - `RelationshipId` — stable identifier for a logical relationship
 - `BlueDolphinObjectItemId` — source object ID (lookup in Objects)
 - `RelatedBlueDolphinObjectItemId` — target object ID (lookup in Objects)
@@ -1489,12 +1486,15 @@ This implementation guide provides a comprehensive foundation for integrating wi
 - `IsRelationshipDirectionAlternative` — boolean directional indicator
 
 ### Directionality and Consolidation
+
 Relationships often appear as directional pairs with the same `RelationshipId` and swapped object IDs:
+
 - Forward: `Name = composed of`
 - Reverse: `Name = composed in`
-For UI/presentation, consolidate pairs under a single logical relationship where appropriate.
+  For UI/presentation, consolidate pairs under a single logical relationship where appropriate.
 
 ### ArchiMate Alignment (from e2e_architecture_context_full.md)
+
 - `Type=composition` → ArchiMate Composition (Structural)
 - `Type=flow` → Flow (Dynamic)
 - `Type=association` → Association (Structural)
@@ -1503,6 +1503,7 @@ For UI/presentation, consolidate pairs under a single logical relationship where
 - `Type=usedby` ↔ Serving (Dependency), labels: serves / served by
 
 Object definitions map to ArchiMate elements across layers:
+
 - Application: Application Component, Application Interface, Data Object
 - Strategy: Capability
 - Motivation: Principle, Goal
@@ -1510,7 +1511,9 @@ Object definitions map to ArchiMate elements across layers:
 - Technology: Technology Service, Node
 
 ### Validated Filters (Relations)
+
 Supported and tested filters for UX:
+
 - `RelationshipDefinitionName`
 - `BlueDolphinObjectDefinitionName`
 - `RelatedBlueDolphinObjectWorkspaceName`
@@ -1521,12 +1524,14 @@ Supported and tested filters for UX:
 Combined filters are supported (e.g., `Type eq 'composition' and BlueDolphinObjectDefinitionName eq 'Application Component'`).
 
 ### Enrichment Pattern
+
 1. Query `/Relations` for edges.
 2. Collect unique IDs from `BlueDolphinObjectItemId` and `RelatedBlueDolphinObjectItemId`.
 3. Fetch objects from `/Objects` (with `MoreColumns=true` if needed).
 4. Merge object data into relationships for display/analysis.
 
 ### Non-Functional Notes
+
 - Performance: prefer batch object lookups and caching for enrichment.
 - Data quality: expect directional pairs and heterogeneous element types.
 - Semantics: use ArchiMate mapping above to ensure consistent terminology in UI and reports.

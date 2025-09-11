@@ -11,12 +11,13 @@ This document outlines the implementation plan for enhanced object retrieval cap
 Analysis of Excel Power Query integration with Blue Dolphin revealed that the `MoreColumns=true` parameter enables access to significantly more metadata than our current implementation.
 
 **Excel Query Structure:**
+
 ```m
 let
     Source = OData.Feed("https://csgipoc.odata.bluedolphin.app", null, [MoreColumns=true]),
     Objects_table = Source{[Name="Objects",Signature="table"]}[Data],
     #"Expanded More Columns" = Table.ExpandRecordColumn(Objects_table, "More Columns", {
-        "Object_Properties_Name", 
+        "Object_Properties_Name",
         "Object_Properties_AMEFF_Import_Identifier",
         "Deliverable_Object_Status_Status",
         "Object_Properties_Deliverable_Object_Status",
@@ -69,9 +70,11 @@ in
 ## CLI Testing Results
 
 ### Test 1: Standard Query (Baseline)
+
 **URL**: `https://csgipoc.odata.bluedolphin.app/Objects?$top=2&$select=Id,Title,Definition,Status`
 
 **Result**: Basic fields only
+
 ```json
 {
   "value": [
@@ -86,16 +89,19 @@ in
 ```
 
 ### Test 2: MoreColumns=true with Select Fields
+
 **URL**: `https://csgipoc.odata.bluedolphin.app/Objects?$top=2&$select=Id,Title,Definition,Status&MoreColumns=true`
 
 **Result**: Same as baseline - **MoreColumns parameter ignored when $select is specified**
 
 ### Test 3: MoreColumns=true without Select Fields
+
 **URL**: `https://csgipoc.odata.bluedolphin.app/Objects?$top=2&MoreColumns=true`
 
 **Result**: **Significantly enhanced response with 30+ additional fields**
 
 ### Test 4: MoreColumns=true with Object Type Filter
+
 **URL**: `https://csgipoc.odata.bluedolphin.app/Objects?$filter=Definition eq 'Business Process'&$top=2&MoreColumns=true`
 
 **Result**: **Maximum enhanced fields available for Business Process objects**
@@ -103,14 +109,17 @@ in
 ## CLI Testing Key Findings
 
 ### ✅ **MoreColumns Parameter Works**
+
 - Parameter is accepted by Blue Dolphin OData service
 - Significantly expands available fields beyond standard ones
 - **Critical**: Must NOT use `$select` parameter when using `MoreColumns=true`
 
 ### ✅ **Enhanced Fields Available**
+
 We successfully retrieved these additional fields that match the Excel query:
 
 **Object Properties:**
+
 - `Object_Properties_Name`
 - `Object_Properties_AMEFF_Import_Identifier`
 - `Object_Properties_Deliverable_Object_Status`
@@ -122,10 +131,12 @@ We successfully retrieved these additional fields that match the Excel query:
 - `Object_Properties_Action_Items`
 
 **Deliverable Status Properties:**
+
 - `Deliverable_Object_Status_Status`
 - `Deliverable_Object_Status_Architectural_Decision_Log`
 
 **AMEFF Properties (Comprehensive Set - 25+ fields):**
+
 - `Ameff_properties_Reportx3AModelx3ACoverx3ABackground`
 - `Ameff_properties_Reportx3AModelx3AHeaderx3ABackground`
 - `Ameff_properties_Reportx3AModelx3AHidex3AApplication`
@@ -153,6 +164,7 @@ We successfully retrieved these additional fields that match the Excel query:
 - `Ameff_properties_Compliance`
 
 ### ⚠️ **Data Quality Observations**
+
 - **Field Availability**: Enhanced fields are available but many are empty strings (`""`)
 - **Object Type Variation**: Different object types have different sets of enhanced fields
 - **Business Process Objects**: Show the most comprehensive enhanced field set
@@ -160,6 +172,7 @@ We successfully retrieved these additional fields that match the Excel query:
 - **Data Population**: Enhanced fields appear to be populated based on specific object configurations
 
 ### 📊 **Performance Impact**
+
 - **Response Size**: Increases significantly with MoreColumns=true
 - **Field Count**: From ~15 standard fields to 45+ enhanced fields
 - **Network Overhead**: Larger responses but single request (vs. multiple requests)
@@ -167,16 +180,25 @@ We successfully retrieved these additional fields that match the Excel query:
 ## Current vs Enhanced Field Comparison
 
 #### Current Implementation (Limited Fields)
+
 ```typescript
 select: [
-  'Id', 'Title', 'Definition', 'Description', 'ArchimateType', 
-  'Status', 'CreatedOn', 'ChangedOn', 'Workspace'
-]
+  'Id',
+  'Title',
+  'Definition',
+  'Description',
+  'ArchimateType',
+  'Status',
+  'CreatedOn',
+  'ChangedOn',
+  'Workspace',
+];
 ```
 
 **Data Coverage**: Basic object properties only (~9 fields)
 
 #### Enhanced Implementation (With MoreColumns)
+
 ```typescript
 // When using MoreColumns=true, DO NOT use $select parameter
 // The service will return all available fields including enhanced ones
@@ -189,12 +211,14 @@ select: [
 ### Phase 1: API Enhancement (Week 1)
 
 #### 1.1 Update Blue Dolphin Service
+
 - [ ] Add `MoreColumns` parameter support to `BlueDolphinODataService`
 - [ ] Create new method `getObjectsWithMoreColumns()`
 - [ ] **Critical**: Ensure `$select` parameter is NOT used when `MoreColumns=true`
 - [ ] Update query parameter building to include `MoreColumns=true`
 
 #### 1.2 Update API Route
+
 - [ ] Add new action `get-objects-enhanced` to `/api/blue-dolphin`
 - [ ] Implement `MoreColumns=true` parameter handling
 - [ ] **Critical**: Disable `$select` when `MoreColumns=true` is enabled
@@ -202,6 +226,7 @@ select: [
 - [ ] Implement error handling for enhanced queries
 
 #### 1.3 Update Type Definitions
+
 - [ ] Create `BlueDolphinObjectEnhanced` interface
 - [ ] Add all enhanced property types based on CLI testing results
 - [ ] Update existing types to support enhanced fields
@@ -210,6 +235,7 @@ select: [
 ### Phase 2: Testing and Validation (Week 2)
 
 #### 2.1 Initial Testing
+
 - [x] **COMPLETED**: Test `MoreColumns=true` parameter acceptance
 - [x] **COMPLETED**: Verify enhanced fields are returned
 - [x] **COMPLETED**: Test with small result sets (top=2)
@@ -217,12 +243,14 @@ select: [
 - [ ] Test field filtering capabilities
 
 #### 2.2 Error Handling Testing
+
 - [ ] Test behavior when `$select` and `MoreColumns=true` are used together
 - [ ] Test missing enhanced fields
 - [ ] Test performance with large datasets
 - [ ] Validate error messages and handling
 
 #### 2.3 Performance Testing
+
 - [x] **COMPLETED**: Measure response time with enhanced fields
 - [x] **COMPLETED**: Compare response sizes (standard vs enhanced)
 - [ ] Test caching effectiveness
@@ -231,6 +259,7 @@ select: [
 ### Phase 3: UI Enhancement (Week 3)
 
 #### 3.1 Update Object Cards
+
 - [ ] Modify object card components to display new fields
 - [ ] Add field selection controls
 - [ ] Implement enhanced field filtering
@@ -238,6 +267,7 @@ select: [
 - [ ] **New**: Add field population indicators (empty vs populated)
 
 #### 3.2 Enhanced Filtering
+
 - [ ] Add filter controls for new properties
 - [ ] Implement compliance filtering
 - [ ] Add cost-based filtering
@@ -245,6 +275,7 @@ select: [
 - [ ] **New**: Add field availability filtering
 
 #### 3.3 Data Export
+
 - [ ] Add enhanced data export functionality
 - [ ] Support CSV/Excel export with all fields
 - [ ] Add field selection for export
@@ -253,6 +284,7 @@ select: [
 ### Phase 4: Performance Optimization (Week 4)
 
 #### 4.1 Field Selection Controls
+
 - [ ] Implement field selection UI
 - [ ] Add field grouping by category
 - [ ] Save user field preferences
@@ -260,12 +292,14 @@ select: [
 - [ ] Optimize queries based on selected fields
 
 #### 4.2 Caching Strategy
+
 - [ ] Implement enhanced field caching
 - [ ] Add cache invalidation logic
 - [ ] Optimize cache key generation
 - [ ] Add cache performance monitoring
 
 #### 4.3 Query Optimization
+
 - [ ] Implement smart field selection
 - [ ] Add query result pagination
 - [ ] Optimize large dataset handling
@@ -286,9 +320,9 @@ async getObjectsWithMoreColumns(options: {
   skip?: number;
   moreColumns?: boolean;
 }): Promise<ODataResponse<any>> {
-  
+
   const queryParams = new URLSearchParams();
-  
+
   // Add MoreColumns parameter if enabled
   if (options.moreColumns) {
     queryParams.append('MoreColumns', 'true');
@@ -300,7 +334,7 @@ async getObjectsWithMoreColumns(options: {
       queryParams.append('$select', options.select.join(','));
     }
   }
-  
+
   // Standard OData parameters
   if (options.filter) queryParams.append('$filter', options.filter);
   if (options.orderby) queryParams.append('$orderby', options.orderby);
@@ -327,10 +361,10 @@ export interface BlueDolphinObjectEnhanced extends BlueDolphinObject {
   Object_Properties_Supplied_By?: string;
   Object_Properties_Questions?: string;
   Object_Properties_Action_Items?: string;
-  
+
   // Deliverable Status Properties
   Deliverable_Object_Status_Architectural_Decision_Log?: string;
-  
+
   // AMEFF Properties (25+ fields confirmed)
   Ameff_properties_Reportx3AModelx3ACoverx3ABackground?: string;
   Ameff_properties_Reportx3AModelx3AHeaderx3ABackground?: string;
@@ -363,6 +397,7 @@ export interface BlueDolphinObjectEnhanced extends BlueDolphinObject {
 ### Testing Strategy
 
 #### Initial Testing (Top=2)
+
 ```typescript
 // Test enhanced query with minimal results
 const testRequest = {
@@ -372,13 +407,14 @@ const testRequest = {
     endpoint: '/Objects',
     filter: "Definition eq 'Business Process'", // Use Business Process for max fields
     top: 2, // Small result set for testing
-    moreColumns: true // Enable enhanced fields
+    moreColumns: true, // Enable enhanced fields
     // NOTE: Do not include select parameter
-  }
+  },
 };
 ```
 
 #### Validation Steps
+
 1. ✅ Verify `MoreColumns=true` parameter is accepted
 2. ✅ Confirm additional fields are returned in response
 3. [ ] Validate field data types and values
@@ -388,6 +424,7 @@ const testRequest = {
 ## Benefits and Considerations
 
 ### Benefits
+
 - **Richer Data Model**: Access to comprehensive object metadata (45+ fields vs 9)
 - **Better Reporting**: More fields for analysis and reporting
 - **Enhanced Filtering**: Filter by additional properties like compliance, report settings
@@ -395,6 +432,7 @@ const testRequest = {
 - **Better Integration**: More data points for external system integration
 
 ### Considerations
+
 - **Performance Impact**: Response size increases significantly (confirmed via CLI testing)
 - **Data Quality**: Many enhanced fields are empty strings (confirmed via CLI testing)
 - **Field Selection Conflict**: Cannot use `$select` with `MoreColumns=true` (critical finding)
@@ -404,24 +442,28 @@ const testRequest = {
 ## Success Criteria
 
 ### Phase 1 Success
+
 - ✅ `MoreColumns=true` parameter is accepted by Blue Dolphin
 - ✅ Enhanced fields are returned in API responses
 - [ ] No breaking changes to existing functionality
 - ✅ Enhanced queries complete within acceptable time limits
 
 ### Phase 2 Success
+
 - [ ] All enhanced fields are properly typed and validated
 - [ ] Error handling works correctly for edge cases
 - ✅ Performance impact is measured and documented
 - ✅ Enhanced queries are stable and reliable
 
 ### Phase 3 Success
+
 - [ ] UI displays enhanced fields correctly
 - [ ] Users can filter by new properties
 - [ ] Data export includes enhanced fields
 - [ ] User experience is improved with new data
 
 ### Phase 4 Success
+
 - [ ] Field selection controls are implemented
 - [ ] Performance is optimized for large datasets
 - [ ] Caching strategy is effective
@@ -430,12 +472,14 @@ const testRequest = {
 ## Risk Mitigation
 
 ### Technical Risks
+
 - **Performance Degradation**: ✅ Confirmed via CLI testing - implement field selection and caching
 - **Data Inconsistency**: Add validation and error handling for empty fields
 - **Breaking Changes**: Maintain backward compatibility
 - **Field Selection Conflict**: ✅ Critical finding - implement smart field handling
 
 ### Business Risks
+
 - **User Adoption**: Provide clear documentation and training
 - **Data Quality**: ✅ Confirmed many fields are empty - implement field population indicators
 - **Maintenance Overhead**: Design for maintainability and extensibility

@@ -3,11 +3,13 @@
 This schema defines the columns for the single CSV export that joins Relations_table rows with full Object data (including enhanced fields via MoreColumns=true) for both endpoints.
 
 Notes
+
 - Prefixes: `rel_` (relationship row fields), `source_` (object at `BlueDolphinObjectItemId`), `target_` (object at `RelatedBlueDolphinObjectItemId`).
 - Field names under `source_`/`target_` preserve Blue Dolphin keys verbatim (including `Object_Properties_*`, `Ameff_properties_*`, `x3A`/`x26` tokens).
 - Types are best-effort strings unless known numeric/boolean.
 
-#### Relationship columns (rel_*)
+#### Relationship columns (rel\_\*)
+
 - `rel_relationshipId` (string) — stable relationship identifier
 - `rel_id` (string) — row Id if present
 - `rel_type` (string) — composition | flow | association | realization | access | usedby
@@ -17,7 +19,8 @@ Notes
 - `rel_sourceWorkspace` (string) — `BlueDolphinObjectWorkspaceName`
 - `rel_targetWorkspace` (string) — `RelatedBlueDolphinObjectWorkspaceName`
 
-#### Source object columns (source_*)
+#### Source object columns (source\_\*)
+
 - `source_ID`
 - `source_Title`
 - `source_Definition`
@@ -74,10 +77,12 @@ Notes
   - `source_Object_Properties_Needs_External_Integration`
   - `source_Object_Properties_Base_Implementation_Costs`
 
-#### Target object columns (target_*)
+#### Target object columns (target\_\*)
+
 - Same set as Source, prefixed `target_` instead of `source_`.
 
 #### Column order (summary)
+
 1. `rel_*` group
 2. `source_*` standard fields
 3. `source_*` enhanced fields
@@ -85,11 +90,13 @@ Notes
 5. `target_*` enhanced fields
 
 #### Example header (abridged)
+
 ```text
 rel_relationshipId,rel_type,rel_name,rel_definitionName,rel_isDirectionAlternative,rel_sourceWorkspace,rel_targetWorkspace,source_ID,source_Title,source_Definition,source_Status,source_Workspace,source_Object_Properties_Name,source_Ameff_properties_Domain,target_ID,target_Title,target_Definition,target_Status,target_Workspace,target_Object_Properties_Name,target_Ameff_properties_Domain
 ```
 
 #### Mapping rules and caveats
+
 - IDs:
   - Relations → source object id: `BlueDolphinObjectItemId`
   - Relations → target object id: `RelatedBlueDolphinObjectItemId`
@@ -99,8 +106,7 @@ rel_relationshipId,rel_type,rel_name,rel_definitionName,rel_isDirectionAlternati
 - Field name preservation: do not rename Ameff/Object_Properties keys beyond prefixing.
 
 #### References
+
 - UI: `BLUE-DOLPHIN-EXPORT-CSV-UI.md`
 - API: `BLUE-DOLPHIN-EXPORT-CSV-API.md`
 - OData behavior: `BLUE-DOLPHIN-ODATA-GUIDE.md`, `BLUE-DOLPHIN-CLI-TESTING-SUMMARY.md`
-
-

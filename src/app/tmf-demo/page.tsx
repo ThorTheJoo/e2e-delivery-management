@@ -1,24 +1,23 @@
 'use client';
 
 import { useState } from 'react';
-import { TMFOdaManager } from '@/components/tmf-oda-manager';
-import { TMFOdaState } from '@/types';
+import { TMFDomainCapabilityManager } from '@/components/tmf-domain-capability-manager';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ArrowLeft, Download } from 'lucide-react';
 import Link from 'next/link';
 
 export default function TMFOdaDemoPage() {
-  const [tmfState, setTmfState] = useState<TMFOdaState | null>(null);
+  const [tmfState, setTmfState] = useState<any[] | null>(null);
 
-  const handleStateChange = (state: TMFOdaState) => {
+  const handleStateChange = (state: any[]) => {
     setTmfState(state);
-    console.log('TMF ODA State updated:', state);
+    console.log('TMF Domain State updated:', state);
   };
 
   const exportState = () => {
     if (!tmfState) return;
-    
+
     const dataStr = JSON.stringify(tmfState, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);
@@ -53,7 +52,7 @@ export default function TMFOdaDemoPage() {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Link href="/" className="hover:bg-blue-700 p-2 rounded-lg transition-colors">
+              <Link href="/" className="rounded-lg p-2 transition-colors hover:bg-blue-700">
                 <ArrowLeft className="h-6 w-6" />
               </Link>
               <div>
@@ -65,11 +64,14 @@ export default function TMFOdaDemoPage() {
               <div className="text-sm text-blue-100">
                 {tmfState ? (
                   <>
-                    <span className="font-medium">{tmfState.domains.length}</span> domains,{' '}
+                    <span className="font-medium">{tmfState.length}</span> domains,{' '}
                     <span className="font-medium">
-                      {tmfState.domains.reduce((sum, domain) => sum + domain.capabilities.length, 0)}
+                      {tmfState.reduce(
+                        (sum, domain) => sum + domain.capabilities.length,
+                        0,
+                      )}
                     </span>{' '}
-                    capabilities
+                    functions
                   </>
                 ) : (
                   'No data loaded'
@@ -82,7 +84,7 @@ export default function TMFOdaDemoPage() {
 
       {/* Main Content */}
       <main className="container mx-auto px-6 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
           {/* Sidebar */}
           <div className="lg:col-span-1">
             <Card>
@@ -91,34 +93,34 @@ export default function TMFOdaDemoPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="mb-2 block text-sm font-medium text-gray-700">
                     Import State
                   </label>
                   <input
                     type="file"
                     accept=".json"
                     onChange={importState}
-                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:rounded-full file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100"
                   />
                 </div>
-                
+
                 <Button
                   onClick={exportState}
                   disabled={!tmfState}
                   className="w-full bg-green-600 hover:bg-green-700"
                 >
-                  <Download className="w-4 h-4 mr-2" />
+                  <Download className="mr-2 h-4 w-4" />
                   Export State
                 </Button>
 
-                <div className="pt-4 border-t">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Features</h4>
-                  <ul className="text-sm text-gray-600 space-y-1">
-                    <li>• Add/Remove TMF ODA domains</li>
-                    <li>• Add/Remove capabilities per domain</li>
-                    <li>• Select/Deselect domains & capabilities</li>
-                    <li>• Edit names and descriptions</li>
-                    <li>• Expandable domain views</li>
+                <div className="border-t pt-4">
+                  <h4 className="mb-2 text-sm font-medium text-gray-700">Features</h4>
+                  <ul className="space-y-1 text-sm text-gray-600">
+                    <li>• Add/Remove TMF domains</li>
+                    <li>• Add/Remove TMF functions per domain</li>
+                    <li>• Select/Deselect domains & functions</li>
+                    <li>• Real TMF reference data integration</li>
+                    <li>• SpecSync import mapping</li>
                     <li>• Real-time state management</li>
                   </ul>
                 </div>
@@ -128,10 +130,7 @@ export default function TMFOdaDemoPage() {
 
           {/* Main Content */}
           <div className="lg:col-span-3">
-            <TMFOdaManager
-              onStateChange={handleStateChange}
-              initialState={tmfState || undefined}
-            />
+            <TMFDomainCapabilityManager onStateChange={handleStateChange} initialState={tmfState || undefined} />
           </div>
         </div>
 
@@ -142,8 +141,8 @@ export default function TMFOdaDemoPage() {
               <CardTitle className="text-lg">Current State</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <pre className="text-xs text-gray-700 overflow-auto max-h-64">
+              <div className="rounded-lg bg-gray-50 p-4">
+                <pre className="max-h-64 overflow-auto text-xs text-gray-700">
                   {JSON.stringify(tmfState, null, 2)}
                 </pre>
               </div>

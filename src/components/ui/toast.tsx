@@ -57,20 +57,20 @@ export function Toast({ toast, onRemove }: ToastProps) {
   };
 
   return (
-    <div className={cn(
-      'flex items-start space-x-3 p-4 rounded-lg border shadow-lg max-w-sm',
-      getBackgroundColor()
-    )}>
+    <div
+      className={cn(
+        'flex max-w-sm items-start space-x-3 rounded-lg border p-4 shadow-lg',
+        getBackgroundColor(),
+      )}
+    >
       {getIcon()}
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0 flex-1">
         <p className="text-sm font-medium text-gray-900">{toast.title}</p>
-        {toast.message && (
-          <p className="text-sm text-gray-600 mt-1">{toast.message}</p>
-        )}
+        {toast.message && <p className="mt-1 text-sm text-gray-600">{toast.message}</p>}
       </div>
       <button
         onClick={() => onRemove(toast.id)}
-        className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+        className="flex-shrink-0 text-gray-400 transition-colors hover:text-gray-600"
       >
         <X className="h-4 w-4" />
       </button>
@@ -78,9 +78,15 @@ export function Toast({ toast, onRemove }: ToastProps) {
   );
 }
 
-export function ToastContainer({ toasts, onRemove }: { toasts: Toast[]; onRemove: (id: string) => void }) {
+export function ToastContainer({
+  toasts,
+  onRemove,
+}: {
+  toasts: Toast[];
+  onRemove: (id: string) => void;
+}) {
   return (
-    <div className="fixed top-4 right-4 z-50 space-y-2">
+    <div className="fixed right-4 top-4 z-50 space-y-2">
       {toasts.map((toast) => (
         <Toast key={toast.id} toast={toast} onRemove={onRemove} />
       ))}
@@ -93,11 +99,11 @@ export function useToast() {
 
   const addToast = (toast: Omit<Toast, 'id'>) => {
     const id = Math.random().toString(36).substr(2, 9);
-    setToasts(prev => [...prev, { ...toast, id }]);
+    setToasts((prev) => [...prev, { ...toast, id }]);
   };
 
   const removeToast = (id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
   };
 
   const showSuccess = (title: string, message?: string) => {
@@ -123,6 +129,6 @@ export function useToast() {
     showSuccess,
     showError,
     showInfo,
-    showWarning
+    showWarning,
   };
 }

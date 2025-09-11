@@ -1,10 +1,10 @@
 import type { BlueDolphinObjectEnhanced } from '@/types/blue-dolphin';
-import type { 
-  BlueDolphinVisualNode, 
-  BlueDolphinVisualLink, 
-  VisualShape, 
-  VisualLineStyle, 
-  VisualArrowStyle 
+import type {
+  BlueDolphinVisualNode,
+  BlueDolphinVisualLink,
+  VisualShape,
+  VisualLineStyle,
+  VisualArrowStyle,
 } from '@/types/blue-dolphin-visualization';
 
 export interface BlueDolphinRelation {
@@ -37,7 +37,7 @@ export function getColorForWorkspace(workspace: string | undefined): string {
     'Product Architecture': '#16a34a',
     'Customer Q': '#ea580c',
     'Simulated Case Study': '#7c3aed',
-    'RR': '#047857'
+    RR: '#047857',
   };
   if (presets[workspace]) return presets[workspace];
   const hue = hashToHue(workspace);
@@ -47,24 +47,36 @@ export function getColorForWorkspace(workspace: string | undefined): string {
 export function getShapeForDefinition(definition: string | undefined): VisualShape {
   if (!definition) return 'circle';
   const d = definition.toLowerCase();
-  if (d.includes('application') || d.includes('technology') || d.includes('component')) return 'rectangle';
+  if (d.includes('application') || d.includes('technology') || d.includes('component'))
+    return 'rectangle';
   if (d.includes('business') || d.includes('process') || d.includes('function')) return 'circle';
   if (d.includes('decision') || d.includes('event')) return 'diamond';
   if (d.includes('capability') || d.includes('outcome')) return 'hexagon';
   return 'circle';
 }
 
-export function getLinkStyleForType(type: string | undefined): { style: VisualLineStyle; width: number; arrowStyle: VisualArrowStyle; color: string } {
+export function getLinkStyleForType(type: string | undefined): {
+  style: VisualLineStyle;
+  width: number;
+  arrowStyle: VisualArrowStyle;
+  color: string;
+} {
   const t = (type || '').toLowerCase();
-  if (t === 'composition' || t === 'aggregation') return { style: 'solid', width: 4, arrowStyle: 'single', color: '#334155' };
+  if (t === 'composition' || t === 'aggregation')
+    return { style: 'solid', width: 4, arrowStyle: 'single', color: '#334155' };
   if (t === 'flow') return { style: 'dashed', width: 3, arrowStyle: 'single', color: '#0369a1' };
-  if (t === 'association') return { style: 'dotted', width: 3, arrowStyle: 'none', color: '#64748b' };
-  if (t === 'realization') return { style: 'solid', width: 3, arrowStyle: 'single', color: '#7c3aed' };
-  if (t === 'serving' || t === 'usedby' || t === 'access') return { style: 'solid', width: 3, arrowStyle: 'single', color: '#16a34a' };
+  if (t === 'association')
+    return { style: 'dotted', width: 3, arrowStyle: 'none', color: '#64748b' };
+  if (t === 'realization')
+    return { style: 'solid', width: 3, arrowStyle: 'single', color: '#7c3aed' };
+  if (t === 'serving' || t === 'usedby' || t === 'access')
+    return { style: 'solid', width: 3, arrowStyle: 'single', color: '#16a34a' };
   return { style: 'solid', width: 3, arrowStyle: 'single', color: '#0f172a' };
 }
 
-export function transformObjectsToNodes(objects: BlueDolphinObjectEnhanced[]): BlueDolphinVisualNode[] {
+export function transformObjectsToNodes(
+  objects: BlueDolphinObjectEnhanced[],
+): BlueDolphinVisualNode[] {
   return (objects || []).map((obj) => {
     const completenessWeight = typeof obj.Completeness === 'number' ? obj.Completeness / 100 : 0;
     const sizeBase = 4 + completenessWeight * 2;
@@ -79,15 +91,19 @@ export function transformObjectsToNodes(objects: BlueDolphinObjectEnhanced[]): B
       shape: getShapeForDefinition(obj.Definition),
       opacity: 1,
       val: sizeBase,
-      metadata: { ...obj }
+      metadata: { ...obj },
     } as BlueDolphinVisualNode;
   });
 }
 
-export function transformRelationsToLinks(relations: BlueDolphinRelation[]): BlueDolphinVisualLink[] {
+export function transformRelationsToLinks(
+  relations: BlueDolphinRelation[],
+): BlueDolphinVisualLink[] {
   return (relations || []).map((rel) => {
     const style = getLinkStyleForType(rel.Type);
-    const id = rel.RelationshipId || `${rel.BlueDolphinObjectItemId}-${rel.Type}-${rel.RelatedBlueDolphinObjectItemId}-${rel.Name}`;
+    const id =
+      rel.RelationshipId ||
+      `${rel.BlueDolphinObjectItemId}-${rel.Type}-${rel.RelatedBlueDolphinObjectItemId}-${rel.Name}`;
     return {
       id,
       source: String(rel.BlueDolphinObjectItemId),
@@ -99,12 +115,15 @@ export function transformRelationsToLinks(relations: BlueDolphinRelation[]): Blu
       style: style.style,
       arrowStyle: style.arrowStyle,
       opacity: 0.9,
-      metadata: { ...rel }
+      metadata: { ...rel },
     } as BlueDolphinVisualLink;
   });
 }
 
-export function resolveLinkEndpoints(nodes: BlueDolphinVisualNode[], links: BlueDolphinVisualLink[]): BlueDolphinVisualLink[] {
+export function resolveLinkEndpoints(
+  nodes: BlueDolphinVisualNode[],
+  links: BlueDolphinVisualLink[],
+): BlueDolphinVisualLink[] {
   const idToNode = new Map<string, BlueDolphinVisualNode>();
   nodes.forEach((n) => idToNode.set(String(n.id), n));
   return links
@@ -119,5 +138,3 @@ export function resolveLinkEndpoints(nodes: BlueDolphinVisualNode[], links: Blue
 export function uniqueSorted(values: Array<string | undefined>): string[] {
   return Array.from(new Set(values.filter(Boolean) as string[])).sort();
 }
-
-

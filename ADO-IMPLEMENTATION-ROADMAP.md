@@ -55,6 +55,7 @@ Epic (BSS Transformation Project)
 ### Field Mapping
 
 #### Epic Level
+
 - **Source**: Project metadata + TMF ODA Domains
 - **ADO Type**: Epic
 - **Key Fields**:
@@ -65,6 +66,7 @@ Epic (BSS Transformation Project)
   - Custom Fields: ProjectId, Customer, Duration, TeamSize
 
 #### Feature Level
+
 - **Source**: TMFOdaDomain objects
 - **ADO Type**: Feature
 - **Key Fields**:
@@ -75,6 +77,7 @@ Epic (BSS Transformation Project)
   - Custom Fields: DomainId, CapabilityCount, TMFLevel
 
 #### User Story Level
+
 - **Source**: TMFOdaCapability objects
 - **ADO Type**: User Story
 - **Key Fields**:
@@ -85,6 +88,7 @@ Epic (BSS Transformation Project)
   - Custom Fields: CapabilityId, DomainId, TMFLevel
 
 #### Task Level
+
 - **Source**: SpecSyncItem objects
 - **ADO Type**: Task
 - **Key Fields**:
@@ -208,11 +212,11 @@ const adoEndpoints = {
     create: '/_apis/wit/workitems/${type}?api-version=7.1',
     update: '/_apis/wit/workitems/{id}?api-version=7.1',
     get: '/_apis/wit/workitems/{id}?api-version=7.1',
-    delete: '/_apis/wit/workitems/{id}?api-version=7.1'
+    delete: '/_apis/wit/workitems/{id}?api-version=7.1',
   },
   projects: {
-    list: '/_apis/projects?api-version=7.1'
-  }
+    list: '/_apis/projects?api-version=7.1',
+  },
 };
 ```
 
@@ -425,6 +429,7 @@ The integration successfully bridges the gap between TMF ODA architecture and Az
 ---
 
 **Next Steps**:
+
 1. Test the integration with real ADO organizations
 2. Gather user feedback and iterate on the UI
 3. Implement Phase 2 advanced features

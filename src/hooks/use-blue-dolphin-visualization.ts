@@ -1,16 +1,17 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 import type { BlueDolphinConfig, BlueDolphinObjectEnhanced } from '@/types/blue-dolphin';
-import type { BlueDolphinVisualLink, BlueDolphinVisualNode, VisualizationFilters } from '@/types/blue-dolphin-visualization';
-import { transformObjectsToNodes, transformRelationsToLinks, resolveLinkEndpoints, uniqueSorted, type BlueDolphinRelation } from '@/lib/blue-dolphin-visualization-utils';
-
-interface BlueDolphinApiResponse<T = unknown> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  count?: number;
-  total?: number;
-  enhancedFields?: string[];
-}
+import type {
+  BlueDolphinVisualLink,
+  BlueDolphinVisualNode,
+  VisualizationFilters,
+} from '@/types/blue-dolphin-visualization';
+import {
+  transformObjectsToNodes,
+  transformRelationsToLinks,
+  resolveLinkEndpoints,
+  uniqueSorted,
+} from '@/lib/blue-dolphin-visualization-utils';
+import { getFilterOptions } from '@/lib/filter-service';
 
 interface UseBlueDolphinVisualizationResult {
   nodes: BlueDolphinVisualNode[];
@@ -20,6 +21,7 @@ interface UseBlueDolphinVisualizationResult {
   filters: VisualizationFilters;
   setFilters: (f: Partial<VisualizationFilters>) => void;
   loadData: () => Promise<void>;
+  forceRefresh: () => Promise<void>;
   available: {
     workspaces: string[];
     relationTypes: string[];
@@ -36,17 +38,24 @@ const DEFAULT_FILTERS: VisualizationFilters = {
   sourceDefinition: '',
   targetDefinition: '',
   resultsTop: 250,
-  viewMode: 'overview'
+  viewMode: 'overview',
+  status: 'Accepted',
+  sourceStatus: 'Accepted',
+  targetStatus: 'Accepted',
 };
 
-export function useBlueDolphinVisualization(config: BlueDolphinConfig): UseBlueDolphinVisualizationResult {
+export function useBlueDolphinVisualization(
+  config: BlueDolphinConfig,
+): UseBlueDolphinVisualizationResult {
   const [nodes, setNodes] = useState<BlueDolphinVisualNode[]>([]);
   const [links, setLinks] = useState<BlueDolphinVisualLink[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFiltersState] = useState<VisualizationFilters>(DEFAULT_FILTERS);
-  const cacheRef = useRef<Map<string, { timestamp: number; data: unknown }>>(new Map());
-  const dataSnapshotRef = useRef<{ objects: BlueDolphinObjectEnhanced[]; relations: Record<string, unknown>[] } | null>(null);
+  const cacheRef = useRef<Map<string, any>>(new Map());
+  const dataSnapshotRef = useRef<{ objects: BlueDolphinObjectEnhanced[]; relations: any[] } | null>(
+    null,
+  );
 
   const setFilters = useCallback((f: Partial<VisualizationFilters>) => {
     setFiltersState((prev) => ({ ...prev, ...f }));
@@ -60,26 +69,51 @@ export function useBlueDolphinVisualization(config: BlueDolphinConfig): UseBlueD
 
   const buildRelationsFilter = useCallback(() => {
     const parts: string[] = [];
-    if (filters.workspace) parts.push(`(BlueDolphinObjectWorkspaceName eq '${filters.workspace}' or RelatedBlueDolphinObjectWorkspaceName eq '${filters.workspace}')`);
+    if (filters.workspace)
+      parts.push(
+        `(BlueDolphinObjectWorkspaceName eq '${filters.workspace}' or RelatedBlueDolphinObjectWorkspaceName eq '${filters.workspace}')`,
+      );
     if (filters.relationType) parts.push(`Type eq '${filters.relationType}'`);
     if (filters.relationName) parts.push(`Name eq '${filters.relationName}'`);
-    if (filters.sourceDefinition) parts.push(`BlueDolphinObjectDefinitionName eq '${filters.sourceDefinition}'`);
-    if (filters.targetDefinition) parts.push(`RelatedBlueDolphinObjectDefinitionName eq '${filters.targetDefinition}'`);
+    if (filters.sourceDefinition)
+      parts.push(`BlueDolphinObjectDefinitionName eq '${filters.sourceDefinition}'`);
+    if (filters.targetDefinition)
+      parts.push(`RelatedBlueDolphinObjectDefinitionName eq '${filters.targetDefinition}'`);
     return parts.join(' and ');
-  }, [filters.workspace, filters.relationType, filters.relationName, filters.sourceDefinition, filters.targetDefinition]);
+  }, [
+    filters.workspace,
+    filters.relationType,
+    filters.relationName,
+    filters.sourceDefinition,
+    filters.targetDefinition,
+  ]);
 
-  const fetchWithCache = useCallback(async (key: string, body: Record<string, unknown>): Promise<BlueDolphinApiResponse> => {
+  const fetchWithCache = useCallback(async (key: string, body: any) => {
     const now = Date.now();
     const cached = cacheRef.current.get(key);
-    if (cached && now - cached.timestamp < 5 * 60 * 1000) return cached.data as BlueDolphinApiResponse;
-    const res = await fetch('/api/blue-dolphin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-    const json: BlueDolphinApiResponse = await res.json();
+    // Reduce cache TTL from 5 minutes to 1 minute to ensure fresher data
+    if (cached && now - cached.timestamp < 1 * 60 * 1000) return cached.data;
+    const res = await fetch('/api/blue-dolphin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const json = await res.json();
     cacheRef.current.set(key, { timestamp: now, data: json });
     return json;
   }, []);
 
+  // Add cache invalidation function
+  const invalidateCache = useCallback(() => {
+    cacheRef.current.clear();
+    console.log('[BD Viz] Cache invalidated');
+  }, []);
+
   const loadData = useCallback(async () => {
-    if (!config.odataUrl) { setError('OData URL not configured'); return; }
+    if (!config.odataUrl) {
+      setError('OData URL not configured');
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -87,17 +121,28 @@ export function useBlueDolphinVisualization(config: BlueDolphinConfig): UseBlueD
       const objectsBody = {
         action: 'get-objects-enhanced',
         config,
-        data: { endpoint: '/Objects', filter: buildObjectsFilter(), top: filters.resultsTop, orderby: 'Title asc', moreColumns: true }
+        data: {
+          endpoint: '/Objects',
+          filter: buildObjectsFilter(),
+          top: filters.resultsTop,
+          orderby: 'Title asc',
+          moreColumns: true,
+        },
       };
-      const objectsJson = await fetchWithCache(`obj|${objectsBody.data.filter}|${filters.resultsTop}`, objectsBody);
+      const objectsJson = await fetchWithCache(
+        `obj|${objectsBody.data.filter}|${filters.resultsTop}`,
+        objectsBody,
+      );
       if (!objectsJson.success) throw new Error(objectsJson.error || 'Failed objects load');
-      const objects = (objectsJson.data as BlueDolphinObjectEnhanced[] | undefined) || [];
+      const objects = (objectsJson.data || []) as BlueDolphinObjectEnhanced[];
 
       // 2) Build relations filter constrained to fetched object IDs to guarantee edges
-      const objectIds = objects.map(o => String(o.ID)).filter(Boolean);
+      const objectIds = objects.map((o) => String(o.ID)).filter(Boolean);
       const maxIds = Math.min(objectIds.length, 20); // keep OData filter short to avoid 400
       const limitedIds = objectIds.slice(0, maxIds);
-      const idClauses = limitedIds.map(id => `(BlueDolphinObjectItemId eq '${id}' or RelatedBlueDolphinObjectItemId eq '${id}')`);
+      const idClauses = limitedIds.map(
+        (id) => `(BlueDolphinObjectItemId eq '${id}' or RelatedBlueDolphinObjectItemId eq '${id}')`,
+      );
       const idFilter = idClauses.length > 0 ? `(${idClauses.join(' or ')})` : '';
 
       const baseRelFilter = buildRelationsFilter();
@@ -106,33 +151,51 @@ export function useBlueDolphinVisualization(config: BlueDolphinConfig): UseBlueD
       const relationsBody = {
         action: 'get-objects-enhanced',
         config,
-        data: { endpoint: '/Relations', filter: combinedRelFilter, top: filters.resultsTop, moreColumns: true }
+        data: {
+          endpoint: '/Relations',
+          filter: combinedRelFilter,
+          top: filters.resultsTop,
+          moreColumns: true,
+        },
       };
 
-      let relationsJson = await fetchWithCache(`rel|${relationsBody.data.filter}|${filters.resultsTop}`, relationsBody);
+      let relationsJson = await fetchWithCache(
+        `rel|${relationsBody.data.filter}|${filters.resultsTop}`,
+        relationsBody,
+      );
       if (!objectsJson.success) throw new Error(objectsJson.error || 'Failed objects load');
       if (!relationsJson.success) {
         // Fallback: try base relations filter without ID clause (some servers reject long OR chains)
         const fallbackRelBody = {
           action: 'get-objects-enhanced',
           config,
-          data: { endpoint: '/Relations', filter: baseRelFilter, top: filters.resultsTop, moreColumns: true }
+          data: {
+            endpoint: '/Relations',
+            filter: baseRelFilter,
+            top: filters.resultsTop,
+            moreColumns: true,
+          },
         };
-        relationsJson = await fetchWithCache(`rel|${fallbackRelBody.data.filter}|${filters.resultsTop}`, fallbackRelBody);
+        relationsJson = await fetchWithCache(
+          `rel|${fallbackRelBody.data.filter}|${filters.resultsTop}`,
+          fallbackRelBody,
+        );
         if (!relationsJson.success) throw new Error(relationsJson.error || 'Failed relations load');
       }
-      const relations = (relationsJson.data as BlueDolphinRelation[] | undefined) || [];
+      const relations = (relationsJson.data || []) as any[];
       dataSnapshotRef.current = { objects, relations };
 
       const nodeList = transformObjectsToNodes(objects);
-      const linkList = transformRelationsToLinks(relations);
+      const linkList = transformRelationsToLinks(relations as any);
       // Resolve endpoints; if resolution yields zero (IDs mismatch), fall back to string IDs (library resolves lazily)
       const resolved = resolveLinkEndpoints(nodeList, linkList);
       const linksForGraph = resolved.length > 0 ? resolved : linkList;
       setNodes(nodeList);
       setLinks(linksForGraph);
       // Debug logs
-      console.log(`[BD Viz] objects=${objects.length}, relations=${relations.length}, nodes=${nodeList.length}, links=${linksForGraph.length}`);
+      console.log(
+        `[BD Viz] objects=${objects.length}, relations=${relations.length}, nodes=${nodeList.length}, links=${linksForGraph.length}`,
+      );
       if (nodeList[0]) console.log('[BD Viz] sample node', nodeList[0]);
       if (linksForGraph[0]) console.log('[BD Viz] sample link', linksForGraph[0]);
     } catch (e) {
@@ -143,57 +206,120 @@ export function useBlueDolphinVisualization(config: BlueDolphinConfig): UseBlueD
     }
   }, [config, filters.resultsTop, buildObjectsFilter, buildRelationsFilter, fetchWithCache]);
 
-  const available = useMemo(() => {
+  // Add function to force refresh data
+  const forceRefresh = useCallback(async () => {
+    invalidateCache();
+    await loadData();
+  }, [invalidateCache, loadData]);
+
+  const [available, setAvailable] = useState({
+    workspaces: [] as string[],
+    relationTypes: [] as string[],
+    relationNames: [] as string[],
+    sourceDefinitions: [] as string[],
+    targetDefinitions: [] as string[],
+  });
+
+  // Build local calculated lists as fallback
+  const computeLocalAvailable = useCallback(() => {
     const snap = dataSnapshotRef.current;
-    if (!snap) return { workspaces: [], relationTypes: [], relationNames: [], sourceDefinitions: [], targetDefinitions: [] };
+    if (!snap)
+      return {
+        workspaces: [],
+        relationTypes: [],
+        relationNames: [],
+        sourceDefinitions: [],
+        targetDefinitions: [],
+      };
     const baseWorkspaces = uniqueSorted([
-      ...snap.objects.map(o => o.Workspace),
-      ...snap.relations.map((r) => String(r.BlueDolphinObjectWorkspaceName || '')),
-      ...snap.relations.map((r) => String(r.RelatedBlueDolphinObjectWorkspaceName || ''))
+      ...snap.objects.map((o) => o.Workspace),
+      ...snap.relations.map((r: any) => r.BlueDolphinObjectWorkspaceName),
+      ...snap.relations.map((r: any) => r.RelatedBlueDolphinObjectWorkspaceName),
     ]);
-    const additionalWorkspaces = ['CSG International','Product Architecture','Customer Q','Simulated Case Study','RR'];
-    const workspaces = uniqueSorted([ ...baseWorkspaces, ...additionalWorkspaces ]);
-    const relationTypes = uniqueSorted(snap.relations.map((r) => String(r.Type || '')));
-    const relationNames = uniqueSorted(snap.relations.map((r) => String(r.Name || '')));
-    const sourceDefinitions = uniqueSorted(snap.relations.map((r) => String(r.BlueDolphinObjectDefinitionName || '')));
-    const targetDefinitions = uniqueSorted(snap.relations.map((r) => String(r.RelatedBlueDolphinObjectDefinitionName || '')));
+    const additionalWorkspaces = [
+      'CSG International',
+      'Product Architecture',
+      'Customer Q',
+      'Simulated Case Study',
+      'RR',
+    ];
+    const workspaces = uniqueSorted([...baseWorkspaces, ...additionalWorkspaces]);
+    const relationTypes = uniqueSorted(snap.relations.map((r: any) => r.Type));
+    const relationNames = uniqueSorted(snap.relations.map((r: any) => r.Name));
+    const sourceDefinitions = uniqueSorted(
+      snap.relations.map((r: any) => r.BlueDolphinObjectDefinitionName),
+    );
+    const targetDefinitions = uniqueSorted(
+      snap.relations.map((r: any) => r.RelatedBlueDolphinObjectDefinitionName),
+    );
     return { workspaces, relationTypes, relationNames, sourceDefinitions, targetDefinitions };
   }, []);
+
+  // Hybrid: try Supabase filter options first, fallback to computed lists
+  useEffect(() => {
+    (async () => {
+      try {
+        const local = computeLocalAvailable();
+        const [work, types, names, srcDefs, tgtDefs] = await Promise.all([
+          getFilterOptions('workspaces', local.workspaces),
+          getFilterOptions('relationTypes', local.relationTypes),
+          getFilterOptions('relationNames', local.relationNames),
+          getFilterOptions('sourceDefinitions', local.sourceDefinitions),
+          getFilterOptions('targetDefinitions', local.targetDefinitions),
+        ]);
+        setAvailable({
+          workspaces: work.map((o) => o.value),
+          relationTypes: types.map((o) => o.value),
+          relationNames: names.map((o) => o.value),
+          sourceDefinitions: srcDefs.map((o) => o.value),
+          targetDefinitions: tgtDefs.map((o) => o.value),
+        });
+      } catch {
+        setAvailable(computeLocalAvailable());
+      }
+    })();
+  }, [nodes, links, computeLocalAvailable]);
 
   // Preload options on first hook usage (persist filter lists before user clicks Load)
   // Use a light call to fetch a small objects sample and relations to populate dropdowns.
   // Does not alter the graph until the user clicks Load.
   const [preloaded, setPreloaded] = useState(false);
-  useMemo(() => {
-    if (preloaded) return;
+  if (!preloaded) {
     setPreloaded(true);
     (async () => {
       try {
         const preloadObjectsBody = {
           action: 'get-objects-enhanced',
           config,
-          data: { endpoint: '/Objects', filter: '', top: 25, orderby: 'Title asc', moreColumns: true }
+          data: {
+            endpoint: '/Objects',
+            filter: '',
+            top: 25,
+            orderby: 'Title asc',
+            moreColumns: true,
+          },
         };
         const preloadRelationsBody = {
           action: 'get-objects-enhanced',
           config,
-          data: { endpoint: '/Relations', filter: '', top: 25, moreColumns: true }
+          data: { endpoint: '/Relations', filter: '', top: 25, moreColumns: true },
         };
         const [po, pr] = await Promise.all([
           fetchWithCache('pre-obj|', preloadObjectsBody),
-          fetchWithCache('pre-rel|', preloadRelationsBody)
+          fetchWithCache('pre-rel|', preloadRelationsBody),
         ]);
         if (po?.success || pr?.success) {
           const objs = (po?.data || []) as BlueDolphinObjectEnhanced[];
-          const rels = (pr?.data || []) as BlueDolphinRelation[];
+          const rels = (pr?.data || []) as any[];
           const existing = dataSnapshotRef.current;
-          dataSnapshotRef.current = { objects: existing ? (existing.objects.length ? existing.objects : objs) : objs, relations: existing ? (existing.relations.length ? existing.relations : rels) : rels };
+          dataSnapshotRef.current = {
+            objects: existing ? (existing.objects.length ? existing.objects : objs) : objs,
+            relations: existing ? (existing.relations.length ? existing.relations : rels) : rels,
+          };
         }
       } catch {}
     })();
-  }, [preloaded, config, fetchWithCache]);
+  }
 
-  return { nodes, links, loading, error, filters, setFilters, loadData, available };
+  return { nodes, links, loading, error, filters, setFilters, loadData, forceRefresh, available };
 }
-
-

@@ -7,18 +7,21 @@ The TMF ODA (Open Digital Architecture) Management System is a comprehensive, in
 ## Features
 
 ### 🏗️ Domain Management
+
 - **Add/Remove Domains**: Create new TMF ODA domains or remove existing ones
 - **Edit Domain Details**: Modify domain names and descriptions inline
 - **Domain Selection**: Select/deselect entire domains and their capabilities
 - **Expandable Views**: Collapsible domain sections for better organization
 
 ### 🔧 Capability Management
+
 - **Add/Remove Capabilities**: Add new capabilities to specific domains
 - **Edit Capability Details**: Modify capability names and descriptions inline
 - **Individual Selection**: Select/deselect specific capabilities independently
 - **Domain Association**: Capabilities are automatically linked to their parent domains
 
 ### 📊 State Management
+
 - **Real-time Updates**: All changes are reflected immediately in the UI
 - **Selection Tracking**: Monitor selected domains and capabilities counts
 - **State Persistence**: Maintain state across component re-renders
@@ -27,6 +30,7 @@ The TMF ODA (Open Digital Architecture) Management System is a comprehensive, in
 ## Architecture
 
 ### Component Structure
+
 ```
 TMFOdaManager
 ├── Header (Title + Add Domain Button + Selection Counts)
@@ -44,6 +48,7 @@ TMFOdaManager
 ### Data Models
 
 #### TMFOdaDomain
+
 ```typescript
 interface TMFOdaDomain {
   id: string;
@@ -57,6 +62,7 @@ interface TMFOdaDomain {
 ```
 
 #### TMFOdaCapability
+
 ```typescript
 interface TMFOdaCapability {
   id: string;
@@ -70,6 +76,7 @@ interface TMFOdaCapability {
 ```
 
 #### TMFOdaState
+
 ```typescript
 interface TMFOdaState {
   domains: TMFOdaDomain[];
@@ -116,12 +123,16 @@ interface TMFOdaState {
 ## Integration
 
 ### In Main Application
+
 The TMF ODA Manager is integrated into the main E2E Delivery Management application under the TMF tab, providing two sub-tabs:
+
 - **TMF ODA Management**: The main management interface
 - **TMF Capabilities**: Legacy capabilities view with SpecSync integration
 
 ### Demo Page
+
 A dedicated demo page is available at `/tmf-demo` that showcases the full functionality with:
+
 - Import/Export capabilities
 - Real-time state display
 - Sidebar with feature overview
@@ -132,6 +143,7 @@ A dedicated demo page is available at `/tmf-demo` that showcases the full functi
 The system comes pre-loaded with comprehensive mock TMF ODA reference data based on real TMF standards:
 
 ### Domains
+
 - Market & Sales Domain
 - Product Domain
 - Customer Domain
@@ -143,7 +155,9 @@ The system comes pre-loaded with comprehensive mock TMF ODA reference data based
 - Integration Domain
 
 ### Capabilities
+
 Each domain includes relevant capabilities with realistic descriptions. For example:
+
 - **Market & Sales Domain**: Sales Territory Management, Lead Management, Marketing Campaign Workflow Design
 - **Product Domain**: Product Specification Management, Offer Configuration, Product Activation
 - **Customer Domain**: Customer Interaction Management, Loyalty Program Management, Customer Experience Analysis
@@ -151,18 +165,21 @@ Each domain includes relevant capabilities with realistic descriptions. For exam
 ## Technical Implementation
 
 ### React Patterns
+
 - **Functional Components**: Modern React with hooks
 - **State Management**: Local state with useState and useEffect
 - **Event Handling**: Comprehensive event handlers for all user interactions
 - **Conditional Rendering**: Dynamic UI based on state and user actions
 
 ### Styling
+
 - **Tailwind CSS**: Utility-first CSS framework
 - **Responsive Design**: Mobile-first approach with responsive breakpoints
 - **Component Library**: Integration with Shadcn UI components
 - **Custom Styling**: Tailored styles for TMF-specific elements
 
 ### Performance
+
 - **Efficient Rendering**: Minimal re-renders with proper state management
 - **Lazy Loading**: Capabilities are only rendered when domains are expanded
 - **Optimized Updates**: Batch state updates to prevent unnecessary renders
@@ -170,6 +187,7 @@ Each domain includes relevant capabilities with realistic descriptions. For exam
 ## Future Enhancements
 
 ### Planned Features
+
 - **Bulk Operations**: Select multiple items for batch operations
 - **Search & Filter**: Find specific domains or capabilities quickly
 - **Validation**: Input validation and error handling
@@ -177,6 +195,7 @@ Each domain includes relevant capabilities with realistic descriptions. For exam
 - **Collaboration**: Multi-user editing capabilities
 
 ### Integration Roadmap
+
 - **SpecSync Integration**: Map imported requirements to TMF ODA capabilities
 - **Effort Estimation**: Link capabilities to effort estimates
 - **Work Package Mapping**: Associate capabilities with work packages
@@ -191,18 +210,21 @@ Each domain includes relevant capabilities with realistic descriptions. For exam
 ## Development
 
 ### Prerequisites
+
 - Node.js 16+
 - React 18+
 - TypeScript 4.5+
 - Tailwind CSS 3.0+
 
 ### Setup
+
 1. Install dependencies: `npm install`
 2. Start development server: `npm run dev`
 3. Navigate to `/tmf-demo` for the standalone demo
 4. Access via main app under TMF → TMF ODA Management
 
 ### Testing
+
 - Component testing with React Testing Library
 - Integration testing for state management
 - E2E testing for user workflows
@@ -210,6 +232,7 @@ Each domain includes relevant capabilities with realistic descriptions. For exam
 ## Support
 
 For questions or issues with the TMF ODA Management System:
+
 - Check the component documentation
 - Review the TypeScript interfaces
 - Test with the standalone demo page

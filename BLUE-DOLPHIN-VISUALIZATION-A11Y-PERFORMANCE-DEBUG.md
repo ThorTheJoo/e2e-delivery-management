@@ -1,6 +1,7 @@
 ### Blue Dolphin Visualization — Accessibility, Performance, and Debugging
 
 #### Accessibility (WCAG AA targets)
+
 - Keyboard navigation:
   - Tab-order through controls in `graph-controls` and focusable graph overlay buttons.
   - Provide keyboard shortcuts for zoom in/out/reset and focus selected node.
@@ -14,6 +15,7 @@
   - On node/link selection, move focus to the sidebar heading; Esc returns focus to graph controls.
 
 #### Performance
+
 - Dataset targets: 1k nodes / 2k links at 60fps.
 - Rendering:
   - Precompute node/link visual attributes (size, color, shape, style) during transform.
@@ -27,6 +29,7 @@
   - Use `useRef` to hold immutable snapshots for current render to avoid effect loops.
 
 #### Debugging
+
 - Transform logs:
   - Counts and first sample of nodes/links.
   - Number of dropped/invalid links; unresolved endpoints.
@@ -37,5 +40,3 @@
 - Error handling:
   - Catch and surface upstream OData errors distinctly from network issues.
   - Provide user-facing retry with copied filter snippets.
-
-

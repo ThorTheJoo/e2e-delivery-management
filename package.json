@@ -1,14 +1,23 @@
 {
   "name": "e2e-delivery-management",
-  "version": "1.26.0",
+  "version": "1.7.0",
   "description": "E2E Delivery Management System - TMF Scoping & Architecture Orchestrator",
   "private": true,
+  "engines": {
+    "node": ">=18.18 <23",
+    "npm": ">=9"
+  },
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/build-info.js",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "build-info": "node scripts/build-info.js",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint:fix": "next lint --fix"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.0",
@@ -41,14 +50,16 @@
     "autoprefixer": "^10.4.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
+    "csv-parser": "^3.2.0",
     "date-fns": "^2.30.0",
+    "exceljs": "^4.4.0",
     "framer-motion": "^10.16.0",
     "lucide-react": "^0.294.0",
     "next": "^14.2.32",
     "postcss": "^8.4.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-force-graph": "^1.48.0",
+    "react-force-graph": "^1.29.3",
     "react-force-graph-2d": "^1.28.0",
     "react-hook-form": "^7.48.0",
     "recharts": "^2.8.0",
@@ -62,9 +73,22 @@
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^6.13.0",
     "@typescript-eslint/parser": "^6.13.0",
+    "dotenv": "^17.2.2",
     "eslint": "^8.55.0",
     "eslint-config-next": "^14.2.32",
     "prettier": "^3.1.0",
     "prettier-plugin-tailwindcss": "^0.5.7"
+  },
+  "browserslist": {
+    "production": [
+      "last 2 versions",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }

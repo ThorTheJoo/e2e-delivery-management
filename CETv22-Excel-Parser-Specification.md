@@ -3,6 +3,7 @@
 ## Excel File Structure
 
 ### Ph1Demand Worksheet Requirements
+
 - **Headers Row**: Row 3 (index 2)
 - **Data Start Row**: Row 6 (index 5)
 - **Required Columns**:
@@ -11,6 +12,7 @@
   - Column O (index 14): Total Mandate Effort
 
 ### Sample Excel Structure
+
 ```
 Row 1: [Empty or title]
 Row 2: [Empty or subtitle]
@@ -24,29 +26,35 @@ Row 7: ['Project Managers (Launch Lead)', ..., 'Program', ..., 57.5, ...]
 ## Parser Implementation
 
 ### Core Parser Class
+
 ```typescript
 export class CETv22ParserService {
-  async parseExcelFile(file: File): Promise<CETv22Data>
-  private processDemandSheet(sheetData: any[][], sheetName: string): CETv22ResourceDemand[]
-  private createResourceDemand(row: any[], headers: string[], sheetName: string): CETv22ResourceDemand | null
-  private isValidDemandRow(row: any[], headers: string[]): boolean
-  private getCellValueByIndex(row: any[], index: number): string
+  async parseExcelFile(file: File): Promise<CETv22Data>;
+  private processDemandSheet(sheetData: any[][], sheetName: string): CETv22ResourceDemand[];
+  private createResourceDemand(
+    row: any[],
+    headers: string[],
+    sheetName: string,
+  ): CETv22ResourceDemand | null;
+  private isValidDemandRow(row: any[], headers: string[]): boolean;
+  private getCellValueByIndex(row: any[], index: number): string;
 }
 ```
 
 ### Key Parsing Logic
 
 #### 1. Sheet Processing
+
 ```typescript
 private processDemandSheet(sheetData: any[][], sheetName: string): CETv22ResourceDemand[] {
   const demands: CETv22ResourceDemand[] = [];
-  
+
   if (sheetData.length < 6) return demands;
-  
+
   // Ph1Demand specific handling
   const headers = sheetName === 'Ph1Demand' ? sheetData[2] : sheetData[0];
   const startRowIndex = sheetName === 'Ph1Demand' ? 5 : 1;
-  
+
   for (let i = startRowIndex; i < sheetData.length; i++) {
     const row = sheetData[i];
     if (this.isValidDemandRow(row, headers)) {
@@ -54,12 +62,13 @@ private processDemandSheet(sheetData: any[][], sheetName: string): CETv22Resourc
       if (demand) demands.push(demand);
     }
   }
-  
+
   return demands;
 }
 ```
 
 #### 2. Data Extraction
+
 ```typescript
 private createResourceDemand(row: any[], headers: string[], sheetName: string): CETv22ResourceDemand | null {
   // Ph1Demand specific extraction
@@ -67,7 +76,7 @@ private createResourceDemand(row: any[], headers: string[], sheetName: string): 
     const domain = this.getCellValueByIndex(row, 12); // Column M
     const totalEffortStr = this.getCellValueByIndex(row, 14); // Column O
     const totalMandateEffort = parseFloat(totalEffortStr) || undefined;
-    
+
     return {
       weekNumber: 1, // Default for Ph1Demand
       weekDate: '',
@@ -80,12 +89,13 @@ private createResourceDemand(row: any[], headers: string[], sheetName: string): 
       totalMandateEffort
     };
   }
-  
+
   // Standard extraction for other sheets...
 }
 ```
 
 #### 3. Validation
+
 ```typescript
 private isValidDemandRow(row: any[], headers: string[]): boolean {
   // Ph1Demand validation
@@ -94,7 +104,7 @@ private isValidDemandRow(row: any[], headers: string[]): boolean {
     const totalEffort = parseFloat(String(row[14] || ''));
     return domain.length > 0 && !isNaN(totalEffort) && totalEffort > 0;
   }
-  
+
   // Standard validation for other sheets...
 }
 ```
@@ -102,13 +112,15 @@ private isValidDemandRow(row: any[], headers: string[]): boolean {
 ## Data Mapping
 
 ### Column Index Mapping
-| Column | Index | Purpose | Example |
-|--------|-------|---------|---------|
-| A | 0 | Project Role | "Program Directors" |
-| M | 12 | Domain | "Program" |
-| O | 14 | Total Effort | 55.5 |
+
+| Column | Index | Purpose      | Example             |
+| ------ | ----- | ------------ | ------------------- |
+| A      | 0     | Project Role | "Program Directors" |
+| M      | 12    | Domain       | "Program"           |
+| O      | 14    | Total Effort | 55.5                |
 
 ### Data Transformation
+
 ```typescript
 // Input: Excel row
 ['Program Directors', 'Phase 1', 'AMER', ..., 'Program', ..., 55.5, ...]
@@ -126,12 +138,14 @@ private isValidDemandRow(row: any[], headers: string[]): boolean {
 ## Error Handling
 
 ### Validation Errors
+
 - Missing required columns
 - Invalid data types
 - Empty or malformed rows
 - File format issues
 
 ### Error Recovery
+
 - Skip invalid rows
 - Log warnings for debugging
 - Provide meaningful error messages
@@ -140,12 +154,14 @@ private isValidDemandRow(row: any[], headers: string[]): boolean {
 ## Performance Considerations
 
 ### Memory Management
+
 - Stream large files
 - Process data in chunks
 - Clean up temporary objects
 - Optimize data structures
 
 ### Processing Speed
+
 - Use direct index access
 - Minimize string operations
 - Efficient validation logic
@@ -154,6 +170,7 @@ private isValidDemandRow(row: any[], headers: string[]): boolean {
 ## Testing Requirements
 
 ### Test Cases
+
 1. **Valid Ph1Demand file** - Should extract all data correctly
 2. **Missing columns** - Should handle gracefully
 3. **Invalid data types** - Should skip invalid rows
@@ -161,22 +178,25 @@ private isValidDemandRow(row: any[], headers: string[]): boolean {
 5. **Large file** - Should process without memory issues
 
 ### Sample Test Data
+
 ```typescript
 const samplePh1DemandData = [
   ['Project Role', 'Phase', 'Region', '...', 'Domain', '...', 'Total'],
   ['Program Directors', 'Phase 1', 'AMER', '...', 'Program', '...', 55.5],
-  ['Project Managers', 'Phase 1', 'AMER', '...', 'Program', '...', 57.5]
+  ['Project Managers', 'Phase 1', 'AMER', '...', 'Program', '...', 57.5],
 ];
 ```
 
 ## Integration Points
 
 ### Dependencies
+
 - **xlsx library**: Excel file reading
 - **File API**: Browser file handling
 - **TypeScript**: Type safety
 
 ### Output Format
+
 - Structured data objects
 - Consistent field naming
 - Type-safe interfaces
@@ -185,20 +205,22 @@ const samplePh1DemandData = [
 ## Configuration
 
 ### Parser Settings
+
 ```typescript
 interface ParserConfig {
   sheetName: 'Ph1Demand';
   headerRow: 3;
   dataStartRow: 6;
   requiredColumns: {
-    projectRole: 0;    // Column A
-    domain: 12;        // Column M
-    totalEffort: 14;   // Column O
+    projectRole: 0; // Column A
+    domain: 12; // Column M
+    totalEffort: 14; // Column O
   };
 }
 ```
 
 ### Validation Rules
+
 - Minimum row length: 15 columns
 - Required fields: domain, totalMandateEffort
 - Data types: string for domain, number for effort

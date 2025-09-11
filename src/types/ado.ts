@@ -29,7 +29,7 @@ export interface ADOConfiguration {
 }
 
 // ADO Work Item Types
-export type ADOWorkItemTypeName = 'epic' | 'feature' | 'userstory' | 'task' | 'bug' | 'testcase';
+export type ADOWorkItemTypeName = 'epic' | 'feature' | 'User Story' | 'task' | 'bug' | 'testcase';
 
 // ADO Work Item Field Operations
 export type ADOFieldOperation = 'add' | 'remove' | 'replace' | 'move' | 'copy' | 'test';
@@ -182,7 +182,7 @@ export interface ADOValidationResult {
 
 // ADO Export Status
 export interface ADOExportStatus {
-  status: 'idle' | 'preparing' | 'exporting' | 'completed' | 'failed';
+  status: 'idle' | 'preparing' | 'exporting' | 'completed' | 'completed_with_errors' | 'failed';
   progress: number;
   totalItems: number;
   processedItems: number;

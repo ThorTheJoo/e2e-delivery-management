@@ -9,9 +9,9 @@ import {
   ADOProject,
   ADOAuthStatus,
   ADOIntegrationLogEntry,
-  ADONotification
+  ADONotification,
 } from '@/types/ado';
-import { Project, TMFOdaDomain, TMFOdaCapability, SpecSyncItem } from '@/types';
+import { Project, TMFOdaDomain, SpecSyncItem } from '@/types';
 
 // ADO Service Class
 export class ADOService {
@@ -21,10 +21,7 @@ export class ADOService {
   private notifications: ADONotification[] = [];
 
   constructor() {
-    // Avoid accessing browser-only APIs during SSR
-    if (typeof window !== 'undefined') {
-      void this.loadConfiguration();
-    }
+    this.loadConfiguration();
     this.log('info', 'ADO Service initialized');
   }
 
@@ -32,6 +29,7 @@ export class ADOService {
   async loadConfiguration(): Promise<ADOConfiguration | null> {
     try {
       if (typeof window === 'undefined') {
+        this.log('info', 'Skipping configuration load on server');
         return null;
       }
       const savedConfig = window.localStorage.getItem('ado-configuration');
@@ -41,7 +39,7 @@ export class ADOService {
         return this.configuration;
       }
     } catch (error) {
-      this.log('error', 'Failed to load configuration', error as Error);
+      this.log('error', 'Failed to load configuration', error);
     }
     return null;
   }
@@ -53,13 +51,13 @@ export class ADOService {
         window.localStorage.setItem('ado-configuration', JSON.stringify(config));
       }
       this.log('info', 'Configuration saved successfully');
-      
+
       // Test connection if authentication is provided
       if (config.authentication.token) {
         await this.testConnection();
       }
     } catch (error) {
-      this.log('error', 'Failed to save configuration', error as Error);
+      this.log('error', 'Failed to save configuration', error);
       throw error;
     }
   }
@@ -75,15 +73,39 @@ export class ADOService {
       return false;
     }
 
+    if (!this.configuration.organization || !this.configuration.project) {
+      this.log('error', 'Organization and project must be configured');
+      this.addNotification(
+        'error',
+        'Configuration Error',
+        'Organization and project must be configured',
+      );
+      return false;
+    }
+
+    if (!this.configuration.authentication.token) {
+      this.log('error', 'Authentication token not configured');
+      this.addNotification('error', 'Authentication Error', 'Personal Access Token not configured');
+      return false;
+    }
+
     try {
-      this.log('info', 'Testing ADO connection...');
-      
+      this.log('info', 'Testing ADO connection...', {
+        organization: this.configuration.organization,
+        project: this.configuration.project,
+      });
+
       const response = await this.makeApiCall('/_apis/projects?api-version=7.1');
-      
+
       if (response.ok) {
         const data: ADOApiResponse<ADOProject> = await response.json();
-        const project = data.value.find(p => p.name === this.configuration!.project);
-        
+        this.log('info', 'Successfully retrieved projects list', {
+          projectCount: data.value.length,
+          projects: data.value.map((p) => p.name),
+        });
+
+        const project = data.value.find((p) => p.name === this.configuration!.project);
+
         if (project) {
           this.authStatus = {
             isAuthenticated: true,
@@ -91,25 +113,51 @@ export class ADOService {
             project: this.configuration.project,
             user: 'Authenticated User', // Would get from API in real implementation
             permissions: ['Read', 'Write'], // Would get from API in real implementation
-            lastChecked: new Date().toISOString()
+            lastChecked: new Date().toISOString(),
           };
-          
-          this.log('info', 'ADO connection test successful');
-          this.addNotification('success', 'Connection Successful', 'Successfully connected to Azure DevOps');
+
+          this.log('info', 'ADO connection test successful', {
+            foundProject: project.name,
+            projectId: project.id,
+          });
+          this.addNotification(
+            'success',
+            'Connection Successful',
+            `Successfully connected to Azure DevOps project: ${project.name}`,
+          );
           return true;
         } else {
-          this.log('error', `Project '${this.configuration.project}' not found`);
-          this.addNotification('error', 'Connection Failed', `Project '${this.configuration.project}' not found`);
+          this.log('error', `Project '${this.configuration.project}' not found in organization`, {
+            availableProjects: data.value.map((p) => p.name),
+          });
+          this.addNotification(
+            'error',
+            'Project Not Found',
+            `Project '${this.configuration.project}' not found. Available projects: ${data.value.map((p) => p.name).join(', ')}`,
+          );
           return false;
         }
       } else {
-        this.log('error', 'ADO connection test failed', { status: response.status, statusText: response.statusText });
-        this.addNotification('error', 'Connection Failed', 'Failed to connect to Azure DevOps');
+        const errorText = await response.text();
+        this.log('error', 'ADO connection test failed', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorText,
+        });
+        this.addNotification(
+          'error',
+          'Connection Failed',
+          `HTTP ${response.status}: ${response.statusText}`,
+        );
         return false;
       }
     } catch (error) {
-      this.log('error', 'ADO connection test failed', error as Error);
-      this.addNotification('error', 'Connection Failed', 'Failed to connect to Azure DevOps');
+      this.log('error', 'ADO connection test failed with exception', error);
+      this.addNotification(
+        'error',
+        'Connection Failed',
+        `Network error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
       return false;
     }
   }
@@ -118,16 +166,95 @@ export class ADOService {
     return this.authStatus;
   }
 
+  // Validate work item types exist in the project
+  async validateWorkItemTypes(): Promise<{ [key: string]: boolean }> {
+    if (!this.configuration) {
+      throw new Error('ADO configuration not found');
+    }
+
+    const workItemTypes = ['epic', 'feature', 'User Story', 'task'];
+    const validation: { [key: string]: boolean } = {};
+
+    try {
+      for (const type of workItemTypes) {
+        try {
+          // Handle spaces in work item type names by URL encoding
+          const encodedType = encodeURIComponent(type);
+          const response = await this.makeApiCall(
+            `/_apis/wit/workItemTypes/${encodedType}?api-version=7.1`,
+            {},
+            true,
+          );
+          validation[type] = response.ok;
+
+          if (response.ok) {
+            this.log('info', `Work item type '${type}' is available`);
+          } else {
+            this.log('warning', `Work item type '${type}' is not available`, {
+              status: response.status,
+            });
+          }
+        } catch (error) {
+          validation[type] = false;
+          this.log('warning', `Failed to validate work item type '${type}'`, error);
+        }
+      }
+    } catch (error) {
+      this.log('error', 'Failed to validate work item types', error);
+    }
+
+    return validation;
+  }
+
+  // Get available work item types from the project
+  async getAvailableWorkItemTypes(): Promise<string[]> {
+    if (!this.configuration) {
+      throw new Error('ADO configuration not found');
+    }
+
+    try {
+      const response = await this.makeApiCall('/_apis/wit/workItemTypes?api-version=7.1', {}, true);
+
+      if (response.ok) {
+        const data = await response.json();
+        const availableTypes = data.value.map((type: any) => type.name);
+
+        this.log('info', 'Retrieved available work item types', {
+          count: availableTypes.length,
+          types: availableTypes,
+        });
+
+        return availableTypes;
+      } else {
+        this.log('error', 'Failed to retrieve work item types', { status: response.status });
+        return [];
+      }
+    } catch (error) {
+      this.log('error', 'Exception while retrieving work item types', error);
+      return [];
+    }
+  }
+
+  // Suggest alternative work item types
+  suggestAlternativeWorkItemTypes(): { [key: string]: string[] } {
+    return {
+      epic: ['Requirement', 'Issue', 'Bug'],
+      feature: ['Requirement', 'Issue', 'Bug'],
+      'User Story': ['Requirement', 'Issue', 'Bug'],
+      task: ['Requirement', 'Issue', 'Bug'],
+    };
+  }
+
   // Work Item Generation
   generateWorkItemMappings(
     project: Project,
     domains: TMFOdaDomain[],
-    specSyncItems: SpecSyncItem[]
+    specSyncItems: SpecSyncItem[],
   ): ADOWorkItemMapping[] {
-    this.log('info', 'Generating work item mappings', { 
-      projectId: project.id, 
-      domainCount: domains.length, 
-      requirementCount: specSyncItems.length 
+    this.log('info', 'Generating work item mappings', {
+      projectId: project.id,
+      domainCount: domains.length,
+      requirementCount: specSyncItems.length,
     });
 
     const mappings: ADOWorkItemMapping[] = [];
@@ -138,39 +265,50 @@ export class ADOService {
       mappings.push(epicMapping);
 
       // 2. Generate Features from TMF Domains
-      domains.forEach(domain => {
+      domains.forEach((domain) => {
         const featureMapping = this.generateFeatureFromDomain(domain);
         mappings.push(featureMapping);
       });
 
       // 3. Generate User Stories from TMF Capabilities
-      domains.forEach(domain => {
-        domain.capabilities.forEach(capability => {
+      domains.forEach((domain) => {
+        domain.capabilities.forEach((capability) => {
           const userStoryMapping = this.generateUserStoryFromCapability(capability, domain);
+          this.log('debug', 'Generated User Story mapping', {
+            targetType: userStoryMapping.targetType,
+            title: userStoryMapping.targetTitle,
+          });
           mappings.push(userStoryMapping);
         });
       });
 
       // 4. Generate Tasks from SpecSync Requirements
-      specSyncItems.forEach(item => {
+      specSyncItems.forEach((item) => {
         const taskMapping = this.generateTaskFromSpecSyncItem(item, domains);
         if (taskMapping) {
           mappings.push(taskMapping);
         }
       });
 
-      this.log('info', 'Work item mappings generated successfully', { 
-        totalMappings: mappings.length,
-        breakdown: {
-          epics: mappings.filter(m => m.targetType === 'epic').length,
-          features: mappings.filter(m => m.targetType === 'feature').length,
-          userStories: mappings.filter(m => m.targetType === 'userstory').length,
-          tasks: mappings.filter(m => m.targetType === 'task').length
-        }
+      // Debug: Log all generated mappings to see their types
+      mappings.forEach((mapping, index) => {
+        this.log('debug', `Mapping ${index + 1}`, {
+          targetType: mapping.targetType,
+          title: mapping.targetTitle,
+        });
       });
 
+      this.log('info', 'Work item mappings generated successfully', {
+        totalMappings: mappings.length,
+        breakdown: {
+          epics: mappings.filter((m) => m.targetType === 'epic').length,
+          features: mappings.filter((m) => m.targetType === 'feature').length,
+          userStories: mappings.filter((m) => m.targetType === 'User Story').length,
+          tasks: mappings.filter((m) => m.targetType === 'task').length,
+        },
+      });
     } catch (error) {
-      this.log('error', 'Failed to generate work item mappings', error as Error);
+      this.log('error', 'Failed to generate work item mappings', error);
     }
 
     return mappings;
@@ -195,13 +333,13 @@ export class ADOService {
         'Custom.ProjectId': project.id,
         'Custom.Customer': project.customer,
         'Custom.Duration': project.duration,
-        'Custom.TeamSize': project.teamSize
+        'Custom.TeamSize': project.teamSize,
       },
       relationships: [],
       estimatedEffort: this.calculateTotalEffort(domains),
       storyPoints: 0,
       priority: 'High',
-      tags: ['BSS-Transformation', 'Epic', project.customer, 'TMF-ODA']
+      tags: ['BSS-Transformation', 'Epic', project.customer, 'TMF-ODA'],
     };
   }
 
@@ -223,22 +361,25 @@ export class ADOService {
         'System.Tags': `TMF-Domain;${domain.name};Feature`,
         'Custom.DomainId': domain.id,
         'Custom.CapabilityCount': domain.capabilities.length,
-        'Custom.TMFLevel': 'Domain'
+        'Custom.TMFLevel': 'Domain',
       },
       relationships: [`Epic:${domain.name}`],
       estimatedEffort: this.calculateDomainEffort(domain),
       storyPoints: this.calculateStoryPoints(domain.capabilities.length),
       priority: 'High',
-      tags: ['TMF-Domain', domain.name, 'Feature']
+      tags: ['TMF-Domain', domain.name, 'Feature'],
     };
   }
 
-  private generateUserStoryFromCapability(capability: TMFOdaCapability, domain: TMFOdaDomain): ADOWorkItemMapping {
+  private generateUserStoryFromCapability(
+    capability: any,
+    domain: TMFOdaDomain,
+  ): ADOWorkItemMapping {
     return {
       sourceType: 'capability',
       sourceId: capability.id,
       sourceName: capability.name,
-      targetType: 'userstory',
+      targetType: 'User Story',
       targetTitle: capability.name,
       targetDescription: capability.description,
       targetFields: {
@@ -251,23 +392,53 @@ export class ADOService {
         'System.Tags': `TMF-Capability;${capability.name};UserStory`,
         'Custom.CapabilityId': capability.id,
         'Custom.DomainId': domain.id,
-        'Custom.TMFLevel': 'Capability'
+        'Custom.TMFLevel': 'Capability',
       },
       relationships: [`Feature:${domain.name}`],
       estimatedEffort: this.calculateCapabilityEffort(capability),
       storyPoints: this.calculateStoryPoints(1),
       priority: 'Medium',
-      tags: ['TMF-Capability', capability.name, 'UserStory']
+      tags: ['TMF-Capability', capability.name, 'UserStory'],
     };
   }
 
-  private generateTaskFromSpecSyncItem(item: SpecSyncItem, domains: TMFOdaDomain[]): ADOWorkItemMapping | null {
+  private generateTaskFromSpecSyncItem(
+    item: SpecSyncItem,
+    domains: TMFOdaDomain[],
+  ): ADOWorkItemMapping | null {
     // Find matching capability based on function name or capability field
     const matchingCapability = this.findMatchingCapability(item, domains);
     if (!matchingCapability) {
-      this.log('warning', 'No matching capability found for SpecSync item', { itemId: item.id, functionName: item.functionName });
+      this.log('warning', 'No matching capability found for SpecSync item', {
+        itemId: item.id,
+        functionName: item.functionName,
+      });
       return null;
     }
+
+    // Enrich with complexity attributes if present in localStorage selection (non-breaking)
+    let complexityFields: Record<string, any> = {};
+    try {
+      const raw = typeof window !== 'undefined' ? window.localStorage.getItem('complexity-selection') : null;
+      if (raw) {
+        const selection = JSON.parse(raw);
+        complexityFields = {
+          'Custom.Complexity.CustomerType': selection.customerTypeId || '',
+          'Custom.Complexity.ProductMix': Array.isArray(selection.productMixIds)
+            ? selection.productMixIds.join(';')
+            : selection.productMixId || '',
+          'Custom.Complexity.AccessTech': Array.isArray(selection.accessTechnologyIds)
+            ? selection.accessTechnologyIds.join(';')
+            : selection.accessTechnologyId || '',
+          'Custom.Complexity.Channel': Array.isArray(selection.channelIds)
+            ? selection.channelIds.join(';')
+            : selection.channelId || '',
+          'Custom.Complexity.Deployment': selection.deploymentId || '',
+          'Custom.Complexity.APIs': selection?.integration?.apiCount || 0,
+          'Custom.Complexity.Legacy': Boolean(selection?.integration?.requiresLegacyCompatibility),
+        };
+      }
+    } catch {}
 
     return {
       sourceType: 'requirement',
@@ -275,10 +446,12 @@ export class ADOService {
       sourceName: item.rephrasedRequirementId,
       targetType: 'task',
       targetTitle: `${item.rephrasedRequirementId} - ${item.functionName}`,
-      targetDescription: item.usecase1 || item.description || `Implement ${item.functionName} functionality`,
+      targetDescription:
+        item.usecase1 || item.description || `Implement ${item.functionName} functionality`,
       targetFields: {
         'System.Title': `${item.rephrasedRequirementId} - ${item.functionName}`,
-        'System.Description': item.usecase1 || item.description || `Implement ${item.functionName} functionality`,
+        'System.Description':
+          item.usecase1 || item.description || `Implement ${item.functionName} functionality`,
         'Microsoft.VSTS.Scheduling.RemainingWork': this.calculateRemainingWork(item),
         'Microsoft.VSTS.Scheduling.Activity': this.determineActivity(item),
         'System.AreaPath': this.configuration?.areaPath || 'Project',
@@ -291,13 +464,14 @@ export class ADOService {
         'Custom.Capability': item.capability,
         'Custom.Usecase': item.usecase1,
         'Custom.Priority': item.priority || 'Medium',
-        'Custom.Status': item.status || 'New'
+        'Custom.Status': item.status || 'New',
+        ...complexityFields,
       },
       relationships: [`UserStory:${matchingCapability.name}`],
       estimatedEffort: this.calculateTaskEffort(item),
       storyPoints: 0,
       priority: item.priority || 'Medium',
-      tags: ['SpecSync', item.domain, item.functionName, 'Task']
+      tags: ['SpecSync', item.domain, item.functionName, 'Task'],
     };
   }
 
@@ -307,10 +481,13 @@ export class ADOService {
   }
 
   private calculateDomainEffort(domain: TMFOdaDomain): number {
-    return domain.capabilities.reduce((total, capability) => total + this.calculateCapabilityEffort(capability), 0);
+    return domain.capabilities.reduce(
+      (total, capability) => total + this.calculateCapabilityEffort(capability),
+      0,
+    );
   }
 
-  private calculateCapabilityEffort(_capability: TMFOdaCapability): number {
+  private calculateCapabilityEffort(_capability: any): number {
     // Default effort calculation - can be enhanced with actual effort data
     return 5; // 5 days per capability
   }
@@ -318,9 +495,9 @@ export class ADOService {
   private calculateTaskEffort(item: SpecSyncItem): number {
     // Default effort calculation based on priority
     const effortMap: Record<string, number> = {
-      'High': 3,
-      'Medium': 2,
-      'Low': 1
+      High: 3,
+      Medium: 2,
+      Low: 1,
     };
     return effortMap[item.priority || 'Medium'] || 2;
   }
@@ -342,12 +519,14 @@ export class ADOService {
     return 'Development';
   }
 
-  private findMatchingCapability(item: SpecSyncItem, domains: TMFOdaDomain[]): TMFOdaCapability | null {
+  private findMatchingCapability(item: SpecSyncItem, domains: TMFOdaDomain[]): any | null {
     // Find capability by name match or domain match
     for (const domain of domains) {
       for (const capability of domain.capabilities) {
-        if (capability.name.toLowerCase().includes(item.functionName.toLowerCase()) ||
-            item.capability.toLowerCase().includes(capability.name.toLowerCase())) {
+        if (
+          capability.name.toLowerCase().includes(item.functionName.toLowerCase()) ||
+          item.capability.toLowerCase().includes(capability.name.toLowerCase())
+        ) {
           return capability;
         }
       }
@@ -372,13 +551,16 @@ export class ADOService {
         if (!mapping.targetDescription || mapping.targetDescription.trim() === '') {
           warnings.push(`Mapping ${index + 1}: Missing description`);
         }
-        if (mapping.targetFields['System.Title'] && mapping.targetFields['System.Title'].length > 255) {
+        if (
+          mapping.targetFields['System.Title'] &&
+          mapping.targetFields['System.Title'].length > 255
+        ) {
           errors.push(`Mapping ${index + 1}: Title too long (max 255 characters)`);
         }
       });
 
       // Check for duplicate titles
-      const titles = mappings.map(m => m.targetTitle);
+      const titles = mappings.map((m) => m.targetTitle);
       const duplicateTitles = titles.filter((title, index) => titles.indexOf(title) !== index);
       if (duplicateTitles.length > 0) {
         warnings.push(`Duplicate titles found: ${duplicateTitles.join(', ')}`);
@@ -390,27 +572,29 @@ export class ADOService {
       } else {
         if (!this.configuration.organization) errors.push('Organization not configured');
         if (!this.configuration.project) errors.push('Project not configured');
-        if (!this.configuration.authentication.token) warnings.push('Authentication token not configured');
+        if (!this.configuration.authentication.token)
+          warnings.push('Authentication token not configured');
       }
 
       // Summary info
       const breakdown = {
-        epics: mappings.filter(m => m.targetType === 'epic').length,
-        features: mappings.filter(m => m.targetType === 'feature').length,
-        userStories: mappings.filter(m => m.targetType === 'userstory').length,
-        tasks: mappings.filter(m => m.targetType === 'task').length
+        epics: mappings.filter((m) => m.targetType === 'epic').length,
+        features: mappings.filter((m) => m.targetType === 'feature').length,
+        userStories: mappings.filter((m) => m.targetType === 'User Story').length,
+        tasks: mappings.filter((m) => m.targetType === 'task').length,
       };
 
-      info.push(`Total items: ${mappings.length} (Epics: ${breakdown.epics}, Features: ${breakdown.features}, User Stories: ${breakdown.userStories}, Tasks: ${breakdown.tasks})`);
+      info.push(
+        `Total items: ${mappings.length} (Epics: ${breakdown.epics}, Features: ${breakdown.features}, User Stories: ${breakdown.userStories}, Tasks: ${breakdown.tasks})`,
+      );
 
-      this.log('info', 'Validation completed', { 
-        errors: errors.length, 
-        warnings: warnings.length, 
-        info: info.length 
+      this.log('info', 'Validation completed', {
+        errors: errors.length,
+        warnings: warnings.length,
+        info: info.length,
       });
-
     } catch (error) {
-      this.log('error', 'Validation failed', error as Error);
+      this.log('error', 'Validation failed', error);
       errors.push('Validation process failed');
     }
 
@@ -418,7 +602,7 @@ export class ADOService {
       isValid: errors.length === 0,
       errors,
       warnings,
-      info
+      info,
     };
   }
 
@@ -426,10 +610,10 @@ export class ADOService {
   generatePreview(mappings: ADOWorkItemMapping[]): ADOPreviewData {
     this.log('info', 'Generating preview data', { totalMappings: mappings.length });
 
-    const epics = mappings.filter(m => m.targetType === 'epic');
-    const features = mappings.filter(m => m.targetType === 'feature');
-    const userStories = mappings.filter(m => m.targetType === 'userstory');
-    const tasks = mappings.filter(m => m.targetType === 'task');
+    const epics = mappings.filter((m) => m.targetType === 'epic');
+    const features = mappings.filter((m) => m.targetType === 'feature');
+    const userStories = mappings.filter((m) => m.targetType === 'User Story');
+    const tasks = mappings.filter((m) => m.targetType === 'task');
 
     const totalEffort = mappings.reduce((sum, m) => sum + (m.estimatedEffort || 0), 0);
     const totalStoryPoints = mappings.reduce((sum, m) => sum + (m.storyPoints || 0), 0);
@@ -438,7 +622,7 @@ export class ADOService {
       epics: epics.length,
       features: features.length,
       userStories: userStories.length,
-      tasks: tasks.length
+      tasks: tasks.length,
     };
 
     return {
@@ -450,8 +634,8 @@ export class ADOService {
         totalItems: mappings.length,
         totalEffort,
         totalStoryPoints,
-        breakdown
-      }
+        breakdown,
+      },
     };
   }
 
@@ -463,7 +647,7 @@ export class ADOService {
       exportDate: new Date().toISOString(),
       configuration: this.configuration,
       workItems: mappings,
-      summary: this.generatePreview(mappings).summary
+      summary: this.generatePreview(mappings).summary,
     };
 
     return JSON.stringify(exportData, null, 2);
@@ -482,23 +666,64 @@ export class ADOService {
       totalItems: mappings.length,
       processedItems: 0,
       errors: [],
-      exportedItems: []
+      exportedItems: [],
     };
 
     try {
       exportStatus.status = 'exporting';
 
-      for (let i = 0; i < mappings.length; i++) {
-        const mapping = mappings[i];
-        
+      // First, validate that all required work item types exist
+      this.log('info', 'Validating work item types before export...');
+      const workItemTypeValidation = await this.validateWorkItemTypes();
+
+      // Debug: Log the validation results
+      this.log('debug', 'Work item type validation results', workItemTypeValidation);
+
+      // Debug: Log all mapping types before filtering
+      mappings.forEach((mapping, index) => {
+        this.log('debug', `Mapping ${index + 1} type check`, {
+          targetType: mapping.targetType,
+          title: mapping.targetTitle,
+          isValid: workItemTypeValidation[mapping.targetType],
+        });
+      });
+
+      // Filter out mappings for unavailable work item types
+      const validMappings = mappings.filter((mapping) => {
+        if (!workItemTypeValidation[mapping.targetType]) {
+          const errorMessage = `Work item type '${mapping.targetType}' not available in ADO project`;
+          exportStatus.errors.push(errorMessage);
+          this.log('warning', errorMessage, { mapping: mapping.targetTitle });
+          return false;
+        }
+        return true;
+      });
+
+      if (validMappings.length === 0) {
+        exportStatus.status = 'failed';
+        exportStatus.errors.push('No valid work item types found for export');
+        this.log('error', 'Export failed: No valid work item types available');
+        return exportStatus;
+      }
+
+      this.log('info', `Proceeding with export of ${validMappings.length} valid mappings`);
+
+      for (let i = 0; i < validMappings.length; i++) {
+        const mapping = validMappings[i];
+
         try {
+          this.log(
+            'info',
+            `Creating work item ${i + 1}/${validMappings.length}: ${mapping.targetTitle}`,
+          );
+
           const workItem = await this.createWorkItem(mapping);
           exportStatus.exportedItems.push(workItem);
           exportStatus.processedItems++;
-          
-          this.log('info', 'Work item created successfully', { 
-            workItemId: workItem.id, 
-            title: mapping.targetTitle 
+
+          this.log('info', 'Work item created successfully', {
+            workItemId: workItem.id,
+            title: mapping.targetTitle,
           });
         } catch (error) {
           const errorMessage = `Failed to create work item: ${mapping.targetTitle}`;
@@ -506,38 +731,46 @@ export class ADOService {
           this.log('error', errorMessage, error);
         }
 
-        exportStatus.progress = Math.round(((i + 1) / mappings.length) * 100);
+        exportStatus.progress = Math.round(((i + 1) / validMappings.length) * 100);
       }
 
-      exportStatus.status = exportStatus.errors.length === 0 ? 'completed' : 'failed';
-      
-      this.log('info', 'ADO export completed', { 
+      exportStatus.status =
+        exportStatus.errors.length === 0 ? 'completed' : 'completed_with_errors';
+
+      this.log('info', 'ADO export completed', {
         status: exportStatus.status,
         processed: exportStatus.processedItems,
-        errors: exportStatus.errors.length
+        errors: exportStatus.errors.length,
       });
-
     } catch (error) {
       exportStatus.status = 'failed';
       exportStatus.errors.push('Export process failed');
-      this.log('error', 'ADO export failed', error as Error);
+      this.log('error', 'ADO export failed', error);
     }
 
     return exportStatus;
   }
 
   // API Methods
-  private async makeApiCall(endpoint: string, options: RequestInit = {}): Promise<Response> {
+  private async makeApiCall(
+    endpoint: string,
+    options: RequestInit = {},
+    useProjectUrl: boolean = false,
+  ): Promise<Response> {
     if (!this.configuration) {
       throw new Error('ADO configuration not found');
     }
 
-    const baseUrl = `https://dev.azure.com/${this.configuration.organization}/${this.configuration.project}`;
+    // For organization-level APIs (like listing projects), use organization URL
+    // For project-level APIs (like work items), use project URL
+    const baseUrl = useProjectUrl
+      ? `https://dev.azure.com/${this.configuration.organization}/${this.configuration.project}`
+      : `https://dev.azure.com/${this.configuration.organization}`;
     const url = `${baseUrl}${endpoint}`;
 
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      ...(options.headers as Record<string, string>)
+      'Content-Type': 'application/json-patch+json',
+      ...(options.headers as Record<string, string>),
     };
 
     if (this.configuration.authentication.token) {
@@ -549,56 +782,150 @@ export class ADOService {
 
     return fetch(url, {
       ...options,
-      headers
+      headers,
     });
   }
 
   private async createWorkItem(mapping: ADOWorkItemMapping): Promise<ADOWorkItemResponse> {
-    const fields: Array<{ op: string; path: string; value: unknown }> = [];
-    
-    // Convert mapping fields to ADO format
-    Object.entries(mapping.targetFields).forEach(([path, value]) => {
-      fields.push({
-        op: 'add',
-        path: `/fields/${path}`,
-        value: value
+    try {
+      // Azure DevOps expects an array of operations, not a workItemType object
+      const operations: any[] = [];
+
+      // Add System.Title first (required field)
+      if (mapping.targetFields['System.Title']) {
+        operations.push({
+          op: 'add',
+          path: '/fields/System.Title',
+          value: mapping.targetFields['System.Title'],
+        });
+      }
+
+      // Add System.Description if available
+      if (mapping.targetFields['System.Description']) {
+        operations.push({
+          op: 'add',
+          path: '/fields/System.Description',
+          value: mapping.targetFields['System.Description'],
+        });
+      }
+
+      // Add only standard ADO fields to avoid custom field errors
+      // Note: Removed System.Tags due to permission issues
+      const standardFields: string[] = [];
+
+      standardFields.forEach((fieldPath) => {
+        const value = mapping.targetFields[fieldPath];
+        if (value !== undefined && value !== null) {
+          operations.push({
+            op: 'add',
+            path: `/fields/${fieldPath}`,
+            value: value,
+          });
+        }
       });
-    });
 
-    const payload = {
-      workItemType: mapping.targetType,
-      fields: fields
-    };
+      // Add area path (required field)
+      const areaPath = this.configuration?.areaPath || this.configuration?.project || 'ADOSandBox';
+      operations.push({
+        op: 'add',
+        path: '/fields/System.AreaPath',
+        value: areaPath,
+      });
 
-    const response = await this.makeApiCall('/_apis/wit/workitems/$' + mapping.targetType + '?api-version=7.1', {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    });
+      // Add iteration path (required field)
+      const iterationPath =
+        this.configuration?.iterationPath || this.configuration?.project || 'ADOSandBox';
+      operations.push({
+        op: 'add',
+        path: '/fields/System.IterationPath',
+        value: iterationPath,
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`Failed to create work item: ${errorData.message || response.statusText}`);
+      // Note: External Reference ID field not available in this ADO project
+      // Epic work items will be created without this field
+
+      this.log('debug', 'Creating work item', {
+        type: mapping.targetType,
+        title: mapping.targetFields['System.Title'],
+        operations: operations.length,
+        operationsList: operations.map((op) => `${op.op} ${op.path}: ${op.value}`),
+      });
+
+      // Handle spaces in work item type names by URL encoding
+      const encodedType = encodeURIComponent(mapping.targetType);
+      const response = await this.makeApiCall(
+        '/_apis/wit/workitems/$' + encodedType + '?api-version=7.1',
+        {
+          method: 'POST',
+          body: JSON.stringify(operations),
+        },
+        true,
+      ); // Use project URL for work item operations
+
+      if (!response.ok) {
+        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        try {
+          const errorData = await response.json();
+          if (errorData.message) {
+            errorMessage = errorData.message;
+          } else if (errorData.value && errorData.value.length > 0) {
+            errorMessage = errorData.value[0].message || errorMessage;
+          }
+        } catch (parseError) {
+          // If we can't parse the error, use the status text
+        }
+
+        this.log('error', 'Work item creation failed', {
+          type: mapping.targetType,
+          title: mapping.targetFields['System.Title'],
+          status: response.status,
+          error: errorMessage,
+        });
+
+        throw new Error(
+          `Failed to create work item: ${mapping.targetFields['System.Title'] || mapping.targetType} - ${errorMessage}`,
+        );
+      }
+
+      const result = await response.json();
+      this.log('info', 'Work item created successfully', {
+        id: result.id,
+        type: mapping.targetType,
+        title: mapping.targetFields['System.Title'],
+      });
+
+      return result;
+    } catch (error) {
+      this.log('error', 'Exception during work item creation', {
+        type: mapping.targetType,
+        title: mapping.targetFields['System.Title'],
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+      throw error;
     }
-
-    return response.json();
   }
 
   // Logging and Notifications
-  private log(level: 'info' | 'warning' | 'error' | 'debug', message: string, details?: unknown): void {
+  private log(level: 'info' | 'warning' | 'error' | 'debug', message: string, details?: any): void {
     const logEntry: ADOIntegrationLogEntry = {
       id: Date.now().toString(),
       timestamp: new Date().toISOString(),
       level,
       message,
       details,
-      operation: 'ADO Service'
+      operation: 'ADO Service',
     };
 
     this.logs.push(logEntry);
     console.log(`[ADO Service] ${level.toUpperCase()}: ${message}`, details || '');
   }
 
-  private addNotification(type: 'success' | 'warning' | 'error' | 'info', title: string, message: string, details?: unknown): void {
+  private addNotification(
+    type: 'success' | 'warning' | 'error' | 'info',
+    title: string,
+    message: string,
+    details?: any,
+  ): void {
     const notification: ADONotification = {
       id: Date.now().toString(),
       type,
@@ -606,7 +933,7 @@ export class ADOService {
       message,
       details,
       timestamp: new Date().toISOString(),
-      read: false
+      read: false,
     };
 
     this.notifications.push(notification);
