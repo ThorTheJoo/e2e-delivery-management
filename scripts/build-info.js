@@ -40,7 +40,7 @@ function generateBuildInfo() {
     version: packageJson.version,
     buildHash: `${gitInfo.branch}@${gitInfo.shortCommit}`,
     buildTimestamp: gitInfo.timestamp,
-    compliance: 'ODA 2025 Compliant',
+    compliance: 'TMF 2025 Compliant',
   };
 
   // Write build info to a file that can be imported

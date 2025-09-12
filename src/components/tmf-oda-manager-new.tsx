@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -30,8 +30,8 @@ export function TMFOdaManager({ onStateChange: _onStateChange, initialState: _in
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDomainFilter, setSelectedDomainFilter] = useState<string>('all');
-  const [showAddCustomDomain, setShowAddCustomDomain] = useState(false);
-  const [availableFunctions, setAvailableFunctions] = useState<TMFFunction[]>([]);
+  // const [_showAddCustomDomain, _setShowAddCustomDomain] = useState(false);
+  // const [_availableFunctions, _setAvailableFunctions] = useState<TMFFunction[]>([]);
 
   // Load TMF reference data
   useEffect(() => {
@@ -83,7 +83,7 @@ export function TMFOdaManager({ onStateChange: _onStateChange, initialState: _in
     }
   };
 
-  const updateDomainsWithSpecSyncData = async () => {
+  const updateDomainsWithSpecSyncData = useCallback(async () => {
     if (!specSyncState) return;
 
     try {
@@ -107,7 +107,7 @@ export function TMFOdaManager({ onStateChange: _onStateChange, initialState: _in
     } catch (error) {
       console.error('Error updating domains with SpecSync data:', error);
     }
-  };
+  }, [specSyncState, domains]);
 
   const handleSpecSyncImport = (state: SpecSyncState) => {
     setSpecSyncState(state);
@@ -149,12 +149,12 @@ export function TMFOdaManager({ onStateChange: _onStateChange, initialState: _in
   };
 
   const handleAddCustomDomain = async () => {
-    setShowAddCustomDomain(true);
+    // setShowAddCustomDomain(true);
     
     // Get available functions for custom domain addition
     const mappedFunctionIds = domains.flatMap(d => d.selectedFunctionIds);
     const available = await getAvailableTMFunctionsForCustomDomain(mappedFunctionIds);
-    setAvailableFunctions(available);
+    // setAvailableFunctions(available);
   };
 
   const filteredDomains = domains.filter(domain => {

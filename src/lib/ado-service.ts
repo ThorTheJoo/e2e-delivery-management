@@ -36,6 +36,13 @@ export class ADOService {
       if (savedConfig) {
         this.configuration = JSON.parse(savedConfig);
         this.log('info', 'Configuration loaded from storage');
+        
+        // Test connection if authentication is provided to set auth status
+        if (this.configuration?.authentication?.token) {
+          this.log('info', 'Testing connection for loaded configuration...');
+          await this.testConnection();
+        }
+        
         return this.configuration;
       }
     } catch (error) {
@@ -164,6 +171,21 @@ export class ADOService {
 
   getAuthStatus(): ADOAuthStatus | null {
     return this.authStatus;
+  }
+
+  // Ensure authentication before operations
+  async ensureAuthenticated(): Promise<boolean> {
+    if (this.authStatus?.isAuthenticated) {
+      return true;
+    }
+
+    if (!this.configuration?.authentication.token) {
+      this.log('error', 'No authentication token available');
+      return false;
+    }
+
+    this.log('info', 'Authentication not verified, testing connection...');
+    return await this.testConnection();
   }
 
   // Validate work item types exist in the project
@@ -553,6 +575,7 @@ export class ADOService {
         }
         if (
           mapping.targetFields['System.Title'] &&
+          typeof mapping.targetFields['System.Title'] === 'string' &&
           mapping.targetFields['System.Title'].length > 255
         ) {
           errors.push(`Mapping ${index + 1}: Title too long (max 255 characters)`);

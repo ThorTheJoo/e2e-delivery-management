@@ -138,7 +138,10 @@ export function ADOConfigurationComponent() {
       if (isConnected) {
         toast.showSuccess('Connection test successful');
       } else {
-        toast.showError('Connection test failed');
+        toast.showError(
+          'Connection test failed. Please check your organization, project, and Personal Access Token.',
+          'Connection Failed'
+        );
       }
 
       // Refresh logs and notifications
@@ -146,7 +149,10 @@ export function ADOConfigurationComponent() {
       loadNotifications();
     } catch (error) {
       console.error('Connection test failed:', error);
-      toast.showError('Connection test failed');
+      toast.showError(
+        'Connection test failed. Please verify your ADO settings and try again.',
+        'Connection Error'
+      );
     } finally {
       setIsTesting(false);
     }

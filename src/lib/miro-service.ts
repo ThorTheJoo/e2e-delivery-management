@@ -41,11 +41,29 @@ export class MiroService {
 
   private async callMiroAPI(action: string, data: any): Promise<any> {
     // Check if we have a valid access token
-    const accessToken = miroAuthService.getAccessToken();
+    let accessToken = miroAuthService.getAccessToken();
 
     if (!accessToken) {
-      throw new Error('No valid Miro access token. Please authenticate with Miro first.');
+      console.error('❌ No valid Miro access token available');
+      console.error('🔍 Auth service status:', miroAuthService.isAuthenticated());
+      console.error('🔍 LocalStorage token:', typeof window !== 'undefined' ? localStorage.getItem('miro_access_token') : 'N/A');
+      
+      // Try to restore token from localStorage if available
+      if (typeof window !== 'undefined') {
+        const storedToken = localStorage.getItem('miro_access_token');
+        if (storedToken) {
+          console.log('🔄 Attempting to restore token from localStorage...');
+          miroAuthService.setTokenFromUrl(storedToken);
+          accessToken = miroAuthService.getAccessToken();
+        }
+      }
+      
+      if (!accessToken) {
+        throw new Error('No valid Miro access token. Please authenticate with Miro first.');
+      }
     }
+
+    console.log('🔐 Using Miro access token for API call:', action);
 
     const response = await fetch(this.apiBaseUrl, {
       method: 'POST',
@@ -57,6 +75,10 @@ export class MiroService {
     });
 
     if (!response.ok) {
+      // Special-case 404 from getBoard so we can gracefully create a new board
+      if (action === 'getBoard' && response.status === 404) {
+        return Promise.reject(Object.assign(new Error('MIRO_BOARD_NOT_FOUND'), { code: 404 }));
+      }
       const errorData = await response.json();
       console.error('Miro API response error:', errorData);
       throw new Error(
@@ -218,8 +240,12 @@ export class MiroService {
         const board = await this.callMiroAPI('getBoard', { boardId: this.specSyncTestBoardId });
         console.log('Successfully reused existing SpecSync test board');
         return board;
-      } catch (error) {
-        console.log('Failed to reuse existing SpecSync board, creating new one:', error);
+      } catch (error: any) {
+        if (error?.code === 404 || String(error?.message || '').includes('board_not_found')) {
+          console.log('Stored SpecSync board not found on Miro, will create new.');
+        } else {
+          console.log('Failed to reuse existing SpecSync board, creating new one:', error);
+        }
         // If the board doesn't exist or we can't access it, create a new one
         this.specSyncTestBoardId = null;
         if (typeof window !== 'undefined') {
@@ -235,6 +261,10 @@ export class MiroService {
     };
 
     const board = await this.createBoard(boardConfig);
+
+    // Add a small delay to ensure board is fully created
+    console.log('Waiting for board to be fully created...');
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     // Store the board ID for future reuse
     this.specSyncTestBoardId = board.id;
@@ -374,65 +404,106 @@ export class MiroService {
     console.log('Input items count:', specSyncItems.length);
     console.log('First item:', specSyncItems[0]);
 
-    // For prototyping, use the test board functionality
-    const board = await this.getOrCreateSpecSyncBoard('SpecSync Requirements Mapping');
+    // Check authentication first
+    if (!miroAuthService.isAuthenticated()) {
+      throw new Error('Not authenticated with Miro. Please connect to Miro first.');
+    }
 
-    // Create domain frames and usecase cards
-    await this.createSpecSyncDomainFrames(board.id, specSyncItems);
+    try {
+      // For prototyping, use the test board functionality
+      const board = await this.getOrCreateSpecSyncBoard('SpecSync Requirements Mapping');
 
-    return board;
+      // Create domain frames and usecase cards
+      await this.createSpecSyncDomainFrames(board.id, specSyncItems);
+
+      return board;
+    } catch (error) {
+      console.error('❌ Error in createSpecSyncBoard:', error);
+      
+      // Provide more specific error messages
+      if (error instanceof Error) {
+        if (error.message.includes('token') || error.message.includes('authentication')) {
+          throw new Error('Miro authentication failed. Please reconnect to Miro and try again.');
+        } else if (error.message.includes('401')) {
+          throw new Error('Miro access denied. Please check your permissions and reconnect.');
+        } else if (error.message.includes('403')) {
+          throw new Error('Miro access forbidden. Please check your board permissions.');
+        } else if (error.message.includes('500')) {
+          throw new Error('Miro server error. Please try again later or contact support.');
+        }
+      }
+      
+      throw error;
+    }
   }
 
   private async createSpecSyncDomainFrames(boardId: string, items: SpecSyncItem[]): Promise<void> {
-    // Group items by domain
-    const domainGroups = new Map<string, SpecSyncItem[]>();
+    try {
+      // Group items by domain
+      const domainGroups = new Map<string, SpecSyncItem[]>();
 
-    console.log(`Total items received: ${items.length}`);
-    console.log(
-      `Sample items:`,
-      items.slice(0, 3).map((item) => ({
-        id: item.rephrasedRequirementId,
-        usecase1: item.usecase1,
-        functionName: item.functionName,
-        domain: item.domain,
-      })),
-    );
+      console.log(`Total items received: ${items.length}`);
+      console.log(
+        `Sample items:`,
+        items.slice(0, 3).map((item) => ({
+          id: item.rephrasedRequirementId,
+          usecase1: item.usecase1,
+          functionName: item.functionName,
+          domain: item.domain,
+        })),
+      );
 
-    for (const item of items) {
-      const domain = item.domain || 'Unknown Domain';
-      if (!domainGroups.has(domain)) {
-        domainGroups.set(domain, []);
+      for (const item of items) {
+        const domain = item.domain || 'Unknown Domain';
+        if (!domainGroups.has(domain)) {
+          domainGroups.set(domain, []);
+        }
+        domainGroups.get(domain)!.push(item);
       }
-      domainGroups.get(domain)!.push(item);
-    }
 
-    console.log(`Creating frames for ${domainGroups.size} domains`);
-    for (const [domainName, domainItems] of Array.from(domainGroups.entries())) {
-      console.log(`Domain "${domainName}": ${domainItems.length} items`);
-    }
+      console.log(`Creating frames for ${domainGroups.size} domains`);
+      for (const [domainName, domainItems] of Array.from(domainGroups.entries())) {
+        console.log(`Domain "${domainName}": ${domainItems.length} items`);
+      }
 
-    let domainIndex = 0;
-    for (const [domainName, domainItems] of Array.from(domainGroups.entries())) {
-      // Create frame for domain
-      console.log(`Creating frame for domain: ${domainName}`);
+      let domainIndex = 0;
+      for (const [domainName, domainItems] of Array.from(domainGroups.entries())) {
+        try {
+          // Create frame for domain
+          console.log(`Creating frame for domain: ${domainName}`);
 
-      const frameData = {
-        boardId,
-        title: domainName,
-        position: { x: domainIndex * 1200, y: 0 }, // Increased spacing between frames
-        geometry: { width: 1100, height: 700 }, // Increased frame dimensions
-      };
+          const frameData = {
+            boardId,
+            title: domainName,
+            position: { x: domainIndex * 1200, y: 0 }, // Increased spacing between frames
+            geometry: { width: 1100, height: 700 }, // Increased frame dimensions
+          };
 
-      console.log('Frame data being sent:', JSON.stringify(frameData, null, 2));
+          console.log('Frame data being sent:', JSON.stringify(frameData, null, 2));
 
-      const frame = await this.callMiroAPI('createFrame', frameData);
+          const frame = await this.callMiroAPI('createFrame', frameData);
 
-      console.log(`Successfully created frame for domain: ${domainName} with ID: ${frame.id}`);
+          console.log(`Successfully created frame for domain: ${domainName} with ID: ${frame.id}`);
 
-      // Add usecase cards within the frame
-      await this.createUsecaseCards(boardId, domainItems, frame.id, domainIndex);
+          // Add usecase cards within the frame
+          await this.createUsecaseCards(boardId, domainItems, frame.id, domainIndex);
 
-      domainIndex++;
+          domainIndex++;
+        } catch (frameError) {
+          console.error(`❌ Failed to create frame for domain ${domainName}:`, frameError);
+          
+          // Continue with other domains even if one fails
+          if (domainIndex === 0) {
+            // If this is the first domain and it fails, re-throw the error
+            throw frameError;
+          } else {
+            console.warn(`Continuing with other domains despite error for ${domainName}`);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('❌ Error in createSpecSyncDomainFrames:', error);
+      throw error;
     }
   }
 
@@ -537,6 +608,37 @@ export class MiroService {
         domain: item.domain,
       })),
     );
+
+    // TEMP TRACE: summarize missing usecase1 to help pinpoint data origin
+    try {
+      const totalCount = items.length;
+      const missingItems = items.filter(
+        (item) => !item.usecase1 || item.usecase1.trim() === '',
+      );
+      const missingCount = missingItems.length;
+      const presentCount = totalCount - missingCount;
+      console.log('=== USECASE1 TRACE SUMMARY ===', {
+        frameId,
+        domainIndex,
+        totalCount,
+        presentCount,
+        missingCount,
+      });
+      if (missingCount > 0) {
+        console.log(
+          'Sample missing usecase1 items (up to 5):',
+          missingItems.slice(0, 5).map((it) => ({
+            id: it.id,
+            requirementId: it.requirementId,
+            rephrasedRequirementId: it.rephrasedRequirementId,
+            functionName: it.functionName,
+            domain: it.domain,
+          })),
+        );
+      }
+    } catch (traceError) {
+      console.warn('USECASE1 trace summary failed:', traceError);
+    }
 
     // Frame dimensions: 1100x700
     const frameWidth = 1100;
@@ -732,9 +834,8 @@ export class MiroService {
     }
   }
 
-  public async getBoard(_boardId: string): Promise<any> {
-    // This would need a separate API endpoint for getting board details
-    throw new Error('getBoard not implemented yet');
+  public async getBoard(boardId: string): Promise<any> {
+    return await this.callMiroAPI('getBoard', { boardId });
   }
 
   public async deleteBoard(_boardId: string): Promise<void> {

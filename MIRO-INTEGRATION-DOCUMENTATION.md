@@ -60,6 +60,19 @@ UI Configuration → localStorage → Server Config API → Global Variable → 
 - **Content Creation**: Frames, cards, and shapes for visual mapping
 
 ## Critical Implementation Details
+### Card Payload (v2)
+
+```json
+{
+  "data": {
+    "title": "Card Title",
+    "description": "optional"
+  },
+  "position": { "x": 0, "y": 0 },
+  "parent": { "id": "<frameId>" }
+}
+```
+
 
 ### Configuration Validation
 

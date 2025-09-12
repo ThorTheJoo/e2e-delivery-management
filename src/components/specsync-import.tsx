@@ -54,6 +54,13 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
         headers.find((h) => /reference.*capability/i.test(h)) || 'Reference Capability',
       usecase1: headers.find((h) => /usecase.*1/i.test(h)) || 'Usecase 1',
     };
+    
+    console.log('🔍 [SpecSync Import] Headers found:', headers);
+    console.log('📋 [SpecSync Import] Header mapping:', {
+      rephrasedRequirementId: headerMap.rephrasedRequirementId,
+      sourceRequirementId: headerMap.sourceRequirementId,
+      functionName: headerMap.functionName
+    });
 
     return lines.slice(1).map((line, index) => {
       const values = line.split(',').map((v) => v.trim().replace(/^"|"$/g, ''));
@@ -67,9 +74,12 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
         row[headerMap.sourceRequirementId] || 
         `REQ-${index + 1}`;
 
+      const requirementId = row[headerMap.sourceRequirementId] || `REQ-${index + 1}`;
+      console.log(`📋 [SpecSync Import] Row ${index + 1}: sourceRequirementId="${row[headerMap.sourceRequirementId]}", final requirementId="${requirementId}"`);
+      
       return {
         id: `imported-${index + 1}`,
-        requirementId: row[headerMap.sourceRequirementId] || `REQ-${index + 1}`,
+        requirementId: requirementId,
         rephrasedRequirementId: row[headerMap.rephrasedRequirementId] || '',
         domain: row[headerMap.domain] || '',
         vertical: row[headerMap.vertical] || '',
@@ -93,6 +103,9 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
     const ws = workbook.Sheets[preferred];
     const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
 
+    console.log('🔍 [SpecSync Excel Import] Available columns:', Object.keys(json[0] || {}));
+    console.log('📋 [SpecSync Excel Import] First row sample:', json[0]);
+
     return json.map((r: any, index: number) => {
       const fn = r['Rephrased Function Name'] || r['Function Name'] || r['Function'] || '';
       const af2 =
@@ -110,9 +123,12 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
         r['SourceRequirementId'] || 
         `REQ-${index + 1}`;
 
+      const requirementId = r['Source Requirement ID'] || r['SourceRequirementId'] || `REQ-${index + 1}`;
+      console.log(`📋 [SpecSync Excel Import] Row ${index + 1}: Source Requirement ID="${r['Source Requirement ID']}", final requirementId="${requirementId}"`);
+      
       return {
         id: `excel-${index + 1}`,
-        requirementId: r['Source Requirement ID'] || r['SourceRequirementId'] || `REQ-${index + 1}`,
+        requirementId: requirementId,
         rephrasedRequirementId:
           r['Rephrased Requirement ID'] || r['RephrasedRequirementId'] || r['RequirementId'] || '',
         domain: r['Rephrased Domain'] || r['Domain'] || '',

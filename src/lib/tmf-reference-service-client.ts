@@ -1,9 +1,6 @@
-import { createClient } from '@supabase/supabase-js';
-
-// Create a direct Supabase client for TMF reference data
-const supabaseUrl = 'https://onmchpzitsizgoxaihbq.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ubWNocHppdHNpemdveGFpaGJxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NzQ5MzYwNywiZXhwIjoyMDczMDY5NjA3fQ.lIzliRexSJfPN5ereE0g4TBQdsNWv7l3_n_VdncAD2U';
-const supabase = createClient(supabaseUrl, supabaseKey);
+import { getBrowserSupabaseClient } from '@/lib/supabase';
+// Use shared singleton browser client to avoid multiple GoTrueClient instances
+const supabase = getBrowserSupabaseClient();
 
 // TMF Reference Data Types
 export interface TMFDomain {

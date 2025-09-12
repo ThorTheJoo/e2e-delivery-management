@@ -68,7 +68,7 @@ export function TMFDomainCapabilityManager({
   const [referenceDomains, setReferenceDomains] = useState<TMFDomain[]>([]);
   const [referenceFunctions, setReferenceFunctions] = useState<TMFFunction[]>([]);
   const [loading, setLoading] = useState(true);
-  const [addDomainDialogOpen, setAddDomainDialogOpen] = useState(false);
+  // const [_addDomainDialogOpen, _setAddDomainDialogOpen] = useState(false);
   const [addCapabilityDialogOpen, setAddCapabilityDialogOpen] = useState(false);
   const [selectedDomainForCapability, setSelectedDomainForCapability] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -128,7 +128,7 @@ export function TMFDomainCapabilityManager({
     };
 
     loadReferenceData();
-  }, []);
+  }, [domains.length]);
 
   // Process SpecSync data after reference data is loaded
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -179,14 +179,14 @@ export function TMFDomainCapabilityManager({
   }, [domains.length, loading]); // Analyze when domains change
 
   // Analyze missing items from TMF reference data
-  const analyzeMissingItems = async () => {
+  const analyzeMissingItems = useCallback(async () => {
     try {
       const gaps = await analyzeTMFReferenceGaps(domains);
       setMissingItemsCount(gaps.totalMissingItems);
     } catch (error) {
       console.error('Error analyzing missing TMF reference items:', error);
     }
-  };
+  }, [domains]);
 
   // Memoized callback for onStateChange to prevent unnecessary re-renders
   const handleStateChange = useCallback((updatedDomains: UserDomain[]) => {
@@ -216,7 +216,7 @@ export function TMFDomainCapabilityManager({
   }, [domains, loading, handleStateChange]); // Include handleStateChange in dependencies
 
   // Initialize sample data
-  const initializeSampleData = (
+  const initializeSampleData = useCallback((
     referenceDomains: TMFDomain[],
     referenceFunctions: TMFFunction[],
   ) => {
@@ -247,9 +247,9 @@ export function TMFDomainCapabilityManager({
 
     setDomains(sampleDomains);
     handleStateChange(sampleDomains);
-  };
+  }, [handleStateChange]);
 
-  const autoSelectMatchingDomainsAndCapabilities = async (specSyncItems: any[]) => {
+  const autoSelectMatchingDomainsAndCapabilities = useCallback(async (specSyncItems: any[]) => {
     try {
       console.log('🔍 Starting autoSelectMatchingDomainsAndCapabilities with', specSyncItems.length, 'items');
       console.log('🔍 Current domains state:', domains.length, 'domains loaded');
@@ -452,9 +452,9 @@ export function TMFDomainCapabilityManager({
     } catch (error) {
       console.error('Error in autoSelectMatchingDomainsAndCapabilities:', error);
     }
-  };
+  }, [domains, onMappingComplete]);
 
-  const updateRequirementCounts = (specSyncItems: any[], domainsToUpdate?: UserDomain[]) => {
+  const updateRequirementCounts = useCallback((specSyncItems: any[], domainsToUpdate?: UserDomain[]) => {
     const domainsToProcess = domainsToUpdate || domains;
     
     console.log('📊 Updating requirement counts for', domainsToProcess.length, 'domains');
@@ -507,16 +507,16 @@ export function TMFDomainCapabilityManager({
     }
     
     return updatedDomains;
-  };
+  }, [domains]);
 
   // Calculate selected counts for badge display
-  const getSelectedCounts = () => {
-    const selectedDomains = domains.filter(domain => domain.isSelected).length;
-    const selectedCapabilities = domains.reduce((total, domain) => 
-      total + domain.capabilities.filter(cap => cap.isSelected).length, 0
-    );
-    return { selectedDomains, selectedCapabilities };
-  };
+  // const _getSelectedCounts = () => {
+  //   const selectedDomains = domains.filter(domain => domain.isSelected).length;
+  //   const selectedCapabilities = domains.reduce((total, domain) => 
+  //     total + domain.capabilities.filter(cap => cap.isSelected).length, 0
+  //   );
+  //   return { selectedDomains, selectedCapabilities };
+  // };
 
   const addDomain = (domainData: {
     name: string;
@@ -537,7 +537,7 @@ export function TMFDomainCapabilityManager({
     const updatedDomains = [...domains, newDomain];
     setDomains(updatedDomains);
     handleStateChange(updatedDomains);
-    setAddDomainDialogOpen(false);
+    // setAddDomainDialogOpen(false);
   };
 
   const addCapability = (capabilityData: {
@@ -1071,78 +1071,78 @@ export function TMFDomainCapabilityManager({
 }
 
 // Add Domain Form Component
-function AddDomainForm({
-  onAdd,
-  referenceDomains,
-}: {
-  onAdd: (data: { name: string; description: string; referenceDomainId?: string }) => void;
-  referenceDomains: TMFDomain[];
-}) {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [selectedReference, setSelectedReference] = useState<string>('custom');
+// function AddDomainForm({
+//   onAdd,
+//   referenceDomains,
+// }: {
+//   onAdd: (data: { name: string; description: string; referenceDomainId?: string }) => void;
+//   referenceDomains: TMFDomain[];
+// }) {
+//   const [name, setName] = useState('');
+//   const [description, setDescription] = useState('');
+//   const [selectedReference, setSelectedReference] = useState<string>('custom');
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (name.trim() && description.trim()) {
-      onAdd({
-        name: name.trim(),
-        description: description.trim(),
-        referenceDomainId: selectedReference === 'custom' ? undefined : selectedReference,
-      });
-      setName('');
-      setDescription('');
-      setSelectedReference('custom');
-    }
-  };
+//   const handleSubmit = (e: React.FormEvent) => {
+//     e.preventDefault();
+//     if (name.trim() && description.trim()) {
+//       onAdd({
+//         name: name.trim(),
+//         description: description.trim(),
+//         referenceDomainId: selectedReference === 'custom' ? undefined : selectedReference,
+//       });
+//       setName('');
+//       setDescription('');
+//       setSelectedReference('custom');
+//     }
+//   };
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="reference-domain">Reference Domain (Optional)</Label>
-        <Select value={selectedReference} onValueChange={setSelectedReference}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select a reference domain" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="custom">Custom Domain</SelectItem>
-            {referenceDomains.map((domain) => (
-              <SelectItem key={domain.id} value={domain.id}>
-                {domain.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+//   return (
+//     <form onSubmit={handleSubmit} className="space-y-4">
+//       <div className="space-y-2">
+//         <Label htmlFor="reference-domain">Reference Domain (Optional)</Label>
+//         <Select value={selectedReference} onValueChange={setSelectedReference}>
+//           <SelectTrigger>
+//             <SelectValue placeholder="Select a reference domain" />
+//           </SelectTrigger>
+//           <SelectContent>
+//             <SelectItem value="custom">Custom Domain</SelectItem>
+//             {referenceDomains.map((domain) => (
+//               <SelectItem key={domain.id} value={domain.id}>
+//                 {domain.name}
+//               </SelectItem>
+//             ))}
+//           </SelectContent>
+//         </Select>
+//       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="domain-name">Domain Name</Label>
-        <Input
-          id="domain-name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Enter domain name"
-          required
-        />
-      </div>
+//       <div className="space-y-2">
+//         <Label htmlFor="domain-name">Domain Name</Label>
+//         <Input
+//           id="domain-name"
+//           value={name}
+//           onChange={(e) => setName(e.target.value)}
+//           placeholder="Enter domain name"
+//           required
+//         />
+//       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="domain-description">Description</Label>
-        <Textarea
-          id="domain-description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Enter domain description"
-          required
-        />
-      </div>
+//       <div className="space-y-2">
+//         <Label htmlFor="domain-description">Description</Label>
+//         <Textarea
+//           id="domain-description"
+//           value={description}
+//           onChange={(e) => setDescription(e.target.value)}
+//           placeholder="Enter domain description"
+//           required
+//         />
+//       </div>
 
-      <div className="flex justify-end space-x-2">
-        <Button type="submit">Add Domain</Button>
-      </div>
-    </form>
-  );
-}
+//       <div className="flex justify-end space-x-2">
+//         <Button type="submit">Add Domain</Button>
+//       </div>
+//     </form>
+//   );
+// }
 
 // Add Capability Form Component
 function AddCapabilityForm({

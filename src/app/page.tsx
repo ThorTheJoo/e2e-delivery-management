@@ -93,12 +93,17 @@ export default function HomePage() {
   
   // NEW - State for relationship traversal
   const [mappingResults, setMappingResults] = useState<any[]>([]);
-  const [workspaceFilter, setWorkspaceFilter] = useState<string>('Grant Test'); // Fixed: Use correct workspace
+  const [workspaceFilter] = useState<string>('Grant Test'); // Fixed: Use correct workspace
 
   // Handle navigation events from child components
   // eslint-disable-next-line react-hooks/exhaustive-deps
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
+    // Prevent duplicate loadData invocations in React 18 strict/dev
+    if ((window as any).__appDataLoading__) {
+      return;
+    }
+    (window as any).__appDataLoading__ = true;
     const handleNavigateToTab = (event: CustomEvent) => {
       setActiveTab(event.detail);
     };
@@ -107,7 +112,7 @@ export default function HomePage() {
     return () => {
       window.removeEventListener('navigate-to-tab', handleNavigateToTab as EventListener);
     };
-  }, [loading]);
+  }, []);
 
   // Handle tab changes and reset expanded states
   const handleTabChange = (tab: string) => {
@@ -381,8 +386,11 @@ export default function HomePage() {
       setLoading(false);
     }, 1000); // Reduced to 1 second timeout
 
-    return () => clearTimeout(timeoutId);
-  }, []);
+    return () => {
+      clearTimeout(timeoutId);
+      delete (window as any).__appDataLoading__;
+    };
+  }, [loading]);
 
   // Load saved SpecSync data
   useEffect(() => {
@@ -1506,7 +1514,7 @@ export default function HomePage() {
             <TabsContent value="solution-model" className="space-y-6">
               <div className="mb-6">
                 <h2 className="mb-2 text-2xl font-bold text-gray-900">
-                  Solution Model - Blue Dolphin Integration
+                  Solution Model - Integration
                 </h2>
                 <p className="text-gray-600">
                   Create and manage your solution model in Blue Dolphin. Import domains,
@@ -1560,7 +1568,7 @@ export default function HomePage() {
                     </Button>
                   </CardTitle>
                   <CardDescription>
-                    Retrieve and manage Blue Dolphin objects with enhanced metadata
+                    Retrieve and manage Model objects with enhanced metadata
                   </CardDescription>
                 </CardHeader>
                 {solutionModelSections.has('object-data') && (

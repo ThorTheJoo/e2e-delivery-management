@@ -28,6 +28,15 @@ export function SpecSyncRelationshipTraversal({
   workspaceFilter 
 }: SpecSyncRelationshipTraversalProps) {
   const [traversalResults, setTraversalResults] = useState<TraversalResult[]>([]);
+  
+  // Debug logging for mapping results
+  console.log('🔍 [Traversal Component] Received mapping results:', mappingResults.length);
+  console.log('📋 [Traversal Component] Sample mapping results:');
+  mappingResults.slice(0, 3).forEach((mapping, index) => {
+    console.log(`  ${index + 1}. specSyncRequirementId: "${mapping.specSyncRequirementId}"`);
+    console.log(`     specSyncFunctionName: "${mapping.specSyncFunctionName}"`);
+    console.log(`     blueDolphinObjectId: "${mapping.blueDolphinObject.ID}"`);
+  });
   const [isTraversing, setIsTraversing] = useState(false);
   const [isExtracting, setIsExtracting] = useState(false);
   const [traversingFunction, setTraversingFunction] = useState<string | null>(null);
@@ -150,7 +159,7 @@ export function SpecSyncRelationshipTraversal({
           'Object Level': obj.hierarchyLevel,
           'Workspace': obj.Workspace,
           'Relationship Type': obj.relationshipType || 'N/A',
-          'Relationship Path': obj.relationshipPath.join(' → ')
+          'Relationship Path': obj.relationshipPath?.join(' → ') || 'N/A'
         });
       });
 
@@ -164,7 +173,7 @@ export function SpecSyncRelationshipTraversal({
           'Object Level': obj.hierarchyLevel,
           'Workspace': obj.Workspace,
           'Relationship Type': obj.relationshipType || 'N/A',
-          'Relationship Path': obj.relationshipPath.join(' → ')
+          'Relationship Path': obj.relationshipPath?.join(' → ') || 'N/A'
         });
       });
 
@@ -178,7 +187,7 @@ export function SpecSyncRelationshipTraversal({
           'Object Level': obj.hierarchyLevel,
           'Workspace': obj.Workspace,
           'Relationship Type': obj.relationshipType || 'N/A',
-          'Relationship Path': obj.relationshipPath.join(' → ')
+          'Relationship Path': obj.relationshipPath?.join(' → ') || 'N/A'
         });
       });
 
@@ -192,7 +201,7 @@ export function SpecSyncRelationshipTraversal({
           'Object Level': obj.hierarchyLevel,
           'Workspace': obj.Workspace,
           'Relationship Type': obj.relationshipType || 'N/A',
-          'Relationship Path': obj.relationshipPath.join(' → ')
+          'Relationship Path': obj.relationshipPath?.join(' → ') || 'N/A'
         });
       });
 
@@ -206,14 +215,36 @@ export function SpecSyncRelationshipTraversal({
   }, [traversalResults]);
 
   /**
-   * Generate CSV data for full payload results with all enhanced fields
+   * Generate CSV data for full payload results with selected enhanced fields
    */
   const generateFullPayloadCSV = useCallback((result: TraversalResultWithPayloads) => {
     const rows = [];
 
-    // Helper function to create a comprehensive row with all enhanced fields
+    // Find all mapping results that match this application function to get all requirement IDs
+    const matchingMappings = mappingResults.filter(mapping => 
+      mapping.blueDolphinObject.ID === result.applicationFunction.ID
+    );
+    
+    console.log(`🔍 [Traversal] Looking for mappings for Application Function ID: ${result.applicationFunction.ID}`);
+    console.log(`📊 [Traversal] Total mapping results available: ${mappingResults.length}`);
+    console.log(`🎯 [Traversal] Matching mappings found: ${matchingMappings.length}`);
+    console.log(`📋 [Traversal] Matching mappings:`, matchingMappings.map(m => ({
+      specSyncRequirementId: m.specSyncRequirementId,
+      specSyncFunctionName: m.specSyncFunctionName,
+      blueDolphinObjectId: m.blueDolphinObject.ID
+    })));
+    
+    // Serialize all requirement IDs into a string
+    const requirementIds = matchingMappings.map(mapping => mapping.specSyncRequirementId).filter(Boolean);
+    const requirementIdString = requirementIds.length > 0 ? requirementIds.join(', ') : 'N/A';
+    
+    console.log(`🔍 [Traversal] Raw requirement IDs from mappings:`, requirementIds);
+    console.log(`✅ [Traversal] Final requirement ID string: "${requirementIdString}"`);
+
+    // Helper function to create a comprehensive row with selected enhanced fields
     const createComprehensiveRow = (obj: any, objectType: string, objectLevel: string, relationshipType: string = 'N/A', relationshipPath: string = 'N/A') => {
       const baseRow = {
+        'SpecSync Requirement ID': requirementIdString,
         'SpecSync Function': result.specSyncFunctionName,
         'Application Function': result.applicationFunction.Title,
         'Object Type': objectType,
@@ -231,15 +262,16 @@ export function SpecSyncRelationshipTraversal({
         ).length
       };
 
-      // Add all enhanced fields dynamically
-      const enhancedFields = Object.keys(obj).filter(key => 
-        key.startsWith('Object_Properties_') || 
-        key.startsWith('Deliverable_Object_Status_') || 
-        key.startsWith('Ameff_properties_')
-      );
+      // Add only the specific enhanced fields we want to keep
+      const selectedFields = [
+        'Ameff_properties_Function_Description_Link',
+        'Ameff_properties_Interface_Description_Link',
+        'Ameff_properties_Service_Description_Link',
+        'Ameff_properties_TMF_Function_ID'
+      ];
 
-      enhancedFields.forEach(field => {
-        baseRow[field] = obj[field] || '';
+      selectedFields.forEach(field => {
+        (baseRow as any)[field] = obj[field] || '';
       });
 
       return baseRow;
@@ -297,7 +329,7 @@ export function SpecSyncRelationshipTraversal({
     });
 
     return rows;
-  }, []);
+  }, [mappingResults]);
 
   /**
    * Clear all results
@@ -609,7 +641,7 @@ function ObjectList({
 
   return (
     <div className="space-y-1">
-      {objects.map((obj, index) => (
+      {objects.map((obj, _index) => (
         <div 
           key={obj.ID} 
           className={`p-2 rounded text-xs bg-gray-50 ${levelStyles[level]}`}
@@ -621,7 +653,7 @@ function ObjectList({
             {obj.Workspace} • {obj.Status}
             {obj.relationshipType && ` • ${obj.relationshipType}`}
           </div>
-          {obj.relationshipPath.length > 0 && (
+          {obj.relationshipPath && obj.relationshipPath.length > 0 && (
             <div className="text-gray-400 text-xs mt-1 truncate">
               Path: {obj.relationshipPath.join(' → ')}
             </div>
