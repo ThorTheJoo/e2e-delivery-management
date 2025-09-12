@@ -46,7 +46,14 @@ export function SpecSyncBlueDolphinMapping({
   onMappingComplete // NEW - Optional callback parameter
 }: SpecSyncBlueDolphinMappingProps) {
   // State management
-  const [selectedFunctionNames, setSelectedFunctionNames] = useState<Set<string>>(new Set());
+  // Selection is tracked at requirement+function granularity to avoid collapsing rows
+  const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
+  const SELECTION_DELIM = '|||';
+  const buildSelectionKey = (requirementId: string, functionName: string) => `${requirementId}${SELECTION_DELIM}${functionName}`;
+  const parseSelectionKey = (key: string): { requirementId: string; functionName: string } => {
+    const [requirementId, ...rest] = key.split(SELECTION_DELIM);
+    return { requirementId, functionName: rest.join(SELECTION_DELIM) };
+  };
   const [filterCriteria, setFilterCriteria] = useState<FilterCriteria>({
     workspace: '',
     status: 'Accepted',
@@ -94,25 +101,23 @@ export function SpecSyncBlueDolphinMapping({
     loadAvailableWorkspaces();
   }, [loadAvailableWorkspaces]);
 
-  const handleFunctionSelection = (functionName: string, checked: boolean) => {
-    setSelectedFunctionNames(prev => {
-      const newSet = new Set(prev);
-      if (checked) {
-        newSet.add(functionName);
-      } else {
-        newSet.delete(functionName);
-      }
-      return newSet;
+  const handleRowSelection = (item: SpecSyncItem, checked: boolean) => {
+    const rid = item.rephrasedRequirementId || item.requirementId;
+    const key = buildSelectionKey(rid, item.functionName);
+    setSelectedKeys(prev => {
+      const next = new Set(prev);
+      if (checked) next.add(key); else next.delete(key);
+      return next;
     });
   };
 
   const handleSelectAll = () => {
-    const allFunctionNames = filteredSpecSyncItems.map(item => item.functionName);
-    setSelectedFunctionNames(new Set(allFunctionNames));
+    const keys = filteredSpecSyncItems.map(item => buildSelectionKey(item.rephrasedRequirementId || item.requirementId, item.functionName));
+    setSelectedKeys(new Set(keys));
   };
 
   const handleClearSelection = () => {
-    setSelectedFunctionNames(new Set());
+    setSelectedKeys(new Set());
   };
 
   const filteredSpecSyncItems = specSyncItems.filter(item => 
@@ -129,7 +134,7 @@ export function SpecSyncBlueDolphinMapping({
   });
 
   const searchBlueDolphin = async () => {
-    if (selectedFunctionNames.size === 0) {
+    if (selectedKeys.size === 0) {
       setError('Please select at least one function name to search');
       return;
     }
@@ -145,7 +150,7 @@ export function SpecSyncBlueDolphinMapping({
 
     try {
       console.log('🔍 Starting Blue Dolphin search with criteria:', {
-        selectedFunctions: Array.from(selectedFunctionNames),
+        selectedKeys: Array.from(selectedKeys),
         filterCriteria
       });
 
@@ -181,11 +186,15 @@ export function SpecSyncBlueDolphinMapping({
         const blueDolphinObjects = result.data as BlueDolphinObjectEnhanced[];
         console.log('📋 Retrieved Blue Dolphin objects:', blueDolphinObjects.length);
 
-        // Match SpecSync function names to Blue Dolphin objects
+        // Match SpecSync selection rows (requirement+function) to Blue Dolphin objects
         const matches: MappingResult[] = [];
-        
-        for (const functionName of Array.from(selectedFunctionNames)) {
-          const specSyncItem = specSyncItems.find(item => item.functionName === functionName);
+        for (const key of Array.from(selectedKeys)) {
+          const { requirementId, functionName } = parseSelectionKey(key);
+          // Find the exact SpecSync row that was selected
+          const specSyncItem = specSyncItems.find(item =>
+            item.functionName === functionName &&
+            (item.rephrasedRequirementId === requirementId || item.requirementId === requirementId)
+          );
           if (!specSyncItem) continue;
 
           // Try exact match first
@@ -329,7 +338,7 @@ export function SpecSyncBlueDolphinMapping({
             {specSyncItems.length} SpecSync Items
           </Badge>
           <Badge variant="outline">
-            {selectedFunctionNames.size} Selected
+            {selectedKeys.size} Selected
           </Badge>
         </div>
       </div>
@@ -435,7 +444,7 @@ export function SpecSyncBlueDolphinMapping({
                     variant="outline"
                     size="sm"
                     onClick={handleClearSelection}
-                    disabled={selectedFunctionNames.size === 0}
+                    disabled={selectedKeys.size === 0}
                   >
                     Clear Selection
                   </Button>
@@ -471,9 +480,9 @@ export function SpecSyncBlueDolphinMapping({
                       <tr key={item.id} className="hover:bg-gray-50">
                         <td className="px-4 py-2">
                           <Checkbox
-                            checked={selectedFunctionNames.has(item.functionName)}
+                            checked={selectedKeys.has(buildSelectionKey(item.rephrasedRequirementId || item.requirementId, item.functionName))}
                             onCheckedChange={(checked) => 
-                              handleFunctionSelection(item.functionName, checked as boolean)
+                              handleRowSelection(item, checked as boolean)
                             }
                           />
                         </td>
@@ -510,7 +519,7 @@ export function SpecSyncBlueDolphinMapping({
             <div className="flex items-center justify-between">
               <Button
                 onClick={searchBlueDolphin}
-                disabled={selectedFunctionNames.size === 0 || !filterCriteria.workspace || isSearching}
+                disabled={selectedKeys.size === 0 || !filterCriteria.workspace || isSearching}
                 className="flex items-center space-x-2"
               >
                 {isSearching ? (
@@ -519,7 +528,7 @@ export function SpecSyncBlueDolphinMapping({
                   <Search className="h-4 w-4" />
                 )}
                 <span>
-                  {isSearching ? 'Searching...' : `Search Blue Dolphin (${selectedFunctionNames.size} functions)`}
+                  {isSearching ? 'Searching...' : `Search Blue Dolphin (${selectedKeys.size} selections)`}
                 </span>
               </Button>
 
@@ -623,7 +632,7 @@ export function SpecSyncBlueDolphinMapping({
             )}
 
             {/* No Results */}
-            {!isSearching && mappingResults.length === 0 && selectedFunctionNames.size > 0 && !error && (
+            {!isSearching && mappingResults.length === 0 && selectedKeys.size > 0 && !error && (
               <div className="text-center py-8 text-gray-500">
                 <XCircle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                 <p>No matching Application Functions found for selected function names.</p>
