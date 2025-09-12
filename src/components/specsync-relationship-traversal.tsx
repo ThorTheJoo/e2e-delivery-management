@@ -334,11 +334,23 @@ export function SpecSyncRelationshipTraversal({
       aggReqIdsByFunctionId.set(m.blueDolphinObject.ID, list);
     });
 
+    // Build global aggregated requirement IDs across all selected mappings (for Combined view)
+    const globalReqIdSet = new Set<string>();
+    mappingResults.forEach(m => {
+      const ids: string[] = Array.isArray((m as any).specSyncRequirementIds)
+        ? (m as any).specSyncRequirementIds as string[]
+        : (m.specSyncRequirementId ? [m.specSyncRequirementId] : []);
+      ids.forEach(id => id && globalReqIdSet.add(id));
+    });
+    const globalReqIds = Array.from(globalReqIdSet);
+
     const dedup = new Map<string, any>();
-    const push = (obj: any, type: string, appFuncId?: string) => {
+    const push = (obj: any, type: string, appFuncId?: string, isCombined?: boolean) => {
       const key = obj.ID;
       if (dedup.has(key)) return;
-      const reqIds = appFuncId ? (aggReqIdsByFunctionId.get(appFuncId) || []) : [];
+      const reqIds = isCombined
+        ? globalReqIds
+        : (appFuncId ? (aggReqIdsByFunctionId.get(appFuncId) || []) : []);
       dedup.set(key, {
         'SpecSync Requirement IDs (all)': reqIds.join(', '),
         'Object Type': type,
@@ -351,11 +363,12 @@ export function SpecSyncRelationshipTraversal({
 
     traversalResults.forEach(tr => {
       const appId = tr.applicationFunction.ID;
-      push(tr.applicationFunction, 'Application Function', appId);
-      [...tr.businessProcesses.topLevel, ...tr.businessProcesses.childLevel, ...tr.businessProcesses.grandchildLevel].forEach(o => push(o, 'Business Process', appId));
-      [...tr.applicationServices.topLevel, ...tr.applicationServices.childLevel, ...tr.applicationServices.grandchildLevel].forEach(o => push(o, 'Application Service', appId));
-      [...tr.applicationInterfaces.topLevel, ...tr.applicationInterfaces.childLevel, ...tr.applicationInterfaces.grandchildLevel].forEach(o => push(o, 'Application Interface', appId));
-      tr.relatedApplicationFunctions.forEach(o => push(o, 'Related Application Function', appId));
+      const isCombined = tr.specSyncFunctionName === 'Combined';
+      push(tr.applicationFunction, 'Application Function', appId, isCombined);
+      [...tr.businessProcesses.topLevel, ...tr.businessProcesses.childLevel, ...tr.businessProcesses.grandchildLevel].forEach(o => push(o, 'Business Process', appId, isCombined));
+      [...tr.applicationServices.topLevel, ...tr.applicationServices.childLevel, ...tr.applicationServices.grandchildLevel].forEach(o => push(o, 'Application Service', appId, isCombined));
+      [...tr.applicationInterfaces.topLevel, ...tr.applicationInterfaces.childLevel, ...tr.applicationInterfaces.grandchildLevel].forEach(o => push(o, 'Application Interface', appId, isCombined));
+      tr.relatedApplicationFunctions.forEach(o => push(o, 'Related Application Function', appId, isCombined));
     });
 
     const rows = Array.from(dedup.values());
@@ -369,14 +382,17 @@ export function SpecSyncRelationshipTraversal({
   const generateFullPayloadCSV = useCallback((result: TraversalResultWithPayloads) => {
     const rows = [];
 
-    // Find all mapping results that match this application function to get all requirement IDs
-    const matchingMappings = mappingResults.filter(mapping => 
-      mapping.blueDolphinObject.ID === result.applicationFunction.ID
-    );
+    // Determine which mappings to use when computing SpecSync Requirement IDs
+    // - For Combined view: use ALL selected mappings (union across seeds)
+    // - For per-function view: only mappings for that Application Function ID
+    const isCombined = result.specSyncFunctionName === 'Combined';
+    const matchingMappings = isCombined
+      ? mappingResults
+      : mappingResults.filter(mapping => mapping.blueDolphinObject.ID === result.applicationFunction.ID);
     
     console.log(`🔍 [Traversal] Looking for mappings for Application Function ID: ${result.applicationFunction.ID}`);
     console.log(`📊 [Traversal] Total mapping results available: ${mappingResults.length}`);
-    console.log(`🎯 [Traversal] Matching mappings found: ${matchingMappings.length}`);
+    console.log(`🎯 [Traversal] Matching mappings found: ${matchingMappings.length} (combined=${isCombined})`);
     console.log(`📋 [Traversal] Matching mappings:`, matchingMappings.map(m => ({
       specSyncRequirementId: m.specSyncRequirementId,
       specSyncFunctionName: m.specSyncFunctionName,
