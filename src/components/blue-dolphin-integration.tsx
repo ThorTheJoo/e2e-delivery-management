@@ -666,7 +666,7 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <h2 className="text-2xl font-bold">Blue Dolphin Integration</h2>
+          <h2 className="text-2xl font-bold">Model Integration</h2>
           <Badge 
             variant={config.protocol === 'REST' ? 'default' : config.protocol === 'ODATA' ? 'secondary' : 'outline'}
             className="text-xs"
@@ -1314,7 +1314,7 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
                           <div>
                             <strong>Data Source:</strong>{' '}
                             {bypassCache
-                              ? 'Fresh from Blue Dolphin (Cache Bypassed)'
+                              ? 'Fresh from Model (Cache Bypassed)'
                               : 'Potentially Cached Data'}
                           </div>
                         </div>

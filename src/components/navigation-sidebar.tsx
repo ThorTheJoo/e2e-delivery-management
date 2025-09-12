@@ -144,7 +144,7 @@ export function NavigationSidebar({
       children: [
         {
           id: 'blue-dolphin-integration',
-          label: 'Blue Dolphin Integration',
+          label: 'Model Integration',
           icon: <Server className="h-4 w-4" />,
           action: 'tab',
           target: 'blue-dolphin-integration',
@@ -361,7 +361,7 @@ export function NavigationSidebar({
       children: [
         {
           id: 'blue-dolphin-config',
-          label: 'Blue Dolphin Configuration',
+          label: 'Model Configuration',
           icon: <Server className="h-4 w-4" />,
           action: 'tab',
           target: 'blue-dolphin-config',
