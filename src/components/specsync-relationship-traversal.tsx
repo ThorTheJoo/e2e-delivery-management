@@ -383,8 +383,16 @@ export function SpecSyncRelationshipTraversal({
       blueDolphinObjectId: m.blueDolphinObject.ID
     })));
     
-    // Serialize all requirement IDs into a string
-    const requirementIds = matchingMappings.map(mapping => mapping.specSyncRequirementId).filter(Boolean);
+    // Serialize all requirement IDs into a string (use aggregated ids when available)
+    const requirementIdSet = new Set<string>();
+    matchingMappings.forEach(m => {
+      if (Array.isArray((m as any).specSyncRequirementIds)) {
+        (m as any).specSyncRequirementIds!.forEach((id: string) => id && requirementIdSet.add(id));
+      } else if (m.specSyncRequirementId) {
+        requirementIdSet.add(m.specSyncRequirementId);
+      }
+    });
+    const requirementIds = Array.from(requirementIdSet);
     const requirementIdString = requirementIds.length > 0 ? requirementIds.join(', ') : 'N/A';
     
     console.log(`🔍 [Traversal] Raw requirement IDs from mappings:`, requirementIds);
