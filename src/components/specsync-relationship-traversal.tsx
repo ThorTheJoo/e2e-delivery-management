@@ -489,6 +489,15 @@ export function SpecSyncRelationshipTraversal({
     console.log('🧹 Cleared all traversal results');
   }, []);
 
+  // Build unique mappings list to render available functions and to use as seeds
+  const uniqueMappings = useMemo(() => {
+    const byId = new Map<string, MappingResult>();
+    mappingResults.forEach(m => {
+      if (!byId.has(m.blueDolphinObject.ID)) byId.set(m.blueDolphinObject.ID, m);
+    });
+    return Array.from(byId.values());
+  }, [mappingResults]);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -513,7 +522,7 @@ export function SpecSyncRelationshipTraversal({
               ))}
             </select>
           </div>
-          {mappingResults.length > 0 && (
+          {uniqueMappings.length > 0 && (
             <Button onClick={traverseAllCombined} variant="outline" size="sm" disabled={isTraversing}>
               {isTraversing ? (
                 <>
@@ -567,10 +576,10 @@ export function SpecSyncRelationshipTraversal({
         </Alert>
       )}
 
-      {/* Mapping Results with Traverse Buttons */}
+      {/* Mapping Results with Traverse Buttons (unique by Application Function) */}
       <div className="space-y-3">
         <h4 className="font-medium">Available Functions for Traversal</h4>
-        {mappingResults.map((result, index) => (
+        {uniqueMappings.map((result, index) => (
           <Card key={index} className="p-4">
             <div className="flex justify-between items-start">
               <div className="flex-1">
