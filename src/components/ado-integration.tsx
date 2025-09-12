@@ -150,6 +150,16 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
       return;
     }
 
+    // Check if ADO is configured first
+    const config = adoService.getConfiguration();
+    if (!config) {
+      toast.showError(
+        'ADO not configured. Please go to ADO Configuration and set up your connection first.',
+        'Configuration Required'
+      );
+      return;
+    }
+
     console.log('🚀 Starting ADO export with mappings:', workItemMappings);
     console.log(
       '📊 Mapping details:',
@@ -162,25 +172,22 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
     setIsExporting(true);
 
     try {
-      // First, check if ADO is configured
-      const config = adoService.getConfiguration();
-      if (!config) {
-        toast.showError('ADO not configured. Please configure ADO first.');
-        return;
-      }
-
       console.log('🔍 ADO Configuration found:', config);
 
-      // Check if authenticated
-      const authStatus = adoService.getAuthStatus();
-      console.log('🔐 ADO Authentication status check:', authStatus);
-
-      if (!authStatus?.isAuthenticated) {
-        console.log('❌ ADO not authenticated - stopping export');
-        toast.showError('ADO not authenticated. Please test connection first.');
+      // Ensure authentication
+      console.log('🔐 Ensuring ADO authentication...');
+      const isAuthenticated = await adoService.ensureAuthenticated();
+      
+      if (!isAuthenticated) {
+        console.log('❌ ADO authentication failed - stopping export');
+        toast.showError(
+          'ADO authentication failed. Please check your configuration and test connection.',
+          'Authentication Failed'
+        );
         return;
       }
 
+      const authStatus = adoService.getAuthStatus();
       console.log('🔐 ADO Authentication status:', authStatus);
 
       // Test basic connection first
@@ -959,7 +966,7 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
                   <div className="max-h-32 space-y-1 overflow-y-auto">
                     {exportStatus.exportedItems.map((item, index) => (
                       <div key={index} className="rounded bg-green-50 p-2 text-sm text-green-600">
-                        ID: {item.id} - {item.fields['System.Title'] || 'Untitled'}
+                        ID: {item.id} - {String(item.fields['System.Title'] || 'Untitled')}
                       </div>
                     ))}
                   </div>

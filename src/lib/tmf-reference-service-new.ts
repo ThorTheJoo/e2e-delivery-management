@@ -1,4 +1,4 @@
-import { getServerSupabaseClient } from './supabase';
+import { getServerSupabaseClient, getBrowserSupabaseClient } from './supabase';
 
 // TMF Reference Data Types
 export interface TMFDomain {
@@ -34,7 +34,9 @@ export interface TMFMapping {
 
 // TMF Reference Data Service
 export class TMFReferenceService {
-  private static client = getServerSupabaseClient();
+  private static client = (typeof window === 'undefined')
+    ? getServerSupabaseClient()
+    : getBrowserSupabaseClient();
 
   // Get all TMF domains
   static async getDomains(): Promise<TMFDomain[]> {

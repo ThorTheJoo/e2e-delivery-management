@@ -119,6 +119,15 @@ export function SpecSyncBlueDolphinMapping({
     item.functionName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Debug logging for requirement IDs
+  console.log('🔍 [SpecSync Mapping] SpecSync items loaded:', specSyncItems.length);
+  console.log('📋 [SpecSync Mapping] Sample requirement IDs:');
+  specSyncItems.slice(0, 5).forEach((item, index) => {
+    console.log(`  ${index + 1}. requirementId: "${item.requirementId}"`);
+    console.log(`     rephrasedRequirementId: "${item.rephrasedRequirementId}"`);
+    console.log(`     functionName: "${item.functionName}"`);
+  });
+
   const searchBlueDolphin = async () => {
     if (selectedFunctionNames.size === 0) {
       setError('Please select at least one function name to search');
@@ -197,9 +206,10 @@ export function SpecSyncBlueDolphinMapping({
           }
 
           if (matchedObject) {
+            console.log(`🎯 [SpecSync Mapping] Creating mapping for function: ${functionName}, requirementId: ${specSyncItem.rephrasedRequirementId || specSyncItem.requirementId}`);
             matches.push({
               specSyncFunctionName: functionName,
-              specSyncRequirementId: specSyncItem.requirementId,
+              specSyncRequirementId: specSyncItem.rephrasedRequirementId || specSyncItem.requirementId,
               blueDolphinObject: matchedObject,
               matchType,
               confidence
@@ -309,7 +319,7 @@ export function SpecSyncBlueDolphinMapping({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold">SpecSync to Blue Dolphin Function Mapping</h3>
+          <h3 className="text-lg font-semibold">SpecSync to Model Function Mapping</h3>
           <p className="text-sm text-gray-600">
             Map SpecSync function names to Blue Dolphin Application Functions
           </p>
@@ -457,7 +467,7 @@ export function SpecSyncBlueDolphinMapping({
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredSpecSyncItems.map((item, index) => (
+                    {filteredSpecSyncItems.map((item, _index) => (
                       <tr key={item.id} className="hover:bg-gray-50">
                         <td className="px-4 py-2">
                           <Checkbox
@@ -468,7 +478,7 @@ export function SpecSyncBlueDolphinMapping({
                           />
                         </td>
                         <td className="px-4 py-2 text-sm text-gray-900">
-                          {item.requirementId}
+                          {item.rephrasedRequirementId || item.requirementId}
                         </td>
                         <td className="px-4 py-2 text-sm text-gray-900 font-medium">
                           {item.functionName}
@@ -558,13 +568,13 @@ export function SpecSyncBlueDolphinMapping({
                       <thead className="bg-gray-50 sticky top-0">
                         <tr>
                           <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            SpecSync Function
+                            SpecSync TMF Function
                           </th>
                           <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Blue Dolphin ID
                           </th>
                           <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Blue Dolphin Title
+                            Model TMF Function
                           </th>
                           <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Match Type

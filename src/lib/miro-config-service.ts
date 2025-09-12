@@ -56,16 +56,16 @@ class MiroConfigService {
 
   private validateConfig(config: unknown): config is MiroConfig {
     return (
-      config &&
+      config !== null &&
       typeof config === 'object' &&
-      typeof config.clientId === 'string' &&
-      config.clientId.trim() !== '' &&
-      typeof config.clientSecret === 'string' &&
-      config.clientSecret.trim() !== '' &&
-      typeof config.redirectUri === 'string' &&
-      config.redirectUri.trim() !== '' &&
-      Array.isArray(config.scopes) &&
-      config.scopes.length > 0
+      typeof (config as any).clientId === 'string' &&
+      (config as any).clientId.trim() !== '' &&
+      typeof (config as any).clientSecret === 'string' &&
+      (config as any).clientSecret.trim() !== '' &&
+      typeof (config as any).redirectUri === 'string' &&
+      (config as any).redirectUri.trim() !== '' &&
+      Array.isArray((config as any).scopes) &&
+      (config as any).scopes.length > 0
     );
   }
 

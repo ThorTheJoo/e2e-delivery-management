@@ -317,7 +317,7 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
     } finally {
       setRelationsLoading(false);
     }
-  }, [config, relDefName, relSrcDef, relTgtWs, relTgtDef, relType, relName, relRawFilter, relationsTop]);
+  }, [config, buildRelationsFilter, relationsTop]);
 
   const unique = (arr: (string | undefined)[]) =>
     Array.from(new Set(arr.filter(Boolean) as string[])).sort();
@@ -328,15 +328,15 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
   const uniqueTgtDefs = unique(relations.map((r) => r.RelatedBlueDolphinObjectDefinitionName));
 
   // Enhanced workspace list with additional predefined options
-  const baseWorkspaces = unique(relations.map((r) => r.RelatedBlueDolphinObjectWorkspaceName));
-  const additionalWorkspaces = [
-    'CSG International',
-    'Product Architecture',
-    'Customer Q',
-    'Simulated Case Study',
-    'RR',
-  ];
-  const uniqueTgtWs = Array.from(new Set([...baseWorkspaces, ...additionalWorkspaces])).sort();
+  // const baseWorkspaces = unique(relations.map((r) => r.RelatedBlueDolphinObjectWorkspaceName));
+  // const additionalWorkspaces = [
+  //   'CSG International',
+  //   'Product Architecture',
+  //   'Customer Q',
+  //   'Simulated Case Study',
+  //   'RR',
+  // ];
+  // const _uniqueTgtWs = Array.from(new Set([...baseWorkspaces, ...additionalWorkspaces])).sort();
 
   // ------------------------------
   // Export (Objects + Relations CSV)
@@ -488,7 +488,7 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
     } finally {
       setExportLoading(false);
     }
-  }, [config, workspaceFilter, exportRelationType, exportObjectDefinition, exportWorkspaceScope, exportLimit]);
+  }, [config, workspaceFilter, exportLimit, buildObjectsFilterForExport, buildRelationsFilterForExport, joinRelationsWithObjects]);
 
   function isEnhancedKey(key: string): boolean {
     return (

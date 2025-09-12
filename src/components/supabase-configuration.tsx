@@ -18,7 +18,7 @@ export function SupabaseConfiguration() {
   const [url, setUrl] = useState('');
   const [anonKey, setAnonKey] = useState('');
   const [serviceRole, setServiceRole] = useState('');
-  const [showAdvanced, setShowAdvanced] = useState(false); // toggleable advanced UI (currently unused)
+  // const [_showAdvanced, _setShowAdvanced] = useState(false); // toggleable advanced UI (currently unused)
   const [moduleModes, setModuleModes] = useState<Record<string, 'local' | 'supabase'>>({
     tmf: getModuleMode('tmf'),
     specs: getModuleMode('specsync'),

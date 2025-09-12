@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Palette, Save, RefreshCw, ArrowRight, AlertTriangle, Settings } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
+import { miroAuthService } from '@/lib/miro-auth-service';
 
 interface MiroConfig {
   clientId: string;
@@ -33,6 +35,34 @@ export function MiroConfiguration() {
   const [isSaving, setIsSaving] = useState(false);
 
   const toast = useToast();
+  const searchParams = useSearchParams();
+
+  // Handle OAuth callback
+  useEffect(() => {
+    const token = searchParams.get('token');
+    const success = searchParams.get('success');
+    const error = searchParams.get('error');
+
+    if (token && success === 'true') {
+      console.log('OAuth callback received in Miro Configuration:', { token: token.substring(0, 20) + '...', success });
+      miroAuthService.setTokenFromUrl(token);
+      setIsConnected(true);
+      toast.showSuccess('Successfully connected to Miro!');
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (error) {
+      console.error('OAuth error in Miro Configuration:', error);
+      setIsConnected(false);
+      toast.showError(`Miro authentication failed: ${decodeURIComponent(error)}`);
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [searchParams, toast]);
+
+  // Check authentication status on mount
+  useEffect(() => {
+    checkConnectionStatus();
+  }, []);
 
   const handleSaveConfig = async () => {
     setIsSaving(true);
@@ -91,13 +121,21 @@ export function MiroConfiguration() {
 
   const checkConnectionStatus = async () => {
     try {
-      const response = await fetch('/api/miro/boards');
-      if (response.ok) {
+      // Check if we have a valid token
+      const isAuthenticated = miroAuthService.isAuthenticated();
+      const hasToken = miroAuthService.getAccessToken();
+      
+      console.log('Checking Miro connection status:', { isAuthenticated, hasToken: !!hasToken });
+      
+      if (isAuthenticated && hasToken) {
         setIsConnected(true);
+        console.log('Miro connection status: Connected');
       } else {
         setIsConnected(false);
+        console.log('Miro connection status: Not connected');
       }
     } catch (error) {
+      console.error('Error checking Miro connection status:', error);
       setIsConnected(false);
     }
   };

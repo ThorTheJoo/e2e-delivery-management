@@ -18,12 +18,12 @@ export function BlueDolphinWorkspaceOperations({ config }: BlueDolphinWorkspaceO
   // Workspace Operations State
   const [sourceWorkspaceId, setSourceWorkspaceId] = useState('');
   const [targetWorkspaceId, setTargetWorkspaceId] = useState('');
-  const [objectId, setObjectId] = useState('');
-  const [isMoving, setIsMoving] = useState(false);
+  // const [_objectId, _setObjectId] = useState('');
+  // const [_isMoving, _setIsMoving] = useState(false);
   const [isLoadingObjects, setIsLoadingObjects] = useState(false);
   const [objects, setObjects] = useState<any[]>([]);
-  const [selectedObject, setSelectedObject] = useState<any>(null);
-  const [moveHistory, setMoveHistory] = useState<any[]>([]);
+  // const [_selectedObject, _setSelectedObject] = useState<any>(null);
+  // const [_moveHistory, _setMoveHistory] = useState<any[]>([]);
   const [selectedObjects, setSelectedObjects] = useState<Set<string>>(new Set());
   const [showAllObjects, setShowAllObjects] = useState(false);
   const [objectLimit] = useState(100); // Limit for performance
@@ -279,10 +279,10 @@ export function BlueDolphinWorkspaceOperations({ config }: BlueDolphinWorkspaceO
   }, [config, toast]);
 
   // Handle object selection
-  const handleObjectSelect = (object: any) => {
-    setSelectedObject(object);
-    setObjectId(object.id || object.ID);
-  };
+  // const _handleObjectSelect = (object: any) => {
+  //   _setSelectedObject(object);
+  //   _setObjectId(object.id || object.ID);
+  // };
 
   return (
     <div className="space-y-6">
@@ -765,7 +765,7 @@ export function BlueDolphinWorkspaceOperations({ config }: BlueDolphinWorkspaceO
       )}
 
       {/* Move History */}
-      {moveHistory.length > 0 && (
+      {/* {moveHistory.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>Move History</CardTitle>
@@ -803,7 +803,7 @@ export function BlueDolphinWorkspaceOperations({ config }: BlueDolphinWorkspaceO
             </div>
           </CardContent>
         </Card>
-      )}
+      )} */}
 
       {/* Instructions */}
       <Card>

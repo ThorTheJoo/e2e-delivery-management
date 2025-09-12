@@ -5,8 +5,14 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'your-anon-
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+// Cache a single browser client to avoid multiple GoTrueClient instances
+let browserClient: SupabaseClient | null = null;
+
 // Browser-aware client that can use UI-saved config (localStorage) for testing
 export function getBrowserSupabaseClient(): SupabaseClient {
+  // Return cached instance if already created
+  if (browserClient) return browserClient;
+
   if (typeof window !== 'undefined') {
     try {
       const raw = window.localStorage.getItem('supabaseConfig');
@@ -15,12 +21,22 @@ export function getBrowserSupabaseClient(): SupabaseClient {
         const url = cfg?.url as string | undefined;
         const anonKey = cfg?.anonKey as string | undefined;
         if (url && anonKey && url.includes('https://')) {
-          return createClient(url, anonKey);
+          // If URL matches env, always reuse the exported singleton to avoid duplicate auth clients
+          if (url === supabaseUrl) {
+            browserClient = supabase;
+            return browserClient;
+          }
+
+          browserClient = createClient(url, anonKey);
+          return browserClient;
         }
       }
     } catch {}
   }
-  return supabase;
+
+  // Fallback to the env-configured singleton
+  browserClient = supabase;
+  return browserClient;
 }
 
 // Enhanced client with fallback to UI config for server operations

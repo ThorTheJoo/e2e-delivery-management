@@ -5,6 +5,39 @@ All notable changes to the E2E Delivery Management System will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.27.1] - 2025-09-11 - Code Quality & Error Fixes
+
+### 🔧 Bug Fixes & Code Quality Improvements
+
+#### TypeScript & ESLint Fixes
+- **Fixed TypeScript compilation errors** - Resolved block-scoped variable usage issues
+- **Fixed ESLint warnings** - Addressed unused variables and dependency array issues
+- **Improved code quality** - Added proper useCallback hooks and dependency management
+- **Fixed circular dependencies** - Resolved function dependency issues in React hooks
+
+#### Code Cleanup
+- **Removed unused variables** - Commented out or removed unused state variables and functions
+- **Fixed import issues** - Added missing useCallback imports where needed
+- **Improved type safety** - Fixed type annotations and null checks
+- **Enhanced error handling** - Better error boundaries and validation
+
+#### Build & Development
+- **Successful build compilation** - Application now builds without TypeScript errors
+- **Reduced warnings** - Significantly reduced ESLint warnings from 27+ to minimal
+- **Better development experience** - Cleaner code with proper linting and type checking
+
+### 🛠️ Technical Improvements
+- Fixed ADO service null pointer exceptions
+- Improved Miro API route type safety
+- Enhanced Blue Dolphin integration error handling
+- Better SpecSync relationship traversal dependency management
+- Improved TMF domain capability manager hooks
+
+### 📝 Notes
+- Minor ESLint warnings remain for unused imports (AlertCircle, CheckCircle)
+- Some React Hook dependency warnings persist but don't affect functionality
+- Application builds successfully and is ready for deployment
+
 ## [1.7.0] - 2025-01-15 - TMF Compliance Update & Alpha Release
 
 ### 🎉 Major Features Added
