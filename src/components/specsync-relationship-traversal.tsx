@@ -399,6 +399,14 @@ export function SpecSyncRelationshipTraversal({
       blueDolphinObjectId: m.blueDolphinObject.ID
     })));
     
+    // Compute label for Application Function column
+    const uniqueSeedFunctionTitles = Array.from(
+      new Map(matchingMappings.map(m => [m.blueDolphinObject.ID, m.blueDolphinObject.Title])).values()
+    ) as string[];
+    const applicationFunctionLabel = isCombined
+      ? uniqueSeedFunctionTitles.join(', ')
+      : result.applicationFunction.Title;
+
     // Serialize all requirement IDs into a string (use aggregated ids when available)
     const requirementIdSet = new Set<string>();
     matchingMappings.forEach(m => {
@@ -419,7 +427,7 @@ export function SpecSyncRelationshipTraversal({
       const baseRow = {
         'SpecSync Requirement ID': requirementIdString,
         'SpecSync Function': result.specSyncFunctionName,
-        'Application Function': result.applicationFunction.Title,
+        'Application Function': applicationFunctionLabel,
         'Object Type': objectType,
         'Object Title': obj.Title,
         'Object Level': objectLevel,
