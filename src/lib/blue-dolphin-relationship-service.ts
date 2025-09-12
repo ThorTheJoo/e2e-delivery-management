@@ -306,6 +306,10 @@ export class BlueDolphinRelationshipService {
         })
       });
 
+      if (!response.ok) {
+        console.error('❌ Optimized filter HTTP error:', response.status);
+        return [];
+      }
       const result = await response.json();
       
       if (!result.success) {
@@ -462,6 +466,10 @@ export class BlueDolphinRelationshipService {
         })
       });
 
+      if (!response.ok) {
+        console.error('❌ Optimized object filter HTTP error:', response.status);
+        return [];
+      }
       const result = await response.json();
       
       if (!result.success) {
