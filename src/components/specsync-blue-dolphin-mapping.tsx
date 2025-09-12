@@ -29,6 +29,8 @@ interface SpecSyncBlueDolphinMappingProps {
 interface MappingResult {
   specSyncFunctionName: string;
   specSyncRequirementId: string;
+  // Aggregated requirement IDs for this function/object pair (for deduped view)
+  specSyncRequirementIds?: string[];
   blueDolphinObject: BlueDolphinObjectEnhanced;
   matchType: 'exact' | 'contains';
   confidence: number;
@@ -219,6 +221,7 @@ export function SpecSyncBlueDolphinMapping({
             matches.push({
               specSyncFunctionName: functionName,
               specSyncRequirementId: specSyncItem.rephrasedRequirementId || specSyncItem.requirementId,
+              specSyncRequirementIds: [specSyncItem.rephrasedRequirementId || specSyncItem.requirementId].filter(Boolean),
               blueDolphinObject: matchedObject,
               matchType,
               confidence
@@ -226,8 +229,25 @@ export function SpecSyncBlueDolphinMapping({
           }
         }
 
-        console.log('✅ Mapping results:', matches);
-        setMappingResults(matches);
+        // Dedupe by function name + Blue Dolphin object ID; aggregate requirement IDs
+        const dedupedMap = new Map<string, MappingResult>();
+        for (const m of matches) {
+          const key = `${m.specSyncFunctionName.toLowerCase()}::${m.blueDolphinObject.ID}`;
+          const existing = dedupedMap.get(key);
+          if (!existing) {
+            dedupedMap.set(key, { ...m, specSyncRequirementIds: m.specSyncRequirementIds || [m.specSyncRequirementId].filter(Boolean) });
+          } else {
+            const agg = new Set<string>([...(existing.specSyncRequirementIds || []), m.specSyncRequirementId].filter(Boolean) as string[]);
+            existing.specSyncRequirementIds = Array.from(agg);
+            // Keep the highest confidence/matchType exact if any
+            if (m.matchType === 'exact' && existing.matchType !== 'exact') existing.matchType = 'exact';
+            if (m.confidence > existing.confidence) existing.confidence = m.confidence;
+          }
+        }
+
+        const deduped = Array.from(dedupedMap.values());
+        console.log('✅ Mapping results (deduped):', deduped);
+        setMappingResults(deduped);
         onMappingComplete?.(matches); // NEW - Call callback if provided for relationship traversal
       } else {
         setError(result.error || 'Failed to retrieve Blue Dolphin objects');
