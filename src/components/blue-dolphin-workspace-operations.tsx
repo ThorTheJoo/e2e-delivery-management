@@ -290,7 +290,7 @@ export function BlueDolphinWorkspaceOperations({ config }: BlueDolphinWorkspaceO
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">REST API Operations</h2>
-          <p className="text-gray-600">Comprehensive Blue Dolphin REST API integration and workspace management</p>
+          <p className="text-gray-600">Comprehensive Model REST API integration and workspace management</p>
         </div>
         <div className="flex space-x-2">
           <Badge variant="outline" className="text-xs">
@@ -307,7 +307,7 @@ export function BlueDolphinWorkspaceOperations({ config }: BlueDolphinWorkspaceO
         <CardHeader>
           <CardTitle>REST API Retrieve Objects</CardTitle>
           <CardDescription>
-            Configure and execute Blue Dolphin REST API calls to retrieve objects with full parameter control
+            Configure and execute Model REST API calls to retrieve objects with full parameter control
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -528,7 +528,7 @@ export function BlueDolphinWorkspaceOperations({ config }: BlueDolphinWorkspaceO
         <CardHeader>
           <CardTitle>Workspace Operations</CardTitle>
           <CardDescription>
-            Export objects from Blue Dolphin workspaces for manual import and update object definitions
+            Export objects from Model workspaces for manual import and update object definitions
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -631,7 +631,7 @@ export function BlueDolphinWorkspaceOperations({ config }: BlueDolphinWorkspaceO
           <CardContent>
             <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded">
               <p className="text-sm text-blue-800">
-                <strong>Note:</strong> Blue Dolphin REST API supports updating object definitions. 
+                <strong>Note:</strong> Model REST API supports updating object definitions. 
                 You can export objects for manual import or update object definitions directly.
               </p>
             </div>
@@ -818,7 +818,7 @@ export function BlueDolphinWorkspaceOperations({ config }: BlueDolphinWorkspaceO
           <p>5. <strong>Update Object Definitions:</strong> Modify object definition names and properties directly</p>
           <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded">
             <p className="text-sm text-green-800">
-              <strong>Full REST API Integration:</strong> This interface provides comprehensive Blue Dolphin REST API access 
+              <strong>Full REST API Integration:</strong> This interface provides comprehensive Model REST API access 
               with full parameter control and detailed response visualization.
             </p>
           </div>

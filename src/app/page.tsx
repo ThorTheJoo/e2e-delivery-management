@@ -1517,7 +1517,7 @@ export default function HomePage() {
                   Solution Model - Integration
                 </h2>
                 <p className="text-gray-600">
-                  Create and manage your solution model in Blue Dolphin. Import domains,
+                  Create and manage your solution model in Model. Import domains,
                   capabilities, and requirements from SpecSync and TMF data.
                 </p>
 
@@ -1658,7 +1658,7 @@ export default function HomePage() {
                     </Button>
                   </CardTitle>
                   <CardDescription>
-                    Move objects between Blue Dolphin workspaces using REST API
+                    Move objects between Model workspaces using REST API
                   </CardDescription>
                 </CardHeader>
                 {solutionModelSections.has('workspace-operations') && (
@@ -1679,14 +1679,14 @@ export default function HomePage() {
                 )}
               </Card>
 
-              {/* Visualization (Blue Dolphin Graph) */}
+              {/* Visualization (Model Graph) */}
               <Card>
                 <CardHeader
                   className="cursor-pointer transition-colors hover:bg-gray-50"
                   onClick={() => toggleSolutionModelSection('visualization')}
                 >
                   <CardTitle className="flex items-center justify-between">
-                    <span>Visualization (Blue Dolphin Graph)</span>
+                    <span>Visualization (Model Graph)</span>
                     <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
                       {solutionModelSections.has('visualization') ? (
                         <ChevronDown className="h-4 w-4" />

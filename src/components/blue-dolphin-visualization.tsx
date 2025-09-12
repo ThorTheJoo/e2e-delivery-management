@@ -40,7 +40,7 @@ export function BlueDolphinVisualization({ config }: BlueDolphinVisualizationPro
 
       <Card>
         <CardHeader>
-          <CardTitle>Blue Dolphin Graph</CardTitle>
+          <CardTitle>Model Graph</CardTitle>
         </CardHeader>
         <CardContent>
           <BlueDolphinGraph
