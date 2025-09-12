@@ -413,16 +413,20 @@ export function PayloadExtractionResult({
 ### **Phase 4: UI Components (Week 7-8)**
 
 #### Week 7: Core UI Components
-- [ ] Create `SpecSyncBlueDolphinMapping` component
-- [ ] Add function name input and results display
-- [ ] Integrate with existing SpecSync section
-- [ ] Add loading states and error handling
+- [x] Create `SpecSyncBlueDolphinMapping` component
+- [x] Add function name input and results display
+- [x] Integrate with existing SpecSync section
+- [x] Add loading states and error handling
+- [x] Selection granularity now requirement+function (prevents ID loss)
 
 #### Week 8: Advanced UI Features
-- [ ] Create `RelationshipTraversalResult` component
-- [ ] Add `PayloadExtractionResult` component
-- [ ] Implement export functionality
-- [ ] Add data visualization and analysis tools
+- [x] Create `RelationshipTraversalResult` component
+- [x] Add `PayloadExtractionResult` component
+- [x] Implement export functionality
+- [x] Add data visualization and analysis tools
+- [x] Add combined traversal (dedupes by Application Function)
+- [x] Add object-only export (deduped across selections; aggregated requirement IDs)
+- [x] Expose `maxDepth` control (default 5; range 3–10)
 
 ### **Phase 5: Integration & Testing (Week 9-10)**
 

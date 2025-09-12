@@ -42,6 +42,7 @@ export function SpecSyncRelationshipTraversal({
   const [traversingFunction, setTraversingFunction] = useState<string | null>(null);
   const [extractingFunction, setExtractingFunction] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [maxDepth, setMaxDepth] = useState<number>(5);
 
   // Initialize relationship service with dynamic workspace detection
   const relationshipService = useMemo(() => {
@@ -68,7 +69,13 @@ export function SpecSyncRelationshipTraversal({
     console.log(`🏢 Workspace: ${workspaceFilter}`);
 
     try {
-      const result = await relationshipService.traverseRelationships(mappingResult);
+      const result = await relationshipService.traverseRelationships(mappingResult, {
+        maxDepth,
+        maxObjectsPerLevel: 100,
+        includeCircular: false,
+        cacheEnabled: true,
+        parallelProcessing: true
+      });
       
       console.log(`✅ Traversal completed for: ${mappingResult.specSyncFunctionName}`);
       console.log(`📈 Results:`, {
@@ -92,6 +99,45 @@ export function SpecSyncRelationshipTraversal({
       setTraversingFunction(null);
     }
   }, [relationshipService, workspaceFilter]);
+
+  /**
+   * Combined traversal for all mapping results (deduped by Application Function ID)
+   */
+  const traverseAllCombined = useCallback(async () => {
+    if (!mappingResults || mappingResults.length === 0) return;
+
+    setIsTraversing(true);
+    setError(null);
+
+    try {
+      // Unique seed Application Function IDs
+      const byFunctionId = new Map<string, MappingResult>();
+      mappingResults.forEach(m => {
+        if (!byFunctionId.has(m.blueDolphinObject.ID)) byFunctionId.set(m.blueDolphinObject.ID, m);
+      });
+
+      const seeds = Array.from(byFunctionId.values());
+      const results: TraversalResult[] = [];
+      for (const seed of seeds) {
+        const result = await relationshipService.traverseRelationships(seed, {
+          maxDepth,
+          maxObjectsPerLevel: 100,
+          includeCircular: false,
+          cacheEnabled: true,
+          parallelProcessing: true
+        });
+        results.push(result);
+      }
+
+      // Store combined results
+      setTraversalResults(results);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Combined traversal failed');
+    } finally {
+      setIsTraversing(false);
+      setTraversingFunction(null);
+    }
+  }, [mappingResults, relationshipService, maxDepth]);
 
   /**
    * Extract full payloads with extended properties and download CSV
@@ -213,6 +259,49 @@ export function SpecSyncRelationshipTraversal({
     
     console.log(`📊 Exported ${csvData.length} rows to CSV`);
   }, [traversalResults]);
+
+  /**
+   * Object-only deduped export with aggregated requirement IDs
+   */
+  const exportObjectsOnly = useCallback(() => {
+    if (traversalResults.length === 0) return;
+
+    // Build aggregated requirement IDs per Application Function ID
+    const aggReqIdsByFunctionId = new Map<string, string[]>();
+    mappingResults.forEach(m => {
+      const list = aggReqIdsByFunctionId.get(m.blueDolphinObject.ID) || [];
+      if (m.specSyncRequirementId && !list.includes(m.specSyncRequirementId)) list.push(m.specSyncRequirementId);
+      aggReqIdsByFunctionId.set(m.blueDolphinObject.ID, list);
+    });
+
+    const dedup = new Map<string, any>();
+    const push = (obj: any, type: string, appFuncId?: string) => {
+      const key = obj.ID;
+      if (dedup.has(key)) return;
+      const reqIds = appFuncId ? (aggReqIdsByFunctionId.get(appFuncId) || []) : [];
+      dedup.set(key, {
+        'SpecSync Requirement IDs (all)': reqIds.join(', '),
+        'Object Type': type,
+        'Object ID': obj.ID,
+        'Object Title': obj.Title,
+        'Status': obj.Status || '',
+        'Workspace': obj.Workspace || ''
+      });
+    };
+
+    traversalResults.forEach(tr => {
+      const appId = tr.applicationFunction.ID;
+      push(tr.applicationFunction, 'Application Function', appId);
+      [...tr.businessProcesses.topLevel, ...tr.businessProcesses.childLevel, ...tr.businessProcesses.grandchildLevel].forEach(o => push(o, 'Business Process', appId));
+      [...tr.applicationServices.topLevel, ...tr.applicationServices.childLevel, ...tr.applicationServices.grandchildLevel].forEach(o => push(o, 'Application Service', appId));
+      [...tr.applicationInterfaces.topLevel, ...tr.applicationInterfaces.childLevel, ...tr.applicationInterfaces.grandchildLevel].forEach(o => push(o, 'Application Interface', appId));
+      tr.relatedApplicationFunctions.forEach(o => push(o, 'Related Application Function', appId));
+    });
+
+    const rows = Array.from(dedup.values());
+    const csv = convertToCSV(rows);
+    downloadCSV(csv, `specsync-objects-only-${Date.now()}.csv`);
+  }, [traversalResults, mappingResults]);
 
   /**
    * Generate CSV data for full payload results with selected enhanced fields
@@ -351,11 +440,40 @@ export function SpecSyncRelationshipTraversal({
           </p>
         </div>
         <div className="flex gap-2">
+          <div className="flex items-center gap-2 mr-3">
+            <span className="text-sm text-gray-600">Max depth</span>
+            <select
+              aria-label="Traversal max depth"
+              value={maxDepth}
+              onChange={(e) => setMaxDepth(Number(e.target.value))}
+              className="border rounded px-2 py-1 text-sm"
+            >
+              {[3,4,5,6,7,8,9,10].map(n => (
+                <option key={n} value={n}>{n}</option>
+              ))}
+            </select>
+          </div>
+          {mappingResults.length > 0 && (
+            <Button onClick={traverseAllCombined} variant="outline" size="sm" disabled={isTraversing}>
+              {isTraversing ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Traversing...
+                </>
+              ) : (
+                'Traverse All (Combined)'
+              )}
+            </Button>
+          )}
           {traversalResults.length > 0 && (
             <>
               <Button onClick={exportResults} variant="outline" size="sm">
                 <Download className="w-4 h-4 mr-2" />
                 Export Basic CSV
+              </Button>
+              <Button onClick={exportObjectsOnly} variant="outline" size="sm">
+                <Download className="w-4 h-4 mr-2" />
+                Export Objects Only
               </Button>
               <Button onClick={clearResults} variant="outline" size="sm">
                 Clear Results
