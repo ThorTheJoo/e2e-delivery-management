@@ -67,6 +67,7 @@ export function SpecSyncBlueDolphinMapping({
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [autoSelectSameFunction, setAutoSelectSameFunction] = useState<boolean>(true);
 
   const loadAvailableWorkspaces = useCallback(async () => {
     try {
@@ -108,7 +109,29 @@ export function SpecSyncBlueDolphinMapping({
     const key = buildSelectionKey(rid, item.functionName);
     setSelectedKeys(prev => {
       const next = new Set(prev);
-      if (checked) next.add(key); else next.delete(key);
+      if (checked) {
+        next.add(key);
+        if (autoSelectSameFunction) {
+          // Auto-select all rows with the same function
+          specSyncItems.forEach(row => {
+            if (row.functionName === item.functionName) {
+              const k = buildSelectionKey(row.rephrasedRequirementId || row.requirementId, row.functionName);
+              next.add(k);
+            }
+          });
+        }
+      } else {
+        next.delete(key);
+        if (autoSelectSameFunction) {
+          // Deselect all rows with the same function
+          specSyncItems.forEach(row => {
+            if (row.functionName === item.functionName) {
+              const k = buildSelectionKey(row.rephrasedRequirementId || row.requirementId, row.functionName);
+              next.delete(k);
+            }
+          });
+        }
+      }
       return next;
     });
   };
@@ -248,7 +271,8 @@ export function SpecSyncBlueDolphinMapping({
         const deduped = Array.from(dedupedMap.values());
         console.log('✅ Mapping results (deduped):', deduped);
         setMappingResults(deduped);
-        onMappingComplete?.(matches); // NEW - Call callback if provided for relationship traversal
+        // IMPORTANT: propagate deduped list to traversal, not raw list
+        onMappingComplete?.(deduped);
       } else {
         setError(result.error || 'Failed to retrieve Blue Dolphin objects');
       }
@@ -468,6 +492,14 @@ export function SpecSyncBlueDolphinMapping({
                   >
                     Clear Selection
                   </Button>
+                  <label className="flex items-center space-x-2 text-sm text-gray-600">
+                    <input
+                      type="checkbox"
+                      checked={autoSelectSameFunction}
+                      onChange={(e) => setAutoSelectSameFunction(e.target.checked)}
+                    />
+                    <span>Auto-select same function</span>
+                  </label>
                 </div>
               </div>
               <div className="text-sm text-gray-600">
