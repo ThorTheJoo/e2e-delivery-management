@@ -7,6 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Collapsible } from '@/components/ui/collapsible';
 import { Download, Loader2, AlertCircle } from 'lucide-react';
+import { matchPdfContent, MatchedContent } from '@/lib/pdf-matcher';
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import { SolutionPdf } from '@/lib/solution-pdf';
 import { BlueDolphinConfig } from '@/types/blue-dolphin';
 import { 
   MappingResult, 
@@ -15,17 +18,21 @@ import {
   HierarchicalObject 
 } from '@/types/blue-dolphin-relationships';
 import { BlueDolphinRelationshipService } from '@/lib/blue-dolphin-relationship-service';
+import { SolutionDescriptionService, SolutionDescriptionData } from '@/lib/solution-description-service';
+import { SpecSyncItem } from '@/types';
 
 interface SpecSyncRelationshipTraversalProps {
   mappingResults: MappingResult[];
   blueDolphinConfig: BlueDolphinConfig;
   workspaceFilter: string;
+  requirements?: SpecSyncItem[];
 }
 
 export function SpecSyncRelationshipTraversal({ 
   mappingResults, 
   blueDolphinConfig, 
-  workspaceFilter 
+  workspaceFilter,
+  requirements = []
 }: SpecSyncRelationshipTraversalProps) {
   const [traversalResults, setTraversalResults] = useState<TraversalResult[]>([]);
   
@@ -43,6 +50,13 @@ export function SpecSyncRelationshipTraversal({
   const [extractingFunction, setExtractingFunction] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [maxDepth, setMaxDepth] = useState<number>(5);
+  
+  // Solution Description Generation State
+  const [isGeneratingSolution, setIsGeneratingSolution] = useState(false);
+  const [solutionDescriptionData, setSolutionDescriptionData] = useState<SolutionDescriptionData | null>(null);
+  const [solutionDescriptionMarkdown, setSolutionDescriptionMarkdown] = useState<string>('');
+  const [showSolutionDescription, setShowSolutionDescription] = useState(false);
+  const [matchedContent, setMatchedContent] = useState<MatchedContent | null>(null);
 
   // Initialize relationship service with dynamic workspace detection
   const relationshipService = useMemo(() => {
@@ -319,6 +333,81 @@ export function SpecSyncRelationshipTraversal({
     
     console.log(`📊 Exported ${csvData.length} rows to CSV`);
   }, [traversalResults]);
+
+  // Solution Description Generation
+  const handleGenerateSolutionDescription = useCallback(async () => {
+    if (traversalResults.length === 0) {
+      setError('No traversal results available. Please run traversal and extract payloads first.');
+      return;
+    }
+
+    setIsGeneratingSolution(true);
+    setError(null);
+
+    try {
+      // Convert traversal results to the format expected by the service
+      const resultsWithPayloads: TraversalResultWithPayloads[] = traversalResults.map(result => ({
+        ...result,
+        businessProcesses: result.businessProcesses || { topLevel: [], childLevel: [], grandchildLevel: [] },
+        applicationServices: result.applicationServices || { topLevel: [], childLevel: [], grandchildLevel: [] },
+        applicationInterfaces: result.applicationInterfaces || { topLevel: [], childLevel: [], grandchildLevel: [] },
+        applicationFunctions: result.relatedApplicationFunctions || [],
+        payloadMetadata: {
+          totalObjectsExtracted: 0,
+          enhancedFieldsAvailable: 0,
+          workspaceScoped: result.applicationFunction.Workspace || 'Unknown',
+          extractionTimestamp: new Date().toISOString(),
+          extractionTimeMs: 0
+        }
+      }));
+
+      // Generate solution description data
+      const solutionData = SolutionDescriptionService.generateSolutionDescription(
+        mappingResults,
+        resultsWithPayloads,
+        requirements,
+        'E2E Delivery Management Solution'
+      );
+
+      // Generate markdown document
+      const markdown = SolutionDescriptionService.generateMarkdownDocument(solutionData);
+
+      setSolutionDescriptionData(solutionData);
+      setSolutionDescriptionMarkdown(markdown);
+      setShowSolutionDescription(true);
+
+      // Ingest PDFs and compute matches (non-blocking for markdown)
+      try {
+        const res = await fetch('/api/pdf-ingest');
+        if (res.ok) {
+          const payload = await res.json();
+          const matches = matchPdfContent(payload.files, requirements, mappingResults, resultsWithPayloads);
+          setMatchedContent(matches);
+        }
+      } catch (e) {
+        console.warn('PDF ingestion/matching skipped:', e);
+      }
+
+      console.log('✅ [Solution Description] Generated successfully');
+    } catch (err) {
+      console.error('❌ [Solution Description] Error generating solution description:', err);
+      setError(err instanceof Error ? err.message : 'Failed to generate solution description');
+    } finally {
+      setIsGeneratingSolution(false);
+    }
+  }, [traversalResults, mappingResults, requirements]);
+
+  const handleDownloadSolutionDescription = useCallback(() => {
+    if (!solutionDescriptionMarkdown) return;
+
+    const blob = new Blob([solutionDescriptionMarkdown], { type: 'text/markdown' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `solution-description-${new Date().toISOString().split('T')[0]}.md`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }, [solutionDescriptionMarkdown]);
 
   /**
    * Object-only deduped export with aggregated requirement IDs
@@ -663,6 +752,151 @@ export function SpecSyncRelationshipTraversal({
               isExtracting={isExtracting && extractingFunction === result.specSyncFunctionName}
             />
           ))}
+        </div>
+      )}
+
+      {/* Solution Description Generation */}
+      {traversalResults.length > 0 && (
+        <div className="space-y-4">
+          <div className="border-t pt-6">
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h4 className="font-medium text-lg">Solution Description Generation</h4>
+                <p className="text-sm text-gray-600">
+                  Generate comprehensive solution description document with full traceability
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={handleGenerateSolutionDescription}
+                  disabled={isGeneratingSolution}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  {isGeneratingSolution ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      📄 Generate Solution Description
+                    </>
+                  )}
+                </Button>
+                {solutionDescriptionMarkdown && (
+                  <Button 
+                    onClick={handleDownloadSolutionDescription}
+                    variant="outline"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Download Document
+                  </Button>
+                )}
+                {solutionDescriptionData && (
+                  <PDFDownloadLink
+                    document={<SolutionPdf data={solutionDescriptionData} matches={matchedContent || undefined} />}
+                    fileName={`solution-description-${new Date().toISOString().split('T')[0]}.pdf`}
+                  >
+                    {({ loading }) => (
+                      <Button variant="outline" disabled={loading}>
+                        <Download className="w-4 h-4 mr-2" />
+                        {loading ? 'Preparing PDF...' : 'Download PDF'}
+                      </Button>
+                    )}
+                  </PDFDownloadLink>
+                )}
+              </div>
+            </div>
+
+            {/* Solution Description Preview */}
+            {showSolutionDescription && solutionDescriptionData && (
+              <Card className="border-2 border-blue-200">
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    📋 Solution Description Preview
+                    <Badge variant="outline" className="text-xs">
+                      {solutionDescriptionData.statistics.totalRequirements} requirements
+                    </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      {solutionDescriptionData.statistics.totalTMFunctions} TMF functions
+                    </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      {solutionDescriptionData.statistics.totalBusinessProcesses + solutionDescriptionData.statistics.totalApplicationServices + solutionDescriptionData.statistics.totalApplicationInterfaces} components
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {/* Statistics Summary */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="text-center p-3 bg-blue-50 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {solutionDescriptionData.statistics.totalRequirements}
+                        </div>
+                        <div className="text-sm text-blue-800">Requirements</div>
+                      </div>
+                      <div className="text-center p-3 bg-green-50 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">
+                          {solutionDescriptionData.statistics.totalTMFunctions}
+                        </div>
+                        <div className="text-sm text-green-800">TMF Functions</div>
+                      </div>
+                      <div className="text-center p-3 bg-purple-50 rounded-lg">
+                        <div className="text-2xl font-bold text-purple-600">
+                          {solutionDescriptionData.statistics.totalBusinessProcesses}
+                        </div>
+                        <div className="text-sm text-purple-800">Business Processes</div>
+                      </div>
+                      <div className="text-center p-3 bg-orange-50 rounded-lg">
+                        <div className="text-2xl font-bold text-orange-600">
+                          {solutionDescriptionData.statistics.totalApplicationServices}
+                        </div>
+                        <div className="text-sm text-orange-800">Application Services</div>
+                      </div>
+                    </div>
+
+                    {/* TMF Functions Summary */}
+                    <div>
+                      <h5 className="font-medium mb-2">TMF Functions Mapped:</h5>
+                      <div className="space-y-2">
+                        {solutionDescriptionData.tmfFunctions.map((func, index) => (
+                          <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                            <div>
+                              <span className="font-medium">{func.name}</span>
+                              <span className="text-sm text-gray-600 ml-2">({func.domain})</span>
+                            </div>
+                            <Badge variant="outline" className="text-xs">
+                              {func.requirements.length} requirements
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Traceability Summary */}
+                    <div>
+                      <h5 className="font-medium mb-2">Traceability Coverage:</h5>
+                      <div className="text-sm text-gray-600">
+                        <div>• Requirements with Business Processes: {solutionDescriptionData.traceabilityMap.filter(m => m.businessProcesses.length > 0).length}</div>
+                        <div>• Requirements with Application Services: {solutionDescriptionData.traceabilityMap.filter(m => m.applicationServices.length > 0).length}</div>
+                        <div>• Requirements with Application Interfaces: {solutionDescriptionData.traceabilityMap.filter(m => m.applicationInterfaces.length > 0).length}</div>
+                      </div>
+                    </div>
+
+                    {/* Document Preview */}
+                    <div>
+                      <h5 className="font-medium mb-2">Document Preview:</h5>
+                      <div className="bg-gray-50 p-3 rounded text-sm max-h-40 overflow-y-auto">
+                        <pre className="whitespace-pre-wrap text-xs">
+                          {solutionDescriptionMarkdown.substring(0, 500)}...
+                        </pre>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
       )}
     </div>

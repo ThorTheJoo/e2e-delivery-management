@@ -53,6 +53,10 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
       referenceCapability:
         headers.find((h) => /reference.*capability/i.test(h)) || 'Reference Capability',
       usecase1: headers.find((h) => /usecase.*1/i.test(h)) || 'Usecase 1',
+      description:
+        headers.find((h) => /requirement\s*(statement|text)?$/i.test(h)) ||
+        headers.find((h) => /description$/i.test(h)) ||
+        'Requirement',
     };
     
     console.log('🔍 [SpecSync Import] Headers found:', headers);
@@ -88,6 +92,7 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
         capability: row[headerMap.afLevel2] || '', // Use AF Level 2 as capability
         referenceCapability: row[headerMap.referenceCapability] || '',
         usecase1: row[headerMap.usecase1] || '', // Add usecase1 parsing
+        description: row[headerMap.description] || '',
       };
     });
   };
@@ -137,7 +142,13 @@ export function SpecSyncImport({ onImport, onClear, currentState }: SpecSyncImpo
         afLevel2: af2,
         capability: af2, // STRICT: only AF Level 2
         referenceCapability: rc,
-        usecase1: r['Usecase 1'] || r['Usecase 1'] || '', // Add usecase1 parsing
+        usecase1: r['Usecase 1'] || r['Use case 1'] || '', // Add usecase1 parsing
+        description:
+          r['Requirement'] ||
+          r['Requirement Statement'] ||
+          r['Requirement Description'] ||
+          r['Description'] ||
+          '',
       };
     });
   };

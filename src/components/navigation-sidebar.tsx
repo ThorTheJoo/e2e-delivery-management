@@ -381,6 +381,13 @@ export function NavigationSidebar({
           target: 'miro-setup',
         },
         {
+          id: 'confluence-config',
+          label: 'Confluence Configuration',
+          icon: <Server className="h-4 w-4" />,
+          action: 'tab',
+          target: 'confluence-config',
+        },
+        {
           id: 'ado-config',
           label: 'ADO Configuration',
           icon: <Server className="h-4 w-4" />,

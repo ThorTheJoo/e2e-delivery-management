@@ -1009,6 +1009,7 @@ function parseCSVToSpecSyncItems(text) {
       // STRICT: Capability must come from AF Level 2 only
       capability: afLevel2,
       referenceCapability,
+      description: get(findIndex(['Requirement', 'Requirement Statement', 'Requirement Description', 'Description'])),
       tags,
     });
   }
@@ -1390,6 +1391,12 @@ function bindSpecSyncDelegatedHandlers() {
                   afLevel2: af2,
                   capability: af2, // STRICT: only AF L2
                   referenceCapability: r['Reference Capability'] || r['Capability'] || '',
+                  description:
+                    r['Requirement'] ||
+                    r['Requirement Statement'] ||
+                    r['Requirement Description'] ||
+                    r['Description'] ||
+                    '',
                   tags,
                 };
               });

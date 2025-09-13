@@ -62,3 +62,9 @@ jspm_packages/
 
 # Temporary files
 temp_analysis.xlsx
+
+# Large files that exceed GitHub's 100MB limit
+*.pdf
+*.docx
+*.htm
+*_files/

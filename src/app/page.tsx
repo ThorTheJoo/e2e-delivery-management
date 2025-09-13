@@ -31,6 +31,7 @@ import { BlueDolphinWorkspaceOperations } from '@/components/blue-dolphin-worksp
 import { SpecSyncBlueDolphinMapping } from '@/components/specsync-blue-dolphin-mapping';
 import { SpecSyncRelationshipTraversal } from '@/components/specsync-relationship-traversal';
 import { MiroConfiguration } from '@/components/miro-configuration';
+import { ConfluenceConfiguration } from '@/components/confluence-configuration';
 import { SupabaseConfiguration } from '@/components/supabase-configuration';
 import { MiroSetupGuide } from '@/components/miro-setup-guide';
 import { ADOConfigurationComponent } from '@/components/ado-configuration';
@@ -38,6 +39,7 @@ import { ADOIntegration } from '@/components/ado-integration';
 import { CETv22ServiceDesign } from '@/components/cet-v22/CETv22ServiceDesign';
 import { BillOfMaterials } from '@/components/bill-of-materials';
 import { BOMConfiguration } from '@/components/bom-configuration';
+import { SolutionDescriptionGenerator } from '@/components/solution-description-generator';
 import { useToast, ToastContainer } from '@/components/ui/toast';
 import { ComplexityMatrix } from '@/components/complexity-matrix';
 import {
@@ -93,6 +95,7 @@ export default function HomePage() {
   
   // NEW - State for relationship traversal
   const [mappingResults, setMappingResults] = useState<any[]>([]);
+  const [traversalResults, setTraversalResults] = useState<any[]>([]);
   const [workspaceFilter] = useState<string>('Grant Test'); // Fixed: Use correct workspace
 
   // Handle navigation events from child components
@@ -1028,6 +1031,7 @@ export default function HomePage() {
                 <Server className="h-4 w-4" />
                 <span className="hidden sm:inline">ADO Integration</span>
               </TabsTrigger>
+              
             </TabsList>
 
             {/* Dashboard Tab */}
@@ -1634,6 +1638,7 @@ export default function HomePage() {
                             password: 'ef498b94-732b-46c8-a24c-65fbd27c1482',
                           }}
                           workspaceFilter={workspaceFilter}
+                          requirements={specSyncItems}
                         />
                       </div>
                     )}
@@ -2071,6 +2076,11 @@ export default function HomePage() {
               <MiroConfiguration />
             </TabsContent>
 
+            {/* Confluence Configuration Tab */}
+            <TabsContent value="confluence-config" className="space-y-6">
+              <ConfluenceConfiguration />
+            </TabsContent>
+
             {/* Miro Setup Guide Tab */}
             <TabsContent value="miro-setup" className="space-y-6">
               <MiroSetupGuide />
@@ -2090,6 +2100,8 @@ export default function HomePage() {
             <TabsContent value="bom-config" className="space-y-6">
               <BOMConfiguration />
             </TabsContent>
+
+            
           </Tabs>
         </main>
       </div>
