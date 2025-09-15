@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/toast';
-import { Server, Save, RefreshCw, TestTube, Eye, Shield } from 'lucide-react';
+import { Server, Save, RefreshCw, TestTube, Eye, Shield, AlertTriangle } from 'lucide-react';
 
 interface ConfluenceConfig {
   baseUrl: string;
@@ -39,7 +39,7 @@ interface PageResult {
 
 export function ConfluenceConfiguration() {
   const [config, setConfig] = useState<ConfluenceConfig>({
-    baseUrl: typeof window !== 'undefined' ? window.location.origin : '',
+    baseUrl: 'https://confluence.csgicorp.com',
     apiBase: 'auto',
     defaultFormat: 'storage',
   });
@@ -337,6 +337,37 @@ export function ConfluenceConfiguration() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Network connectivity help section - shown when there are DNS/network errors */}
+      {lastAction.type === 'test' && !lastAction.ok && lastAction.message?.includes('DNS resolution failed') && (
+        <Card className="border-amber-200 bg-amber-50">
+          <CardHeader>
+            <div className="flex items-center space-x-2">
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-100">
+                <AlertTriangle className="h-4 w-4 text-amber-600" />
+              </div>
+              <CardTitle className="text-sm text-amber-800">Network Connectivity Issue</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-amber-700">
+              The Confluence server cannot be reached. This is likely due to one of the following reasons:
+            </p>
+            <ul className="ml-4 list-disc space-y-1 text-sm text-amber-700">
+              <li><strong>VPN Required:</strong> You may need to connect to your corporate VPN to access the Confluence server</li>
+              <li><strong>Incorrect URL:</strong> Verify that the Base URL is correct (e.g., https://confluence.yourcompany.com)</li>
+              <li><strong>Network Restrictions:</strong> Your network may be blocking access to the Confluence server</li>
+              <li><strong>Server Unavailable:</strong> The Confluence server may be temporarily down</li>
+            </ul>
+            <div className="rounded bg-amber-100 p-3">
+              <p className="text-xs text-amber-800">
+                <strong>Quick Fix:</strong> Try connecting to your corporate VPN and test the connection again. 
+                If you're unsure about the correct URL, contact your IT administrator.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

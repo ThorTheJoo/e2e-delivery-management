@@ -4,7 +4,15 @@
 
 The E2E Delivery Management System is a comprehensive platform for managing end-to-end delivery processes, integrating with various enterprise systems including Blue Dolphin, Azure DevOps, Miro, and SpecSync. The system provides TMF ODA 2025 compliant architecture management, requirement tracking, and delivery orchestration capabilities.
 
-## 🚀 Latest Features (v1.6.0)
+## 🚀 Latest Features (v1.29.0)
+
+### 🔧 Confluence Integration Fixes & Service Layer Improvements
+
+- **Fixed Confluence API Route**: Resolved Confluence integration API route issues and improved error handling
+- **Enhanced Configuration Management**: Improved Confluence configuration component with better validation
+- **Service Layer Improvements**: Enhanced ADO service with better error handling and type safety
+- **PDF Service Updates**: Updated solution PDF service with improved functionality
+- **Code Quality Improvements**: Resolved TypeScript compilation errors and improved type safety
 
 ### 🔗 Enhanced Blue Dolphin Integration
 

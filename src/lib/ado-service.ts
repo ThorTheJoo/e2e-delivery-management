@@ -37,11 +37,8 @@ export class ADOService {
         this.configuration = JSON.parse(savedConfig);
         this.log('info', 'Configuration loaded from storage');
         
-        // Test connection if authentication is provided to set auth status
-        if (this.configuration?.authentication?.token) {
-          this.log('info', 'Testing connection for loaded configuration...');
-          await this.testConnection();
-        }
+        // Don't automatically test connection on load to prevent infinite loops
+        // Connection testing should be done explicitly by user action
         
         return this.configuration;
       }
@@ -59,10 +56,8 @@ export class ADOService {
       }
       this.log('info', 'Configuration saved successfully');
 
-      // Test connection if authentication is provided
-      if (config.authentication.token) {
-        await this.testConnection();
-      }
+      // Don't automatically test connection on save to prevent infinite loops
+      // Connection testing should be done explicitly by user action
     } catch (error) {
       this.log('error', 'Failed to save configuration', error);
       throw error;
@@ -803,10 +798,36 @@ export class ADOService {
 
     this.log('debug', 'Making API call', { url, method: options.method || 'GET' });
 
-    return fetch(url, {
-      ...options,
-      headers,
-    });
+    try {
+      const response = await fetch(url, {
+        ...options,
+        headers,
+        // Add timeout to prevent hanging
+        signal: AbortSignal.timeout(10000) // 10 second timeout
+      });
+      return response;
+    } catch (fetchError) {
+      // Provide more specific error messages based on the error type
+      let errorMessage = 'Unknown fetch error';
+      if (fetchError instanceof Error) {
+        if (fetchError.name === 'AbortError') {
+          errorMessage = 'Request timeout - the Azure DevOps server may be unreachable or slow to respond';
+        } else if (fetchError.message.includes('ENOTFOUND')) {
+          errorMessage = 'DNS resolution failed - cannot reach dev.azure.com. Please check your internet connection and VPN status';
+        } else if (fetchError.message.includes('ECONNREFUSED')) {
+          errorMessage = 'Connection refused - the Azure DevOps server is not accepting connections';
+        } else if (fetchError.message.includes('ETIMEDOUT')) {
+          errorMessage = 'Connection timeout - the Azure DevOps server is not responding';
+        } else if (fetchError.message.includes('fetch failed')) {
+          errorMessage = 'Network error - please check your internet connection and VPN status';
+        } else {
+          errorMessage = fetchError.message;
+        }
+      }
+      
+      this.log('error', `ADO API call failed: ${errorMessage}`);
+      throw new Error(errorMessage);
+    }
   }
 
   private async createWorkItem(mapping: ADOWorkItemMapping): Promise<ADOWorkItemResponse> {

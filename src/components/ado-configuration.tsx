@@ -78,27 +78,32 @@ export function ADOConfigurationComponent() {
   const [logs, setLogs] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState('general');
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const toast = useToast();
 
   const loadConfiguration = useCallback(async () => {
+    if (isInitialized) return; // Prevent reloading if already initialized
+    
     try {
       const config = await adoService.loadConfiguration();
       if (config) {
         setConfiguration(config);
         toast.showSuccess('Configuration loaded successfully');
       }
+      setIsInitialized(true);
     } catch (error) {
       console.error('Failed to load configuration:', error);
       toast.showError('Failed to load configuration');
+      setIsInitialized(true);
     }
-  }, [toast]);
+  }, [toast, isInitialized]);
 
   useEffect(() => {
     loadConfiguration();
     loadLogs();
     loadNotifications();
-  }, [toast, loadConfiguration]);
+  }, []); // Remove dependencies to prevent infinite loop
 
   const loadLogs = () => {
     const serviceLogs = adoService.getLogs();
@@ -116,10 +121,8 @@ export function ADOConfigurationComponent() {
       await adoService.saveConfiguration(configuration);
       toast.showSuccess('Configuration saved successfully');
 
-      // Test connection if token is provided
-      if (configuration.authentication.token) {
-        await testConnection();
-      }
+      // Don't automatically test connection on save to prevent infinite loops
+      // User can manually test connection using the Test Connection button
     } catch (error) {
       console.error('Failed to save configuration:', error);
       toast.showError('Failed to save configuration');
@@ -807,6 +810,37 @@ export function ADOConfigurationComponent() {
           </div>
         </CardFooter>
       </Card>
+
+      {/* Network connectivity help section - shown when there are network errors */}
+      {authStatus && !authStatus.isAuthenticated && (
+        <Card className="border-amber-200 bg-amber-50">
+          <CardHeader>
+            <div className="flex items-center space-x-2">
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-100">
+                <AlertTriangle className="h-4 w-4 text-amber-600" />
+              </div>
+              <CardTitle className="text-sm text-amber-800">Connection Issue</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-amber-700">
+              Unable to connect to Azure DevOps. This could be due to:
+            </p>
+            <ul className="ml-4 list-disc space-y-1 text-sm text-amber-700">
+              <li><strong>Network Connectivity:</strong> Check your internet connection and VPN status</li>
+              <li><strong>Incorrect Organization/Project:</strong> Verify the organization and project names are correct</li>
+              <li><strong>Invalid PAT:</strong> Ensure your Personal Access Token is valid and has the correct permissions</li>
+              <li><strong>Firewall/Proxy:</strong> Your network may be blocking access to dev.azure.com</li>
+            </ul>
+            <div className="rounded bg-amber-100 p-3">
+              <p className="text-xs text-amber-800">
+                <strong>Quick Fix:</strong> Verify your organization and project names, check your PAT permissions, 
+                and ensure you can access dev.azure.com in your browser.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

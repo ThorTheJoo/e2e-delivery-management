@@ -1,9 +1,10 @@
 'use client';
 
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet, Link } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 import type { EnhancedSolutionDescriptionData } from './enhanced-solution-description-service';
 import type { MatchedContent } from './pdf-matcher';
+import type { SolutionDescriptionData } from './solution-description-service';
 
 const styles = StyleSheet.create({
   page: { padding: 32, fontSize: 10, fontFamily: 'Helvetica' },
@@ -16,55 +17,96 @@ const styles = StyleSheet.create({
   code: { fontFamily: 'Courier', fontSize: 8, backgroundColor: '#f2f2f2', padding: 4, borderRadius: 2 },
 });
 
+type BaseDocMeta = { projectName?: string; clientName?: string; version?: string; date?: string; status?: string };
+type LegacySolutionData = SolutionDescriptionData & BaseDocMeta;
+type CompatibleSolutionData = Partial<EnhancedSolutionDescriptionData> | LegacySolutionData;
+
 interface SolutionPdfProps {
-  data: Partial<EnhancedSolutionDescriptionData> & { projectName?: string; clientName?: string; version?: string; date?: string; status?: string };
+  data: CompatibleSolutionData;
   matches?: MatchedContent;
 }
 
 export function SolutionPdf({ data, matches }: SolutionPdfProps) {
+  function isEnhanced(d: CompatibleSolutionData): d is Partial<EnhancedSolutionDescriptionData> {
+    return typeof (d as any).solutionOverview !== 'undefined' || typeof (d as any).businessContext !== 'undefined' || typeof (d as any).documentOverview !== 'undefined';
+  }
+
+  function isLegacy(d: CompatibleSolutionData): d is LegacySolutionData {
+    return Array.isArray((d as any).requirements) && Array.isArray((d as any).tmfFunctions);
+  }
+
+  const projectName = (data as any).projectName || 'Project';
+  const clientName = isEnhanced(data) ? (data.clientName || 'Client') : 'Client';
+  const version = (data as any).version || '1.0.0';
+  const date = isEnhanced(data)
+    ? (data.date || new Date().toISOString().slice(0, 10))
+    : (() => {
+        const gd = isLegacy(data) ? (data.generatedDate as string | undefined) : undefined;
+        return (gd ? new Date(gd) : new Date()).toISOString().slice(0, 10);
+      })();
+  const status = isEnhanced(data) ? (data.status || 'Draft') : 'Draft';
+
   const safe = {
-    projectName: data.projectName || 'Project',
-    clientName: data.clientName || 'Client',
-    version: data.version || '1.0.0',
-    date: data.date || new Date().toISOString().slice(0, 10),
-    status: data.status || 'Draft',
+    projectName,
+    clientName,
+    version,
+    date,
+    status,
     documentOverview: {
-      scope: data.documentOverview?.scope || '',
-      purpose: data.documentOverview?.purpose || '',
+      scope: isEnhanced(data) && data.documentOverview ? (data.documentOverview.scope || '') : '',
+      purpose: isEnhanced(data) && data.documentOverview ? (data.documentOverview.purpose || '') : '',
     },
     businessContext: {
       clientUnderstanding: {
-        customerSegments: data.businessContext?.clientUnderstanding?.customerSegments || [],
-        productServiceSegments: data.businessContext?.clientUnderstanding?.productServiceSegments || [],
-        missionCritical: data.businessContext?.clientUnderstanding?.missionCritical || '',
+        customerSegments: isEnhanced(data) && data.businessContext?.clientUnderstanding?.customerSegments ? data.businessContext.clientUnderstanding.customerSegments : [],
+        productServiceSegments: isEnhanced(data) && data.businessContext?.clientUnderstanding?.productServiceSegments ? data.businessContext.clientUnderstanding.productServiceSegments : [],
+        missionCritical: isEnhanced(data) && data.businessContext?.clientUnderstanding?.missionCritical ? data.businessContext.clientUnderstanding.missionCritical : '',
       },
-      projectUnderstanding: data.businessContext?.projectUnderstanding || '',
-      solutionAbout: data.businessContext?.solutionAbout || '',
+      projectUnderstanding: isEnhanced(data) && data.businessContext?.projectUnderstanding ? data.businessContext.projectUnderstanding : '',
+      solutionAbout: isEnhanced(data) && data.businessContext?.solutionAbout ? data.businessContext.solutionAbout : '',
     },
     solutionOverview: {
-      highLevelArchitecture: data.solutionOverview?.highLevelArchitecture || '',
-      capabilityView: data.solutionOverview?.capabilityView || '',
-      csgSolutionComponents: data.solutionOverview?.csgSolutionComponents || {
-        revenueManagement: '',
-        customerManagement: '',
-        ratingCharging: '',
-        consumerCatalog: '',
-        enterpriseCatalog: '',
-        cpq: '',
-        activeMediationManager: '',
-      },
-      partnerSolutionComponents: data.solutionOverview?.partnerSolutionComponents || [],
-      externalSolutionComponents: data.solutionOverview?.externalSolutionComponents || [],
-      endToEndProcessFlows: data.solutionOverview?.endToEndProcessFlows || '',
-      integrationArchitecture: data.solutionOverview?.integrationArchitecture || {
-        detailedIntegrationLandscape: '',
-        fileInterfaces: '',
-        onlineInterfaces: '',
-        coreNetworkInterfaces: '',
-      },
+      highLevelArchitecture: isEnhanced(data) && data.solutionOverview?.highLevelArchitecture ? data.solutionOverview.highLevelArchitecture : '',
+      capabilityView: isEnhanced(data) && data.solutionOverview?.capabilityView ? data.solutionOverview.capabilityView : '',
+      csgSolutionComponents: isEnhanced(data) && data.solutionOverview?.csgSolutionComponents
+        ? data.solutionOverview.csgSolutionComponents
+        : {
+            revenueManagement: '',
+            customerManagement: '',
+            ratingCharging: '',
+            consumerCatalog: '',
+            enterpriseCatalog: '',
+            cpq: '',
+            activeMediationManager: '',
+          },
+      partnerSolutionComponents: isEnhanced(data) && data.solutionOverview?.partnerSolutionComponents ? data.solutionOverview.partnerSolutionComponents : [],
+      externalSolutionComponents: isEnhanced(data) && data.solutionOverview?.externalSolutionComponents ? data.solutionOverview.externalSolutionComponents : [],
+      endToEndProcessFlows: isEnhanced(data) && data.solutionOverview?.endToEndProcessFlows ? data.solutionOverview.endToEndProcessFlows : '',
+      integrationArchitecture: isEnhanced(data) && data.solutionOverview?.integrationArchitecture
+        ? data.solutionOverview.integrationArchitecture
+        : {
+            detailedIntegrationLandscape: '',
+            fileInterfaces: '',
+            onlineInterfaces: '',
+            coreNetworkInterfaces: '',
+          },
     },
-    traceabilityMap: Array.isArray((data as any).traceabilityMap) ? (data as any).traceabilityMap : [],
-  };
+  } as const;
+
+  const traceabilityItems: Array<{ relationship: string; sourceName: string; targetName: string }> = [];
+  if (isEnhanced(data) && (data as any).traceability) {
+    const tr = (data as any).traceability;
+    const lists: any[] = [tr.requirementsToFunctions, tr.functionsToServices, tr.servicesToComponents].filter(Array.isArray);
+    lists.flat().forEach((m: any) => {
+      if (m && m.sourceName && m.targetName) {
+        traceabilityItems.push({ relationship: m.relationship || 'trace', sourceName: m.sourceName, targetName: m.targetName });
+      }
+    });
+  } else if (isLegacy(data) && Array.isArray((data as any).traceabilityMap)) {
+    (data as any).traceabilityMap.forEach((m: any) => {
+      traceabilityItems.push({ relationship: 'requirement-to-function', sourceName: m.requirementText, targetName: m.tmfFunction });
+    });
+  }
   return (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -90,7 +132,7 @@ export function SolutionPdf({ data, matches }: SolutionPdfProps) {
 
         <Text style={styles.h2}>4. Traceability</Text>
         <View>
-          {safe.traceabilityMap.slice(0, 20).map((m: any, i: number) => (
+          {traceabilityItems.slice(0, 20).map((m, i) => (
             <Text key={i} style={styles.listItem}>
               {m.relationship}: {m.sourceName} → {m.targetName}
             </Text>

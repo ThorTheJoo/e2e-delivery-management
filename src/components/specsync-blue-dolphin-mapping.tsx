@@ -560,9 +560,9 @@ export function SpecSyncBlueDolphinMapping({
       {/* Search and Results */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Blue Dolphin Search</CardTitle>
+          <CardTitle className="text-base">Model Search</CardTitle>
           <CardDescription>
-            Search for matching Application Functions in Blue Dolphin
+            Search for matching Application Functions in Model
           </CardDescription>
         </CardHeader>
         <CardContent>
