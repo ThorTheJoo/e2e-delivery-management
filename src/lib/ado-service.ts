@@ -219,6 +219,10 @@ export class ADOService {
               validation[typeGroup.original] = true;
               found = true;
               this.log('info', `Work item type '${variant}' is available (mapped to '${typeGroup.original}')`);
+              
+              // Also log to console for immediate visibility
+              console.log(`✅ Work item type '${variant}' is available (mapped to '${typeGroup.original}')`);
+              
               break; // Found a working variant, no need to check others
             }
           } catch (error) {
@@ -232,6 +236,9 @@ export class ADOService {
           this.log('warning', `Work item type '${typeGroup.original}' not available in any variant`, {
             checkedVariants: typeGroup.variants,
           });
+          
+          // Also log to console for immediate visibility
+          console.warn(`❌ Work item type '${typeGroup.original}' not available in any variant:`, typeGroup.variants);
         }
       }
     } catch (error) {
@@ -849,10 +856,20 @@ export class ADOService {
 
       // Debug: Log the validation results
       this.log('debug', 'Work item type validation results', workItemTypeValidation);
+      
+      // Also log to console for immediate visibility
+      console.log('🔍 Work item type validation results:', workItemTypeValidation);
 
       // Debug: Log all mapping types before filtering
       mappings.forEach((mapping, index) => {
         this.log('debug', `Mapping ${index + 1} type check`, {
+          targetType: mapping.targetType,
+          title: mapping.targetTitle,
+          isValid: workItemTypeValidation[mapping.targetType],
+        });
+        
+        // Also log to console for immediate visibility
+        console.log(`🔍 Mapping ${index + 1} validation:`, {
           targetType: mapping.targetType,
           title: mapping.targetTitle,
           isValid: workItemTypeValidation[mapping.targetType],
@@ -865,6 +882,14 @@ export class ADOService {
           const errorMessage = `Work item type '${mapping.targetType}' not available in ADO project`;
           exportStatus.errors.push(errorMessage);
           this.log('warning', errorMessage, { mapping: mapping.targetTitle });
+          
+          // Also log to console for immediate visibility
+          console.warn(`⚠️ Filtering out work item:`, {
+            type: mapping.targetType,
+            title: mapping.targetTitle,
+            reason: 'Work item type not available in ADO project'
+          });
+          
           return false;
         }
         return true;
@@ -1116,6 +1141,16 @@ export class ADOService {
         }
 
         this.log('error', 'Work item creation failed', {
+          type: mapping.targetType,
+          title: mapping.targetFields['System.Title'],
+          status: response.status,
+          error: errorMessage,
+          detailedError: detailedError,
+          operations: operations.map((op) => `${op.path}: ${op.value}`),
+        });
+
+        // Also log to console for immediate visibility
+        console.error('🚨 ADO Work Item Creation Failed:', {
           type: mapping.targetType,
           title: mapping.targetFields['System.Title'],
           status: response.status,

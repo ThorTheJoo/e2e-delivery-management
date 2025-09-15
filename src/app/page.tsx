@@ -659,7 +659,13 @@ export default function HomePage() {
   }, []); // Changed from [tmfDomains.length] to [] to prevent infinite loop
 
   const handleSpecSyncImport = (state: SpecSyncState) => {
-    console.log('handleSpecSyncImport called with:', state);
+    console.log('🎯 handleSpecSyncImport called with:', state);
+    console.log('📊 SpecSync data summary:', {
+      totalRequirements: state.counts.totalRequirements,
+      domains: Object.keys(state.counts.domains),
+      useCases: state.counts.useCases,
+      fileName: state.fileName
+    });
     setSpecSyncState(state);
     setSpecSyncItems(state.items); // Update specSyncItems for MiroBoardCreator
     updateRequirementCounts(state);
@@ -1016,12 +1022,121 @@ export default function HomePage() {
     );
   }
 
-  const totalEffort = tmfFunctions.length * 10; // Default effort per function
+  // Load Blue Dolphin objects from localStorage for accurate count
+  const getBlueDolphinObjectsCount = () => {
+    try {
+      const stored = localStorage.getItem('blueDolphinTraversalObjects');
+      if (stored) {
+        const data = JSON.parse(stored);
+        if (data.objects && Array.isArray(data.objects)) {
+          console.log('💾 [Dashboard] Blue Dolphin objects from localStorage:', data.objects.length);
+          return data.objects.length;
+        }
+      }
+    } catch (error) {
+      console.error('❌ [Dashboard] Failed to load Blue Dolphin objects from localStorage:', error);
+    }
+    return blueDolphinTraversalResults.length; // Fallback to traversal results
+  };
 
-  const completedWorkPackages = workPackages.filter((wp) => wp.status === 'Completed').length;
-  const totalWorkPackages = workPackages.length;
-  const progressPercentage =
-    totalWorkPackages > 0 ? (completedWorkPackages / totalWorkPackages) * 100 : 0;
+  // Calculate realistic dashboard metrics from consolidated data
+  const calculateDashboardMetrics = () => {
+    // Total Effort: Combine SpecSync requirements + SET estimates + CETv22 resource demands
+    let totalEffort = 0;
+    
+    // SpecSync effort (based on requirements complexity)
+    if (specSyncState && specSyncState.items.length > 0) {
+      totalEffort += specSyncState.items.length * 5; // 5 days per requirement
+    }
+    
+    // SET domain efforts
+    const setTotalEffort = Object.values(setDomainEfforts).reduce((sum, effort) => sum + effort, 0);
+    totalEffort += setTotalEffort;
+    
+    // CETv22 resource demands
+    if (cetv22Data && cetv22Data.resourceDemands) {
+      const cetv22Effort = cetv22Data.resourceDemands.reduce((sum: number, demand: any) => {
+        return sum + (demand.effortHours || 0);
+      }, 0);
+      totalEffort += cetv22Effort;
+    }
+    
+    // Fallback to TMF functions if no other data
+    if (totalEffort === 0 && tmfFunctions.length > 0) {
+      totalEffort = tmfFunctions.length * 10;
+    }
+
+    // TMF Functions: Count from SpecSync + TMF reference data
+    let tmfFunctionsCount = 0;
+    if (specSyncState && specSyncState.items.length > 0) {
+      // Filter out empty/null functions and get unique count
+      // Use functionName field from SpecSyncItem interface
+      const validFunctions = specSyncState.items
+        .map(item => item.functionName)
+        .filter(func => func && func.trim() !== '');
+      const uniqueFunctions = new Set(validFunctions).size;
+      console.log('🔍 TMF Functions Debug:', {
+        totalItems: specSyncState.items.length,
+        allFunctionNames: specSyncState.items.map(item => item.functionName),
+        validFunctions: validFunctions,
+        uniqueFunctions: Array.from(new Set(validFunctions)),
+        uniqueCount: uniqueFunctions
+      });
+      tmfFunctionsCount = uniqueFunctions;
+    } else if (tmfFunctions.length > 0) {
+      tmfFunctionsCount = tmfFunctions.length;
+    }
+
+    // eTOM Processes: Count from available data
+    let etomProcessesCount = 0;
+    if (etomProcesses.length > 0) {
+      etomProcessesCount = etomProcesses.length;
+    } else if (specSyncState && specSyncState.items.length > 0) {
+      // Estimate based on SpecSync domains
+      etomProcessesCount = Object.keys(specSyncState.counts.domains).length;
+    }
+
+    // Progress: Calculate based on completed vs total work
+    const completedWorkPackages = workPackages.filter((wp) => wp.status === 'Completed').length;
+    const totalWorkPackages = workPackages.length;
+    let progressPercentage = 0;
+    
+    if (totalWorkPackages > 0) {
+      progressPercentage = (completedWorkPackages / totalWorkPackages) * 100;
+    } else if (specSyncState && specSyncState.items.length > 0) {
+      // Estimate progress based on SpecSync data completeness
+      const completedRequirements = specSyncState.items.filter(item => 
+        item.status === 'Completed' || item.status === 'Done'
+      ).length;
+      progressPercentage = (completedRequirements / specSyncState.items.length) * 100;
+    }
+
+    // Blue Dolphin Objects count
+    const blueDolphinObjectsCount = getBlueDolphinObjectsCount();
+
+    return {
+      totalEffort: Math.round(totalEffort),
+      tmfFunctionsCount,
+      etomProcessesCount,
+      progressPercentage: Math.round(progressPercentage),
+      blueDolphinObjectsCount
+    };
+  };
+
+  const dashboardMetrics = calculateDashboardMetrics();
+  const { totalEffort, tmfFunctionsCount, etomProcessesCount, progressPercentage, blueDolphinObjectsCount } = dashboardMetrics;
+
+  // Log metrics for debugging
+  console.log('📊 Dashboard Metrics Calculated:', {
+    totalEffort,
+    tmfFunctionsCount,
+    etomProcessesCount,
+    progressPercentage,
+    blueDolphinObjectsCount,
+    specSyncAvailable: !!(specSyncState && specSyncState.items.length > 0),
+    setDataAvailable: Object.keys(setDomainEfforts).length > 0,
+    cetv22DataAvailable: !!cetv22Data
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-tmf-50 via-white to-etom-50">
@@ -1125,23 +1240,264 @@ export default function HomePage() {
             {/* Dashboard Tab */}
             <TabsContent value="dashboard" className="space-y-6">
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-                <Card className="metric-card">
-                  <div className="metric-value">{totalEffort}</div>
-                  <div className="metric-label">Total Effort (Days)</div>
+                <Card className="metric-card border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50">
+                  <div className="metric-value text-blue-900">{totalEffort.toLocaleString()}</div>
+                  <div className="metric-label text-blue-700">Total Effort (Days)</div>
+                  <div className="text-xs text-blue-600 mt-1">
+                    {specSyncState && specSyncState.items.length > 0 ? 'SpecSync + SET + CETv22' : 'TMF Reference'}
+                  </div>
                 </Card>
-                <Card className="metric-card">
-                  <div className="metric-value">{tmfFunctions.length}</div>
-                  <div className="metric-label">TMF Functions</div>
+                <Card className="metric-card border-green-200 bg-gradient-to-br from-green-50 to-emerald-50">
+                  <div className="metric-value text-green-900">{tmfFunctionsCount}</div>
+                  <div className="metric-label text-green-700">TMF Functions</div>
+                  <div className="text-xs text-green-600 mt-1">
+                    {specSyncState && specSyncState.items.length > 0 ? 'From SpecSync' : 'Reference Data'}
+                  </div>
                 </Card>
-                <Card className="metric-card">
-                  <div className="metric-value">{etomProcesses.length}</div>
-                  <div className="metric-label">eTOM Processes</div>
+                <Card className="metric-card border-purple-200 bg-gradient-to-br from-purple-50 to-violet-50">
+                  <div className="metric-value text-purple-900">{etomProcessesCount}</div>
+                  <div className="metric-label text-purple-700">eTOM Processes</div>
+                  <div className="text-xs text-purple-600 mt-1">
+                    {etomProcesses.length > 0 ? 'Loaded' : 'Estimated'}
+                  </div>
                 </Card>
-                <Card className="metric-card">
-                  <div className="metric-value">{progressPercentage.toFixed(0)}%</div>
-                  <div className="metric-label">Progress</div>
+                <Card className="metric-card border-orange-200 bg-gradient-to-br from-orange-50 to-amber-50">
+                  <div className="metric-value text-orange-900">{progressPercentage}%</div>
+                  <div className="metric-label text-orange-700">Progress</div>
+                  <div className="text-xs text-orange-600 mt-1">
+                    {workPackages.length > 0 ? 'Work Packages' : 'Requirements'}
+                  </div>
                 </Card>
               </div>
+
+              {/* Additional KPI Cards Row */}
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+                {/* Requirements Count */}
+                {specSyncState && specSyncState.items.length > 0 && (
+                  <Card className="metric-card border-cyan-200 bg-gradient-to-br from-cyan-50 to-sky-50">
+                    <div className="metric-value text-cyan-900">{specSyncState.counts.totalRequirements}</div>
+                    <div className="metric-label text-cyan-700">Requirements</div>
+                    <div className="text-xs text-cyan-600 mt-1">SpecSync Import</div>
+                  </Card>
+                )}
+
+                {/* Domains Covered */}
+                {specSyncState && specSyncState.items.length > 0 && (
+                  <Card className="metric-card border-teal-200 bg-gradient-to-br from-teal-50 to-emerald-50">
+                    <div className="metric-value text-teal-900">{Object.keys(specSyncState.counts.domains).length}</div>
+                    <div className="metric-label text-teal-700">Domains</div>
+                    <div className="text-xs text-teal-600 mt-1">Covered</div>
+                  </Card>
+                )}
+
+                {/* SET Effort */}
+                {Object.keys(setDomainEfforts).length > 0 && (
+                  <Card className="metric-card border-indigo-200 bg-gradient-to-br from-indigo-50 to-blue-50">
+                    <div className="metric-value text-indigo-900">
+                      {Object.values(setDomainEfforts).reduce((sum, effort) => sum + effort, 0).toLocaleString()}
+                    </div>
+                    <div className="metric-label text-indigo-700">SET Effort (Days)</div>
+                    <div className="text-xs text-indigo-600 mt-1">Domain Estimates</div>
+                  </Card>
+                )}
+
+                {/* Blue Dolphin Objects */}
+                {blueDolphinObjectsCount > 0 && (
+                  console.log('🔍 Blue Dolphin Objects Debug:', {
+                    blueDolphinObjectsCount,
+                    traversalResultsLength: blueDolphinTraversalResults.length,
+                    localStorageData: !!localStorage.getItem('blueDolphinTraversalObjects')
+                  }),
+                  <Card className="metric-card border-pink-200 bg-gradient-to-br from-pink-50 to-rose-50">
+                    <div className="metric-value text-pink-900">{blueDolphinObjectsCount}</div>
+                    <div className="metric-label text-pink-700">Solution Objects</div>
+                    <div className="text-xs text-pink-600 mt-1">Blue Dolphin</div>
+                  </Card>
+                )}
+
+                {/* Use Cases Count */}
+                {specSyncState && specSyncState.items.length > 0 && (
+                  <Card className="metric-card border-yellow-200 bg-gradient-to-br from-yellow-50 to-amber-50">
+                    <div className="metric-value text-yellow-900">{specSyncState.counts.useCases}</div>
+                    <div className="metric-label text-yellow-700">Use Cases</div>
+                    <div className="text-xs text-yellow-600 mt-1">SpecSync Import</div>
+                  </Card>
+                )}
+              </div>
+
+              {/* SpecSync Analytics Section */}
+              {specSyncState && specSyncState.items.length > 0 && (
+                console.log('🎯 Rendering SpecSync Analytics Section:', {
+                  totalRequirements: specSyncState.counts.totalRequirements,
+                  domains: Object.keys(specSyncState.counts.domains).length,
+                  useCases: specSyncState.counts.useCases,
+                  fileName: specSyncState.fileName
+                }),
+                <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2 text-blue-900">
+                      <FileText className="h-5 w-5" />
+                      <span>SpecSync Requirements Analytics</span>
+                      <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                        {specSyncState.items.length} requirements
+                      </Badge>
+                    </CardTitle>
+                    <CardDescription className="text-blue-700">
+                      Imported from {specSyncState.fileName} • Last updated: {new Date(specSyncState.importedAt).toLocaleString()}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+                      {/* Total Requirements */}
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-blue-600">{specSyncState.counts.totalRequirements}</div>
+                        <div className="text-sm text-blue-700">Total Requirements</div>
+                      </div>
+                      
+                      {/* Domains Covered */}
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-green-600">{Object.keys(specSyncState.counts.domains).length}</div>
+                        <div className="text-sm text-green-700">Domains Covered</div>
+                      </div>
+                      
+                      {/* Use Cases */}
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-purple-600">{specSyncState.counts.useCases}</div>
+                        <div className="text-sm text-purple-700">Use Cases</div>
+                      </div>
+                      
+                      {/* Mapping Completeness */}
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-orange-600">
+                          {Math.round((specSyncState.counts.useCases / specSyncState.counts.totalRequirements) * 100)}%
+                        </div>
+                        <div className="text-sm text-orange-700">Use Case Coverage</div>
+                      </div>
+                    </div>
+                    
+                    {/* Domain Breakdown */}
+                    <div className="mt-6">
+                      <h4 className="text-sm font-semibold text-blue-900 mb-3">Requirements by Domain</h4>
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                        {Object.entries(specSyncState.counts.domains)
+                          .sort(([,a], [,b]) => b - a)
+                          .map(([domain, count]) => (
+                            <div key={domain} className="flex items-center justify-between rounded-lg bg-white/70 p-3 border border-blue-200">
+                              <span className="text-sm font-medium text-blue-900 truncate">{domain}</span>
+                              <Badge variant="outline" className="bg-blue-100 text-blue-800">
+                                {count}
+                              </Badge>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Consolidated Data Insights Section */}
+              {specSyncState && specSyncState.items.length > 0 && (
+                console.log('🔗 Rendering Consolidated Data Insights:', {
+                  specSyncDomains: Object.keys(specSyncState.counts.domains).length,
+                  setDomains: Object.keys(setDomainEfforts).length,
+                  cetv22Available: !!cetv22Data,
+                  blueDolphinObjects: blueDolphinTraversalResults.length,
+                  totalSetEffort: Object.values(setDomainEfforts).reduce((a, b) => a + b, 0)
+                }),
+                <Card className="border-green-200 bg-gradient-to-br from-green-50 to-emerald-50">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2 text-green-900">
+                      <TrendingUp className="h-5 w-5" />
+                      <span>Consolidated Project Insights</span>
+                      <Badge variant="secondary" className="bg-green-100 text-green-800">
+                        Multi-Source Analysis
+                      </Badge>
+                    </CardTitle>
+                    <CardDescription className="text-green-700">
+                      Integrated view combining SpecSync requirements with estimation and resource data
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                      {/* SpecSync + SET Integration */}
+                      <div className="space-y-3">
+                        <h4 className="text-sm font-semibold text-green-900">Requirements + Estimation</h4>
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-green-700">Requirements with Effort:</span>
+                            <Badge variant="outline" className="bg-green-100 text-green-800">
+                              {Object.keys(setDomainEfforts).length > 0 ? 
+                                Math.round((Object.keys(setDomainEfforts).length / Object.keys(specSyncState.counts.domains).length) * 100) : 0}%
+                            </Badge>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-green-700">Total Estimated Effort:</span>
+                            <span className="font-semibold text-green-900">
+                              {Object.values(setDomainEfforts).reduce((a, b) => a + b, 0)} days
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* SpecSync + CETv22 Integration */}
+                      <div className="space-y-3">
+                        <h4 className="text-sm font-semibold text-green-900">Requirements + Resources</h4>
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-green-700">Resource Data Available:</span>
+                            <Badge variant="outline" className="bg-green-100 text-green-800">
+                              {cetv22Data ? 'Yes' : 'No'}
+                            </Badge>
+                          </div>
+                          {cetv22Data && (
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-green-700">Total Resource Hours:</span>
+                              <span className="font-semibold text-green-900">
+                                {cetv22Data.resourceDemands ? 
+                                  Math.round(cetv22Data.resourceDemands.reduce((sum: number, demand: any) => sum + (demand.effortHours || 0), 0) / 8) : 0} days
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* SpecSync + Blue Dolphin Integration */}
+                      <div className="space-y-3">
+                        <h4 className="text-sm font-semibold text-green-900">Requirements + Architecture</h4>
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-green-700">Architecture Objects:</span>
+                            <Badge variant="outline" className="bg-green-100 text-green-800">
+                              {blueDolphinTraversalResults.length > 0 ? 
+                                blueDolphinTraversalResults.reduce((total, result) => {
+                                  return total + (result.businessProcesses?.topLevel?.length || 0) +
+                                         (result.businessProcesses?.childLevel?.length || 0) +
+                                         (result.businessProcesses?.grandchildLevel?.length || 0) +
+                                         (result.applicationServices?.topLevel?.length || 0) +
+                                         (result.applicationServices?.childLevel?.length || 0) +
+                                         (result.applicationServices?.grandchildLevel?.length || 0) +
+                                         (result.applicationInterfaces?.topLevel?.length || 0) +
+                                         (result.applicationInterfaces?.childLevel?.length || 0) +
+                                         (result.applicationInterfaces?.grandchildLevel?.length || 0) +
+                                         (result.deliverables?.topLevel?.length || 0) +
+                                         (result.deliverables?.childLevel?.length || 0) +
+                                         (result.deliverables?.grandchildLevel?.length || 0) +
+                                         (result.relatedApplicationFunctions?.length || 0);
+                                }, 0) : 0}
+                            </Badge>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-green-700">Integration Status:</span>
+                            <Badge variant="outline" className="bg-green-100 text-green-800">
+                              {blueDolphinTraversalResults.length > 0 ? 'Connected' : 'Not Connected'}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <Card>
