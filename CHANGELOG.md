@@ -5,6 +5,27 @@ All notable changes to the E2E Delivery Management System will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.32.0] - 2025-01-15 - TypeScript Error Resolution & Code Quality
+
+### 🔧 TypeScript Error Resolution
+
+#### CETv22 Resource Demands Calculation Fix
+- **Fixed Property Access Error** - Resolved TypeScript error where code was trying to access `totalDays` property on `CETv22ResourceDemand` objects
+- **Corrected Property Usage** - Updated to use the correct `effortHours` property from the interface
+- **Type Safety Improvements** - Added proper type annotations for reduce function parameters (`sum: number, demand: any`)
+- **Build Success** - Application now builds successfully without TypeScript compilation errors
+
+#### Code Quality Improvements
+- **ESLint Compliance** - All ESLint checks passing with no warnings or errors
+- **TypeScript Compilation** - Resolved all TypeScript compilation errors
+- **Application Stability** - Application runs successfully in development and production builds
+
+### 🧪 Testing & Validation
+- **Build Validation** - Confirmed successful production build
+- **Development Server** - Verified application starts and runs without errors
+- **Type Checking** - All TypeScript type checks passing
+- **Linting** - All ESLint rules passing
+
 ## [1.31.0] - 2025-01-15 - TypeScript & Hook Dependencies Fix
 
 ### 🔧 TypeScript & Build Fixes

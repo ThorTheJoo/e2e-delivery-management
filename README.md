@@ -4,9 +4,19 @@
 
 The E2E Delivery Management System is a comprehensive platform for managing end-to-end delivery processes, integrating with various enterprise systems including Blue Dolphin, Azure DevOps, Miro, and SpecSync. The system provides TMF ODA 2025 compliant architecture management, requirement tracking, and delivery orchestration capabilities.
 
-## 🚀 Latest Features (v1.30.0)
+## 🚀 Latest Features (v1.32.0)
 
-### 🧹 Code Quality & ESLint Cleanup
+### 🔧 TypeScript Error Resolution & Code Quality
+
+- **TypeScript Error Fixes**: Resolved TypeScript compilation errors in CETv22 resource demands calculation
+- **Property Access Fix**: Fixed incorrect `totalDays` property access, now using correct `effortHours` property
+- **Type Safety Improvements**: Added proper type annotations for reduce function parameters
+- **Build Success**: Application now builds successfully without TypeScript errors
+- **ESLint Compliance**: All ESLint checks passing with no warnings or errors
+
+### 🧹 Previous Features (v1.30.0)
+
+### Code Quality & ESLint Cleanup
 
 - **ESLint Compliance**: Resolved all ESLint errors and warnings across the codebase
 - **Code Quality Improvements**: Enhanced code consistency and TypeScript compliance
