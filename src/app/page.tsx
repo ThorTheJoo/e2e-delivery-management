@@ -159,6 +159,7 @@ export default function HomePage() {
   const [userTmfDomains, setUserTmfDomains] = useState<any[]>([]);
   const [specSyncItems, setSpecSyncItems] = useState<SpecSyncItem[]>([]);
   const [blueDolphinObjects, setBlueDolphinObjects] = useState<BlueDolphinObjectEnhanced[]>([]);
+  
 
   // Handle Blue Dolphin objects loaded from integration component
   const handleBlueDolphinObjectsLoaded = (objects: BlueDolphinObjectEnhanced[]) => {
@@ -411,6 +412,23 @@ export default function HomePage() {
           }
         } catch (e) {
           console.warn('Failed to load CETv22 data from local storage:', e);
+        }
+
+        // Load SET data from local storage if available
+        try {
+          const savedSetData = localStorage.getItem('set-data');
+          if (savedSetData) {
+            const parsedData = JSON.parse(savedSetData);
+            console.log('SET data loaded from local storage:', parsedData);
+            if (parsedData.domainEfforts) {
+              setSetDomainEfforts(parsedData.domainEfforts);
+            }
+            if (parsedData.matchedWorkPackages) {
+              setSetMatchedWorkPackages(parsedData.matchedWorkPackages);
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to load SET data from local storage:', e);
         }
       } catch (error) {
         console.error('Error loading data:', error);
@@ -952,6 +970,20 @@ export default function HomePage() {
     
     setSetDomainEfforts(domainEfforts);
     setSetMatchedWorkPackages(matchedWorkPackages);
+
+    // Save to localStorage for persistence
+    try {
+      const setData = {
+        domainEfforts,
+        matchedWorkPackages,
+        timestamp: new Date().toISOString(),
+        totalEffort: Object.values(domainEfforts).reduce((a, b) => a + b, 0)
+      };
+      localStorage.setItem('set-data', JSON.stringify(setData));
+      console.log('💾 SET data saved to localStorage');
+    } catch (error) {
+      console.error('❌ Failed to save SET data to localStorage:', error);
+    }
   };
 
   if (loading) {
@@ -1030,12 +1062,14 @@ export default function HomePage() {
         const data = JSON.parse(stored);
         if (data.objects && Array.isArray(data.objects)) {
           console.log('💾 [Dashboard] Blue Dolphin objects from localStorage:', data.objects.length);
+          console.log('💾 [Dashboard] Blue Dolphin objectTypes:', data.objectTypes);
           return data.objects.length;
         }
       }
     } catch (error) {
       console.error('❌ [Dashboard] Failed to load Blue Dolphin objects from localStorage:', error);
     }
+    console.log('💾 [Dashboard] Fallback to traversal results:', blueDolphinTraversalResults.length);
     return blueDolphinTraversalResults.length; // Fallback to traversal results
   };
 
@@ -1135,7 +1169,14 @@ export default function HomePage() {
     blueDolphinObjectsCount,
     specSyncAvailable: !!(specSyncState && specSyncState.items.length > 0),
     setDataAvailable: Object.keys(setDomainEfforts).length > 0,
-    cetv22DataAvailable: !!cetv22Data
+    setDomainEfforts: setDomainEfforts,
+    cetv22DataAvailable: !!cetv22Data,
+    cetv22Data: cetv22Data ? {
+      hasResourceDemands: !!cetv22Data.resourceDemands,
+      resourceDemandsLength: cetv22Data.resourceDemands?.length || 0,
+      hasJobProfiles: !!cetv22Data.jobProfiles,
+      jobProfilesLength: cetv22Data.jobProfiles?.length || 0
+    } : null
   });
 
   return (
@@ -1239,6 +1280,65 @@ export default function HomePage() {
 
             {/* Dashboard Tab */}
             <TabsContent value="dashboard" className="space-y-6">
+              {/* Project Overview Section - Moved to Top */}
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <TrendingUp className="h-5 w-5" />
+                      <span>Project Overview</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <div className="text-sm text-muted-foreground">Duration</div>
+                        <div className="font-semibold">{project.duration}</div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-muted-foreground">Team Size</div>
+                        <div className="font-semibold">{project.teamSize} people</div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-muted-foreground">Start Date</div>
+                        <div className="font-semibold">{formatDate(project.startDate)}</div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-muted-foreground">End Date</div>
+                        <div className="font-semibold">{formatDate(project.endDate)}</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <AlertTriangle className="h-5 w-5" />
+                      <span>Risks & Issues</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {risks.slice(0, 3).map((risk) => (
+                        <div
+                          key={risk.id}
+                          className="flex items-center justify-between rounded-lg bg-muted/50 p-3"
+                        >
+                          <div>
+                            <div className="font-medium">{risk.name}</div>
+                            <div className="text-sm text-muted-foreground">{risk.description}</div>
+                          </div>
+                          <div className={`status-badge ${getSeverityColor(risk.severity)}`}>
+                            {risk.severity}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
                 <Card className="metric-card border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50">
                   <div className="metric-value text-blue-900">{totalEffort.toLocaleString()}</div>
@@ -1395,6 +1495,224 @@ export default function HomePage() {
                 </Card>
               )}
 
+
+              {/* Blue Dolphin Analytics Section */}
+              {(() => {
+                console.log('🔍 [Dashboard] Blue Dolphin Analytics Check:', {
+                  blueDolphinObjectsCount,
+                  shouldRender: blueDolphinObjectsCount > 0
+                });
+                return blueDolphinObjectsCount > 0;
+              })() && (
+                <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-violet-50">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2 text-purple-900">
+                      <Network className="h-5 w-5" />
+                      <span>Solution Model Analytics</span>
+                      <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                        {blueDolphinObjectsCount} objects
+                      </Badge>
+                    </CardTitle>
+                    <CardDescription className="text-purple-700">
+                      Architecture objects and relationships from Blue Dolphin traversal
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {(() => {
+                      try {
+                        const stored = localStorage.getItem('blueDolphinTraversalObjects');
+                        if (stored) {
+                          const data = JSON.parse(stored);
+                          // const objects = data.objects || []; // Unused variable removed
+                          const objectTypes = data.objectTypes || {};
+                          
+                          return (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                              <div className="bg-white/50 rounded-lg p-4">
+                                <h4 className="font-semibold text-purple-800 mb-2">Application Functions</h4>
+                                <div className="text-2xl font-bold text-purple-900">
+                                  {objectTypes.applicationFunctions || 0}
+                                </div>
+                                <div className="text-sm text-purple-600">Core functions</div>
+                              </div>
+                              <div className="bg-white/50 rounded-lg p-4">
+                                <h4 className="font-semibold text-purple-800 mb-2">Business Processes</h4>
+                                <div className="text-2xl font-bold text-purple-900">
+                                  {objectTypes.businessProcesses || 0}
+                                </div>
+                                <div className="text-sm text-purple-600">Process flows</div>
+                              </div>
+                              <div className="bg-white/50 rounded-lg p-4">
+                                <h4 className="font-semibold text-purple-800 mb-2">Application Services</h4>
+                                <div className="text-2xl font-bold text-purple-900">
+                                  {objectTypes.applicationServices || 0}
+                                </div>
+                                <div className="text-sm text-purple-600">Service components</div>
+                              </div>
+                              <div className="bg-white/50 rounded-lg p-4">
+                                <h4 className="font-semibold text-purple-800 mb-2">Deliverables</h4>
+                                <div className="text-2xl font-bold text-purple-900">
+                                  {objectTypes.deliverables || 0}
+                                </div>
+                                <div className="text-sm text-purple-600">Project outputs</div>
+                              </div>
+                            </div>
+                          );
+                        }
+                        return null;
+                      } catch (error) {
+                        console.error('Error parsing Blue Dolphin data:', error);
+                        return null;
+                      }
+                    })()}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* SET Estimation Analytics Section */}
+              {Object.keys(setDomainEfforts).length > 0 && (
+                <Card className="border-orange-200 bg-gradient-to-br from-orange-50 to-amber-50">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2 text-orange-900">
+                      <BarChart3 className="h-5 w-5" />
+                      <span>SET Estimation Analytics</span>
+                      <Badge variant="secondary" className="bg-orange-100 text-orange-800">
+                        {Object.keys(setDomainEfforts).length} domains
+                      </Badge>
+                    </CardTitle>
+                    <CardDescription className="text-orange-700">
+                      Effort estimates and work package breakdown from SET data
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="bg-white/50 rounded-lg p-4">
+                        <h4 className="font-semibold text-orange-800 mb-2">Domain Effort Summary</h4>
+                        <div className="space-y-2">
+                          {Object.entries(setDomainEfforts)
+                            .sort(([,a], [,b]) => b - a)
+                            .slice(0, 5)
+                            .map(([domain, effort]) => (
+                              <div key={domain} className="flex justify-between items-center">
+                                <span className="text-sm text-orange-700 truncate">{domain}</span>
+                                <span className="font-medium text-orange-900">{effort}d</span>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                      <div className="bg-white/50 rounded-lg p-4">
+                        <h4 className="font-semibold text-orange-800 mb-2">Total Estimation</h4>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span>Total Effort:</span>
+                            <span className="font-medium text-lg text-orange-900">
+                              {Object.values(setDomainEfforts).reduce((a, b) => a + b, 0)} days
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Average per Domain:</span>
+                            <span className="font-medium text-orange-900">
+                              {Math.round(Object.values(setDomainEfforts).reduce((a, b) => a + b, 0) / Object.keys(setDomainEfforts).length)} days
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Domains Covered:</span>
+                            <span className="font-medium text-orange-900">
+                              {Object.keys(setDomainEfforts).length}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* CETv22 Service Design Analytics Section */}
+              {(() => {
+                console.log('🔍 [Dashboard] CETv22 Analytics Check:', {
+                  cetv22DataExists: !!cetv22Data,
+                  cetv22Data: cetv22Data,
+                  shouldRender: !!cetv22Data
+                });
+                return !!cetv22Data;
+              })() && (
+                <Card className="border-cyan-200 bg-gradient-to-br from-cyan-50 to-sky-50">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2 text-cyan-900">
+                      <Route className="h-5 w-5" />
+                      <span>CETv22 Service Design Analytics</span>
+                      <Badge variant="secondary" className="bg-cyan-100 text-cyan-800">
+                        Resource Planning
+                      </Badge>
+                    </CardTitle>
+                    <CardDescription className="text-cyan-700">
+                      Resource demands and job profile analysis from service design data
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {(() => {
+                      try {
+                        const resourceDemands = cetv22Data.resourceDemands || [];
+                        // const jobProfiles = cetv22Data.jobProfiles || []; // Unused variable removed
+                        // const phases = cetv22Data.phases || []; // Unused variable removed
+                        
+                        // Calculate totals
+                        const totalHours = resourceDemands.reduce((sum: number, demand: any) => sum + (demand.effortHours || 0), 0);
+                        const uniqueJobProfiles = new Set(resourceDemands.map((d: any) => d.jobProfile)).size;
+                        const uniquePhases = new Set(resourceDemands.map((d: any) => d.phase)).size;
+                        
+                        // Top job profiles by hours (commented out as unused)
+                        // const jobProfileHours = resourceDemands.reduce((acc: Record<string, number>, demand: any) => {
+                        //   acc[demand.jobProfile] = (acc[demand.jobProfile] || 0) + (demand.effortHours || 0);
+                        //   return acc;
+                        // }, {} as Record<string, number>);
+                        
+                        // const topJobProfiles = Object.entries(jobProfileHours)
+                        //   .sort(([,a], [,b]) => (b as number) - (a as number))
+                        //   .slice(0, 3); // Unused variable removed
+                        
+                        return (
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div className="bg-white/50 rounded-lg p-4">
+                              <h4 className="font-semibold text-cyan-800 mb-2">Total Resource Hours</h4>
+                              <div className="text-2xl font-bold text-cyan-900">
+                                {totalHours.toLocaleString()}
+                              </div>
+                              <div className="text-sm text-cyan-600">Hours planned</div>
+                            </div>
+                            <div className="bg-white/50 rounded-lg p-4">
+                              <h4 className="font-semibold text-cyan-800 mb-2">Job Profiles</h4>
+                              <div className="text-2xl font-bold text-cyan-900">
+                                {uniqueJobProfiles}
+                              </div>
+                              <div className="text-sm text-cyan-600">Unique roles</div>
+                            </div>
+                            <div className="bg-white/50 rounded-lg p-4">
+                              <h4 className="font-semibold text-cyan-800 mb-2">Project Phases</h4>
+                              <div className="text-2xl font-bold text-cyan-900">
+                                {uniquePhases}
+                              </div>
+                              <div className="text-sm text-cyan-600">Phases defined</div>
+                            </div>
+                            <div className="bg-white/50 rounded-lg p-4">
+                              <h4 className="font-semibold text-cyan-800 mb-2">Resource Demands</h4>
+                              <div className="text-2xl font-bold text-cyan-900">
+                                {resourceDemands.length}
+                              </div>
+                              <div className="text-sm text-cyan-600">Demand entries</div>
+                            </div>
+                          </div>
+                        );
+                      } catch (error) {
+                        console.error('Error parsing CETv22 data:', error);
+                        return null;
+                      }
+                    })()}
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Consolidated Data Insights Section */}
               {specSyncState && specSyncState.items.length > 0 && (
                 console.log('🔗 Rendering Consolidated Data Insights:', {
@@ -1498,64 +1816,6 @@ export default function HomePage() {
                   </CardContent>
                 </Card>
               )}
-
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <TrendingUp className="h-5 w-5" />
-                      <span>Project Overview</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <div className="text-sm text-muted-foreground">Duration</div>
-                        <div className="font-semibold">{project.duration}</div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-muted-foreground">Team Size</div>
-                        <div className="font-semibold">{project.teamSize} people</div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-muted-foreground">Start Date</div>
-                        <div className="font-semibold">{formatDate(project.startDate)}</div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-muted-foreground">End Date</div>
-                        <div className="font-semibold">{formatDate(project.endDate)}</div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <AlertTriangle className="h-5 w-5" />
-                      <span>Risks & Issues</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {risks.slice(0, 3).map((risk) => (
-                        <div
-                          key={risk.id}
-                          className="flex items-center justify-between rounded-lg bg-muted/50 p-3"
-                        >
-                          <div>
-                            <div className="font-medium">{risk.name}</div>
-                            <div className="text-sm text-muted-foreground">{risk.description}</div>
-                          </div>
-                          <div className={`status-badge ${getSeverityColor(risk.severity)}`}>
-                            {risk.severity}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
 
               {/* eTOM Processes Section - Collapsible */}
               <div className="border-b pb-6">
