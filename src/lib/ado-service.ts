@@ -12,6 +12,7 @@ import {
   ADONotification,
 } from '@/types/ado';
 import { Project, TMFOdaDomain, SpecSyncItem } from '@/types';
+import { BlueDolphinObjectEnhanced } from '@/types/blue-dolphin';
 
 // ADO Service Class
 export class ADOService {
@@ -331,6 +332,73 @@ export class ADOService {
     return mappings;
   }
 
+  // Blue Dolphin Work Item Generation
+  generateWorkItemMappingsFromBlueDolphin(
+    project: Project,
+    blueDolphinObjects: BlueDolphinObjectEnhanced[],
+    selectedDeliverables: string[] = [],
+    selectedApplicationFunctions: string[] = [],
+    selectedApplicationInterfaces: string[] = []
+  ): ADOWorkItemMapping[] {
+    this.log('info', 'Generating work item mappings from Blue Dolphin objects', {
+      projectId: project.id,
+      totalObjects: blueDolphinObjects.length,
+      selectedDeliverables: selectedDeliverables.length,
+      selectedApplicationFunctions: selectedApplicationFunctions.length,
+      selectedApplicationInterfaces: selectedApplicationInterfaces.length,
+    });
+
+    const mappings: ADOWorkItemMapping[] = [];
+
+    try {
+      // Filter objects based on selection
+      const deliverables = blueDolphinObjects.filter(obj => 
+        obj.Definition === 'Deliverable' && 
+        (selectedDeliverables.length === 0 || selectedDeliverables.includes(obj.ID))
+      );
+      
+      const applicationFunctions = blueDolphinObjects.filter(obj => 
+        obj.Definition === 'Application Function' && 
+        (selectedApplicationFunctions.length === 0 || selectedApplicationFunctions.includes(obj.ID))
+      );
+      
+      const applicationInterfaces = blueDolphinObjects.filter(obj => 
+        obj.Definition === 'Application Interface' && 
+        (selectedApplicationInterfaces.length === 0 || selectedApplicationInterfaces.includes(obj.ID))
+      );
+
+      // 1. Generate Epics from Deliverables
+      deliverables.forEach((deliverable) => {
+        const epicMapping = this.generateEpicFromDeliverable(deliverable, project);
+        mappings.push(epicMapping);
+      });
+
+      // 2. Generate Features from Application Functions
+      applicationFunctions.forEach((appFunction) => {
+        const featureMapping = this.generateFeatureFromApplicationFunction(appFunction, project);
+        mappings.push(featureMapping);
+      });
+
+      // 3. Generate Features from Application Interfaces
+      applicationInterfaces.forEach((appInterface) => {
+        const featureMapping = this.generateFeatureFromApplicationInterface(appInterface, project);
+        mappings.push(featureMapping);
+      });
+
+      this.log('info', 'Blue Dolphin work item mappings generated successfully', {
+        totalMappings: mappings.length,
+        breakdown: {
+          epics: mappings.filter((m) => m.targetType === 'epic').length,
+          features: mappings.filter((m) => m.targetType === 'feature').length,
+        },
+      });
+    } catch (error) {
+      this.log('error', 'Failed to generate Blue Dolphin work item mappings', error);
+    }
+
+    return mappings;
+  }
+
   private generateEpicFromProject(project: Project, domains: TMFOdaDomain[]): ADOWorkItemMapping {
     return {
       sourceType: 'project',
@@ -526,6 +594,101 @@ export class ADOService {
 
   private calculateRemainingWork(item: SpecSyncItem): number {
     return this.calculateTaskEffort(item);
+  }
+
+  // Blue Dolphin Mapping Methods
+  private generateEpicFromDeliverable(deliverable: BlueDolphinObjectEnhanced, project: Project): ADOWorkItemMapping {
+    return {
+      sourceType: 'deliverable',
+      sourceId: deliverable.ID,
+      sourceName: deliverable.Title,
+      targetType: 'epic',
+      targetTitle: `Epic: ${deliverable.Title}`,
+      targetDescription: deliverable.Description || `Deliverable: ${deliverable.Title}`,
+      targetFields: {
+        'System.Title': `Epic: ${deliverable.Title}`,
+        'System.Description': deliverable.Description || `Deliverable: ${deliverable.Title}`,
+        'Microsoft.VSTS.Common.BusinessValue': 1000,
+        'Microsoft.VSTS.Common.Risk': 'Medium',
+        'System.AreaPath': this.configuration?.areaPath || 'Project',
+        'System.IterationPath': this.configuration?.iterationPath || 'Current',
+        'System.Tags': `BlueDolphin;Deliverable;${project.customer}`,
+        [this.configuration?.customFields.blueDolphinId || 'Custom.BlueDolphinId']: deliverable.ID,
+        [this.configuration?.customFields.workspace || 'Custom.Workspace']: deliverable.Workspace || '',
+        [this.configuration?.customFields.objectType || 'Custom.ObjectType']: deliverable.Definition || '',
+        [this.configuration?.customFields.objectStatus || 'Custom.ObjectStatus']: deliverable.Status || 'New',
+        [this.configuration?.customFields.deliverableStatus || 'Custom.DeliverableStatus']: deliverable.Deliverable_Object_Status_Status || 'New',
+        'Custom.ProjectId': project.id,
+        'Custom.Customer': project.customer,
+      },
+      relationships: [],
+      estimatedEffort: 30, // 30 days for deliverable epic
+      storyPoints: 0,
+      priority: 'High',
+      tags: ['BlueDolphin', 'Deliverable', project.customer],
+    };
+  }
+
+  private generateFeatureFromApplicationFunction(appFunction: BlueDolphinObjectEnhanced, project: Project): ADOWorkItemMapping {
+    return {
+      sourceType: 'applicationFunction',
+      sourceId: appFunction.ID,
+      sourceName: appFunction.Title,
+      targetType: 'feature',
+      targetTitle: `Feature: ${appFunction.Title}`,
+      targetDescription: appFunction.Description || `Application Function: ${appFunction.Title}`,
+      targetFields: {
+        'System.Title': `Feature: ${appFunction.Title}`,
+        'System.Description': appFunction.Description || `Application Function: ${appFunction.Title}`,
+        'Microsoft.VSTS.Common.ValueArea': 'Business',
+        'System.AreaPath': this.configuration?.areaPath || 'Project',
+        'System.IterationPath': this.configuration?.iterationPath || 'Current',
+        'System.Tags': `BlueDolphin;ApplicationFunction;${project.customer}`,
+        [this.configuration?.customFields.blueDolphinId || 'Custom.BlueDolphinId']: appFunction.ID,
+        [this.configuration?.customFields.workspace || 'Custom.Workspace']: appFunction.Workspace || '',
+        [this.configuration?.customFields.objectType || 'Custom.ObjectType']: appFunction.Definition || '',
+        [this.configuration?.customFields.objectStatus || 'Custom.ObjectStatus']: appFunction.Status || 'New',
+        [this.configuration?.customFields.functionType || 'Custom.FunctionType']: 'Application Function',
+        'Custom.ProjectId': project.id,
+        'Custom.Customer': project.customer,
+      },
+      relationships: [],
+      estimatedEffort: 8, // 8 days for application function feature
+      storyPoints: 13,
+      priority: 'Medium',
+      tags: ['BlueDolphin', 'ApplicationFunction', project.customer],
+    };
+  }
+
+  private generateFeatureFromApplicationInterface(appInterface: BlueDolphinObjectEnhanced, project: Project): ADOWorkItemMapping {
+    return {
+      sourceType: 'applicationInterface',
+      sourceId: appInterface.ID,
+      sourceName: appInterface.Title,
+      targetType: 'feature',
+      targetTitle: `Feature: ${appInterface.Title}`,
+      targetDescription: appInterface.Description || `Application Interface: ${appInterface.Title}`,
+      targetFields: {
+        'System.Title': `Feature: ${appInterface.Title}`,
+        'System.Description': appInterface.Description || `Application Interface: ${appInterface.Title}`,
+        'Microsoft.VSTS.Common.ValueArea': 'Technical',
+        'System.AreaPath': this.configuration?.areaPath || 'Project',
+        'System.IterationPath': this.configuration?.iterationPath || 'Current',
+        'System.Tags': `BlueDolphin;ApplicationInterface;${project.customer}`,
+        [this.configuration?.customFields.blueDolphinId || 'Custom.BlueDolphinId']: appInterface.ID,
+        [this.configuration?.customFields.workspace || 'Custom.Workspace']: appInterface.Workspace || '',
+        [this.configuration?.customFields.objectType || 'Custom.ObjectType']: appInterface.Definition || '',
+        [this.configuration?.customFields.objectStatus || 'Custom.ObjectStatus']: appInterface.Status || 'New',
+        [this.configuration?.customFields.interfaceType || 'Custom.InterfaceType']: 'Application Interface',
+        'Custom.ProjectId': project.id,
+        'Custom.Customer': project.customer,
+      },
+      relationships: [],
+      estimatedEffort: 5, // 5 days for application interface feature
+      storyPoints: 8,
+      priority: 'Medium',
+      tags: ['BlueDolphin', 'ApplicationInterface', project.customer],
+    };
   }
 
   private determineActivity(item: SpecSyncItem): string {

@@ -39,6 +39,11 @@ export interface TraversalResult {
     childLevel: HierarchicalObject[];
     grandchildLevel: HierarchicalObject[];
   };
+  deliverables: {
+    topLevel: HierarchicalObject[];
+    childLevel: HierarchicalObject[];
+    grandchildLevel: HierarchicalObject[];
+  };
   relatedApplicationFunctions: HierarchicalObject[];
   specSyncFunctionName: string;
   traversalMetadata: {

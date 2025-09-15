@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   ADOWorkItemMapping,
   ADOValidationResult,
@@ -8,6 +8,7 @@ import {
   ADOExportStatus,
 } from '@/types/ado';
 import { Project, TMFOdaDomain, SpecSyncItem } from '@/types';
+import { BlueDolphinObjectEnhanced } from '@/types/blue-dolphin';
 import { adoService } from '@/lib/ado-service';
 import { Button } from '@/components/ui/button';
 import {
@@ -54,9 +55,10 @@ interface ADOIntegrationProps {
   project: Project;
   tmfDomains: TMFOdaDomain[];
   specSyncItems: SpecSyncItem[];
+  blueDolphinObjects?: BlueDolphinObjectEnhanced[];
 }
 
-export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegrationProps) {
+export function ADOIntegration({ project, tmfDomains, specSyncItems, blueDolphinObjects = [] }: ADOIntegrationProps) {
   const [workItemMappings, setWorkItemMappings] = useState<ADOWorkItemMapping[]>([]);
   const [previewData, setPreviewData] = useState<ADOPreviewData | null>(null);
   const [validation, setValidation] = useState<ADOValidationResult | null>(null);
@@ -66,6 +68,9 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
   const [selectedDomains, setSelectedDomains] = useState<string[]>([]);
   const [selectedCapabilities, setSelectedCapabilities] = useState<string[]>([]);
   const [selectedRequirements, setSelectedRequirements] = useState<string[]>([]);
+  const [selectedDeliverables, setSelectedDeliverables] = useState<string[]>([]);
+  const [selectedApplicationFunctions, setSelectedApplicationFunctions] = useState<string[]>([]);
+  const [selectedApplicationInterfaces, setSelectedApplicationInterfaces] = useState<string[]>([]);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['summary']));
   const [activeTab, setActiveTab] = useState('overview');
   const [searchTerm, setSearchTerm] = useState('');
@@ -74,30 +79,165 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
   const toast = useToast();
 
   useEffect(() => {
+    // Load Blue Dolphin objects from local storage if not provided via props
+    const loadBlueDolphinObjectsFromStorage = () => {
+      try {
+        const stored = localStorage.getItem('blueDolphinTraversalObjects');
+        if (stored) {
+          const data = JSON.parse(stored);
+          if (data.objects && Array.isArray(data.objects)) {
+            console.log('💾 [ADO Integration] Loaded Blue Dolphin objects from local storage:', data.objects.length);
+            console.log('💾 [ADO Integration] Storage metadata:', {
+              timestamp: data.timestamp,
+              source: data.source,
+              totalObjects: data.totalObjects,
+              objectTypes: data.objectTypes
+            });
+            return data.objects;
+          }
+        }
+      } catch (error) {
+        console.error('❌ [ADO Integration] Failed to load Blue Dolphin objects from storage:', error);
+      }
+      return [];
+    };
+
     // Initialize with all domains and capabilities selected
     const allDomainIds = tmfDomains.map((d) => d.id);
     const allCapabilityIds = tmfDomains.flatMap((d) => d.capabilities.map((c) => c.id));
     const allRequirementIds = specSyncItems.map((r) => r.id);
 
+    // Get Blue Dolphin objects from props or local storage
+    const availableBlueDolphinObjects = blueDolphinObjects.length > 0 
+      ? blueDolphinObjects 
+      : loadBlueDolphinObjectsFromStorage();
+
+    // Initialize Blue Dolphin object selections
+    const allDeliverableIds = availableBlueDolphinObjects
+      .filter((obj: any) => obj.Definition === 'Deliverable')
+      .map((obj: any) => obj.ID);
+    const allApplicationFunctionIds = availableBlueDolphinObjects
+      .filter((obj: any) => obj.Definition === 'Application Function')
+      .map((obj: any) => obj.ID);
+    const allApplicationInterfaceIds = availableBlueDolphinObjects
+      .filter((obj: any) => obj.Definition === 'Application Interface')
+      .map((obj: any) => obj.ID);
+
     setSelectedDomains(allDomainIds);
     setSelectedCapabilities(allCapabilityIds);
     setSelectedRequirements(allRequirementIds);
-  }, [tmfDomains, specSyncItems]);
+    setSelectedDeliverables(allDeliverableIds);
+    setSelectedApplicationFunctions(allApplicationFunctionIds);
+    setSelectedApplicationInterfaces(allApplicationInterfaceIds);
+
+    console.log('🔧 [ADO Integration] Initialized with data:', {
+      tmfDomains: allDomainIds.length,
+      specSyncItems: allRequirementIds.length,
+      blueDolphinObjects: availableBlueDolphinObjects.length,
+      deliverables: allDeliverableIds.length,
+      applicationFunctions: allApplicationFunctionIds.length,
+      applicationInterfaces: allApplicationInterfaceIds.length
+    });
+  }, []); // eslint-disable-next-line react-hooks/exhaustive-deps -- Initialize only once on mount to prevent infinite loops
 
   const generateWorkItems = async () => {
     setIsGenerating(true);
     try {
-      // Filter domains and items based on selection
-      const filteredDomains = tmfDomains.filter((d) => selectedDomains.includes(d.id));
-      const filteredSpecSyncItems = specSyncItems.filter((r) =>
-        selectedRequirements.includes(r.id),
-      );
+      let mappings: ADOWorkItemMapping[] = [];
 
-      const mappings = adoService.generateWorkItemMappings(
-        project,
-        filteredDomains,
-        filteredSpecSyncItems,
-      );
+      // Load and validate ADO configuration
+      const config = await adoService.loadConfiguration();
+      if (!config) {
+        console.log('⚠️ [ADO Integration] No ADO configuration found, using defaults');
+        toast.showWarning('No ADO configuration found. Using default settings.');
+      }
+      
+      const dataSource = config?.dataSource || 'blueDolphin'; // Default to Blue Dolphin
+      
+      console.log('🔧 [ADO Integration] Data source configuration:', dataSource);
+      console.log('🔧 [ADO Integration] Configuration status:', {
+        hasConfig: !!config,
+        organization: config?.organization || 'Not configured',
+        project: config?.project || 'Not configured',
+        dataSource: dataSource
+      });
+      console.log('🔧 [ADO Integration] Available data:', {
+        blueDolphinObjects: blueDolphinObjects.length,
+        specSyncItems: specSyncItems.length,
+        tmfDomains: tmfDomains.length
+      });
+
+      // Enforce data source priority based on configuration
+      if (dataSource === 'blueDolphin' || dataSource === 'both') {
+        // Use Blue Dolphin objects when configured as primary or both
+        if (blueDolphinObjects.length > 0) {
+          console.log('🔵 [ADO Integration] Using Blue Dolphin objects as primary data source');
+          const blueDolphinMappings = adoService.generateWorkItemMappingsFromBlueDolphin(
+            project,
+            blueDolphinObjects,
+            selectedDeliverables,
+            selectedApplicationFunctions,
+            selectedApplicationInterfaces,
+          );
+          mappings = [...mappings, ...blueDolphinMappings];
+        } else if (dataSource === 'blueDolphin') {
+          console.log('⚠️ [ADO Integration] Blue Dolphin data required but not available');
+          toast.showError('Blue Dolphin data is required but not available. Please run traversal first.');
+          return;
+        }
+      }
+
+      if (dataSource === 'specsync' || dataSource === 'both') {
+        // Use SpecSync data when configured as primary or both
+        if (specSyncItems.length > 0) {
+          console.log('📋 [ADO Integration] Using SpecSync data as', dataSource === 'both' ? 'secondary' : 'primary', 'data source');
+          const filteredDomains = tmfDomains.filter((d) => selectedDomains.includes(d.id));
+          const filteredSpecSyncItems = specSyncItems.filter((r) =>
+            selectedRequirements.includes(r.id),
+          );
+
+          const specSyncMappings = adoService.generateWorkItemMappings(
+            project,
+            filteredDomains,
+            filteredSpecSyncItems,
+          );
+          mappings = [...mappings, ...specSyncMappings];
+        } else if (dataSource === 'specsync') {
+          console.log('⚠️ [ADO Integration] SpecSync data required but not available');
+          toast.showError('SpecSync data is required but not available.');
+          return;
+        }
+      }
+
+      // Fallback: If no configuration or both data sources are empty, use available data
+      if (mappings.length === 0) {
+        console.log('🔄 [ADO Integration] No configuration found, using fallback logic');
+        if (blueDolphinObjects.length > 0) {
+          console.log('🔵 [ADO Integration] Fallback: Using Blue Dolphin objects');
+          const blueDolphinMappings = adoService.generateWorkItemMappingsFromBlueDolphin(
+            project,
+            blueDolphinObjects,
+            selectedDeliverables,
+            selectedApplicationFunctions,
+            selectedApplicationInterfaces,
+          );
+          mappings = [...mappings, ...blueDolphinMappings];
+        } else if (specSyncItems.length > 0) {
+          console.log('📋 [ADO Integration] Fallback: Using SpecSync data');
+          const filteredDomains = tmfDomains.filter((d) => selectedDomains.includes(d.id));
+          const filteredSpecSyncItems = specSyncItems.filter((r) =>
+            selectedRequirements.includes(r.id),
+          );
+
+          const specSyncMappings = adoService.generateWorkItemMappings(
+            project,
+            filteredDomains,
+            filteredSpecSyncItems,
+          );
+          mappings = [...mappings, ...specSyncMappings];
+        }
+      }
+
       setWorkItemMappings(mappings);
 
       const preview = adoService.generatePreview(mappings);
@@ -267,13 +407,15 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
     setExpandedSections(newExpanded);
   };
 
-  const filteredMappings = workItemMappings.filter((mapping) => {
-    const matchesSearch =
-      mapping.targetTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      mapping.targetDescription.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterType === 'all' || mapping.targetType === filterType;
-    return matchesSearch && matchesFilter;
-  });
+  const filteredMappings = useMemo(() => {
+    return workItemMappings.filter((mapping) => {
+      const matchesSearch =
+        mapping.targetTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        mapping.targetDescription.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesFilter = filterType === 'all' || mapping.targetType === filterType;
+      return matchesSearch && matchesFilter;
+    });
+  }, [workItemMappings, searchTerm, filterType]);
 
   const getWorkItemIcon = (type: string) => {
     switch (type) {
@@ -312,13 +454,13 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Azure DevOps Integration</h2>
           <p className="text-gray-600">
-            Transform TMF domains and capabilities into ADO work items
+            Transform Blue Dolphin objects into ADO work items (with SpecSync fallback)
           </p>
         </div>
         <div className="flex items-center space-x-2">
           <Button
             onClick={generateWorkItems}
-            disabled={isGenerating || selectedDomains.length === 0}
+            disabled={isGenerating || (blueDolphinObjects.length === 0 && selectedDomains.length === 0 && selectedDeliverables.length === 0 && selectedApplicationFunctions.length === 0 && selectedApplicationInterfaces.length === 0)}
             className="flex items-center space-x-2"
           >
             <Zap className="h-4 w-4" />
@@ -393,6 +535,19 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
             </div>
           </CardContent>
         </Card>
+        {blueDolphinObjects.length > 0 && (
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-2">
+                <Target className="h-8 w-8 text-blue-600" />
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Blue Dolphin Objects</p>
+                  <p className="text-2xl font-bold">{blueDolphinObjects.length}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
@@ -451,32 +606,32 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <div className="rounded-lg bg-purple-50 p-4">
                         <h4 className="mb-2 font-semibold text-purple-800">Epic Level</h4>
-                        <p className="text-sm text-purple-700">Project + TMF Domains → ADO Epic</p>
+                        <p className="text-sm text-purple-700">Blue Dolphin Deliverables → ADO Epics</p>
                         <p className="mt-1 text-xs text-purple-600">
-                          Each BSS transformation becomes an epic
+                          Each deliverable becomes an epic
                         </p>
                       </div>
                       <div className="rounded-lg bg-blue-50 p-4">
                         <h4 className="mb-2 font-semibold text-blue-800">Feature Level</h4>
-                        <p className="text-sm text-blue-700">TMF Domains → ADO Features</p>
+                        <p className="text-sm text-blue-700">Blue Dolphin Application Functions → ADO Features</p>
                         <p className="mt-1 text-xs text-blue-600">
-                          Each TMF domain becomes a feature
+                          Each application function becomes a feature
                         </p>
                       </div>
                       <div className="rounded-lg bg-green-50 p-4">
-                        <h4 className="mb-2 font-semibold text-green-800">User Story Level</h4>
+                        <h4 className="mb-2 font-semibold text-green-800">Feature Level</h4>
                         <p className="text-sm text-green-700">
-                          TMF Capabilities → ADO User Stories
+                          Blue Dolphin Application Interfaces → ADO Features
                         </p>
                         <p className="mt-1 text-xs text-green-600">
-                          Each capability becomes a user story
+                          Each application interface becomes a feature
                         </p>
                       </div>
                       <div className="rounded-lg bg-orange-50 p-4">
-                        <h4 className="mb-2 font-semibold text-orange-800">Task Level</h4>
-                        <p className="text-sm text-orange-700">SpecSync Requirements → ADO Tasks</p>
+                        <h4 className="mb-2 font-semibold text-orange-800">Fallback Mode</h4>
+                        <p className="text-sm text-orange-700">SpecSync Requirements → ADO Tasks (if no Blue Dolphin data)</p>
                         <p className="mt-1 text-xs text-orange-600">
-                          Each requirement becomes a task
+                          Falls back to SpecSync when Blue Dolphin data is unavailable
                         </p>
                       </div>
                     </div>
@@ -501,98 +656,196 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
                     <div>
                       <h3 className="text-lg font-semibold">Data Selection</h3>
                       <p className="text-sm text-gray-600">
-                        Select which data to include in the integration
+                        {blueDolphinObjects.length > 0 
+                          ? "Select which Blue Dolphin objects to include in the integration"
+                          : "Select which SpecSync data to include in the integration (Blue Dolphin objects not available)"
+                        }
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Badge variant="secondary">
-                      {selectedDomains.length} domains, {selectedCapabilities.length} capabilities,{' '}
-                      {selectedRequirements.length} requirements
+                      {blueDolphinObjects.length > 0 ? (
+                        <>
+                          {selectedDeliverables.length} deliverables, {selectedApplicationFunctions.length} functions, {selectedApplicationInterfaces.length} interfaces
+                        </>
+                      ) : (
+                        <>
+                          {selectedDomains.length} domains, {selectedCapabilities.length} capabilities,{' '}
+                          {selectedRequirements.length} requirements
+                        </>
+                      )}
                     </Badge>
                   </div>
                 </div>
                 {expandedSections.has('selection') && (
                   <div className="mt-4 space-y-4">
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                      <div>
-                        <h4 className="mb-2 font-medium">TMF Domains</h4>
-                        <div className="max-h-32 space-y-2 overflow-y-auto">
-                          {tmfDomains.map((domain) => (
-                            <label key={domain.id} className="flex items-center space-x-2">
-                              <input
-                                type="checkbox"
-                                checked={selectedDomains.includes(domain.id)}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    setSelectedDomains([...selectedDomains, domain.id]);
-                                  } else {
-                                    setSelectedDomains(
-                                      selectedDomains.filter((id) => id !== domain.id),
-                                    );
-                                  }
-                                }}
-                                className="rounded"
-                              />
-                              <span className="text-sm">{domain.name}</span>
-                            </label>
-                          ))}
+                    {/* Blue Dolphin Objects Selection - Show First */}
+                    {blueDolphinObjects.length > 0 && (
+                      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                        <div>
+                          <h4 className="mb-2 font-medium">Blue Dolphin Deliverables</h4>
+                          <div className="max-h-32 space-y-2 overflow-y-auto">
+                            {blueDolphinObjects
+                              .filter(obj => obj.Definition === 'Deliverable')
+                              .map((deliverable) => (
+                                <label key={deliverable.ID} className="flex items-center space-x-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedDeliverables.includes(deliverable.ID)}
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        setSelectedDeliverables([...selectedDeliverables, deliverable.ID]);
+                                      } else {
+                                        setSelectedDeliverables(
+                                          selectedDeliverables.filter((id) => id !== deliverable.ID),
+                                        );
+                                      }
+                                    }}
+                                    className="rounded"
+                                  />
+                                  <span className="text-sm">{deliverable.Title}</span>
+                                </label>
+                              ))}
+                          </div>
+                        </div>
+                        <div>
+                          <h4 className="mb-2 font-medium">Application Functions</h4>
+                          <div className="max-h-32 space-y-2 overflow-y-auto">
+                            {blueDolphinObjects
+                              .filter(obj => obj.Definition === 'Application Function')
+                              .map((appFunction) => (
+                                <label key={appFunction.ID} className="flex items-center space-x-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedApplicationFunctions.includes(appFunction.ID)}
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        setSelectedApplicationFunctions([...selectedApplicationFunctions, appFunction.ID]);
+                                      } else {
+                                        setSelectedApplicationFunctions(
+                                          selectedApplicationFunctions.filter((id) => id !== appFunction.ID),
+                                        );
+                                      }
+                                    }}
+                                    className="rounded"
+                                  />
+                                  <span className="text-sm">{appFunction.Title}</span>
+                                </label>
+                              ))}
+                          </div>
+                        </div>
+                        <div>
+                          <h4 className="mb-2 font-medium">Application Interfaces</h4>
+                          <div className="max-h-32 space-y-2 overflow-y-auto">
+                            {blueDolphinObjects
+                              .filter(obj => obj.Definition === 'Application Interface')
+                              .map((appInterface) => (
+                                <label key={appInterface.ID} className="flex items-center space-x-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedApplicationInterfaces.includes(appInterface.ID)}
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        setSelectedApplicationInterfaces([...selectedApplicationInterfaces, appInterface.ID]);
+                                      } else {
+                                        setSelectedApplicationInterfaces(
+                                          selectedApplicationInterfaces.filter((id) => id !== appInterface.ID),
+                                        );
+                                      }
+                                    }}
+                                    className="rounded"
+                                  />
+                                  <span className="text-sm">{appInterface.Title}</span>
+                                </label>
+                              ))}
+                          </div>
                         </div>
                       </div>
-                      <div>
-                        <h4 className="mb-2 font-medium">TMF Capabilities</h4>
-                        <div className="max-h-32 space-y-2 overflow-y-auto">
-                          {tmfDomains
-                            .flatMap((d) => d.capabilities)
-                            .map((capability) => (
-                              <label key={capability.id} className="flex items-center space-x-2">
+                    )}
+
+                    {/* SpecSync Data Selection - Show Only if No Blue Dolphin Data */}
+                    {blueDolphinObjects.length === 0 && (
+                      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                        <div>
+                          <h4 className="mb-2 font-medium">TMF Domains</h4>
+                          <div className="max-h-32 space-y-2 overflow-y-auto">
+                            {tmfDomains.map((domain) => (
+                              <label key={domain.id} className="flex items-center space-x-2">
                                 <input
                                   type="checkbox"
-                                  checked={selectedCapabilities.includes(capability.id)}
+                                  checked={selectedDomains.includes(domain.id)}
                                   onChange={(e) => {
                                     if (e.target.checked) {
-                                      setSelectedCapabilities([
-                                        ...selectedCapabilities,
-                                        capability.id,
-                                      ]);
+                                      setSelectedDomains([...selectedDomains, domain.id]);
                                     } else {
-                                      setSelectedCapabilities(
-                                        selectedCapabilities.filter((id) => id !== capability.id),
+                                      setSelectedDomains(
+                                        selectedDomains.filter((id) => id !== domain.id),
                                       );
                                     }
                                   }}
                                   className="rounded"
                                 />
-                                <span className="text-sm">{capability.name}</span>
+                                <span className="text-sm">{domain.name}</span>
                               </label>
                             ))}
+                          </div>
+                        </div>
+                        <div>
+                          <h4 className="mb-2 font-medium">TMF Capabilities</h4>
+                          <div className="max-h-32 space-y-2 overflow-y-auto">
+                            {tmfDomains
+                              .flatMap((d) => d.capabilities)
+                              .map((capability) => (
+                                <label key={capability.id} className="flex items-center space-x-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedCapabilities.includes(capability.id)}
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        setSelectedCapabilities([
+                                          ...selectedCapabilities,
+                                          capability.id,
+                                        ]);
+                                      } else {
+                                        setSelectedCapabilities(
+                                          selectedCapabilities.filter((id) => id !== capability.id),
+                                        );
+                                      }
+                                    }}
+                                    className="rounded"
+                                  />
+                                  <span className="text-sm">{capability.name}</span>
+                                </label>
+                              ))}
+                          </div>
+                        </div>
+                        <div>
+                          <h4 className="mb-2 font-medium">SpecSync Requirements</h4>
+                          <div className="max-h-32 space-y-2 overflow-y-auto">
+                            {specSyncItems.map((item) => (
+                              <label key={item.id} className="flex items-center space-x-2">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedRequirements.includes(item.id)}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setSelectedRequirements([...selectedRequirements, item.id]);
+                                    } else {
+                                      setSelectedRequirements(
+                                        selectedRequirements.filter((id) => id !== item.id),
+                                      );
+                                    }
+                                  }}
+                                  className="rounded"
+                                />
+                                <span className="text-sm">{item.rephrasedRequirementId}</span>
+                              </label>
+                            ))}
+                          </div>
                         </div>
                       </div>
-                      <div>
-                        <h4 className="mb-2 font-medium">SpecSync Requirements</h4>
-                        <div className="max-h-32 space-y-2 overflow-y-auto">
-                          {specSyncItems.map((item) => (
-                            <label key={item.id} className="flex items-center space-x-2">
-                              <input
-                                type="checkbox"
-                                checked={selectedRequirements.includes(item.id)}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    setSelectedRequirements([...selectedRequirements, item.id]);
-                                  } else {
-                                    setSelectedRequirements(
-                                      selectedRequirements.filter((id) => id !== item.id),
-                                    );
-                                  }
-                                }}
-                                className="rounded"
-                              />
-                              <span className="text-sm">{item.rephrasedRequirementId}</span>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -630,7 +883,7 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems }: ADOIntegr
                   </div>
                   <Select value={filterType} onValueChange={setFilterType}>
                     <SelectTrigger className="w-48">
-                      <SelectValue />
+                      <SelectValue placeholder="Filter by type" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Types</SelectItem>

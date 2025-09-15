@@ -18,9 +18,10 @@ import { BlueDolphinConfig, BlueDolphinObjectEnhanced } from '@/types/blue-dolph
 
 interface BlueDolphinIntegrationProps {
   config: BlueDolphinConfig;
+  onObjectsLoaded?: (objects: BlueDolphinObjectEnhanced[]) => void;
 }
 
-export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) {
+export function BlueDolphinIntegration({ config, onObjectsLoaded }: BlueDolphinIntegrationProps) {
   const [objects, setObjects] = useState<BlueDolphinObjectEnhanced[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -143,7 +144,8 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
       const result = await response.json();
 
       if (result.success) {
-        setObjects(result.data || []);
+        const loadedObjects = result.data || [];
+        setObjects(loadedObjects);
         setObjectTotal(result.total || 0);
         setLastDataUpdate(new Date());
         setLastApiResponse(result);
@@ -151,7 +153,7 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
         // Extract available statuses from the response
         const statuses = Array.from(
           new Set(
-            (result.data || [])
+            loadedObjects
               .map((obj: any) => obj.Status)
               .filter((status: any): status is string => 
                 typeof status === 'string' && status.trim() !== ''
@@ -159,6 +161,11 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
           )
         ).sort();
         setAvailableStatuses(statuses as string[]);
+        
+        // Call the callback to pass objects back to parent component
+        if (onObjectsLoaded && loadedObjects.length > 0) {
+          onObjectsLoaded(loadedObjects);
+        }
         
         console.log(
           `✅ Loaded ${result.count} objects with enhanced fields:`,
@@ -178,7 +185,7 @@ export function BlueDolphinIntegration({ config }: BlueDolphinIntegrationProps) 
     } finally {
       setLoading(false);
     }
-  }, [config, selectedEndpoint, filter, workspaceFilter, statusFilter, useEnhancedFields, resultsLimit]);
+  }, [config, selectedEndpoint, filter, workspaceFilter, statusFilter, useEnhancedFields, resultsLimit, onObjectsLoaded]);
 
   const clearObjects = () => {
     setObjects([]);

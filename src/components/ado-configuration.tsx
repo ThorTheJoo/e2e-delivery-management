@@ -62,13 +62,23 @@ export function ADOConfigurationComponent() {
       taskTemplate: '',
     },
     customFields: {
+      // SpecSync fields (preserved)
       tmfLevel: 'Custom.TMFLevel',
       domainId: 'Custom.DomainId',
       capabilityId: 'Custom.CapabilityId',
       requirementId: 'Custom.RequirementId',
       projectId: 'Custom.ProjectId',
       customer: 'Custom.Customer',
+      // Blue Dolphin fields (new)
+      blueDolphinId: 'Custom.BlueDolphinId',
+      workspace: 'Custom.Workspace',
+      objectType: 'Custom.ObjectType',
+      objectStatus: 'Custom.ObjectStatus',
+      deliverableStatus: 'Custom.DeliverableStatus',
+      functionType: 'Custom.FunctionType',
+      interfaceType: 'Custom.InterfaceType',
     },
+    dataSource: 'blueDolphin', // Default to Blue Dolphin for new mappings
   });
 
   const [authStatus, setAuthStatus] = useState<ADOAuthStatus | null>(null);
@@ -103,7 +113,7 @@ export function ADOConfigurationComponent() {
     loadConfiguration();
     loadLogs();
     loadNotifications();
-  }, []); // Remove dependencies to prevent infinite loop
+  }, [loadConfiguration]); // Include loadConfiguration dependency
 
   const loadLogs = () => {
     const serviceLogs = adoService.getLogs();
@@ -319,6 +329,32 @@ export function ADOConfigurationComponent() {
                   </p>
                 </div>
               </div>
+              
+              {/* Data Source Selection */}
+              <div className="space-y-2">
+                <Label htmlFor="dataSource">Data Source</Label>
+                <Select
+                  value={configuration.dataSource}
+                  onValueChange={(value: 'specsync' | 'blueDolphin' | 'both') =>
+                    setConfiguration({
+                      ...configuration,
+                      dataSource: value,
+                    })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="specsync">SpecSync Only</SelectItem>
+                    <SelectItem value="blueDolphin">Blue Dolphin Only</SelectItem>
+                    <SelectItem value="both">Both SpecSync & Blue Dolphin</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-gray-500">
+                  Select which data sources to use for ADO work item generation
+                </p>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -451,6 +487,143 @@ export function ADOConfigurationComponent() {
 
         {/* Field Mapping Configuration */}
         <TabsContent value="mapping" className="space-y-6">
+          {/* Data Source Priority Display */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Database className="h-5 w-5" />
+                <span>Data Source Priority</span>
+              </CardTitle>
+              <CardDescription>
+                Current data source configuration and mapping strategy
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
+                  <div>
+                    <div className="flex items-center space-x-2 mb-2">
+                      <h4 className="font-medium text-blue-900">Primary Data Source</h4>
+                      <Badge className="bg-blue-100 text-blue-800">
+                        {configuration.dataSource === 'blueDolphin' && 'Blue Dolphin'}
+                        {configuration.dataSource === 'specsync' && 'SpecSync'}
+                        {configuration.dataSource === 'both' && 'Both Sources'}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-blue-700">
+                      {configuration.dataSource === 'blueDolphin' && 'Blue Dolphin objects will be used as the primary data source for work item generation'}
+                      {configuration.dataSource === 'specsync' && 'SpecSync data will be used as the primary data source for work item generation'}
+                      {configuration.dataSource === 'both' && 'Both Blue Dolphin and SpecSync data will be used for work item generation'}
+                    </p>
+                    <div className="mt-2 text-xs text-blue-600">
+                      <strong>Status:</strong> {configuration.dataSource === 'blueDolphin' && '✅ Blue Dolphin prioritized'}
+                      {configuration.dataSource === 'specsync' && '✅ SpecSync prioritized'}
+                      {configuration.dataSource === 'both' && '✅ Both sources enabled'}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl">
+                      {configuration.dataSource === 'blueDolphin' && '🔵'}
+                      {configuration.dataSource === 'specsync' && '📋'}
+                      {configuration.dataSource === 'both' && '🔄'}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-3 bg-gray-50 rounded-lg">
+                    <h5 className="font-medium text-gray-900 mb-2">Blue Dolphin Mapping Strategy</h5>
+                    <ul className="text-sm text-gray-600 space-y-1">
+                      <li>• Deliverables → ADO Epics</li>
+                      <li>• Application Functions → ADO Features</li>
+                      <li>• Application Interfaces → ADO Features</li>
+                      <li>• Business Processes → ADO Tasks</li>
+                    </ul>
+                  </div>
+                  <div className="p-3 bg-gray-50 rounded-lg">
+                    <h5 className="font-medium text-gray-900 mb-2">SpecSync Mapping Strategy</h5>
+                    <ul className="text-sm text-gray-600 space-y-1">
+                      <li>• TMF Domains → ADO Features</li>
+                      <li>• TMF Capabilities → ADO User Stories</li>
+                      <li>• SpecSync Requirements → ADO Tasks</li>
+                      <li>• Project → ADO Epic</li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Mapping Strategy Preview */}
+                <div className="p-4 bg-gradient-to-r from-blue-50 to-green-50 rounded-lg border border-blue-200">
+                  <h5 className="font-medium text-gray-900 mb-3 flex items-center space-x-2">
+                    <Activity className="h-5 w-5 text-blue-600" />
+                    <span>Current Mapping Strategy Preview</span>
+                  </h5>
+                  <div className="space-y-3">
+                    <div className="text-sm text-gray-700">
+                      <strong>When you generate work items, the system will:</strong>
+                    </div>
+                    <div className="space-y-2">
+                      {configuration.dataSource === 'blueDolphin' && (
+                        <>
+                          <div className="flex items-center space-x-2 text-sm">
+                            <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                            <span>1. Look for Blue Dolphin objects (Deliverables, Application Functions, etc.)</span>
+                          </div>
+                          <div className="flex items-center space-x-2 text-sm">
+                            <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                            <span>2. Map them to ADO work items according to the Blue Dolphin strategy</span>
+                          </div>
+                          <div className="flex items-center space-x-2 text-sm">
+                            <span className="w-2 h-2 bg-gray-400 rounded-full"></span>
+                            <span>3. Skip SpecSync data (not configured as primary)</span>
+                          </div>
+                        </>
+                      )}
+                      {configuration.dataSource === 'specsync' && (
+                        <>
+                          <div className="flex items-center space-x-2 text-sm">
+                            <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                            <span>1. Look for SpecSync data (TMF Domains, Capabilities, Requirements)</span>
+                          </div>
+                          <div className="flex items-center space-x-2 text-sm">
+                            <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                            <span>2. Map them to ADO work items according to the SpecSync strategy</span>
+                          </div>
+                          <div className="flex items-center space-x-2 text-sm">
+                            <span className="w-2 h-2 bg-gray-400 rounded-full"></span>
+                            <span>3. Skip Blue Dolphin data (not configured as primary)</span>
+                          </div>
+                        </>
+                      )}
+                      {configuration.dataSource === 'both' && (
+                        <>
+                          <div className="flex items-center space-x-2 text-sm">
+                            <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                            <span>1. Look for Blue Dolphin objects first (primary data source)</span>
+                          </div>
+                          <div className="flex items-center space-x-2 text-sm">
+                            <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                            <span>2. Map Blue Dolphin objects to ADO work items</span>
+                          </div>
+                          <div className="flex items-center space-x-2 text-sm">
+                            <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                            <span>3. Add SpecSync data as secondary source</span>
+                          </div>
+                          <div className="flex items-center space-x-2 text-sm">
+                            <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                            <span>4. Map SpecSync data to ADO work items</span>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                    <div className="mt-3 p-2 bg-white rounded border text-xs text-gray-600">
+                      <strong>Note:</strong> The system will validate data availability and show appropriate warnings if required data is missing.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
@@ -458,7 +631,7 @@ export function ADOConfigurationComponent() {
                 <span>Custom Field Mapping</span>
               </CardTitle>
               <CardDescription>
-                Configure custom field mappings for TMF-specific data
+                Configure custom field mappings for SpecSync and Blue Dolphin data
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -560,6 +733,249 @@ export function ADOConfigurationComponent() {
                         customFields: {
                           ...configuration.customFields,
                           customer: e.target.value,
+                        },
+                      })
+                    }
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Field Mapping Table */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <FileText className="h-5 w-5" />
+                <span>Field Mapping Reference</span>
+              </CardTitle>
+              <CardDescription>
+                Source to target field mappings for work item generation
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {/* Blue Dolphin Field Mappings */}
+                <div>
+                  <h4 className="font-medium text-lg mb-4 text-blue-900">Blue Dolphin → ADO Field Mappings</h4>
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse border border-gray-300">
+                      <thead>
+                        <tr className="bg-blue-50">
+                          <th className="border border-gray-300 px-4 py-2 text-left font-medium">Source Field (Blue Dolphin)</th>
+                          <th className="border border-gray-300 px-4 py-2 text-left font-medium">Target Field (ADO)</th>
+                          <th className="border border-gray-300 px-4 py-2 text-left font-medium">Description</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td className="border border-gray-300 px-4 py-2 font-mono text-sm">ID</td>
+                          <td className="border border-gray-300 px-4 py-2 font-mono text-sm">Custom.BlueDolphinId</td>
+                          <td className="border border-gray-300 px-4 py-2 text-sm">Unique Blue Dolphin object identifier</td>
+                        </tr>
+                        <tr>
+                          <td className="border border-gray-300 px-4 py-2 font-mono text-sm">Title</td>
+                          <td className="border border-gray-300 px-4 py-2 font-mono text-sm">System.Title</td>
+                          <td className="border border-gray-300 px-4 py-2 text-sm">Object title becomes work item title</td>
+                        </tr>
+                        <tr>
+                          <td className="border border-gray-300 px-4 py-2 font-mono text-sm">Description</td>
+                          <td className="border border-gray-300 px-4 py-2 font-mono text-sm">System.Description</td>
+                          <td className="border border-gray-300 px-4 py-2 text-sm">Object description becomes work item description</td>
+                        </tr>
+                        <tr>
+                          <td className="border border-gray-300 px-4 py-2 font-mono text-sm">Workspace</td>
+                          <td className="border border-gray-300 px-4 py-2 font-mono text-sm">Custom.Workspace</td>
+                          <td className="border border-gray-300 px-4 py-2 text-sm">Blue Dolphin workspace identifier</td>
+                        </tr>
+                        <tr>
+                          <td className="border border-gray-300 px-4 py-2 font-mono text-sm">Definition</td>
+                          <td className="border border-gray-300 px-4 py-2 font-mono text-sm">Custom.ObjectType</td>
+                          <td className="border border-gray-300 px-4 py-2 text-sm">Object type (Deliverable, Application Function, etc.)</td>
+                        </tr>
+                        <tr>
+                          <td className="border border-gray-300 px-4 py-2 font-mono text-sm">Status</td>
+                          <td className="border border-gray-300 px-4 py-2 font-mono text-sm">Custom.ObjectStatus</td>
+                          <td className="border border-gray-300 px-4 py-2 text-sm">Object status in Blue Dolphin</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* SpecSync Field Mappings */}
+                <div>
+                  <h4 className="font-medium text-lg mb-4 text-green-900">SpecSync → ADO Field Mappings</h4>
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse border border-gray-300">
+                      <thead>
+                        <tr className="bg-green-50">
+                          <th className="border border-gray-300 px-4 py-2 text-left font-medium">Source Field (SpecSync)</th>
+                          <th className="border border-gray-300 px-4 py-2 text-left font-medium">Target Field (ADO)</th>
+                          <th className="border border-gray-300 px-4 py-2 text-left font-medium">Description</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td className="border border-gray-300 px-4 py-2 font-mono text-sm">requirementId</td>
+                          <td className="border border-gray-300 px-4 py-2 font-mono text-sm">Custom.RequirementId</td>
+                          <td className="border border-gray-300 px-4 py-2 text-sm">SpecSync requirement identifier</td>
+                        </tr>
+                        <tr>
+                          <td className="border border-gray-300 px-4 py-2 font-mono text-sm">functionName</td>
+                          <td className="border border-gray-300 px-4 py-2 font-mono text-sm">System.Title</td>
+                          <td className="border border-gray-300 px-4 py-2 text-sm">Function name becomes work item title</td>
+                        </tr>
+                        <tr>
+                          <td className="border border-gray-300 px-4 py-2 font-mono text-sm">domain</td>
+                          <td className="border border-gray-300 px-4 py-2 font-mono text-sm">Custom.DomainId</td>
+                          <td className="border border-gray-300 px-4 py-2 text-sm">TMF domain identifier</td>
+                        </tr>
+                        <tr>
+                          <td className="border border-gray-300 px-4 py-2 font-mono text-sm">capability</td>
+                          <td className="border border-gray-300 px-4 py-2 font-mono text-sm">Custom.CapabilityId</td>
+                          <td className="border border-gray-300 px-4 py-2 text-sm">TMF capability identifier</td>
+                        </tr>
+                        <tr>
+                          <td className="border border-gray-300 px-4 py-2 font-mono text-sm">usecase1</td>
+                          <td className="border border-gray-300 px-4 py-2 font-mono text-sm">System.Description</td>
+                          <td className="border border-gray-300 px-4 py-2 text-sm">Use case becomes work item description</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Blue Dolphin Field Mapping */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Database className="h-5 w-5" />
+                <span>Blue Dolphin Field Mapping</span>
+              </CardTitle>
+              <CardDescription>
+                Configure custom field mappings for Blue Dolphin objects
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="blueDolphinId">Blue Dolphin ID Field</Label>
+                  <Input
+                    id="blueDolphinId"
+                    placeholder="Custom.BlueDolphinId"
+                    value={configuration.customFields.blueDolphinId}
+                    onChange={(e) =>
+                      setConfiguration({
+                        ...configuration,
+                        customFields: {
+                          ...configuration.customFields,
+                          blueDolphinId: e.target.value,
+                        },
+                      })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="workspace">Workspace Field</Label>
+                  <Input
+                    id="workspace"
+                    placeholder="Custom.Workspace"
+                    value={configuration.customFields.workspace}
+                    onChange={(e) =>
+                      setConfiguration({
+                        ...configuration,
+                        customFields: {
+                          ...configuration.customFields,
+                          workspace: e.target.value,
+                        },
+                      })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="objectType">Object Type Field</Label>
+                  <Input
+                    id="objectType"
+                    placeholder="Custom.ObjectType"
+                    value={configuration.customFields.objectType}
+                    onChange={(e) =>
+                      setConfiguration({
+                        ...configuration,
+                        customFields: {
+                          ...configuration.customFields,
+                          objectType: e.target.value,
+                        },
+                      })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="objectStatus">Object Status Field</Label>
+                  <Input
+                    id="objectStatus"
+                    placeholder="Custom.ObjectStatus"
+                    value={configuration.customFields.objectStatus}
+                    onChange={(e) =>
+                      setConfiguration({
+                        ...configuration,
+                        customFields: {
+                          ...configuration.customFields,
+                          objectStatus: e.target.value,
+                        },
+                      })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="deliverableStatus">Deliverable Status Field</Label>
+                  <Input
+                    id="deliverableStatus"
+                    placeholder="Custom.DeliverableStatus"
+                    value={configuration.customFields.deliverableStatus}
+                    onChange={(e) =>
+                      setConfiguration({
+                        ...configuration,
+                        customFields: {
+                          ...configuration.customFields,
+                          deliverableStatus: e.target.value,
+                        },
+                      })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="functionType">Function Type Field</Label>
+                  <Input
+                    id="functionType"
+                    placeholder="Custom.FunctionType"
+                    value={configuration.customFields.functionType}
+                    onChange={(e) =>
+                      setConfiguration({
+                        ...configuration,
+                        customFields: {
+                          ...configuration.customFields,
+                          functionType: e.target.value,
+                        },
+                      })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="interfaceType">Interface Type Field</Label>
+                  <Input
+                    id="interfaceType"
+                    placeholder="Custom.InterfaceType"
+                    value={configuration.customFields.interfaceType}
+                    onChange={(e) =>
+                      setConfiguration({
+                        ...configuration,
+                        customFields: {
+                          ...configuration.customFields,
+                          interfaceType: e.target.value,
                         },
                       })
                     }

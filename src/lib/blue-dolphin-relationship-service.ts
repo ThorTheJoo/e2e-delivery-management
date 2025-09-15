@@ -45,12 +45,14 @@ export class BlueDolphinRelationshipService {
       const businessProcesses = allDiscoveredObjects.filter(obj => obj.Definition === 'Business Process');
       const applicationServices = allDiscoveredObjects.filter(obj => obj.Definition === 'Application Service');
       const applicationInterfaces = allDiscoveredObjects.filter(obj => obj.Definition === 'Application Interface');
+      const deliverables = allDiscoveredObjects.filter(obj => obj.Definition === 'Deliverable');
       const relatedFunctions = allDiscoveredObjects.filter(obj => obj.Definition === 'Application Function' && obj.ID !== mappingResult.blueDolphinObject.ID);
 
       // Detect hierarchy for each type
       const hierarchicalBusinessProcesses = this.detectObjectHierarchy(businessProcesses, []);
       const hierarchicalApplicationServices = this.detectObjectHierarchy(applicationServices, []);
       const hierarchicalApplicationInterfaces = this.detectObjectHierarchy(applicationInterfaces, []);
+      const hierarchicalDeliverables = this.detectObjectHierarchy(deliverables, []);
       const hierarchicalRelatedFunctions = this.detectObjectHierarchy(relatedFunctions, []);
 
       // Organize by hierarchy levels
@@ -59,6 +61,7 @@ export class BlueDolphinRelationshipService {
         businessProcesses: this.organizeByHierarchy(hierarchicalBusinessProcesses),
         applicationServices: this.organizeByHierarchy(hierarchicalApplicationServices),
         applicationInterfaces: this.organizeByHierarchy(hierarchicalApplicationInterfaces),
+        deliverables: this.organizeByHierarchy(hierarchicalDeliverables),
         relatedApplicationFunctions: hierarchicalRelatedFunctions,
         specSyncFunctionName: mappingResult.specSyncFunctionName,
         traversalMetadata: {
@@ -71,7 +74,10 @@ export class BlueDolphinRelationshipService {
 
       console.log(`✅ Traversal completed in ${result.traversalMetadata.processingTimeMs}ms`);
       console.log(`📈 Found ${result.traversalMetadata.totalObjectsFound} total objects`);
-      console.log(`📊 Breakdown: ${businessProcesses.length} Business Processes, ${applicationServices.length} Application Services, ${applicationInterfaces.length} Application Interfaces, ${relatedFunctions.length} Related Functions`);
+      console.log(`📊 Breakdown: ${businessProcesses.length} Business Processes, ${applicationServices.length} Application Services, ${applicationInterfaces.length} Application Interfaces, ${deliverables.length} Deliverables, ${relatedFunctions.length} Related Functions`);
+      
+      // Automatically save to local storage for later enrichment
+      this.saveTraversalResultToStorage(result);
       
       return result;
 
@@ -110,6 +116,11 @@ export class BlueDolphinRelationshipService {
         level.forEach(obj => allObjectIds.add(obj.ID));
       });
       
+      // Add all Deliverables
+      Object.values(traversalResult.deliverables).forEach(level => {
+        level.forEach(obj => allObjectIds.add(obj.ID));
+      });
+      
       // Add all Related Functions
       traversalResult.relatedApplicationFunctions.forEach(obj => {
         allObjectIds.add(obj.ID);
@@ -134,6 +145,7 @@ export class BlueDolphinRelationshipService {
         businessProcesses: this.replaceWithFullPayloads(traversalResult.businessProcesses, payloadMap),
         applicationServices: this.replaceWithFullPayloads(traversalResult.applicationServices, payloadMap),
         applicationInterfaces: this.replaceWithFullPayloads(traversalResult.applicationInterfaces, payloadMap),
+        deliverables: this.replaceWithFullPayloads(traversalResult.deliverables, payloadMap),
         relatedApplicationFunctions: traversalResult.relatedApplicationFunctions.map(obj => 
           payloadMap.get(obj.ID) || obj
         ),
@@ -285,8 +297,8 @@ export class BlueDolphinRelationshipService {
     console.log(`🔍 Fetching relationships for object: ${objectId}`);
     console.log(`🏢 Workspace filter: ${this.workspaceFilter}`);
 
-    // Use the validated optimized filter approach
-    const optimizedFilter = `(BlueDolphinObjectItemId eq '${objectId}' or RelatedBlueDolphinObjectItemId eq '${objectId}') and BlueDolphinObjectWorkspaceName eq '${this.workspaceFilter}' and RelatedBlueDolphinObjectWorkspaceName eq '${this.workspaceFilter}' and (RelatedBlueDolphinObjectDefinitionName eq 'Application Function' or RelatedBlueDolphinObjectDefinitionName eq 'Application Service' or RelatedBlueDolphinObjectDefinitionName eq 'Application Interface' or RelatedBlueDolphinObjectDefinitionName eq 'Business Process')`;
+    // Use the validated optimized filter approach with Deliverable inclusion
+    const optimizedFilter = `(BlueDolphinObjectItemId eq '${objectId}' or RelatedBlueDolphinObjectItemId eq '${objectId}') and BlueDolphinObjectWorkspaceName eq '${this.workspaceFilter}' and RelatedBlueDolphinObjectWorkspaceName eq '${this.workspaceFilter}' and (RelatedBlueDolphinObjectDefinitionName eq 'Application Function' or RelatedBlueDolphinObjectDefinitionName eq 'Application Service' or RelatedBlueDolphinObjectDefinitionName eq 'Application Interface' or RelatedBlueDolphinObjectDefinitionName eq 'Business Process' or RelatedBlueDolphinObjectDefinitionName eq 'Deliverable')`;
 
     console.log(`🎯 Using optimized filter: ${optimizedFilter}`);
 
@@ -675,5 +687,182 @@ export class BlueDolphinRelationshipService {
       size: this.cache.size,
       keys: Array.from(this.cache.keys())
     };
+  }
+
+  /**
+   * Save traversal result to local storage for later enrichment
+   */
+  saveTraversalResultToStorage(
+    result: TraversalResult | TraversalResultWithPayloads,
+    keyPrefix: string = 'blueDolphinTraversal'
+  ): void {
+    try {
+      const storageKey = `${keyPrefix}_${result.specSyncFunctionName}_${Date.now()}`;
+      const storageData = {
+        ...result,
+        savedAt: new Date().toISOString(),
+        workspaceFilter: this.workspaceFilter,
+        storageKey: storageKey
+      };
+      
+      localStorage.setItem(storageKey, JSON.stringify(storageData));
+      console.log(`💾 Traversal result saved to localStorage with key: ${storageKey}`);
+      
+      // Also save a reference in the main index
+      this.updateTraversalIndex(storageKey, result.specSyncFunctionName);
+      
+    } catch (error) {
+      console.error('❌ Failed to save traversal result to localStorage:', error);
+    }
+  }
+
+  /**
+   * Load traversal result from local storage
+   */
+  loadTraversalResultFromStorage(storageKey: string): TraversalResult | TraversalResultWithPayloads | null {
+    try {
+      const stored = localStorage.getItem(storageKey);
+      if (!stored) {
+        console.log(`❌ No data found for key: ${storageKey}`);
+        return null;
+      }
+      
+      const result = JSON.parse(stored);
+      console.log(`📂 Traversal result loaded from localStorage: ${storageKey}`);
+      return result;
+      
+    } catch (error) {
+      console.error('❌ Failed to load traversal result from localStorage:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get all saved traversal results
+   */
+  getAllSavedTraversalResults(): Array<{
+    key: string;
+    functionName: string;
+    savedAt: string;
+    workspaceFilter: string;
+    totalObjectsFound: number;
+  }> {
+    try {
+      const results: Array<{
+        key: string;
+        functionName: string;
+        savedAt: string;
+        workspaceFilter: string;
+        totalObjectsFound: number;
+      }> = [];
+      
+      // Get the traversal index
+      const index = this.getTraversalIndex();
+      
+      for (const key of index) {
+        const stored = localStorage.getItem(key);
+        if (stored) {
+          try {
+            const data = JSON.parse(stored);
+            results.push({
+              key: data.storageKey || key,
+              functionName: data.specSyncFunctionName,
+              savedAt: data.savedAt,
+              workspaceFilter: data.workspaceFilter,
+              totalObjectsFound: data.traversalMetadata?.totalObjectsFound || 0
+            });
+          } catch (parseError) {
+            console.warn(`⚠️ Failed to parse stored data for key: ${key}`);
+          }
+        }
+      }
+      
+      // Sort by savedAt (newest first)
+      results.sort((a, b) => new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime());
+      
+      console.log(`📋 Found ${results.length} saved traversal results`);
+      return results;
+      
+    } catch (error) {
+      console.error('❌ Failed to get saved traversal results:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Update the traversal index in localStorage
+   */
+  private updateTraversalIndex(storageKey: string, _functionName: string): void {
+    try {
+      const indexKey = 'blueDolphinTraversalIndex';
+      const existingIndex = this.getTraversalIndex();
+      
+      // Add new key if not already present
+      if (!existingIndex.includes(storageKey)) {
+        existingIndex.push(storageKey);
+        localStorage.setItem(indexKey, JSON.stringify(existingIndex));
+        console.log(`📝 Updated traversal index with key: ${storageKey}`);
+      }
+      
+    } catch (error) {
+      console.error('❌ Failed to update traversal index:', error);
+    }
+  }
+
+  /**
+   * Get the traversal index from localStorage
+   */
+  private getTraversalIndex(): string[] {
+    try {
+      const indexKey = 'blueDolphinTraversalIndex';
+      const stored = localStorage.getItem(indexKey);
+      return stored ? JSON.parse(stored) : [];
+    } catch (error) {
+      console.error('❌ Failed to get traversal index:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Clear all saved traversal results
+   */
+  clearAllSavedTraversalResults(): void {
+    try {
+      const index = this.getTraversalIndex();
+      
+      // Remove all stored results
+      index.forEach(key => {
+        localStorage.removeItem(key);
+      });
+      
+      // Clear the index
+      localStorage.removeItem('blueDolphinTraversalIndex');
+      
+      console.log(`🧹 Cleared ${index.length} saved traversal results`);
+      
+    } catch (error) {
+      console.error('❌ Failed to clear saved traversal results:', error);
+    }
+  }
+
+  /**
+   * Remove a specific saved traversal result
+   */
+  removeSavedTraversalResult(storageKey: string): boolean {
+    try {
+      localStorage.removeItem(storageKey);
+      
+      // Remove from index
+      const index = this.getTraversalIndex();
+      const updatedIndex = index.filter(key => key !== storageKey);
+      localStorage.setItem('blueDolphinTraversalIndex', JSON.stringify(updatedIndex));
+      
+      console.log(`🗑️ Removed saved traversal result: ${storageKey}`);
+      return true;
+      
+    } catch (error) {
+      console.error('❌ Failed to remove saved traversal result:', error);
+      return false;
+    }
   }
 }

@@ -133,7 +133,7 @@ export class SolutionDescriptionService {
    */
   private static extractTMFFunctions(
     mappingResults: MappingResult[],
-    requirements: SpecSyncItem[]
+    _requirements: SpecSyncItem[]
   ): TMFFunction[] {
     const functionMap = new Map<string, TMFFunction>();
     
@@ -142,9 +142,9 @@ export class SolutionDescriptionService {
       
       if (!functionMap.has(functionKey)) {
         // Find the requirement for this mapping
-        const requirement = requirements.find(req => 
-          req.requirementId === mapping.specSyncRequirementId
-        );
+        // const _requirement = requirements.find(req => 
+        //   req.requirementId === mapping.specSyncRequirementId
+        // );
         
         functionMap.set(functionKey, {
           id: mapping.blueDolphinObject.ID,
@@ -283,7 +283,7 @@ export class SolutionDescriptionService {
   /**
    * Extract requirements from an object (placeholder - would need actual implementation)
    */
-  private static extractRequirementsFromObject(obj: any): string[] {
+  private static extractRequirementsFromObject(_obj: any): string[] {
     // This would need to be implemented based on how requirements are linked to objects
     // For now, return empty array
     return [];
@@ -571,7 +571,7 @@ ${matrixRows}
 - **Requirements with Application Interfaces:** ${data.traceabilityMap.filter(m => m.applicationInterfaces.length > 0).length}`;
   }
   
-  private static generateTechnicalSpecifications(data: SolutionDescriptionData): string {
+  private static generateTechnicalSpecifications(_data: SolutionDescriptionData): string {
     return `## Technical Specifications
 
 ### Architecture Principles
@@ -602,7 +602,7 @@ ${matrixRows}
 - **Azure DevOps:** Delivery orchestration and work item management`;
   }
   
-  private static generateImplementationPlan(data: SolutionDescriptionData): string {
+  private static generateImplementationPlan(_data: SolutionDescriptionData): string {
     return `## Implementation Plan
 
 ### Phase 1: Foundation (Weeks 1-2)

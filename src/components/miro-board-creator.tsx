@@ -18,6 +18,7 @@ import {
 import { miroService } from '@/lib/miro-service';
 import { miroAuthService } from '@/lib/miro-auth-service';
 import { Project, TMFOdaDomain, SpecSyncItem } from '@/types';
+import { TraversalResult } from '@/types/blue-dolphin-relationships';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
@@ -25,18 +26,21 @@ interface MiroBoardCreatorProps {
   project: Project;
   tmfDomains: TMFOdaDomain[];
   specSyncItems: SpecSyncItem[];
+  blueDolphinTraversalResults?: TraversalResult[];
   onAuthStatusChange?: (isAuthenticated: boolean) => void;
 }
 
 interface BoardLinks {
   tmfBoard?: string;
   specSyncBoard?: string;
+  solutionModelBoard?: string;
 }
 
 export function MiroBoardCreator({
   project,
   tmfDomains,
   specSyncItems,
+  blueDolphinTraversalResults = [],
   onAuthStatusChange,
 }: MiroBoardCreatorProps) {
   console.log('=== MIRO BOARD CREATOR DEBUG ===');
@@ -49,6 +53,7 @@ export function MiroBoardCreator({
   const [boardLinks, setBoardLinks] = useState<BoardLinks>({});
   const [isCreatingTMF, setIsCreatingTMF] = useState(false);
   const [isCreatingSpecSync, setIsCreatingSpecSync] = useState(false);
+  const [isCreatingSolutionModel, setIsCreatingSolutionModel] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const searchParams = useSearchParams();
@@ -207,12 +212,185 @@ export function MiroBoardCreator({
     }
   };
 
+  const handleCreateSolutionModelBoard = async () => {
+    setIsCreatingSolutionModel(true);
+    setError(null);
+
+    console.log('Creating Solution Model board with traversal results:', blueDolphinTraversalResults);
+    console.log('Traversal results length:', blueDolphinTraversalResults.length);
+    console.log('SpecSync items length:', specSyncItems.length);
+
+    try {
+      const board = await miroService.createSolutionModelBoard(
+        blueDolphinTraversalResults,
+        specSyncItems,
+        project
+      );
+      setBoardLinks((prev) => ({ ...prev, solutionModelBoard: board.viewLink }));
+    } catch (error) {
+      console.error('Failed to create Solution Model board:', error);
+
+      // Check if it's a token-related error
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      if (
+        errorMessage.includes('token') ||
+        errorMessage.includes('authentication') ||
+        errorMessage.includes('401') ||
+        errorMessage.includes('403')
+      ) {
+        setError(
+          'Miro access token is invalid or expired. Please re-authenticate with Miro in the Configuration tab.',
+        );
+        setIsAuthenticated(false);
+        onAuthStatusChange?.(false);
+      } else {
+        setError(
+          'Failed to create Solution Model Integration board. Please check your Miro credentials and try again.',
+        );
+      }
+    } finally {
+      setIsCreatingSolutionModel(false);
+    }
+  };
+
   const totalCapabilities = tmfDomains.reduce((acc, domain) => acc + domain.capabilities.length, 0);
   const selectedDomains = tmfDomains.filter((domain) => domain.isSelected).length;
   const selectedCapabilities = tmfDomains.reduce(
     (acc, domain) => acc + domain.capabilities.filter((cap) => cap.isSelected).length,
     0,
   );
+
+  // Helper functions for Solution Model Integration statistics
+  const getTotalObjectsCount = () => {
+    if (!blueDolphinTraversalResults || blueDolphinTraversalResults.length === 0) {
+      console.log('🔍 [Solution Model] No traversal results available for counting');
+      return 0;
+    }
+
+    let totalCount = 0;
+    blueDolphinTraversalResults.forEach((result, index) => {
+      console.log(`🔍 [Solution Model] Processing traversal result ${index + 1}:`, {
+        businessProcesses: {
+          top: result.businessProcesses?.topLevel?.length || 0,
+          child: result.businessProcesses?.childLevel?.length || 0,
+          grandchild: result.businessProcesses?.grandchildLevel?.length || 0
+        },
+        applicationServices: {
+          top: result.applicationServices?.topLevel?.length || 0,
+          child: result.applicationServices?.childLevel?.length || 0,
+          grandchild: result.applicationServices?.grandchildLevel?.length || 0
+        },
+        applicationInterfaces: {
+          top: result.applicationInterfaces?.topLevel?.length || 0,
+          child: result.applicationInterfaces?.childLevel?.length || 0,
+          grandchild: result.applicationInterfaces?.grandchildLevel?.length || 0
+        },
+        deliverables: {
+          top: result.deliverables?.topLevel?.length || 0,
+          child: result.deliverables?.childLevel?.length || 0,
+          grandchild: result.deliverables?.grandchildLevel?.length || 0
+        },
+        applicationFunctions: result.relatedApplicationFunctions?.length || 0,
+        hasMainFunction: !!result.applicationFunction
+      });
+
+      // Count business processes
+      totalCount += (result.businessProcesses?.topLevel?.length || 0);
+      totalCount += (result.businessProcesses?.childLevel?.length || 0);
+      totalCount += (result.businessProcesses?.grandchildLevel?.length || 0);
+      
+      // Count application services
+      totalCount += (result.applicationServices?.topLevel?.length || 0);
+      totalCount += (result.applicationServices?.childLevel?.length || 0);
+      totalCount += (result.applicationServices?.grandchildLevel?.length || 0);
+      
+      // Count application interfaces
+      totalCount += (result.applicationInterfaces?.topLevel?.length || 0);
+      totalCount += (result.applicationInterfaces?.childLevel?.length || 0);
+      totalCount += (result.applicationInterfaces?.grandchildLevel?.length || 0);
+      
+      // Count deliverables
+      totalCount += (result.deliverables?.topLevel?.length || 0);
+      totalCount += (result.deliverables?.childLevel?.length || 0);
+      totalCount += (result.deliverables?.grandchildLevel?.length || 0);
+      
+      // Count application functions
+      totalCount += (result.relatedApplicationFunctions?.length || 0);
+      if (result.applicationFunction) {
+        totalCount += 1;
+      }
+    });
+
+    console.log(`📊 [Solution Model] Total objects count: ${totalCount}`);
+    return totalCount;
+  };
+
+  const getObjectTypesList = () => {
+    if (!blueDolphinTraversalResults || blueDolphinTraversalResults.length === 0) {
+      console.log('🔍 [Solution Model] No traversal results available for object types');
+      return [];
+    }
+
+    const objectTypes = new Set<string>();
+    
+    blueDolphinTraversalResults.forEach((result, index) => {
+      console.log(`🔍 [Solution Model] Checking object types for result ${index + 1}:`, {
+        hasBusinessProcesses: !!(result.businessProcesses?.topLevel?.length > 0 || 
+          result.businessProcesses?.childLevel?.length > 0 || 
+          result.businessProcesses?.grandchildLevel?.length > 0),
+        hasApplicationServices: !!(result.applicationServices?.topLevel?.length > 0 || 
+          result.applicationServices?.childLevel?.length > 0 || 
+          result.applicationServices?.grandchildLevel?.length > 0),
+        hasApplicationInterfaces: !!(result.applicationInterfaces?.topLevel?.length > 0 || 
+          result.applicationInterfaces?.childLevel?.length > 0 || 
+          result.applicationInterfaces?.grandchildLevel?.length > 0),
+        hasDeliverables: !!(result.deliverables?.topLevel?.length > 0 || 
+          result.deliverables?.childLevel?.length > 0 || 
+          result.deliverables?.grandchildLevel?.length > 0),
+        hasApplicationFunctions: !!(result.relatedApplicationFunctions?.length > 0 || result.applicationFunction)
+      });
+
+      // Check business processes
+      if (result.businessProcesses?.topLevel?.length > 0 || 
+          result.businessProcesses?.childLevel?.length > 0 || 
+          result.businessProcesses?.grandchildLevel?.length > 0) {
+        objectTypes.add('Business Process');
+      }
+      
+      // Check application services
+      if (result.applicationServices?.topLevel?.length > 0 || 
+          result.applicationServices?.childLevel?.length > 0 || 
+          result.applicationServices?.grandchildLevel?.length > 0) {
+        objectTypes.add('Application Service');
+      }
+      
+      // Check application interfaces
+      if (result.applicationInterfaces?.topLevel?.length > 0 || 
+          result.applicationInterfaces?.childLevel?.length > 0 || 
+          result.applicationInterfaces?.grandchildLevel?.length > 0) {
+        objectTypes.add('Application Interface');
+      }
+      
+      // Check deliverables
+      if (result.deliverables?.topLevel?.length > 0 || 
+          result.deliverables?.childLevel?.length > 0 || 
+          result.deliverables?.grandchildLevel?.length > 0) {
+        objectTypes.add('Deliverable');
+      }
+      
+      // Check application functions
+      if (result.relatedApplicationFunctions?.length > 0 || result.applicationFunction) {
+        objectTypes.add('Application Function');
+      }
+    });
+
+    const typesArray = Array.from(objectTypes).sort();
+    console.log(`📊 [Solution Model] Object types found: ${typesArray.join(', ')}`);
+    return typesArray;
+  };
+
+  const totalObjectsCount = getTotalObjectsCount();
+  const objectTypesList = getObjectTypesList();
 
   return (
     <div className="space-y-6">
@@ -470,8 +648,88 @@ export function MiroBoardCreator({
         </CardContent>
       </Card>
 
+      {/* Solution Model Integration Board */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Network className="h-5 w-5" />
+            <span>Solution Model Integration</span>
+            {boardLinks.solutionModelBoard && (
+              <Badge variant="secondary" className="ml-2">
+                <CheckCircle className="mr-1 h-3 w-3" />
+                Created
+              </Badge>
+            )}
+          </CardTitle>
+          <CardDescription>
+            Visual mapping of Blue Dolphin architecture objects with SpecSync requirements
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-3">
+              <div className="flex items-center space-x-2">
+                <span className="text-muted-foreground">Total Objects:</span>
+                <Badge variant="outline">{totalObjectsCount}</Badge>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-muted-foreground">Object Types:</span>
+                <Badge variant="outline">
+                  {objectTypesList.length > 0 ? objectTypesList.join(', ') : 'None'}
+                </Badge>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-muted-foreground">Project:</span>
+                <Badge variant="outline">{project.name}</Badge>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-4">
+              <Button
+                onClick={handleCreateSolutionModelBoard}
+                disabled={!isAuthenticated || isCreatingSolutionModel || blueDolphinTraversalResults.length === 0}
+                className="flex items-center space-x-2"
+              >
+                {isCreatingSolutionModel ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Creating Board...</span>
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-4 w-4" />
+                    <span>Create Solution Model Board</span>
+                  </>
+                )}
+              </Button>
+
+              {boardLinks.solutionModelBoard && (
+                <Link href={boardLinks.solutionModelBoard} target="_blank">
+                  <Button variant="outline" className="flex items-center space-x-2">
+                    <ExternalLink className="h-4 w-4" />
+                    <span>Open in Miro</span>
+                  </Button>
+                </Link>
+              )}
+            </div>
+
+            {!isAuthenticated && (
+              <div className="text-sm text-muted-foreground">
+                Please connect to Miro in the Configuration tab first to create boards.
+              </div>
+            )}
+
+            {isAuthenticated && blueDolphinTraversalResults.length === 0 && (
+              <div className="text-sm text-muted-foreground">
+                Please run Blue Dolphin traversal first to generate architecture objects.
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Board Management */}
-      {(boardLinks.tmfBoard || boardLinks.specSyncBoard) && (
+      {(boardLinks.tmfBoard || boardLinks.specSyncBoard || boardLinks.solutionModelBoard) && (
         <Card>
           <CardHeader>
             <CardTitle>Board Management</CardTitle>
@@ -511,6 +769,26 @@ export function MiroBoardCreator({
                     </div>
                   </div>
                   <Link href={boardLinks.specSyncBoard} target="_blank">
+                    <Button variant="outline" size="sm">
+                      <ExternalLink className="mr-1 h-3 w-3" />
+                      Open
+                    </Button>
+                  </Link>
+                </div>
+              )}
+
+              {boardLinks.solutionModelBoard && (
+                <div className="flex items-center justify-between rounded-lg border p-3">
+                  <div className="flex items-center space-x-3">
+                    <Network className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <div className="font-medium">Solution Model Integration Board</div>
+                      <div className="text-sm text-muted-foreground">
+                        {totalObjectsCount} objects, {objectTypesList.length} types
+                      </div>
+                    </div>
+                  </div>
+                  <Link href={boardLinks.solutionModelBoard} target="_blank">
                     <Button variant="outline" size="sm">
                       <ExternalLink className="mr-1 h-3 w-3" />
                       Open

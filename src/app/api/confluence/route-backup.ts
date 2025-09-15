@@ -83,8 +83,8 @@ export async function POST(request: NextRequest) {
 
     if (action === 'test') {
       // Try primary apiBase; if fails and apiBase was auto-resolved to /rest/api, try /wiki/rest/api as fallback
-      let probeUrl = `${baseUrl}${apiBase}`;
-      let result = await fetchJson(probeUrl, headers);
+      const probeUrl = `${baseUrl}${apiBase}`;
+      const result = await fetchJson(probeUrl, headers);
       if (!result.ok) {
         const altBase = apiBase === '/rest/api' ? '/wiki/rest/api' : '/rest/api';
         const altUrl = `${baseUrl}${altBase}`;

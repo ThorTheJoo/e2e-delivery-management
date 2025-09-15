@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Project, TMFFunction, ETOMProcess, WorkPackage, Milestone, Risk, Dependency, Document, TMFOdaDomain, SpecSyncItem } from '@/types';
+import { BlueDolphinObjectEnhanced } from '@/types/blue-dolphin';
 import { dataService } from '@/lib/data-service';
 import { formatDate, getStatusColor, getSeverityColor } from '@/lib/utils';
 import { getBuildInfo } from '@/lib/build-info';
@@ -39,7 +40,6 @@ import { ADOIntegration } from '@/components/ado-integration';
 import { CETv22ServiceDesign } from '@/components/cet-v22/CETv22ServiceDesign';
 import { BillOfMaterials } from '@/components/bill-of-materials';
 import { BOMConfiguration } from '@/components/bom-configuration';
-import { SolutionDescriptionGenerator } from '@/components/solution-description-generator';
 import { useToast, ToastContainer } from '@/components/ui/toast';
 import { ComplexityMatrix } from '@/components/complexity-matrix';
 import {
@@ -95,7 +95,8 @@ export default function HomePage() {
   
   // NEW - State for relationship traversal
   const [mappingResults, setMappingResults] = useState<any[]>([]);
-  const [traversalResults, setTraversalResults] = useState<any[]>([]);
+  // const [_traversalResults, _setTraversalResults] = useState<any[]>([]);
+  const [blueDolphinTraversalResults, setBlueDolphinTraversalResults] = useState<any[]>([]);
   const [workspaceFilter] = useState<string>('Grant Test'); // Fixed: Use correct workspace
 
   // Handle navigation events from child components
@@ -153,6 +154,71 @@ export default function HomePage() {
   const [tmfDomains, setTmfDomains] = useState<TMFOdaDomain[]>([]);
   const [userTmfDomains, setUserTmfDomains] = useState<any[]>([]);
   const [specSyncItems, setSpecSyncItems] = useState<SpecSyncItem[]>([]);
+  const [blueDolphinObjects, setBlueDolphinObjects] = useState<BlueDolphinObjectEnhanced[]>([]);
+
+  // Handle Blue Dolphin objects loaded from integration component
+  const handleBlueDolphinObjectsLoaded = (objects: BlueDolphinObjectEnhanced[]) => {
+    console.log('🔵 Blue Dolphin objects loaded in main page:', objects.length);
+    setBlueDolphinObjects(objects);
+  };
+
+  // Handle Blue Dolphin objects loaded from traversal component
+  const handleTraversalBlueDolphinObjectsLoaded = (objects: BlueDolphinObjectEnhanced[]) => {
+    console.log('🔵 Blue Dolphin objects loaded from traversal in main page:', objects.length);
+    setBlueDolphinObjects(objects);
+  };
+
+  // Load Blue Dolphin traversal results from localStorage
+  const loadTraversalResultsFromStorage = useCallback(() => {
+    try {
+      const stored = localStorage.getItem('blueDolphinTraversalObjects');
+      if (stored) {
+        const data = JSON.parse(stored);
+        if (data.objects && Array.isArray(data.objects)) {
+          console.log('💾 [Main Page] Loaded Blue Dolphin traversal objects from localStorage:', data.objects.length);
+          
+          // Convert stored objects back to TraversalResult format
+          // For now, we'll create a simple structure that can be used by MiroBoardCreator
+          const traversalResults = [{
+            applicationFunction: data.objects.find((obj: any) => obj.Definition === 'Application Function') || null,
+            businessProcesses: {
+              topLevel: data.objects.filter((obj: any) => obj.Definition === 'Business Process' && obj.hierarchyLevel === 'top'),
+              childLevel: data.objects.filter((obj: any) => obj.Definition === 'Business Process' && obj.hierarchyLevel === 'child'),
+              grandchildLevel: data.objects.filter((obj: any) => obj.Definition === 'Business Process' && obj.hierarchyLevel === 'grandchild')
+            },
+            applicationServices: {
+              topLevel: data.objects.filter((obj: any) => obj.Definition === 'Application Service' && obj.hierarchyLevel === 'top'),
+              childLevel: data.objects.filter((obj: any) => obj.Definition === 'Application Service' && obj.hierarchyLevel === 'child'),
+              grandchildLevel: data.objects.filter((obj: any) => obj.Definition === 'Application Service' && obj.hierarchyLevel === 'grandchild')
+            },
+            applicationInterfaces: {
+              topLevel: data.objects.filter((obj: any) => obj.Definition === 'Application Interface' && obj.hierarchyLevel === 'top'),
+              childLevel: data.objects.filter((obj: any) => obj.Definition === 'Application Interface' && obj.hierarchyLevel === 'child'),
+              grandchildLevel: data.objects.filter((obj: any) => obj.Definition === 'Application Interface' && obj.hierarchyLevel === 'grandchild')
+            },
+            deliverables: {
+              topLevel: data.objects.filter((obj: any) => obj.Definition === 'Deliverable' && obj.hierarchyLevel === 'top'),
+              childLevel: data.objects.filter((obj: any) => obj.Definition === 'Deliverable' && obj.hierarchyLevel === 'child'),
+              grandchildLevel: data.objects.filter((obj: any) => obj.Definition === 'Deliverable' && obj.hierarchyLevel === 'grandchild')
+            },
+            relatedApplicationFunctions: data.objects.filter((obj: any) => obj.Definition === 'Application Function'),
+            specSyncFunctionName: 'Loaded from Storage',
+            traversalMetadata: {
+              totalObjectsFound: data.objects.length,
+              maxDepthReached: 3,
+              processingTimeMs: 0,
+              cacheHitRate: 1.0
+            }
+          }];
+          
+          setBlueDolphinTraversalResults(traversalResults);
+          console.log('📊 [Main Page] Converted to traversal results format:', traversalResults.length);
+        }
+      }
+    } catch (error) {
+      console.error('❌ [Main Page] Failed to load traversal results from localStorage:', error);
+    }
+  }, []);
 
   const toast = useToast();
 
@@ -174,6 +240,11 @@ export default function HomePage() {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, [toast]);
+
+  // Load traversal results from localStorage on component mount
+  useEffect(() => {
+    loadTraversalResultsFromStorage();
+  }, [loadTraversalResultsFromStorage]);
 
   useEffect(() => {
     console.log('useEffect triggered, starting data loading process...');
@@ -1586,6 +1657,7 @@ export default function HomePage() {
                         username: 'csgipoc',
                         password: 'ef498b94-732b-46c8-a24c-65fbd27c1482',
                       }}
+                      onObjectsLoaded={handleBlueDolphinObjectsLoaded}
                     />
                   </CardContent>
                 )}
@@ -1639,6 +1711,7 @@ export default function HomePage() {
                           }}
                           workspaceFilter={workspaceFilter}
                           requirements={specSyncItems}
+                          onBlueDolphinObjectsLoaded={handleTraversalBlueDolphinObjectsLoaded}
                         />
                       </div>
                     )}
@@ -2054,6 +2127,7 @@ export default function HomePage() {
                 project={project}
                 tmfDomains={tmfDomains}
                 specSyncItems={specSyncItems}
+                blueDolphinTraversalResults={blueDolphinTraversalResults}
               />
             </TabsContent>
 
@@ -2063,6 +2137,7 @@ export default function HomePage() {
                 project={project}
                 tmfDomains={tmfDomains}
                 specSyncItems={specSyncItems}
+                blueDolphinObjects={blueDolphinObjects}
               />
             </TabsContent>
 

@@ -360,7 +360,7 @@ export class EnhancedSolutionDescriptionService {
   /**
    * Extract TMF functions from mapping results
    */
-  private static extractTMFFunctions(mappingResults: MappingResult[], requirements: SpecSyncItem[]): any[] {
+  private static extractTMFFunctions(mappingResults: MappingResult[], _requirements: SpecSyncItem[]): any[] {
     const functions: any[] = [];
     
     mappingResults.forEach(mapping => {
@@ -503,8 +503,8 @@ export class EnhancedSolutionDescriptionService {
   /**
    * Generate use cases based on E2E template
    */
-  private static generateUseCases(traversalResults: TraversalResultWithPayloads[], requirements: SpecSyncItem[]): UseCase[] {
-    const useCases: UseCase[] = [];
+  private static generateUseCases(_traversalResults: TraversalResultWithPayloads[], _requirements: SpecSyncItem[]): UseCase[] {
+    // const _useCases: UseCase[] = [];
     
     // Generate standard use cases based on the E2E template
     const standardUseCases = [
@@ -552,7 +552,7 @@ export class EnhancedSolutionDescriptionService {
   /**
    * Generate E2E use cases
    */
-  private static generateE2EUseCases(traversalResults: TraversalResultWithPayloads[], requirements: SpecSyncItem[]): E2EUseCase[] {
+  private static generateE2EUseCases(_traversalResults: TraversalResultWithPayloads[], _requirements: SpecSyncItem[]): E2EUseCase[] {
     return [
       {
         name: 'Lead to Order (L2O)',
@@ -700,7 +700,7 @@ export class EnhancedSolutionDescriptionService {
   /**
    * Generate data models
    */
-  private static generateDataModels(traversalResults: TraversalResultWithPayloads[]): any {
+  private static generateDataModels(_traversalResults: TraversalResultWithPayloads[]): any {
     return {
       customer: {
         id: 'string',

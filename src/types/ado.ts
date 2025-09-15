@@ -1,5 +1,8 @@
 // Azure DevOps (ADO) Integration Types
 
+import type { BlueDolphinObjectEnhanced } from './blue-dolphin';
+import type { Project } from './index';
+
 // ADO Configuration
 export interface ADOConfiguration {
   organization: string;
@@ -19,13 +22,24 @@ export interface ADOConfiguration {
     taskTemplate: string;
   };
   customFields: {
+    // SpecSync fields (preserved)
     tmfLevel: string;
     domainId: string;
     capabilityId: string;
     requirementId: string;
     projectId: string;
     customer: string;
+    // Blue Dolphin fields (new)
+    blueDolphinId: string;
+    workspace: string;
+    objectType: string;
+    objectStatus: string;
+    deliverableStatus: string;
+    functionType: string;
+    interfaceType: string;
   };
+  // Data source selection
+  dataSource: 'specsync' | 'blueDolphin' | 'both';
 }
 
 // ADO Work Item Types
@@ -158,7 +172,7 @@ export interface ADOIntegrationState {
 
 // ADO Work Item Mapping
 export interface ADOWorkItemMapping {
-  sourceType: 'project' | 'domain' | 'capability' | 'requirement';
+  sourceType: 'project' | 'domain' | 'capability' | 'requirement' | 'deliverable' | 'applicationFunction' | 'applicationInterface';
   sourceId: string;
   sourceName: string;
   targetType: ADOWorkItemTypeName;
@@ -319,4 +333,13 @@ export interface ADONotification {
   details?: unknown;
   timestamp: string;
   read: boolean;
+}
+
+// Blue Dolphin Work Item Generation
+export interface BlueDolphinWorkItemGeneration {
+  project: Project;
+  blueDolphinObjects: BlueDolphinObjectEnhanced[];
+  selectedDeliverables: string[];
+  selectedApplicationFunctions: string[];
+  selectedApplicationInterfaces: string[];
 }

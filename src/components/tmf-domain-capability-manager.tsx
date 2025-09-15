@@ -128,7 +128,7 @@ export function TMFDomainCapabilityManager({
     };
 
     loadReferenceData();
-  }, [domains.length]);
+  }, [domains.length, initializeSampleData]);
 
   // Process SpecSync data after reference data is loaded
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -169,14 +169,14 @@ export function TMFDomainCapabilityManager({
                 loading ? 'Still loading' : 'Already processing'
       });
     }
-  }, [specSyncData?.items, loading, referenceDomains.length]); // Process when reference data is loaded
+  }, [specSyncData?.items, loading, referenceDomains.length, analyzeMissingItems, autoSelectMatchingDomainsAndCapabilities]); // Process when reference data is loaded
 
   // Analyze missing TMF reference items when domains change
   useEffect(() => {
     if (domains.length > 0 && !loading && !isProcessingSpecSync.current) {
       analyzeMissingItems();
     }
-  }, [domains.length, loading]); // Analyze when domains change
+  }, [domains.length, loading, analyzeMissingItems]); // Analyze when domains change
 
   // Analyze missing items from TMF reference data
   const analyzeMissingItems = useCallback(async () => {
@@ -452,7 +452,7 @@ export function TMFDomainCapabilityManager({
     } catch (error) {
       console.error('Error in autoSelectMatchingDomainsAndCapabilities:', error);
     }
-  }, [domains, onMappingComplete]);
+  }, [domains, onMappingComplete, updateRequirementCounts]);
 
   const updateRequirementCounts = useCallback((specSyncItems: any[], domainsToUpdate?: UserDomain[]) => {
     const domainsToProcess = domainsToUpdate || domains;

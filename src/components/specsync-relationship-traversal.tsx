@@ -10,7 +10,7 @@ import { Download, Loader2, AlertCircle } from 'lucide-react';
 import { matchPdfContent, MatchedContent } from '@/lib/pdf-matcher';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { SolutionPdf } from '@/lib/solution-pdf';
-import { BlueDolphinConfig } from '@/types/blue-dolphin';
+import { BlueDolphinConfig, BlueDolphinObjectEnhanced } from '@/types/blue-dolphin';
 import { 
   MappingResult, 
   TraversalResult, 
@@ -26,13 +26,15 @@ interface SpecSyncRelationshipTraversalProps {
   blueDolphinConfig: BlueDolphinConfig;
   workspaceFilter: string;
   requirements?: SpecSyncItem[];
+  onBlueDolphinObjectsLoaded?: (objects: BlueDolphinObjectEnhanced[]) => void;
 }
 
 export function SpecSyncRelationshipTraversal({ 
   mappingResults, 
   blueDolphinConfig, 
   workspaceFilter,
-  requirements = []
+  requirements = [],
+  onBlueDolphinObjectsLoaded
 }: SpecSyncRelationshipTraversalProps) {
   const [traversalResults, setTraversalResults] = useState<TraversalResult[]>([]);
   
@@ -68,7 +70,7 @@ export function SpecSyncRelationshipTraversal({
     console.log(`🏢 Using workspace: ${detectedWorkspace} (from mapping results: ${mappingResults.length > 0})`);
     
     return new BlueDolphinRelationshipService(blueDolphinConfig, detectedWorkspace);
-  }, [blueDolphinConfig, workspaceFilter, mappingResults]);
+  }, [blueDolphinConfig, workspaceFilter, mappingResults]); // Include mappingResults dependency
 
   /**
    * Main traversal function
@@ -105,6 +107,90 @@ export function SpecSyncRelationshipTraversal({
         return [...filtered, result];
       });
 
+      // Extract Blue Dolphin objects from this single traversal result and call callback
+      if (onBlueDolphinObjectsLoaded) {
+        const blueDolphinObjects: BlueDolphinObjectEnhanced[] = [];
+        
+        // Add Application Function
+        if (result.applicationFunction && result.applicationFunction.ID) {
+          blueDolphinObjects.push(result.applicationFunction as BlueDolphinObjectEnhanced);
+        }
+        
+        // Add Business Processes
+        [...result.businessProcesses.topLevel, ...result.businessProcesses.childLevel, ...result.businessProcesses.grandchildLevel].forEach(obj => {
+          if (obj.ID) {
+            blueDolphinObjects.push(obj as BlueDolphinObjectEnhanced);
+          }
+        });
+        
+        // Add Application Services
+        [...result.applicationServices.topLevel, ...result.applicationServices.childLevel, ...result.applicationServices.grandchildLevel].forEach(obj => {
+          if (obj.ID) {
+            blueDolphinObjects.push(obj as BlueDolphinObjectEnhanced);
+          }
+        });
+        
+        // Add Application Interfaces
+        [...result.applicationInterfaces.topLevel, ...result.applicationInterfaces.childLevel, ...result.applicationInterfaces.grandchildLevel].forEach(obj => {
+          if (obj.ID) {
+            blueDolphinObjects.push(obj as BlueDolphinObjectEnhanced);
+          }
+        });
+        
+        // Add Deliverables
+        [...result.deliverables.topLevel, ...result.deliverables.childLevel, ...result.deliverables.grandchildLevel].forEach(obj => {
+          if (obj.ID) {
+            blueDolphinObjects.push(obj as BlueDolphinObjectEnhanced);
+          }
+        });
+        
+        // Add Related Application Functions
+        result.relatedApplicationFunctions.forEach(obj => {
+          if (obj.ID) {
+            blueDolphinObjects.push(obj as BlueDolphinObjectEnhanced);
+          }
+        });
+
+        // Deduplicate by ID
+        const uniqueObjects = blueDolphinObjects.filter((obj, index, self) => 
+          index === self.findIndex(o => o.ID === obj.ID)
+        );
+
+        console.log('🔵 [Single Traversal] Extracted Blue Dolphin objects:', uniqueObjects.length);
+        console.log('🔵 [Single Traversal] Object types breakdown:', {
+          deliverables: uniqueObjects.filter(obj => obj.Definition === 'Deliverable').length,
+          applicationFunctions: uniqueObjects.filter(obj => obj.Definition === 'Application Function').length,
+          applicationInterfaces: uniqueObjects.filter(obj => obj.Definition === 'Application Interface').length,
+          applicationServices: uniqueObjects.filter(obj => obj.Definition === 'Application Service').length,
+          businessProcesses: uniqueObjects.filter(obj => obj.Definition === 'Business Process').length
+        });
+        
+        // Persist Blue Dolphin objects to local storage
+        try {
+          const storageKey = 'blueDolphinTraversalObjects';
+          const storageData = {
+            objects: uniqueObjects,
+            timestamp: new Date().toISOString(),
+            source: 'traversal',
+            workspaceFilter: workspaceFilter,
+            totalObjects: uniqueObjects.length,
+            objectTypes: {
+              deliverables: uniqueObjects.filter(obj => obj.Definition === 'Deliverable').length,
+              applicationFunctions: uniqueObjects.filter(obj => obj.Definition === 'Application Function').length,
+              applicationInterfaces: uniqueObjects.filter(obj => obj.Definition === 'Application Interface').length,
+              applicationServices: uniqueObjects.filter(obj => obj.Definition === 'Application Service').length,
+              businessProcesses: uniqueObjects.filter(obj => obj.Definition === 'Business Process').length
+            }
+          };
+          localStorage.setItem(storageKey, JSON.stringify(storageData));
+          console.log('💾 [Single Traversal] Blue Dolphin objects saved to local storage:', uniqueObjects.length);
+        } catch (error) {
+          console.error('❌ [Single Traversal] Failed to save Blue Dolphin objects to local storage:', error);
+        }
+        
+        onBlueDolphinObjectsLoaded(uniqueObjects);
+      }
+
     } catch (error) {
       console.error(`❌ Traversal failed for ${mappingResult.specSyncFunctionName}:`, error);
       setError(error instanceof Error ? error.message : 'Traversal failed');
@@ -112,7 +198,7 @@ export function SpecSyncRelationshipTraversal({
       setIsTraversing(false);
       setTraversingFunction(null);
     }
-  }, [relationshipService, workspaceFilter]);
+  }, [relationshipService, workspaceFilter, maxDepth, onBlueDolphinObjectsLoaded]);
 
   /**
    * Combined traversal for all mapping results (deduped by Application Function ID)
@@ -145,19 +231,106 @@ export function SpecSyncRelationshipTraversal({
 
       // Merge all results into a single combined view
       // Use object ID to dedupe across seeds
-      const seen = new Set<string>();
+      // const _seen = new Set<string>();
       const merged: TraversalResult[] = [];
       // Keep individual results for optional drill-down but also compute a synthetic combined result
       const combined = combineTraversalResults(results);
       merged.push(combined);
       setTraversalResults(merged);
+
+      // Extract Blue Dolphin objects from traversal results and call callback
+      if (onBlueDolphinObjectsLoaded) {
+        const blueDolphinObjects: BlueDolphinObjectEnhanced[] = [];
+        
+        // Collect all Blue Dolphin objects from traversal results
+        results.forEach(result => {
+          // Add Application Function
+          if (result.applicationFunction && result.applicationFunction.ID) {
+            blueDolphinObjects.push(result.applicationFunction as BlueDolphinObjectEnhanced);
+          }
+          
+          // Add Business Processes
+          [...result.businessProcesses.topLevel, ...result.businessProcesses.childLevel, ...result.businessProcesses.grandchildLevel].forEach(obj => {
+            if (obj.ID) {
+              blueDolphinObjects.push(obj as BlueDolphinObjectEnhanced);
+            }
+          });
+          
+          // Add Application Services
+          [...result.applicationServices.topLevel, ...result.applicationServices.childLevel, ...result.applicationServices.grandchildLevel].forEach(obj => {
+            if (obj.ID) {
+              blueDolphinObjects.push(obj as BlueDolphinObjectEnhanced);
+            }
+          });
+          
+          // Add Application Interfaces
+          [...result.applicationInterfaces.topLevel, ...result.applicationInterfaces.childLevel, ...result.applicationInterfaces.grandchildLevel].forEach(obj => {
+            if (obj.ID) {
+              blueDolphinObjects.push(obj as BlueDolphinObjectEnhanced);
+            }
+          });
+          
+          // Add Deliverables
+          [...result.deliverables.topLevel, ...result.deliverables.childLevel, ...result.deliverables.grandchildLevel].forEach(obj => {
+            if (obj.ID) {
+              blueDolphinObjects.push(obj as BlueDolphinObjectEnhanced);
+            }
+          });
+          
+          // Add Related Application Functions
+          result.relatedApplicationFunctions.forEach(obj => {
+            if (obj.ID) {
+              blueDolphinObjects.push(obj as BlueDolphinObjectEnhanced);
+            }
+          });
+        });
+
+        // Deduplicate by ID
+        const uniqueObjects = blueDolphinObjects.filter((obj, index, self) => 
+          index === self.findIndex(o => o.ID === obj.ID)
+        );
+
+        console.log('🔵 [Traversal] Extracted Blue Dolphin objects:', uniqueObjects.length);
+        console.log('🔵 [Traversal] Object types breakdown:', {
+          deliverables: uniqueObjects.filter(obj => obj.Definition === 'Deliverable').length,
+          applicationFunctions: uniqueObjects.filter(obj => obj.Definition === 'Application Function').length,
+          applicationInterfaces: uniqueObjects.filter(obj => obj.Definition === 'Application Interface').length,
+          applicationServices: uniqueObjects.filter(obj => obj.Definition === 'Application Service').length,
+          businessProcesses: uniqueObjects.filter(obj => obj.Definition === 'Business Process').length
+        });
+        
+        // Persist Blue Dolphin objects to local storage
+        try {
+          const storageKey = 'blueDolphinTraversalObjects';
+          const storageData = {
+            objects: uniqueObjects,
+            timestamp: new Date().toISOString(),
+            source: 'traversal',
+            workspaceFilter: workspaceFilter,
+            totalObjects: uniqueObjects.length,
+            objectTypes: {
+              deliverables: uniqueObjects.filter(obj => obj.Definition === 'Deliverable').length,
+              applicationFunctions: uniqueObjects.filter(obj => obj.Definition === 'Application Function').length,
+              applicationInterfaces: uniqueObjects.filter(obj => obj.Definition === 'Application Interface').length,
+              applicationServices: uniqueObjects.filter(obj => obj.Definition === 'Application Service').length,
+              businessProcesses: uniqueObjects.filter(obj => obj.Definition === 'Business Process').length
+            }
+          };
+          localStorage.setItem(storageKey, JSON.stringify(storageData));
+          console.log('💾 [Traversal] Blue Dolphin objects saved to local storage:', uniqueObjects.length);
+        } catch (error) {
+          console.error('❌ [Traversal] Failed to save Blue Dolphin objects to local storage:', error);
+        }
+        
+        onBlueDolphinObjectsLoaded(uniqueObjects);
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Combined traversal failed');
     } finally {
       setIsTraversing(false);
       setTraversingFunction(null);
     }
-  }, [mappingResults, relationshipService, maxDepth]);
+  }, [mappingResults, relationshipService, maxDepth, onBlueDolphinObjectsLoaded, workspaceFilter]);
 
   // Helper: combine multiple TraversalResult objects into one unified result
   function combineTraversalResults(results: TraversalResult[]): TraversalResult {
@@ -167,6 +340,7 @@ export function SpecSyncRelationshipTraversal({
         businessProcesses: { topLevel: [], childLevel: [], grandchildLevel: [] },
         applicationServices: { topLevel: [], childLevel: [], grandchildLevel: [] },
         applicationInterfaces: { topLevel: [], childLevel: [], grandchildLevel: [] },
+        deliverables: { topLevel: [], childLevel: [], grandchildLevel: [] },
         relatedApplicationFunctions: [],
         specSyncFunctionName: 'Combined',
         traversalMetadata: { totalObjectsFound: 0, maxDepthReached: 0, processingTimeMs: 0, cacheHitRate: 0.8 }
@@ -193,6 +367,7 @@ export function SpecSyncRelationshipTraversal({
         businessProcesses: mergeSections(acc.businessProcesses, cur.businessProcesses),
         applicationServices: mergeSections(acc.applicationServices, cur.applicationServices),
         applicationInterfaces: mergeSections(acc.applicationInterfaces, cur.applicationInterfaces),
+        deliverables: mergeSections(acc.deliverables, cur.deliverables),
         relatedApplicationFunctions: dedupe([...(acc.relatedApplicationFunctions || []), ...(cur.relatedApplicationFunctions || [])]),
         specSyncFunctionName: 'Combined',
         traversalMetadata: {
@@ -208,6 +383,7 @@ export function SpecSyncRelationshipTraversal({
     const total = acc.businessProcesses.topLevel.length + acc.businessProcesses.childLevel.length + acc.businessProcesses.grandchildLevel.length +
       acc.applicationServices.topLevel.length + acc.applicationServices.childLevel.length + acc.applicationServices.grandchildLevel.length +
       acc.applicationInterfaces.topLevel.length + acc.applicationInterfaces.childLevel.length + acc.applicationInterfaces.grandchildLevel.length +
+      acc.deliverables.topLevel.length + acc.deliverables.childLevel.length + acc.deliverables.grandchildLevel.length +
       (acc.relatedApplicationFunctions || []).length;
     acc.traversalMetadata.totalObjectsFound = total;
     return acc;
@@ -244,7 +420,7 @@ export function SpecSyncRelationshipTraversal({
       setIsExtracting(false);
       setExtractingFunction(null);
     }
-  }, [relationshipService]);
+  }, [relationshipService, generateFullPayloadCSV]);
 
   /**
    * Export results to CSV
@@ -303,6 +479,20 @@ export function SpecSyncRelationshipTraversal({
           'SpecSync Function': result.specSyncFunctionName,
           'Application Function': result.applicationFunction.Title,
           'Object Type': 'Application Interface',
+          'Object Title': obj.Title,
+          'Object Level': obj.hierarchyLevel,
+          'Workspace': obj.Workspace,
+          'Relationship Type': obj.relationshipType || 'N/A',
+          'Relationship Path': obj.relationshipPath?.join(' → ') || 'N/A'
+        });
+      });
+
+      // Deliverables
+      [...result.deliverables.topLevel, ...result.deliverables.childLevel, ...result.deliverables.grandchildLevel].forEach(obj => {
+        rows.push({
+          'SpecSync Function': result.specSyncFunctionName,
+          'Application Function': result.applicationFunction.Title,
+          'Object Type': 'Deliverable',
           'Object Title': obj.Title,
           'Object Level': obj.hierarchyLevel,
           'Workspace': obj.Workspace,
@@ -581,6 +771,17 @@ export function SpecSyncRelationshipTraversal({
       rows.push(createComprehensiveRow(
         obj, 
         'Application Interface', 
+        obj.hierarchyLevel,
+        obj.relationshipType || 'N/A',
+        obj.relationshipPath?.join(' → ') || 'N/A'
+      ));
+    });
+
+    // Deliverables with full payload
+    [...result.deliverables.topLevel, ...result.deliverables.childLevel, ...result.deliverables.grandchildLevel].forEach(obj => {
+      rows.push(createComprehensiveRow(
+        obj, 
+        'Deliverable', 
         obj.hierarchyLevel,
         obj.relationshipType || 'N/A',
         obj.relationshipPath?.join(' → ') || 'N/A'
@@ -919,6 +1120,7 @@ function TraversalResultCard({
     result.businessProcesses.topLevel.length + result.businessProcesses.childLevel.length + result.businessProcesses.grandchildLevel.length +
     result.applicationServices.topLevel.length + result.applicationServices.childLevel.length + result.applicationServices.grandchildLevel.length +
     result.applicationInterfaces.topLevel.length + result.applicationInterfaces.childLevel.length + result.applicationInterfaces.grandchildLevel.length +
+    result.deliverables.topLevel.length + result.deliverables.childLevel.length + result.deliverables.grandchildLevel.length +
     result.relatedApplicationFunctions.length;
 
   return (
@@ -981,6 +1183,14 @@ function TraversalResultCard({
           color="purple"
           icon="🔌"
           data={result.applicationInterfaces}
+        />
+
+        {/* Deliverables */}
+        <HierarchicalSection
+          title="Deliverables"
+          color="yellow"
+          icon="📦"
+          data={result.deliverables}
         />
 
         {/* Related Application Functions */}

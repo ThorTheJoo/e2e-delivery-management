@@ -847,6 +847,235 @@ export class MiroService {
     return miroAuthService.isAuthenticated();
   }
 
+  private async getOrCreateSolutionModelBoard(boardName: string): Promise<{ id: string; viewLink: string }> {
+    try {
+      // Try to get existing board first
+      const existingBoard = await this.callMiroAPI('getBoard', { boardId: 'solution-model-board' });
+      if (existingBoard && existingBoard.id) {
+        console.log('📋 Using existing Solution Model board:', existingBoard.id);
+        return existingBoard;
+      }
+    } catch (error) {
+      console.log('📋 No existing Solution Model board found, creating new one');
+    }
+
+    // Create new board
+    const boardData = {
+      name: boardName,
+      description: 'Solution Model Integration - Blue Dolphin Architecture Objects with SpecSync Requirements',
+    };
+
+    const board = await this.callMiroAPI('createBoard', boardData);
+    console.log('✅ Solution Model board created:', board.id);
+    
+    // Store board ID for future reference
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('miro_solution_model_board_id', board.id);
+    }
+
+    return board;
+  }
+
+  private async createSolutionModelFrames(
+    boardId: string,
+    traversalResults: any[],
+    _specSyncItems: any[]
+  ): Promise<void> {
+    try {
+      console.log('Creating Solution Model frames for board:', boardId);
+      
+      // Create frames for each object type
+      const frameConfigs = [
+        {
+          title: 'Business Processes',
+          objects: this.extractObjectsByType(traversalResults, 'businessProcesses'),
+          position: { x: 0, y: 0 },
+          color: '#E3F2FD'
+        },
+        {
+          title: 'Application Services',
+          objects: this.extractObjectsByType(traversalResults, 'applicationServices'),
+          position: { x: 1200, y: 0 },
+          color: '#F3E5F5'
+        },
+        {
+          title: 'Application Interfaces',
+          objects: this.extractObjectsByType(traversalResults, 'applicationInterfaces'),
+          position: { x: 2400, y: 0 },
+          color: '#E8F5E8'
+        },
+        {
+          title: 'Application Functions',
+          objects: this.extractObjectsByType(traversalResults, 'relatedApplicationFunctions'),
+          position: { x: 0, y: 800 },
+          color: '#FFF3E0'
+        },
+        {
+          title: 'Deliverables',
+          objects: this.extractObjectsByType(traversalResults, 'deliverables'),
+          position: { x: 1200, y: 800 },
+          color: '#FCE4EC'
+        }
+      ];
+
+      for (const config of frameConfigs) {
+        if (config.objects.length > 0) {
+          await this.createObjectTypeFrame(boardId, config);
+        }
+      }
+
+      console.log('✅ Solution Model frames created successfully');
+    } catch (error) {
+      console.error('❌ Error creating Solution Model frames:', error);
+      throw error;
+    }
+  }
+
+  private extractObjectsByType(traversalResults: any[], type: string): any[] {
+    const objects: any[] = [];
+    
+    for (const result of traversalResults) {
+      if (type === 'businessProcesses') {
+        objects.push(...result.businessProcesses?.topLevel || []);
+        objects.push(...result.businessProcesses?.childLevel || []);
+        objects.push(...result.businessProcesses?.grandchildLevel || []);
+      } else if (type === 'applicationServices') {
+        objects.push(...result.applicationServices?.topLevel || []);
+        objects.push(...result.applicationServices?.childLevel || []);
+        objects.push(...result.applicationServices?.grandchildLevel || []);
+      } else if (type === 'applicationInterfaces') {
+        objects.push(...result.applicationInterfaces?.topLevel || []);
+        objects.push(...result.applicationInterfaces?.childLevel || []);
+        objects.push(...result.applicationInterfaces?.grandchildLevel || []);
+      } else if (type === 'deliverables') {
+        objects.push(...result.deliverables?.topLevel || []);
+        objects.push(...result.deliverables?.childLevel || []);
+        objects.push(...result.deliverables?.grandchildLevel || []);
+      } else if (type === 'relatedApplicationFunctions') {
+        objects.push(...result.relatedApplicationFunctions || []);
+        if (result.applicationFunction) {
+          objects.push(result.applicationFunction);
+        }
+      }
+    }
+    
+    return objects;
+  }
+
+  private async createObjectTypeFrame(
+    boardId: string,
+    config: { title: string; objects: any[]; position: { x: number; y: number }; color: string }
+  ): Promise<void> {
+    try {
+      console.log(`Creating frame for ${config.title} with ${config.objects.length} objects`);
+
+      // Create frame
+      const frameData = {
+        boardId,
+        title: config.title,
+        position: config.position,
+        geometry: { width: 1100, height: 700 },
+        style: { fillColor: config.color }
+      };
+
+      const frame = await this.callMiroAPI('createFrame', frameData);
+      console.log(`✅ Frame created for ${config.title}:`, frame.id);
+
+      // Create cards for objects
+      await this.createObjectCards(boardId, frame.id, config.objects, config.title);
+
+    } catch (error) {
+      console.error(`❌ Failed to create frame for ${config.title}:`, error);
+      throw error;
+    }
+  }
+
+  private async createObjectCards(
+    boardId: string,
+    frameId: string,
+    objects: any[],
+    frameTitle: string
+  ): Promise<void> {
+    const cardsPerRow = 3;
+    const cardWidth = 300;
+    const cardHeight = 150;
+    const spacing = 30;
+    const margin = 50;
+
+    console.log(`Creating ${objects.length} cards for ${frameTitle}`);
+
+    for (let i = 0; i < objects.length; i++) {
+      const obj = objects[i];
+      const row = Math.floor(i / cardsPerRow);
+      const col = i % cardsPerRow;
+
+      const x = margin + col * (cardWidth + spacing);
+      const y = margin + row * (cardHeight + spacing);
+
+      try {
+        const cardData = {
+          boardId,
+          frameId,
+          title: obj.Title || obj.name || `Object ${i + 1}`,
+          description: obj.Description || obj.description || `Type: ${obj.Definition || 'Unknown'}`,
+          position: { x, y },
+          geometry: { width: cardWidth, height: cardHeight },
+          style: { fillColor: '#FFFFFF' }
+        };
+
+        await this.callMiroAPI('createCard', cardData);
+        console.log(`✅ Card created for ${obj.Title || obj.name}`);
+
+      } catch (error) {
+        console.error(`❌ Failed to create card for ${obj.Title || obj.name}:`, error);
+        // Continue with other cards
+      }
+    }
+  }
+
+  public async createSolutionModelBoard(
+    traversalResults: any[],
+    specSyncItems: any[],
+    project: any
+  ): Promise<{ id: string; viewLink: string }> {
+    console.log('=== MIRO SERVICE: createSolutionModelBoard called ===');
+    console.log('Input traversal results count:', traversalResults.length);
+    console.log('Input specSync items count:', specSyncItems.length);
+    console.log('Project:', project);
+
+    // Check authentication first
+    if (!miroAuthService.isAuthenticated()) {
+      throw new Error('Not authenticated with Miro. Please connect to Miro first.');
+    }
+
+    try {
+      // Create the main board
+      const board = await this.getOrCreateSolutionModelBoard('Solution Model Integration');
+
+      // Create frames for each object type
+      await this.createSolutionModelFrames(board.id, traversalResults, specSyncItems);
+
+      return board;
+    } catch (error) {
+      console.error('❌ Error in createSolutionModelBoard:', error);
+      
+      // Provide more specific error messages
+      if (error instanceof Error) {
+        if (error.message.includes('token') || error.message.includes('authentication')) {
+          throw new Error('Miro authentication failed. Please reconnect to Miro and try again.');
+        } else if (error.message.includes('401')) {
+          throw new Error('Miro access denied. Please check your permissions and reconnect.');
+        } else if (error.message.includes('403')) {
+          throw new Error('Miro access forbidden. Please check your board permissions.');
+        } else if (error.message.includes('500')) {
+          throw new Error('Miro server error. Please try again later or contact support.');
+        }
+      }
+      
+      throw error;
+    }
+  }
+
   public async authenticate(): Promise<void> {
     if (!this.isAuthenticated()) {
       const authUrl = await miroAuthService.initiateOAuth();

@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
@@ -19,9 +18,7 @@ import {
   Building, 
   Workflow, 
   Database,
-  CheckCircle,
-  AlertCircle,
-  Info
+  CheckCircle
 } from 'lucide-react';
 import { EnhancedSolutionDescriptionService, EnhancedSolutionDescriptionData } from '@/lib/enhanced-solution-description-service';
 import { matchPdfContent, MatchedContent } from '@/lib/pdf-matcher';

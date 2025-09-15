@@ -8,7 +8,7 @@ import { Plus, Edit, ChevronDown, ChevronRight, FileSpreadsheet, Search, Filter 
 import { TMFDomain, TMFFunction, SpecSyncState } from '@/types';
 import { SpecSyncImport } from './specsync-import';
 import { TMFReferenceService } from '@/lib/tmf-reference-service-new';
-import { getMappedTMFunctions, getAvailableTMFunctionsForCustomDomain } from '@/lib/specsync-tmf-utils';
+import { getMappedTMFunctions } from '@/lib/specsync-tmf-utils';
 
 interface TMFOdaManagerProps {
   onStateChange?: (state: any) => void;
@@ -43,7 +43,7 @@ export function TMFOdaManager({ onStateChange: _onStateChange, initialState: _in
     if (specSyncState) {
       updateDomainsWithSpecSyncData();
     }
-  }, [specSyncState]);
+  }, [specSyncState, updateDomainsWithSpecSyncData]);
 
   const loadTMFReferenceData = async () => {
     try {
@@ -152,8 +152,8 @@ export function TMFOdaManager({ onStateChange: _onStateChange, initialState: _in
     // setShowAddCustomDomain(true);
     
     // Get available functions for custom domain addition
-    const mappedFunctionIds = domains.flatMap(d => d.selectedFunctionIds);
-    const available = await getAvailableTMFunctionsForCustomDomain(mappedFunctionIds);
+    // const mappedFunctionIds = domains.flatMap(d => d.selectedFunctionIds);
+    // const _available = await getAvailableTMFunctionsForCustomDomain(mappedFunctionIds);
     // setAvailableFunctions(available);
   };
 

@@ -121,9 +121,9 @@ export async function POST(request: NextRequest) {
       headers.Authorization = `Bearer ${credentials.pat}`;
       
       // Try primary apiBase; if fails and apiBase was auto-resolved to /rest/api, try /wiki/rest/api as fallback
-      let probeUrl = `${baseUrl}${apiBase}`;
+      const probeUrl = `${baseUrl}${apiBase}`;
       console.log('Confluence API: Testing URL:', probeUrl);
-      let result = await fetchJson(probeUrl, headers);
+      const result = await fetchJson(probeUrl, headers);
       console.log('Confluence API: Test result:', result);
       
       if (!result.ok) {
