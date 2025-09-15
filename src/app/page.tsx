@@ -7,6 +7,7 @@ import { dataService } from '@/lib/data-service';
 import { formatDate, getStatusColor, getSeverityColor } from '@/lib/utils';
 import { getBuildInfo } from '@/lib/build-info';
 import { getActiveDataSource, isSupabaseEnvConfigured } from '@/lib/data-source';
+import { getStaticTMFDomains, getStaticTMFFunctions } from '@/lib/static-tmf-reference-data';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -58,7 +59,9 @@ import {
   FileText,
   AlertTriangle,
   Flag,
-  
+  Database,
+  Workflow,
+  Settings,
   TrendingUp,
   BarChart3,
   ChevronDown,
@@ -148,6 +151,7 @@ export default function HomePage() {
   const [solutionModelSections, setSolutionModelSections] = useState<Set<string>>(
     new Set([]),
   );
+  const [workPackageEstimationExpanded, setWorkPackageEstimationExpanded] = useState(false);
   const [setDomainEfforts, setSetDomainEfforts] = useState<Record<string, number>>({});
   const [setMatchedWorkPackages, setSetMatchedWorkPackages] = useState<Record<string, any>>({});
   const [cetv22Data, setCetv22Data] = useState<any>(null);
@@ -719,8 +723,113 @@ export default function HomePage() {
 
   // Get domain and function cards with integrated data from SpecSync, SET, and service design
   const getDomainFunctionCards = () => {
-    // If we have TMF functions from Supabase, use them
+    // PRIORITY 1: If we have SpecSync data, use it to create cards based on actual requirements
+    if (specSyncState && specSyncState.items.length > 0) {
+      console.log('🎯 Dashboard: Using SpecSync data for TMF Domain and Function Overview');
+      console.log('📊 SpecSync items count:', specSyncState.items.length);
+      console.log('📊 SpecSync domains:', [...new Set(specSyncState.items.map(item => item.domain))]);
+      console.log('📊 SpecSync functions:', [...new Set(specSyncState.items.map(item => item.functionName))]);
+      const domainMap = new Map<string, {
+        name: string;
+        functions: Array<{
+          id: string;
+          function_name: string;
+          domain_name: string;
+          vertical?: string;
+          function_id?: string;
+          uid?: string;
+          requirementCount: number;
+          useCaseCount: number;
+          developmentEffort: number;
+          mandateEffort: number;
+          requirements: Array<{
+            id: string;
+            requirementId: string;
+            description: string;
+            priority: string;
+            status: string;
+            usecase1?: string;
+          }>;
+        }>;
+        totalRequirements: number;
+      }>();
+
+      // Group SpecSync items by function name and domain
+      const functionGroups = new Map<string, SpecSyncItem[]>();
+      
+      specSyncState.items.forEach((item) => {
+        const domainName = item.domain || 'Unknown';
+        const functionName = item.functionName || item.capability || 'Unknown Function';
+        const key = `${domainName}||${functionName}`;
+        
+        if (!functionGroups.has(key)) {
+          functionGroups.set(key, []);
+        }
+        functionGroups.get(key)!.push(item);
+      });
+
+      functionGroups.forEach((items, key) => {
+        const [domainName, functionName] = key.split('||');
+        
+        if (!domainMap.has(domainName)) {
+          domainMap.set(domainName, {
+            name: domainName,
+            functions: [],
+            totalRequirements: 0,
+          });
+        }
+
+        const domain = domainMap.get(domainName)!;
+        const requirementCount = items.length;
+        const useCaseCount = items.filter(item => item.usecase1).length;
+        
+        // Get effort data from SET file (estimation page)
+        const domainEffort = setDomainEfforts[domainName] || 0;
+        const developmentEffort = Math.round(domainEffort / Math.max(domain.functions.length, 1)) || 5; // Default 5 days
+        
+        // Get mandate effort from service design data (CETv22)
+        let mandateEffort = 0;
+        if (cetv22Data && cetv22Data.resourceDemands) {
+          // Calculate mandate effort based on resource demands for this domain
+          const domainResourceDemands = cetv22Data.resourceDemands.filter((demand: { productType: string; jobProfile: string; effortHours: number }) => 
+            demand.productType.toLowerCase().includes(domainName.toLowerCase()) ||
+            demand.jobProfile.toLowerCase().includes(domainName.toLowerCase())
+          );
+          mandateEffort = Math.round(domainResourceDemands.reduce((sum: number, demand: { effortHours: number }) => sum + demand.effortHours, 0) / 8); // Convert hours to days
+        }
+
+        domain.functions.push({
+          id: `specsync-${functionName.replace(/\s+/g, '-').toLowerCase()}`,
+          function_name: functionName,
+          domain_name: domainName,
+          vertical: items[0].vertical,
+          function_id: items[0].requirementId,
+          uid: items[0].id,
+          requirementCount,
+          useCaseCount,
+          developmentEffort,
+          mandateEffort,
+          requirements: items.map((req) => ({
+            id: req.id,
+            requirementId: req.requirementId,
+            description: req.description ?? '',
+            priority: req.priority ?? '',
+            status: req.status ?? '',
+            usecase1: req.usecase1,
+          })),
+        });
+
+        domain.totalRequirements += requirementCount;
+      });
+
+      return Array.from(domainMap.values());
+    }
+
+    // PRIORITY 2: If we have TMF functions from Supabase, use them
     if (tmfFunctions.length > 0) {
+      console.log('🎯 Dashboard: Using TMF functions data for TMF Domain and Function Overview');
+      console.log('📊 TMF functions count:', tmfFunctions.length);
+      console.log('📊 TMF domains:', [...new Set(tmfFunctions.map(func => func.domain_name))]);
       const domainMap = new Map<string, {
         name: string;
         functions: Array<{
@@ -821,105 +930,8 @@ export default function HomePage() {
       return Array.from(domainMap.values());
     }
 
-    // Fallback: Create domain cards from SpecSync data if available
-    if (specSyncState && specSyncState.items.length > 0) {
-      const domainMap = new Map<string, {
-        name: string;
-        functions: Array<{
-          id: string;
-          function_name: string;
-          domain_name: string;
-          vertical?: string;
-          function_id?: string;
-          uid?: string;
-          requirementCount: number;
-          useCaseCount: number;
-          developmentEffort: number;
-          mandateEffort: number;
-          requirements: Array<{
-            id: string;
-            requirementId: string;
-            description: string;
-            priority: string;
-            status: string;
-            usecase1?: string;
-          }>;
-        }>;
-        totalRequirements: number;
-      }>();
-
-      // Group SpecSync items by function name and domain
-      const functionGroups = new Map<string, SpecSyncItem[]>();
-      
-      specSyncState.items.forEach((item) => {
-        const domainName = item.domain || 'Unknown';
-        const functionName = item.functionName || item.capability || 'Unknown Function';
-        const key = `${domainName}||${functionName}`;
-        
-        if (!functionGroups.has(key)) {
-          functionGroups.set(key, []);
-        }
-        functionGroups.get(key)!.push(item);
-      });
-
-      functionGroups.forEach((items, key) => {
-        const [domainName, functionName] = key.split('||');
-        
-        if (!domainMap.has(domainName)) {
-          domainMap.set(domainName, {
-            name: domainName,
-            functions: [],
-            totalRequirements: 0,
-          });
-        }
-
-        const domain = domainMap.get(domainName)!;
-        const requirementCount = items.length;
-        const useCaseCount = items.filter(item => item.usecase1).length;
-        
-        // Get effort data from SET file (estimation page)
-        const domainEffort = setDomainEfforts[domainName] || 0;
-        const developmentEffort = Math.round(domainEffort / Math.max(domain.functions.length, 1)) || 5; // Default 5 days
-        
-        // Get mandate effort from service design data (CETv22)
-        let mandateEffort = 0;
-        if (cetv22Data && cetv22Data.resourceDemands) {
-          // Calculate mandate effort based on resource demands for this domain
-          const domainResourceDemands = cetv22Data.resourceDemands.filter((demand: { productType: string; jobProfile: string; effortHours: number }) => 
-            demand.productType.toLowerCase().includes(domainName.toLowerCase()) ||
-            demand.jobProfile.toLowerCase().includes(domainName.toLowerCase())
-          );
-          mandateEffort = Math.round(domainResourceDemands.reduce((sum: number, demand: { effortHours: number }) => sum + demand.effortHours, 0) / 8); // Convert hours to days
-        }
-
-        domain.functions.push({
-          id: `specsync-${functionName.replace(/\s+/g, '-').toLowerCase()}`,
-          function_name: functionName,
-          domain_name: domainName,
-          vertical: items[0].vertical,
-          function_id: items[0].requirementId,
-          uid: items[0].id,
-          requirementCount,
-          useCaseCount,
-          developmentEffort,
-          mandateEffort,
-          requirements: items.map((req) => ({
-            id: req.id,
-            requirementId: req.requirementId,
-            description: req.description ?? '',
-            priority: req.priority ?? '',
-            status: req.status ?? '',
-            usecase1: req.usecase1,
-          })),
-        });
-
-        domain.totalRequirements += requirementCount;
-      });
-
-      return Array.from(domainMap.values());
-    }
-
     // Return empty array if no data available
+    console.log('⚠️ Dashboard: No data available for TMF Domain and Function Overview');
     return [];
   };
 
@@ -927,6 +939,11 @@ export default function HomePage() {
     domainEfforts: Record<string, number>,
     matchedWorkPackages: Record<string, any>,
   ) => {
+    console.log('📥 SET data loaded in main page:');
+    console.log('📊 Domain efforts:', domainEfforts);
+    console.log('📊 Matched work packages:', matchedWorkPackages);
+    console.log('📊 Total effort:', Object.values(domainEfforts).reduce((a, b) => a + b, 0));
+    
     setSetDomainEfforts(domainEfforts);
     setSetMatchedWorkPackages(matchedWorkPackages);
   };
@@ -1627,27 +1644,32 @@ export default function HomePage() {
               </div>
 
               {/* Object Data Section */}
-              <Card>
-                <CardHeader
-                  className="cursor-pointer transition-colors hover:bg-gray-50"
+              <div className="border-b pb-6">
+                <div
+                  className="mb-4 flex cursor-pointer items-center justify-between rounded-lg p-2 transition-colors hover:bg-muted/50"
                   onClick={() => toggleSolutionModelSection('object-data')}
                 >
-                  <CardTitle className="flex items-center justify-between">
-                    <span>Object Data</span>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                  <div className="flex items-center space-x-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-blue-200 bg-blue-100">
                       {solutionModelSections.has('object-data') ? (
-                        <ChevronDown className="h-4 w-4" />
+                        <ChevronDown className="h-5 w-5 text-blue-700" />
                       ) : (
-                        <ChevronRight className="h-4 w-4" />
+                        <ChevronRight className="h-5 w-5 text-blue-700" />
                       )}
-                    </Button>
-                  </CardTitle>
-                  <CardDescription>
-                    Retrieve and manage Model objects with enhanced metadata
-                  </CardDescription>
-                </CardHeader>
+                    </div>
+                    <div>
+                      <h3 className="flex items-center space-x-2 text-base font-semibold">
+                        <Database className="h-4 w-4" />
+                        <span>Object Data</span>
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        Retrieve and manage Model objects with enhanced metadata
+                      </p>
+                    </div>
+                  </div>
+                </div>
                 {solutionModelSections.has('object-data') && (
-                  <CardContent>
+                  <div className="space-y-4">
                     <BlueDolphinIntegration
                       config={{
                         protocol: 'ODATA',
@@ -1659,30 +1681,37 @@ export default function HomePage() {
                       }}
                       onObjectsLoaded={handleBlueDolphinObjectsLoaded}
                     />
-                  </CardContent>
+                  </div>
                 )}
-              </Card>
+              </div>
 
               {/* Requirements Synchronization Section */}
-              <Card>
-                <CardHeader
-                  className="cursor-pointer transition-colors hover:bg-gray-50"
+              <div className="border-b pb-6">
+                <div
+                  className="mb-4 flex cursor-pointer items-center justify-between rounded-lg p-2 transition-colors hover:bg-muted/50"
                   onClick={() => toggleSolutionModelSection('requirements-sync')}
                 >
-                  <CardTitle className="flex items-center justify-between">
-                    <span>Requirements Synchronization</span>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                  <div className="flex items-center space-x-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-green-200 bg-green-100">
                       {solutionModelSections.has('requirements-sync') ? (
-                        <ChevronDown className="h-4 w-4" />
+                        <ChevronDown className="h-5 w-5 text-green-700" />
                       ) : (
-                        <ChevronRight className="h-4 w-4" />
+                        <ChevronRight className="h-5 w-5 text-green-700" />
                       )}
-                    </Button>
-                  </CardTitle>
-                  <CardDescription>Synchronize requirements between systems</CardDescription>
-                </CardHeader>
+                    </div>
+                    <div>
+                      <h3 className="flex items-center space-x-2 text-base font-semibold">
+                        <FileText className="h-4 w-4" />
+                        <span>Requirements Synchronization</span>
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        Synchronize requirements between systems
+                      </p>
+                    </div>
+                  </div>
+                </div>
                 {solutionModelSections.has('requirements-sync') && (
-                  <CardContent>
+                  <div className="space-y-4">
                     <SpecSyncBlueDolphinMapping
                       specSyncItems={specSyncItems}
                       blueDolphinConfig={{
@@ -1715,32 +1744,37 @@ export default function HomePage() {
                         />
                       </div>
                     )}
-                  </CardContent>
+                  </div>
                 )}
-              </Card>
+              </div>
 
               {/* Workspace Operations Section */}
-              <Card>
-                <CardHeader
-                  className="cursor-pointer transition-colors hover:bg-gray-50"
+              <div className="border-b pb-6">
+                <div
+                  className="mb-4 flex cursor-pointer items-center justify-between rounded-lg p-2 transition-colors hover:bg-muted/50"
                   onClick={() => toggleSolutionModelSection('workspace-operations')}
                 >
-                  <CardTitle className="flex items-center justify-between">
-                    <span>Workspace Operations</span>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                  <div className="flex items-center space-x-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-orange-200 bg-orange-100">
                       {solutionModelSections.has('workspace-operations') ? (
-                        <ChevronDown className="h-4 w-4" />
+                        <ChevronDown className="h-5 w-5 text-orange-700" />
                       ) : (
-                        <ChevronRight className="h-4 w-4" />
+                        <ChevronRight className="h-5 w-5 text-orange-700" />
                       )}
-                    </Button>
-                  </CardTitle>
-                  <CardDescription>
-                    Move objects between Model workspaces using REST API
-                  </CardDescription>
-                </CardHeader>
+                    </div>
+                    <div>
+                      <h3 className="flex items-center space-x-2 text-base font-semibold">
+                        <Workflow className="h-4 w-4" />
+                        <span>Workspace Operations</span>
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        Move objects between Model workspaces using REST API
+                      </p>
+                    </div>
+                  </div>
+                </div>
                 {solutionModelSections.has('workspace-operations') && (
-                  <CardContent>
+                  <div className="space-y-4">
                     <BlueDolphinWorkspaceOperations
                       config={{
                         protocol: 'REST',
@@ -1753,33 +1787,38 @@ export default function HomePage() {
                         workspaceId: '68b8214f5b12ebdcb8e00345',
                       }}
                     />
-                  </CardContent>
+                  </div>
                 )}
-              </Card>
+              </div>
 
               {/* Visualization (Model Graph) */}
-              <Card>
-                <CardHeader
-                  className="cursor-pointer transition-colors hover:bg-gray-50"
+              <div className="border-b pb-6">
+                <div
+                  className="mb-4 flex cursor-pointer items-center justify-between rounded-lg p-2 transition-colors hover:bg-muted/50"
                   onClick={() => toggleSolutionModelSection('visualization')}
                 >
-                  <CardTitle className="flex items-center justify-between">
-                    <span>Visualization (Model Graph)</span>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                  <div className="flex items-center space-x-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-purple-200 bg-purple-100">
                       {solutionModelSections.has('visualization') ? (
-                        <ChevronDown className="h-4 w-4" />
+                        <ChevronDown className="h-5 w-5 text-purple-700" />
                       ) : (
-                        <ChevronRight className="h-4 w-4" />
+                        <ChevronRight className="h-5 w-5 text-purple-700" />
                       )}
-                    </Button>
-                  </CardTitle>
-                  <CardDescription>
-                    Explore objects as nodes and relationships as links with dedicated visualization
-                    filters
-                  </CardDescription>
-                </CardHeader>
+                    </div>
+                    <div>
+                      <h3 className="flex items-center space-x-2 text-base font-semibold">
+                        <Network className="h-4 w-4" />
+                        <span>Visualization (Model Graph)</span>
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        Explore objects as nodes and relationships as links with dedicated visualization
+                        filters
+                      </p>
+                    </div>
+                  </div>
+                </div>
                 {solutionModelSections.has('visualization') && (
-                  <CardContent>
+                  <div className="space-y-4">
                     <BlueDolphinVisualization
                       config={{
                         protocol: 'ODATA',
@@ -1790,151 +1829,312 @@ export default function HomePage() {
                         password: 'ef498b94-732b-46c8-a24c-65fbd27c1482',
                       }}
                     />
-                  </CardContent>
+                  </div>
                 )}
-              </Card>
+              </div>
 
               {/* Domain Management Section */}
-              <Card>
-                <CardHeader
-                  className="cursor-pointer transition-colors hover:bg-gray-50"
+              <div className="border-b pb-6">
+                <div
+                  className="mb-4 flex cursor-pointer items-center justify-between rounded-lg p-2 transition-colors hover:bg-muted/50"
                   onClick={() => toggleSolutionModelSection('domain-management')}
                 >
-                  <CardTitle className="flex items-center justify-between">
-                    <span>Domain Management</span>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                  <div className="flex items-center space-x-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-indigo-200 bg-indigo-100">
                       {solutionModelSections.has('domain-management') ? (
-                        <ChevronDown className="h-4 w-4" />
+                        <ChevronDown className="h-5 w-5 text-indigo-700" />
                       ) : (
-                        <ChevronRight className="h-4 w-4" />
+                        <ChevronRight className="h-5 w-5 text-indigo-700" />
                       )}
-                    </Button>
-                  </CardTitle>
-                  <CardDescription>Manage TMF ODA domains and capabilities</CardDescription>
-                </CardHeader>
+                    </div>
+                    <div>
+                      <h3 className="flex items-center space-x-2 text-base font-semibold">
+                        <Settings className="h-4 w-4" />
+                        <span>Domain Management</span>
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        Manage TMF ODA domains and capabilities
+                      </p>
+                    </div>
+                  </div>
+                </div>
                 {solutionModelSections.has('domain-management') && (
-                  <CardContent>
+                  <div className="space-y-4">
                     <p className="text-sm text-gray-600">
                       Domain management functionality will be implemented here.
                     </p>
-                  </CardContent>
+                  </div>
                 )}
-              </Card>
+              </div>
 
               {/* Capabilities Section */}
-              <Card>
-                <CardHeader
-                  className="cursor-pointer transition-colors hover:bg-gray-50"
+              <div className="border-b pb-6">
+                <div
+                  className="mb-4 flex cursor-pointer items-center justify-between rounded-lg p-2 transition-colors hover:bg-muted/50"
                   onClick={() => toggleSolutionModelSection('capabilities')}
                 >
-                  <CardTitle className="flex items-center justify-between">
-                    <span>Capabilities</span>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                  <div className="flex items-center space-x-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-teal-200 bg-teal-100">
                       {solutionModelSections.has('capabilities') ? (
-                        <ChevronDown className="h-4 w-4" />
+                        <ChevronDown className="h-5 w-5 text-teal-700" />
                       ) : (
-                        <ChevronRight className="h-4 w-4" />
+                        <ChevronRight className="h-5 w-5 text-teal-700" />
                       )}
-                    </Button>
-                  </CardTitle>
-                  <CardDescription>Manage TMF ODA capabilities within domains</CardDescription>
-                </CardHeader>
+                    </div>
+                    <div>
+                      <h3 className="flex items-center space-x-2 text-base font-semibold">
+                        <Network className="h-4 w-4" />
+                        <span>Capabilities</span>
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        Manage TMF ODA capabilities within domains
+                      </p>
+                    </div>
+                  </div>
+                </div>
                 {solutionModelSections.has('capabilities') && (
-                  <CardContent>
+                  <div className="space-y-4">
                     <p className="text-sm text-gray-600">
                       Capability management functionality will be implemented here.
                     </p>
-                  </CardContent>
+                  </div>
                 )}
-              </Card>
+              </div>
             </TabsContent>
 
             {/* Estimation Tab */}
             <TabsContent value="estimation" className="space-y-6">
               <SETImport onDataLoaded={handleSETDataLoaded} />
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Work Package Estimation</CardTitle>
-                  <CardDescription>Calculate effort estimates for work packages</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {workPackages.map((workPackage) => {
-                      // Check if this work package has SET data updates
-                      const setMatch = Object.entries(setMatchedWorkPackages).find(
-                        ([_ignored, match]) => match.workPackages.includes(workPackage.name),
-                      );
-
-                      const setEffort = setMatch ? setMatch[1].effort : null;
-                      const setDomain = setMatch ? setMatch[0] : null;
-
-                      return (
-                        <div key={workPackage.id} className="rounded-lg border p-4">
-                          <div className="mb-3 flex items-center justify-between">
-                            <h3 className="font-semibold">{workPackage.name}</h3>
-                            <div className="flex items-center space-x-2">
-                              {setEffort && (
-                                <Badge variant="secondary" className="text-xs">
-                                  SET: {setEffort}d
-                                </Badge>
-                              )}
-                              <div className={`status-badge ${getStatusColor(workPackage.status)}`}>
-                                {workPackage.status}
-                              </div>
-                            </div>
-                          </div>
-                          <p className="mb-3 text-sm text-muted-foreground">
-                            {workPackage.description}
-                          </p>
-                          {setDomain && (
-                            <p className="mb-2 text-xs text-blue-600">
-                              📊 SET Domain: {setDomain} | Total Effort: {setEffort}d
-                            </p>
-                          )}
-                          <div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
-                            <div>
-                              <div className="text-muted-foreground">BA Effort</div>
-                              <div className="font-medium">
-                                {workPackage.effort.businessAnalyst}d
-                              </div>
-                            </div>
-                            <div>
-                              <div className="text-muted-foreground">SA Effort</div>
-                              <div className="font-medium">
-                                {workPackage.effort.solutionArchitect}d
-                              </div>
-                            </div>
-                            <div>
-                              <div className="text-muted-foreground">Dev Effort</div>
-                              <div className="font-medium">{workPackage.effort.developer}d</div>
-                            </div>
-                            <div>
-                              <div className="text-muted-foreground">QA Effort</div>
-                              <div className="font-medium">{workPackage.effort.qaEngineer}d</div>
-                            </div>
-                          </div>
-                          {setEffort && (
-                            <div className="mt-3 border-t pt-3">
-                              <div className="text-sm font-medium text-green-600">
-                                SET Total Effort: {setEffort}d
-                              </div>
-                              <div className="text-xs text-muted-foreground">
-                                Original Total:{' '}
-                                {workPackage.effort.businessAnalyst +
-                                  workPackage.effort.solutionArchitect +
-                                  workPackage.effort.developer +
-                                  workPackage.effort.qaEngineer}
-                                d
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
+              {/* Work Package Estimation Section */}
+              <div className="border-b pb-6">
+                <div
+                  className="mb-4 flex cursor-pointer items-center justify-between rounded-lg p-2 transition-colors hover:bg-muted/50"
+                  onClick={() => setWorkPackageEstimationExpanded(!workPackageEstimationExpanded)}
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-purple-200 bg-purple-100">
+                      {workPackageEstimationExpanded ? (
+                        <ChevronDown className="h-5 w-5 text-purple-700" />
+                      ) : (
+                        <ChevronRight className="h-5 w-5 text-purple-700" />
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="flex items-center space-x-2 text-base font-semibold">
+                        <Calculator className="h-4 w-4" />
+                        <span>Work Package Estimation</span>
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        Calculate effort estimates for work packages
+                      </p>
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+
+                {workPackageEstimationExpanded && (
+                  <div className="space-y-6">
+                    {/* Domain and TMF Function Cards */}
+                    {(() => {
+                      const tmfDomains = getStaticTMFDomains();
+                      const tmfFunctions = getStaticTMFFunctions();
+                      
+                      // Group functions by domain
+                      const functionsByDomain = tmfFunctions.reduce((acc, func) => {
+                        if (!acc[func.domainName]) {
+                          acc[func.domainName] = [];
+                        }
+                        acc[func.domainName].push(func);
+                        return acc;
+                      }, {} as Record<string, typeof tmfFunctions>);
+
+                      // Get all domains from both TMF and SET data
+                      const allDomains = new Set([
+                        ...tmfDomains.map(d => d.name),
+                        ...Object.keys(setDomainEfforts)
+                      ]);
+
+                      return Array.from(allDomains).map((domainName) => {
+                        // Find TMF domain info if it exists
+                        const tmfDomain = tmfDomains.find(d => d.name === domainName);
+                        const domainFunctions = functionsByDomain[domainName] || [];
+                        const setEffort = setDomainEfforts[domainName] || 0;
+                        
+                        // Create domain info for non-TMF domains (like "Other Efforts")
+                        const domainInfo = tmfDomain || {
+                          id: `domain-${domainName.toLowerCase().replace(/\s+/g, '-')}`,
+                          name: domainName,
+                          description: domainName === 'Other Efforts' 
+                            ? 'Additional efforts and miscellaneous work items'
+                            : `TMF ${domainName}`,
+                          functionCount: domainFunctions.length
+                        };
+                        
+                        return (
+                          <div key={domainInfo.id} className="rounded-lg border p-6 bg-white shadow-sm">
+                            <div className="mb-4 flex items-center justify-between">
+                              <div>
+                                <h3 className="text-lg font-semibold text-gray-900">{domainInfo.name}</h3>
+                                <p className="text-sm text-gray-600">{domainInfo.description}</p>
+                              </div>
+                              <div className="flex items-center space-x-3">
+                                {setEffort > 0 && (
+                                  <Badge variant="secondary" className="text-sm font-medium">
+                                    SET: {setEffort}d
+                                  </Badge>
+                                )}
+                                <div className="text-right">
+                                  <div className="text-sm font-medium text-gray-900">
+                                    {domainFunctions.length} Functions
+                                  </div>
+                                  <div className="text-xs text-gray-500">
+                                    {setEffort > 0 ? `${setEffort}d effort` : 'No SET data'}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {/* TMF Functions Grid */}
+                            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+                              {domainName === 'Other Efforts' ? (
+                                // Special case for Other Efforts - show placeholder functions
+                                <>
+                                  <div className="rounded-md border border-gray-200 p-3 bg-gray-50">
+                                    <div className="text-sm font-medium text-gray-900">
+                                      Reporting & Analytics
+                                    </div>
+                                    <div className="text-xs text-gray-500 mt-1">
+                                      Financial reporting and data warehouse feeds
+                                    </div>
+                                  </div>
+                                  <div className="rounded-md border border-gray-200 p-3 bg-gray-50">
+                                    <div className="text-sm font-medium text-gray-900">
+                                      Integration & Migration
+                                    </div>
+                                    <div className="text-xs text-gray-500 mt-1">
+                                      Data migration and system integration
+                                    </div>
+                                  </div>
+                                  <div className="rounded-md border border-gray-200 p-3 bg-gray-50">
+                                    <div className="text-sm font-medium text-gray-900">
+                                      Invoice & Billing
+                                    </div>
+                                    <div className="text-xs text-gray-500 mt-1">
+                                      Invoice generation and billing processes
+                                    </div>
+                                  </div>
+                                </>
+                              ) : (
+                                // Regular TMF functions
+                                <>
+                                  {domainFunctions.slice(0, 6).map((func) => (
+                                    <div key={func.id} className="rounded-md border border-gray-200 p-3 bg-gray-50">
+                                      <div className="text-sm font-medium text-gray-900">
+                                        {func.functionName}
+                                      </div>
+                                      {func.vertical && (
+                                        <div className="text-xs text-gray-500 mt-1">
+                                          {func.vertical}
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                  {domainFunctions.length > 6 && (
+                                    <div className="rounded-md border border-gray-200 p-3 bg-gray-100 flex items-center justify-center">
+                                      <span className="text-sm text-gray-500">
+                                        +{domainFunctions.length - 6} more functions
+                                      </span>
+                                    </div>
+                                  )}
+                                </>
+                              )}
+                            </div>
+                            
+                            {/* SET Effort Details */}
+                            {setEffort > 0 && (
+                              <div className="mt-4 border-t pt-4">
+                                <div className="flex items-center justify-between">
+                                  <div className="text-sm font-medium text-green-600">
+                                    SET Total Effort: {setEffort} days
+                                  </div>
+                                  <div className="text-xs text-gray-500">
+                                    Mapped from SET Test Loader data
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      });
+                    })()}
+                    
+                    {/* Summary Card */}
+                    {Object.keys(setDomainEfforts).length > 0 && (
+                      <Card className="bg-gradient-to-br from-slate-50 to-blue-50 border-slate-200 shadow-lg">
+                        <CardHeader className="pb-4">
+                          <div className="flex items-center space-x-3">
+                            <div className="p-2 bg-blue-100 rounded-lg">
+                              <BarChart3 className="h-6 w-6 text-blue-600" />
+                            </div>
+                            <div>
+                              <CardTitle className="text-xl text-slate-800">SET Data Summary</CardTitle>
+                              <CardDescription className="text-slate-600">
+                                Effort breakdown across domains
+                              </CardDescription>
+                            </div>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+                            {Object.entries(setDomainEfforts).map(([domain, effort]) => (
+                              <Card key={domain} className="relative overflow-hidden bg-white border-slate-200 hover:shadow-md transition-all duration-200">
+                                <CardContent className="p-4 text-center">
+                                  <div className="mb-2">
+                                    <div className="text-3xl font-bold text-slate-800 mb-1">
+                                      {effort}
+                                    </div>
+                                    <div className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                                      days
+                                    </div>
+                                  </div>
+                                  <div className="text-sm font-medium text-slate-700 leading-tight">
+                                    {domain}
+                                  </div>
+                                  <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 opacity-20 rounded-bl-full"></div>
+                                </CardContent>
+                              </Card>
+                            ))}
+                          </div>
+                          
+                          <div className="border-t border-slate-200 pt-4">
+                            <Card className="bg-gradient-to-r from-blue-600 to-blue-700 text-white border-0 shadow-lg">
+                              <CardContent className="p-4">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center space-x-3">
+                                    <div className="p-2 bg-white/20 rounded-lg">
+                                      <Calculator className="h-5 w-5" />
+                                    </div>
+                                    <div>
+                                      <div className="text-sm font-medium opacity-90">Total SET Effort</div>
+                                      <div className="text-2xl font-bold">
+                                        {Object.values(setDomainEfforts).reduce((a, b) => a + b, 0)} days
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <div className="text-sm opacity-90">Across {Object.keys(setDomainEfforts).length} domains</div>
+                                    <div className="text-xs opacity-75">Phase 1 estimation</div>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                )}
+              </div>
             </TabsContent>
 
             {/* Service Design Tab */}

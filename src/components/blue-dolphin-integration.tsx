@@ -724,7 +724,7 @@ export function BlueDolphinIntegration({ config, onObjectsLoaded }: BlueDolphinI
           onClick={() => toggleSection('object-retrieval')}
         >
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg font-semibold">Object Retrieval</CardTitle>
+            <CardTitle className="text-base font-semibold">Object Retrieval</CardTitle>
             <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
               {expandedSections.has('object-retrieval') ? (
                 <ChevronDown className="h-4 w-4" />
@@ -1488,7 +1488,7 @@ export function BlueDolphinIntegration({ config, onObjectsLoaded }: BlueDolphinI
           onClick={() => toggleSection('relations-section')}
         >
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg font-semibold">
+            <CardTitle className="text-base font-semibold">
               Relationship Data (Relations_table)
             </CardTitle>
             <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
@@ -1816,7 +1816,7 @@ export function BlueDolphinIntegration({ config, onObjectsLoaded }: BlueDolphinI
           onClick={() => toggleSection('export-csv')}
         >
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg font-semibold">
+            <CardTitle className="text-base font-semibold">
               Export Model (Objects + Relations CSV)
             </CardTitle>
             <Button variant="ghost" size="sm" className="h-6 w-6 p-0">

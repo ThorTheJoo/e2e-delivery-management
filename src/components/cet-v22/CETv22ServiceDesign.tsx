@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
-import { FileText, Upload, BarChart3, Users, TrendingUp, CheckCircle, XCircle } from 'lucide-react';
+import { FileText, Upload, BarChart3, TrendingUp, CheckCircle, XCircle, ChevronDown, ChevronRight } from 'lucide-react';
 
 import { CETv22Data, CETv22AnalysisResult, CETv22IntegrationMappings } from '@/types';
 import { CETv22AnalyzerService } from '@/services/cet-v22-analyzer';
@@ -15,7 +15,6 @@ import { CETv22AnalyzerService } from '@/services/cet-v22-analyzer';
 // Import sub-components
 import { CETv22FileUpload } from './CETv22FileUpload';
 import { CETv22ProjectOverview } from './CETv22ProjectOverview';
-import { CETv22ResourceDashboard } from './CETv22ResourceDashboard';
 import { CETv22EffortAnalysisComponent } from './CETv22EffortAnalysis';
 import { CETv22PhaseTimeline } from './CETv22PhaseTimeline';
 import { CETv22RiskAssessment } from './CETv22RiskAssessment';
@@ -40,13 +39,27 @@ export const CETv22ServiceDesign: React.FC<CETv22ServiceDesignProps> = ({
   onError,
 }) => {
   // State management
-  const [activeTab, setActiveTab] = useState('upload');
+  const [activeTab, setActiveTab] = useState('overview');
   const [processingState, setProcessingState] = useState<ProcessingState>('idle');
   const [progress, setProgress] = useState(0);
   const [cetData, setCetData] = useState<CETv22Data | null>(null);
   const [analysisResult, setAnalysisResult] = useState<CETv22AnalysisResult | null>(null);
   const [, setIntegrationMappings] = useState<CETv22IntegrationMappings | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+
+  // Helper function to toggle section expansion
+  const toggleSection = (sectionId: string) => {
+    setExpandedSections(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(sectionId)) {
+        newSet.delete(sectionId);
+      } else {
+        newSet.add(sectionId);
+      }
+      return newSet;
+    });
+  };
 
   // Load data from local storage on component mount
   useEffect(() => {
@@ -158,49 +171,51 @@ export const CETv22ServiceDesign: React.FC<CETv22ServiceDesignProps> = ({
   return (
     <div className="space-y-6">
       {/* Header with status */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <FileText className="h-6 w-6 text-blue-600" />
-              <div>
-                <CardTitle className="text-xl">CET v22.0 Service Design</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Resource demand planning and service design based on CET v22.0 analysis
-                </p>
-              </div>
+      <div className="border-b pb-6">
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-blue-200 bg-blue-100">
+              <FileText className="h-5 w-5 text-blue-700" />
             </div>
-            <div className="flex items-center space-x-3">
-              <Badge
-                variant={
-                  status.color === 'green'
-                    ? 'default'
-                    : status.color === 'red'
-                      ? 'destructive'
-                      : 'secondary'
-                }
-              >
-                {status.text}
-              </Badge>
-              {processingState !== 'idle' && (
-                <Button variant="outline" size="sm" onClick={handleReset}>
-                  Reset
-                </Button>
-              )}
+            <div>
+              <h1 className="flex items-center space-x-2 text-base font-semibold">
+                <span>CET v22.0 Service Design</span>
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                Resource demand planning and service design based on CET v22.0 analysis
+              </p>
             </div>
           </div>
+          <div className="flex items-center space-x-3">
+            <Badge
+              variant={
+                status.color === 'green'
+                  ? 'default'
+                  : status.color === 'red'
+                    ? 'destructive'
+                    : 'secondary'
+              }
+            >
+              {status.text}
+            </Badge>
+            {processingState !== 'idle' && (
+              <Button variant="outline" size="sm" onClick={handleReset}>
+                Reset
+              </Button>
+            )}
+          </div>
+        </div>
 
-          {processingState !== 'idle' && processingState !== 'completed' && (
-            <div className="mt-4">
-              <div className="mb-2 flex justify-between text-sm">
-                <span>Processing...</span>
-                <span>{progress}%</span>
-              </div>
-              <Progress value={progress} className="w-full" />
+        {processingState !== 'idle' && processingState !== 'completed' && (
+          <div className="mt-4">
+            <div className="mb-2 flex justify-between text-sm">
+              <span>Processing...</span>
+              <span>{progress}%</span>
             </div>
-          )}
-        </CardHeader>
-      </Card>
+            <Progress value={progress} className="w-full" />
+          </div>
+        )}
+      </div>
 
       {/* Error display */}
       {error && (
@@ -213,18 +228,10 @@ export const CETv22ServiceDesign: React.FC<CETv22ServiceDesignProps> = ({
 
       {/* Main content tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="upload" disabled={processingState === 'analyzing'}>
-            <Upload className="mr-2 h-4 w-4" />
-            Upload
-          </TabsTrigger>
-          <TabsTrigger value="overview" disabled={!cetData}>
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="overview">
             <BarChart3 className="mr-2 h-4 w-4" />
             Overview
-          </TabsTrigger>
-          <TabsTrigger value="resources" disabled={!analysisResult}>
-            <Users className="mr-2 h-4 w-4" />
-            Resources
           </TabsTrigger>
           <TabsTrigger value="effort" disabled={!analysisResult}>
             <TrendingUp className="mr-2 h-4 w-4" />
@@ -240,31 +247,54 @@ export const CETv22ServiceDesign: React.FC<CETv22ServiceDesignProps> = ({
           </TabsTrigger>
         </TabsList>
 
-        {/* Upload Tab */}
-        <TabsContent value="upload" className="space-y-6">
-          <CETv22FileUpload
-            onFileProcessed={handleFileProcessed}
-            onError={handleError}
-            disabled={processingState !== 'idle'}
-          />
-        </TabsContent>
 
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-6">
-          {cetData && (
-            <CETv22ProjectOverview projectData={cetData.project} analysisData={analysisResult} />
-          )}
-        </TabsContent>
+          {/* File Upload Section */}
+          <div className="border-b pb-6">
+            <div
+              className="mb-4 flex cursor-pointer items-center justify-between rounded-lg p-2 transition-colors hover:bg-muted/50"
+              onClick={() => toggleSection('file-upload')}
+            >
+              <div className="flex items-center space-x-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-blue-200 bg-blue-100">
+                  {expandedSections.has('file-upload') ? (
+                    <ChevronDown className="h-5 w-5 text-blue-700" />
+                  ) : (
+                    <ChevronRight className="h-5 w-5 text-blue-700" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="flex items-center space-x-2 text-base font-semibold">
+                    <Upload className="h-4 w-4" />
+                    <span>File Upload</span>
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Upload CET v22.0 Excel files for analysis
+                  </p>
+                </div>
+              </div>
+            </div>
+            {expandedSections.has('file-upload') && (
+              <div className="space-y-4">
+                <CETv22FileUpload
+                  onFileProcessed={handleFileProcessed}
+                  onError={handleError}
+                  disabled={processingState !== 'idle'}
+                />
+              </div>
+            )}
+          </div>
 
-        {/* Resources Tab */}
-        <TabsContent value="resources" className="space-y-6">
-          {analysisResult && (
-            <CETv22ResourceDashboard
-              resourceAnalysis={analysisResult.resources}
-              jobProfiles={cetData?.jobProfiles || []}
+          {cetData && (
+            <CETv22ProjectOverview 
+              projectData={cetData.project} 
+              analysisData={analysisResult}
+              jobProfiles={cetData.jobProfiles || []}
             />
           )}
         </TabsContent>
+
 
         {/* Effort Tab */}
         <TabsContent value="effort" className="space-y-6">

@@ -77,6 +77,55 @@ export function TMFDomainCapabilityManager({
   const [missingItemsCount, setMissingItemsCount] = useState(0);
   const isProcessingSpecSync = useRef(false);
 
+  // Memoized callback for onStateChange to prevent unnecessary re-renders
+  const handleStateChange = useCallback((updatedDomains: UserDomain[]) => {
+    onStateChange?.(updatedDomains);
+  }, [onStateChange]);
+
+  // Initialize sample data
+  const initializeSampleData = useCallback((
+    referenceDomains: TMFDomain[],
+    referenceFunctions: TMFFunction[],
+  ) => {
+    const sampleDomains: UserDomain[] = referenceDomains.map((refDomain, index) => {
+      const domainFunctions = referenceFunctions.filter(
+        (func) => func.domain_id === refDomain.id,
+      );
+
+      return {
+        id: `domain-${index + 1}`,
+        name: refDomain.name,
+        description: `TMF ${refDomain.name} domain with ${domainFunctions.length} functions`,
+        referenceDomainId: refDomain.id,
+        capabilities: domainFunctions.map((refFunc, funcIndex) => ({
+          id: `capability-${index + 1}-${funcIndex + 1}`,
+          name: refFunc.function_name,
+          description: `TMF Function: ${refFunc.function_name}`,
+          referenceFunctionId: refFunc.id,
+          domainId: `domain-${index + 1}`,
+          isSelected: false,
+          requirementCount: 0,
+        })),
+        isSelected: false,
+        isExpanded: false,
+        requirementCount: 0,
+      };
+    });
+
+    setDomains(sampleDomains);
+    handleStateChange(sampleDomains);
+  }, [handleStateChange]);
+
+  // Analyze missing items from TMF reference data
+  const analyzeMissingItems = useCallback(async () => {
+    try {
+      const gaps = await analyzeTMFReferenceGaps(domains);
+      setMissingItemsCount(gaps.totalMissingItems);
+    } catch (error) {
+      console.error('Error analyzing missing TMF reference items:', error);
+    }
+  }, [domains]);
+
   // Load reference data
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -130,125 +179,63 @@ export function TMFDomainCapabilityManager({
     loadReferenceData();
   }, [domains.length, initializeSampleData]);
 
-  // Process SpecSync data after reference data is loaded
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    console.log('🔄 SpecSync useEffect triggered:', {
-      hasSpecSyncData: !!specSyncData?.items,
-      specSyncItemsLength: specSyncData?.items?.length || 0,
-      referenceDomainsLength: referenceDomains.length,
-      loading,
-      isProcessing: isProcessingSpecSync.current
-    });
-
-    if (specSyncData?.items && referenceDomains.length > 0 && !loading && !isProcessingSpecSync.current) {
-      console.log('✅ Starting SpecSync processing...');
-      isProcessingSpecSync.current = true;
-
-      const processSpecSyncData = async () => {
-        try {
-          console.log('🚀 Calling autoSelectMatchingDomainsAndCapabilities...');
-          await autoSelectMatchingDomainsAndCapabilities(specSyncData.items);
-          console.log('✅ autoSelectMatchingDomainsAndCapabilities completed');
-          await analyzeMissingItems();
-          console.log('✅ analyzeMissingItems completed');
-        } catch (error) {
-          console.error('❌ Error in processSpecSyncData:', error);
-        } finally {
-          isProcessingSpecSync.current = false;
-          console.log('🏁 SpecSync processing finished');
-        }
-      };
-
-      // Use setTimeout to break the synchronous update cycle
-      setTimeout(processSpecSyncData, 0);
-    } else {
-      console.log('❌ SpecSync processing skipped:', {
-        reason: !specSyncData?.items ? 'No SpecSync data' : 
-                referenceDomains.length === 0 ? 'No reference domains' :
-                loading ? 'Still loading' : 'Already processing'
-      });
-    }
-  }, [specSyncData?.items, loading, referenceDomains.length, analyzeMissingItems, autoSelectMatchingDomainsAndCapabilities]); // Process when reference data is loaded
-
-  // Analyze missing TMF reference items when domains change
-  useEffect(() => {
-    if (domains.length > 0 && !loading && !isProcessingSpecSync.current) {
-      analyzeMissingItems();
-    }
-  }, [domains.length, loading, analyzeMissingItems]); // Analyze when domains change
-
-  // Analyze missing items from TMF reference data
-  const analyzeMissingItems = useCallback(async () => {
-    try {
-      const gaps = await analyzeTMFReferenceGaps(domains);
-      setMissingItemsCount(gaps.totalMissingItems);
-    } catch (error) {
-      console.error('Error analyzing missing TMF reference items:', error);
-    }
-  }, [domains]);
-
-  // Memoized callback for onStateChange to prevent unnecessary re-renders
-  const handleStateChange = useCallback((updatedDomains: UserDomain[]) => {
-    onStateChange?.(updatedDomains);
-  }, [onStateChange]);
-
-  // Handle onStateChange callback when domains change (but not during SpecSync processing)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    console.log('🔄 Domains state changed:', {
-      domainsLength: domains.length,
-      loading,
-      isProcessing: isProcessingSpecSync.current,
-      selectedDomains: domains.filter(d => d.isSelected).length,
-      selectedCapabilities: domains.reduce((sum, d) => sum + d.capabilities.filter(c => c.isSelected).length, 0)
-    });
+  // Update requirement counts
+  const updateRequirementCounts = useCallback((specSyncItems: any[], domainsToUpdate?: UserDomain[]) => {
+    const domainsToProcess = domainsToUpdate || domains;
     
-    if (domains.length > 0 && !loading && !isProcessingSpecSync.current) {
-      console.log('✅ Calling handleStateChange with updated domains');
-      handleStateChange(domains);
-    } else {
-      console.log('❌ Skipping handleStateChange:', {
-        reason: domains.length === 0 ? 'No domains' : 
-                loading ? 'Still loading' : 'Processing SpecSync'
-      });
-    }
-  }, [domains, loading, handleStateChange]); // Include handleStateChange in dependencies
+    console.log('📊 Updating requirement counts for', domainsToProcess.length, 'domains');
+    
+    const updatedDomains = domainsToProcess.map((domain) => {
+      const domainCapabilities = domain.capabilities.map((capability) => {
+        // Count requirements that match this function
+        const requirementCount = specSyncItems.filter((item: any) => {
+          const itemFunction = (item.functionName || '').toString().trim().toLowerCase();
+          const itemDomain = (item.domain || '').toString().trim().toLowerCase();
+          const functionName = capability.name.trim().toLowerCase();
+          const domainName = domain.name.trim().toLowerCase();
 
-  // Initialize sample data
-  const initializeSampleData = useCallback((
-    referenceDomains: TMFDomain[],
-    referenceFunctions: TMFFunction[],
-  ) => {
-    const sampleDomains: UserDomain[] = referenceDomains.map((refDomain, index) => {
-      const domainFunctions = referenceFunctions.filter(
-        (func) => func.domain_id === refDomain.id,
+          // Exact match for better accuracy
+          const functionMatch = itemFunction === functionName;
+          const domainMatch = itemDomain === domainName;
+
+          return functionMatch && domainMatch;
+        }).length;
+
+        if (requirementCount > 0) {
+          console.log(`📈 ${capability.name}: ${requirementCount} requirements`);
+        }
+
+        return {
+          ...capability,
+          requirementCount,
+        };
+      });
+
+      const domainRequirementCount = domainCapabilities.reduce(
+        (sum, cap) => sum + cap.requirementCount,
+        0,
       );
 
+      if (domainRequirementCount > 0) {
+        console.log(`📈 Domain ${domain.name}: ${domainRequirementCount} total requirements`);
+      }
+
       return {
-        id: `domain-${index + 1}`,
-        name: refDomain.name,
-        description: `TMF ${refDomain.name} domain with ${domainFunctions.length} functions`,
-        referenceDomainId: refDomain.id,
-        capabilities: domainFunctions.map((refFunc, funcIndex) => ({
-          id: `capability-${index + 1}-${funcIndex + 1}`,
-          name: refFunc.function_name,
-          description: `TMF Function: ${refFunc.function_name}`,
-          referenceFunctionId: refFunc.id,
-          domainId: `domain-${index + 1}`,
-          isSelected: false,
-          requirementCount: 0,
-        })),
-        isSelected: false,
-        isExpanded: false,
-        requirementCount: 0,
+        ...domain,
+        capabilities: domainCapabilities,
+        requirementCount: domainRequirementCount,
       };
     });
 
-    setDomains(sampleDomains);
-    handleStateChange(sampleDomains);
-  }, [handleStateChange]);
+    // Only update state if we're not already in the middle of updating
+    if (!domainsToUpdate) {
+      setDomains(updatedDomains);
+    }
+    
+    return updatedDomains;
+  }, [domains]);
 
+  // Auto-select matching domains and capabilities
   const autoSelectMatchingDomainsAndCapabilities = useCallback(async (specSyncItems: any[]) => {
     try {
       console.log('🔍 Starting autoSelectMatchingDomainsAndCapabilities with', specSyncItems.length, 'items');
@@ -454,60 +441,79 @@ export function TMFDomainCapabilityManager({
     }
   }, [domains, onMappingComplete, updateRequirementCounts]);
 
-  const updateRequirementCounts = useCallback((specSyncItems: any[], domainsToUpdate?: UserDomain[]) => {
-    const domainsToProcess = domainsToUpdate || domains;
-    
-    console.log('📊 Updating requirement counts for', domainsToProcess.length, 'domains');
-    
-    const updatedDomains = domainsToProcess.map((domain) => {
-      const domainCapabilities = domain.capabilities.map((capability) => {
-        // Count requirements that match this function
-        const requirementCount = specSyncItems.filter((item: any) => {
-          const itemFunction = (item.functionName || '').toString().trim().toLowerCase();
-          const itemDomain = (item.domain || '').toString().trim().toLowerCase();
-          const functionName = capability.name.trim().toLowerCase();
-          const domainName = domain.name.trim().toLowerCase();
-
-          // Exact match for better accuracy
-          const functionMatch = itemFunction === functionName;
-          const domainMatch = itemDomain === domainName;
-
-          return functionMatch && domainMatch;
-        }).length;
-
-        if (requirementCount > 0) {
-          console.log(`📈 ${capability.name}: ${requirementCount} requirements`);
-        }
-
-        return {
-          ...capability,
-          requirementCount,
-        };
-      });
-
-      const domainRequirementCount = domainCapabilities.reduce(
-        (sum, cap) => sum + cap.requirementCount,
-        0,
-      );
-
-      if (domainRequirementCount > 0) {
-        console.log(`📈 Domain ${domain.name}: ${domainRequirementCount} total requirements`);
-      }
-
-      return {
-        ...domain,
-        capabilities: domainCapabilities,
-        requirementCount: domainRequirementCount,
-      };
+  // Process SpecSync data after reference data is loaded
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    console.log('🔄 SpecSync useEffect triggered:', {
+      hasSpecSyncData: !!specSyncData?.items,
+      specSyncItemsLength: specSyncData?.items?.length || 0,
+      referenceDomainsLength: referenceDomains.length,
+      loading,
+      isProcessing: isProcessingSpecSync.current
     });
 
-    // Only update state if we're not already in the middle of updating
-    if (!domainsToUpdate) {
-      setDomains(updatedDomains);
+    if (specSyncData?.items && referenceDomains.length > 0 && !loading && !isProcessingSpecSync.current) {
+      console.log('✅ Starting SpecSync processing...');
+      isProcessingSpecSync.current = true;
+
+      const processSpecSyncData = async () => {
+        try {
+          console.log('🚀 Calling autoSelectMatchingDomainsAndCapabilities...');
+          await autoSelectMatchingDomainsAndCapabilities(specSyncData.items);
+          console.log('✅ autoSelectMatchingDomainsAndCapabilities completed');
+          await analyzeMissingItems();
+          console.log('✅ analyzeMissingItems completed');
+        } catch (error) {
+          console.error('❌ Error in processSpecSyncData:', error);
+        } finally {
+          isProcessingSpecSync.current = false;
+          console.log('🏁 SpecSync processing finished');
+        }
+      };
+
+      // Use setTimeout to break the synchronous update cycle
+      setTimeout(processSpecSyncData, 0);
+    } else {
+      console.log('❌ SpecSync processing skipped:', {
+        reason: !specSyncData?.items ? 'No SpecSync data' : 
+                referenceDomains.length === 0 ? 'No reference domains' :
+                loading ? 'Still loading' : 'Already processing'
+      });
     }
+  }, [specSyncData?.items, loading, referenceDomains.length, analyzeMissingItems, autoSelectMatchingDomainsAndCapabilities]); // Process when reference data is loaded
+
+  // Analyze missing TMF reference items when domains change
+  useEffect(() => {
+    if (domains.length > 0 && !loading && !isProcessingSpecSync.current) {
+      analyzeMissingItems();
+    }
+  }, [domains.length, loading, analyzeMissingItems]); // Analyze when domains change
+
+
+
+  // Handle onStateChange callback when domains change (but not during SpecSync processing)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    console.log('🔄 Domains state changed:', {
+      domainsLength: domains.length,
+      loading,
+      isProcessing: isProcessingSpecSync.current,
+      selectedDomains: domains.filter(d => d.isSelected).length,
+      selectedCapabilities: domains.reduce((sum, d) => sum + d.capabilities.filter(c => c.isSelected).length, 0)
+    });
     
-    return updatedDomains;
-  }, [domains]);
+    if (domains.length > 0 && !loading && !isProcessingSpecSync.current) {
+      console.log('✅ Calling handleStateChange with updated domains');
+      handleStateChange(domains);
+    } else {
+      console.log('❌ Skipping handleStateChange:', {
+        reason: domains.length === 0 ? 'No domains' : 
+                loading ? 'Still loading' : 'Processing SpecSync'
+      });
+    }
+  }, [domains, loading, handleStateChange]); // Include handleStateChange in dependencies
+
+
 
   // Calculate selected counts for badge display
   // const _getSelectedCounts = () => {

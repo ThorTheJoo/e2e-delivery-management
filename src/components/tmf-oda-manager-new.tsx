@@ -38,6 +38,32 @@ export function TMFOdaManager({ onStateChange: _onStateChange, initialState: _in
     loadTMFReferenceData();
   }, []);
 
+  const updateDomainsWithSpecSyncData = useCallback(async () => {
+    if (!specSyncState) return;
+
+    try {
+      // Get mapped TMF functions from SpecSync data
+      const mappedFunctions = await getMappedTMFunctions(specSyncState.items);
+      
+      // Update domain counts
+      const updatedDomains = domains.map(domain => {
+        const domainMappedFunctions = mappedFunctions.filter(
+          mf => mf.function.domain_name === domain.name
+        );
+        
+        return {
+          ...domain,
+          mappedFunctionCount: domainMappedFunctions.length,
+          selectedFunctionIds: domainMappedFunctions.map(mf => mf.function.id),
+        };
+      });
+
+      setDomains(updatedDomains);
+    } catch (error) {
+      console.error('Error updating domains with SpecSync data:', error);
+    }
+  }, [specSyncState, domains]);
+
   // Update domains when SpecSync data changes
   useEffect(() => {
     if (specSyncState) {
@@ -83,31 +109,6 @@ export function TMFOdaManager({ onStateChange: _onStateChange, initialState: _in
     }
   };
 
-  const updateDomainsWithSpecSyncData = useCallback(async () => {
-    if (!specSyncState) return;
-
-    try {
-      // Get mapped TMF functions from SpecSync data
-      const mappedFunctions = await getMappedTMFunctions(specSyncState.items);
-      
-      // Update domain counts
-      const updatedDomains = domains.map(domain => {
-        const domainMappedFunctions = mappedFunctions.filter(
-          mf => mf.function.domain_name === domain.name
-        );
-        
-        return {
-          ...domain,
-          mappedFunctionCount: domainMappedFunctions.length,
-          selectedFunctionIds: domainMappedFunctions.map(mf => mf.function.id),
-        };
-      });
-
-      setDomains(updatedDomains);
-    } catch (error) {
-      console.error('Error updating domains with SpecSync data:', error);
-    }
-  }, [specSyncState, domains]);
 
   const handleSpecSyncImport = (state: SpecSyncState) => {
     setSpecSyncState(state);

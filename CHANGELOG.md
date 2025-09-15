@@ -5,6 +5,38 @@ All notable changes to the E2E Delivery Management System will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.31.0] - 2025-01-15 - TypeScript & Hook Dependencies Fix
+
+### 🔧 TypeScript & Build Fixes
+
+#### TypeScript Configuration Updates
+- **Updated TypeScript Target** - Changed from ES5 to ES2015 to fix Set iteration errors
+- **TypeScript Version Update** - Updated to version 5.3.3 for better ESLint compatibility
+- **Map Iterator Fix** - Fixed Map.entries() iteration in CET v22 parser using Array.from()
+
+#### React Hook Dependencies & Variable Hoisting
+- **Fixed Hook Dependencies** - Resolved all React Hook dependency array issues
+- **Variable Hoisting Fixes** - Moved function declarations before their usage in:
+  - `specsync-relationship-traversal.tsx` - Moved `generateFullPayloadCSV` function
+  - `tmf-domain-capability-manager.tsx` - Moved `initializeSampleData`, `analyzeMissingItems`, `autoSelectMatchingDomainsAndCapabilities`, `updateRequirementCounts`, and `handleStateChange` functions
+  - `tmf-oda-manager-new.tsx` - Moved `updateDomainsWithSpecSyncData` function
+- **ADO Integration Dependencies** - Fixed missing dependencies in useEffect hook
+
+#### Code Quality Improvements
+- **Removed Unused Imports** - Cleaned up unused imports across multiple components:
+  - `page.tsx` - Removed unused `Collapsible` import
+  - `CETv22FileUpload.tsx` - Removed unused Card components and AlertTitle
+  - `CETv22ProjectOverview.tsx` - Removed unused Card components
+  - `CETv22ServiceDesign.tsx` - Removed unused CardHeader and CardTitle
+  - `set-import.tsx` - Removed unused Card components
+- **ESLint Compliance** - All components now pass ESLint checks with no warnings or errors
+
+### 🚀 Build & Development
+- **TypeScript Compilation** - All TypeScript compilation errors resolved
+- **Linting Clean** - Zero ESLint warnings or errors across the entire codebase
+- **Hook Dependencies** - All React hooks now have correct dependency arrays
+- **Code Organization** - Improved function declaration order for better readability
+
 ## [1.30.0] - 2025-01-15 - Code Quality & ESLint Cleanup
 
 ### 🧹 Code Quality & Cleanup

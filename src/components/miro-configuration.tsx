@@ -25,7 +25,7 @@ export function MiroConfiguration() {
     redirectUri:
       typeof window !== 'undefined'
         ? `${window.location.protocol}//${window.location.host}/api/auth/miro/callback`
-        : 'http://localhost:3000/api/auth/miro/callback',
+        : 'http://localhost:3002/api/auth/miro/callback',
     scopes: ['boards:read', 'boards:write'],
   });
 
@@ -170,7 +170,7 @@ export function MiroConfiguration() {
       redirectUri:
         typeof window !== 'undefined'
           ? `${window.location.protocol}//${window.location.host}/api/auth/miro/callback`
-          : 'http://localhost:3000/api/auth/miro/callback',
+          : 'http://localhost:3002/api/auth/miro/callback',
       scopes: ['boards:read', 'boards:write'],
     });
     setIsConfigured(false);
@@ -273,7 +273,7 @@ export function MiroConfiguration() {
                   id="redirectUri"
                   value={config.redirectUri}
                   onChange={(e) => setConfig({ ...config, redirectUri: e.target.value })}
-                  placeholder="http://localhost:3000/api/auth/miro/callback"
+                  placeholder="http://localhost:3002/api/auth/miro/callback"
                 />
                 <p className="mt-1 text-xs text-muted-foreground">
                   Must match exactly with your Miro app configuration.

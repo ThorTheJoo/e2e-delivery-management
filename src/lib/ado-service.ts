@@ -190,31 +190,48 @@ export class ADOService {
       throw new Error('ADO configuration not found');
     }
 
-    const workItemTypes = ['epic', 'feature', 'User Story', 'task'];
+    // Check both lowercase and proper case variants for work item types
+    // Most ADO projects use proper case (Epic, Feature, etc.)
+    const workItemTypesToCheck = [
+      { original: 'epic', variants: ['Epic', 'epic'] },
+      { original: 'feature', variants: ['Feature', 'feature'] },
+      { original: 'User Story', variants: ['User Story', 'user story', 'userstory'] },
+      { original: 'task', variants: ['Task', 'task'] }
+    ];
+    
     const validation: { [key: string]: boolean } = {};
 
     try {
-      for (const type of workItemTypes) {
-        try {
-          // Handle spaces in work item type names by URL encoding
-          const encodedType = encodeURIComponent(type);
-          const response = await this.makeApiCall(
-            `/_apis/wit/workItemTypes/${encodedType}?api-version=7.1`,
-            {},
-            true,
-          );
-          validation[type] = response.ok;
-
-          if (response.ok) {
-            this.log('info', `Work item type '${type}' is available`);
-          } else {
-            this.log('warning', `Work item type '${type}' is not available`, {
-              status: response.status,
-            });
+      for (const typeGroup of workItemTypesToCheck) {
+        let found = false;
+        
+        for (const variant of typeGroup.variants) {
+          try {
+            // Handle spaces in work item type names by URL encoding
+            const encodedType = encodeURIComponent(variant);
+            const response = await this.makeApiCall(
+              `/_apis/wit/workItemTypes/${encodedType}?api-version=7.1`,
+              {},
+              true,
+            );
+            
+            if (response.ok) {
+              validation[typeGroup.original] = true;
+              found = true;
+              this.log('info', `Work item type '${variant}' is available (mapped to '${typeGroup.original}')`);
+              break; // Found a working variant, no need to check others
+            }
+          } catch (error) {
+            // Continue to next variant
+            this.log('debug', `Work item type '${variant}' check failed`, error);
           }
-        } catch (error) {
-          validation[type] = false;
-          this.log('warning', `Failed to validate work item type '${type}'`, error);
+        }
+        
+        if (!found) {
+          validation[typeGroup.original] = false;
+          this.log('warning', `Work item type '${typeGroup.original}' not available in any variant`, {
+            checkedVariants: typeGroup.variants,
+          });
         }
       }
     } catch (error) {
@@ -410,15 +427,10 @@ export class ADOService {
       targetFields: {
         'System.Title': `${project.name} - BSS Transformation`,
         'System.Description': `Comprehensive BSS transformation initiative for ${project.customer} covering ${domains.length} TMF domains`,
-        'Microsoft.VSTS.Common.BusinessValue': 1000,
-        'Microsoft.VSTS.Common.Risk': 'Medium',
-        'System.AreaPath': this.configuration?.areaPath || 'Project',
-        'System.IterationPath': this.configuration?.iterationPath || 'Current',
-        'System.Tags': `BSS-Transformation;Epic;${project.customer};TMF-ODA`,
-        'Custom.ProjectId': project.id,
-        'Custom.Customer': project.customer,
-        'Custom.Duration': project.duration,
-        'Custom.TeamSize': project.teamSize,
+        'System.AreaPath': this.configuration?.areaPath || 'ADOSandBox',
+        'System.IterationPath': this.configuration?.iterationPath || 'ADOSandBox',
+        // Removed all optional fields to prevent creation failures
+        // Only using required system fields that are guaranteed to exist
       },
       relationships: [],
       estimatedEffort: this.calculateTotalEffort(domains),
@@ -608,18 +620,10 @@ export class ADOService {
       targetFields: {
         'System.Title': `Epic: ${deliverable.Title}`,
         'System.Description': deliverable.Description || `Deliverable: ${deliverable.Title}`,
-        'Microsoft.VSTS.Common.BusinessValue': 1000,
-        'Microsoft.VSTS.Common.Risk': 'Medium',
-        'System.AreaPath': this.configuration?.areaPath || 'Project',
-        'System.IterationPath': this.configuration?.iterationPath || 'Current',
-        'System.Tags': `BlueDolphin;Deliverable;${project.customer}`,
-        [this.configuration?.customFields.blueDolphinId || 'Custom.BlueDolphinId']: deliverable.ID,
-        [this.configuration?.customFields.workspace || 'Custom.Workspace']: deliverable.Workspace || '',
-        [this.configuration?.customFields.objectType || 'Custom.ObjectType']: deliverable.Definition || '',
-        [this.configuration?.customFields.objectStatus || 'Custom.ObjectStatus']: deliverable.Status || 'New',
-        [this.configuration?.customFields.deliverableStatus || 'Custom.DeliverableStatus']: deliverable.Deliverable_Object_Status_Status || 'New',
-        'Custom.ProjectId': project.id,
-        'Custom.Customer': project.customer,
+        'System.AreaPath': this.configuration?.areaPath || 'ADOSandBox',
+        'System.IterationPath': this.configuration?.iterationPath || 'ADOSandBox',
+        // Removed all optional fields to prevent creation failures
+        // Only using required system fields that are guaranteed to exist
       },
       relationships: [],
       estimatedEffort: 30, // 30 days for deliverable epic
@@ -641,16 +645,9 @@ export class ADOService {
         'System.Title': `Feature: ${appFunction.Title}`,
         'System.Description': appFunction.Description || `Application Function: ${appFunction.Title}`,
         'Microsoft.VSTS.Common.ValueArea': 'Business',
-        'System.AreaPath': this.configuration?.areaPath || 'Project',
-        'System.IterationPath': this.configuration?.iterationPath || 'Current',
-        'System.Tags': `BlueDolphin;ApplicationFunction;${project.customer}`,
-        [this.configuration?.customFields.blueDolphinId || 'Custom.BlueDolphinId']: appFunction.ID,
-        [this.configuration?.customFields.workspace || 'Custom.Workspace']: appFunction.Workspace || '',
-        [this.configuration?.customFields.objectType || 'Custom.ObjectType']: appFunction.Definition || '',
-        [this.configuration?.customFields.objectStatus || 'Custom.ObjectStatus']: appFunction.Status || 'New',
-        [this.configuration?.customFields.functionType || 'Custom.FunctionType']: 'Application Function',
-        'Custom.ProjectId': project.id,
-        'Custom.Customer': project.customer,
+        'System.AreaPath': this.configuration?.areaPath || 'ADOSandBox',
+        'System.IterationPath': this.configuration?.iterationPath || 'ADOSandBox',
+        // Only using minimal standard fields to prevent creation failures
       },
       relationships: [],
       estimatedEffort: 8, // 8 days for application function feature
@@ -671,17 +668,10 @@ export class ADOService {
       targetFields: {
         'System.Title': `Feature: ${appInterface.Title}`,
         'System.Description': appInterface.Description || `Application Interface: ${appInterface.Title}`,
-        'Microsoft.VSTS.Common.ValueArea': 'Technical',
-        'System.AreaPath': this.configuration?.areaPath || 'Project',
-        'System.IterationPath': this.configuration?.iterationPath || 'Current',
-        'System.Tags': `BlueDolphin;ApplicationInterface;${project.customer}`,
-        [this.configuration?.customFields.blueDolphinId || 'Custom.BlueDolphinId']: appInterface.ID,
-        [this.configuration?.customFields.workspace || 'Custom.Workspace']: appInterface.Workspace || '',
-        [this.configuration?.customFields.objectType || 'Custom.ObjectType']: appInterface.Definition || '',
-        [this.configuration?.customFields.objectStatus || 'Custom.ObjectStatus']: appInterface.Status || 'New',
-        [this.configuration?.customFields.interfaceType || 'Custom.InterfaceType']: 'Application Interface',
-        'Custom.ProjectId': project.id,
-        'Custom.Customer': project.customer,
+        'Microsoft.VSTS.Common.ValueArea': 'Architectural',
+        'System.AreaPath': this.configuration?.areaPath || 'ADOSandBox',
+        'System.IterationPath': this.configuration?.iterationPath || 'ADOSandBox',
+        // Only using minimal standard fields to prevent creation failures
       },
       relationships: [],
       estimatedEffort: 5, // 5 days for application interface feature
@@ -1016,20 +1006,32 @@ export class ADOService {
         });
       }
 
-      // Add only standard ADO fields to avoid custom field errors
-      // Note: Removed System.Tags due to permission issues
-      const standardFields: string[] = [];
-
-      standardFields.forEach((fieldPath) => {
-        const value = mapping.targetFields[fieldPath];
-        if (value !== undefined && value !== null) {
+      // Use minimal field approach - only add fields that are guaranteed to exist
+      // This prevents field validation errors that cause work item creation failures
+      
+      // Only add Microsoft.VSTS.Common.ValueArea if it's a simple string value
+      if (mapping.targetFields['Microsoft.VSTS.Common.ValueArea'] && 
+          typeof mapping.targetFields['Microsoft.VSTS.Common.ValueArea'] === 'string') {
+        const valueArea = mapping.targetFields['Microsoft.VSTS.Common.ValueArea'];
+        // Only use standard values that exist in most ADO projects
+        if (valueArea === 'Business' || valueArea === 'Architectural') {
           operations.push({
             op: 'add',
-            path: `/fields/${fieldPath}`,
-            value: value,
+            path: '/fields/Microsoft.VSTS.Common.ValueArea',
+            value: valueArea,
           });
         }
+      }
+
+      // Add Priority as integer (2 = Normal priority in most ADO projects)
+      operations.push({
+        op: 'add',
+        path: '/fields/Microsoft.VSTS.Common.Priority',
+        value: 2,
       });
+
+      // Note: Removed Custom.WorkItemHealth as it may not exist in all ADO projects
+      // Only using guaranteed standard fields to prevent creation failures
 
       // Add area path (required field)
       const areaPath = this.configuration?.areaPath || this.configuration?.project || 'ADOSandBox';
@@ -1059,7 +1061,23 @@ export class ADOService {
       });
 
       // Handle spaces in work item type names by URL encoding
-      const encodedType = encodeURIComponent(mapping.targetType);
+      // Map lowercase types to proper case for ADO API
+      const typeMapping: { [key: string]: string } = {
+        'epic': 'Epic',
+        'feature': 'Feature', 
+        'User Story': 'User Story',
+        'task': 'Task'
+      };
+      
+      const actualType = typeMapping[mapping.targetType] || mapping.targetType;
+      const encodedType = encodeURIComponent(actualType);
+      
+      this.log('debug', 'Creating work item with type mapping', {
+        originalType: mapping.targetType,
+        mappedType: actualType,
+        encodedType: encodedType
+      });
+      
       const response = await this.makeApiCall(
         '/_apis/wit/workitems/$' + encodedType + '?api-version=7.1',
         {
@@ -1071,15 +1089,30 @@ export class ADOService {
 
       if (!response.ok) {
         let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        let detailedError = '';
+        
         try {
           const errorData = await response.json();
+          this.log('debug', 'ADO API Error Response', errorData);
+          
           if (errorData.message) {
             errorMessage = errorData.message;
           } else if (errorData.value && errorData.value.length > 0) {
             errorMessage = errorData.value[0].message || errorMessage;
+            // Capture detailed field validation errors
+            if (errorData.value[0].fields) {
+              detailedError = `Field errors: ${JSON.stringify(errorData.value[0].fields)}`;
+            }
           }
+          
+          // Log the full error response for debugging
+          if (errorData.innerException) {
+            detailedError += ` Inner exception: ${errorData.innerException.message}`;
+          }
+          
         } catch (parseError) {
           // If we can't parse the error, use the status text
+          this.log('debug', 'Could not parse error response', parseError);
         }
 
         this.log('error', 'Work item creation failed', {
@@ -1087,10 +1120,12 @@ export class ADOService {
           title: mapping.targetFields['System.Title'],
           status: response.status,
           error: errorMessage,
+          detailedError: detailedError,
+          operations: operations.map((op) => `${op.path}: ${op.value}`),
         });
 
         throw new Error(
-          `Failed to create work item: ${mapping.targetFields['System.Title'] || mapping.targetType} - ${errorMessage}`,
+          `Failed to create work item: ${mapping.targetFields['System.Title'] || mapping.targetType} - ${errorMessage}${detailedError ? ` (${detailedError})` : ''}`,
         );
       }
 

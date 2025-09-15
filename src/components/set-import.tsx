@@ -2,7 +2,6 @@
 
 import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Upload, CheckCircle, Loader2, ChevronDown, ChevronRight, FileSpreadsheet } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
@@ -92,23 +91,53 @@ export function SETImport({ onDataLoaded }: SETImportProps) {
   };
 
   const processSETData = (components: SETComponent[]): Record<string, number> => {
+    console.log('🔍 Processing SET data with', components.length, 'components');
+    
     const domainEfforts: Record<string, number> = {};
     let currentDomain = '';
+    let totalEffort = 0;
 
-    components.forEach((component) => {
+    // First pass: identify all domain headers
+    const domainHeaders: string[] = [];
+    components.forEach((component, index) => {
+      if (component.component.includes('Domain') || component.component === 'Other Efforts') {
+        domainHeaders.push(component.component);
+        console.log(`📋 Found domain/effort header: ${component.component} (index: ${index})`);
+      }
+    });
+
+    console.log('📋 All domain headers found:', domainHeaders);
+
+    // Second pass: group components by domain
+    components.forEach((component, index) => {
       // Check if this is a domain header
-      if (component.component.includes('Domain')) {
+      if (component.component.includes('Domain') || component.component === 'Other Efforts') {
         currentDomain = component.component;
-        domainEfforts[currentDomain] = 0;
+        if (!domainEfforts[currentDomain]) {
+          domainEfforts[currentDomain] = 0;
+        }
+        console.log(`📋 Processing domain: ${currentDomain} (index: ${index})`);
         return;
       }
 
       // If we have a current domain and this component has effort, add it
       if (currentDomain && component.phase1_effort && component.phase1_effort > 0) {
         domainEfforts[currentDomain] += component.phase1_effort;
+        totalEffort += component.phase1_effort;
+        console.log(`➕ Added ${component.phase1_effort}d to ${currentDomain} from ${component.component} (ref: ${component.ref_num})`);
       }
     });
 
+    // Remove domains with 0 effort
+    Object.keys(domainEfforts).forEach(domain => {
+      if (domainEfforts[domain] === 0) {
+        delete domainEfforts[domain];
+      }
+    });
+
+    console.log('📊 Final domain efforts:', domainEfforts);
+    console.log('📊 Total effort calculated:', totalEffort);
+    
     return domainEfforts;
   };
 
@@ -151,31 +180,33 @@ export function SETImport({ onDataLoaded }: SETImportProps) {
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <FileSpreadsheet className="h-5 w-5" />
-            <div
-              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border-2 border-blue-200 bg-blue-100 transition-colors hover:bg-blue-200"
-              onClick={toggleExpanded}
-            >
-              {state.isExpanded ? (
-                <ChevronDown className="h-5 w-5 text-blue-700" />
-              ) : (
-                <ChevronRight className="h-5 w-5 text-blue-700" />
-              )}
-            </div>
-            <CardTitle>SET Test Loader Import</CardTitle>
+    <div className="border-b pb-6">
+      <div
+        className="mb-4 flex cursor-pointer items-center justify-between rounded-lg p-2 transition-colors hover:bg-muted/50"
+        onClick={toggleExpanded}
+      >
+        <div className="flex items-center space-x-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-blue-200 bg-blue-100">
+            {state.isExpanded ? (
+              <ChevronDown className="h-5 w-5 text-blue-700" />
+            ) : (
+              <ChevronRight className="h-5 w-5 text-blue-700" />
+            )}
+          </div>
+          <div>
+            <h3 className="flex items-center space-x-2 text-base font-semibold">
+              <FileSpreadsheet className="h-4 w-4" />
+              <span>SET Test Loader Import</span>
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              Import effort estimates from SET Test Loader CUT.xlsx file
+            </p>
           </div>
         </div>
-        <CardDescription>
-          Import effort estimates from SET Test Loader CUT.xlsx file
-        </CardDescription>
-      </CardHeader>
+      </div>
 
       {state.isExpanded && (
-        <CardContent className="space-y-4">
+        <div className="space-y-4">
           <div className="flex items-center space-x-4">
             <Button
               onClick={handleUploadClick}
@@ -231,26 +262,8 @@ export function SETImport({ onDataLoaded }: SETImportProps) {
             </div>
           )}
 
-          {state.matchedWorkPackages && Object.keys(state.matchedWorkPackages).length > 0 && (
-            <div className="space-y-3">
-              <h4 className="font-medium">Work Package Matches</h4>
-              <div className="space-y-2">
-                {Object.entries(state.matchedWorkPackages).map(([domain, match]) => (
-                  <div key={domain} className="rounded-lg border p-3">
-                    <div className="mb-2 text-sm font-medium">{domain}</div>
-                    <div className="text-sm text-muted-foreground">
-                      Total Effort: <span className="font-medium">{match.effort}d</span>
-                    </div>
-                    <div className="mt-1 text-xs text-muted-foreground">
-                      Matched to: {match.workPackages.join(', ')}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </CardContent>
+        </div>
       )}
-    </Card>
+    </div>
   );
 }

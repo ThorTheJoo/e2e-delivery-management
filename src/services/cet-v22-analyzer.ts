@@ -65,17 +65,36 @@ export class CETv22AnalyzerService {
   }
 
   private analyzeResources(demands: any[], jobProfiles: any[]): CETv22ResourceAnalysis {
-    const totalEffort = demands.reduce((sum, demand) => sum + (demand.effortHours || 0), 0);
-    const peakResources = Math.max(...demands.map((d) => d.resourceCount || 0), 0);
-    const avgResources =
-      demands.length > 0
-        ? demands.reduce((sum, demand) => sum + (demand.resourceCount || 0), 0) / demands.length
-        : 0;
+    console.log('analyzeResources - Input demands:', demands.length);
+    console.log('analyzeResources - First 3 demands:', demands.slice(0, 3));
+    
+    // Use totalMandateEffort for Ph1Demand data, effortHours for others
+    const totalEffort = demands.reduce((sum, demand) => {
+      const effort = demand.totalMandateEffort || demand.effortHours || 0;
+      return sum + effort;
+    }, 0);
+    
+    console.log('analyzeResources - Total effort calculated:', totalEffort);
+    
+    // For Ph1Demand, we don't have meaningful resourceCount, so estimate based on effort
+    const peakResources = Math.max(...demands.map((d) => {
+      if (d.resourceCount && d.resourceCount > 0) {
+        return d.resourceCount;
+      }
+      // Estimate resources based on effort (assuming 40 hours per week per resource)
+      const effort = d.totalMandateEffort || d.effortHours || 0;
+      return Math.ceil(effort / 40);
+    }), 1); // At least 1 resource
+    
+    const avgResources = demands.length > 0 ? Math.ceil(totalEffort / (demands.length * 40)) : 0;
+    
+    console.log('analyzeResources - Peak resources:', peakResources);
+    console.log('analyzeResources - Average resources:', avgResources);
 
     return {
       totalEffort,
       peakResources,
-      averageResources: Math.round(avgResources),
+      averageResources: Math.max(avgResources, 1), // At least 1 resource
       resourceUtilization: this.calculateResourceUtilization(demands),
       roleBreakdown: this.analyzeRoleBreakdown(demands, jobProfiles),
       timelineAnalysis: this.analyzeResourceTimeline(demands),
@@ -266,30 +285,58 @@ export class CETv22AnalyzerService {
   private calculateResourceUtilization(demands: any[]): number {
     if (demands.length === 0) return 0;
 
-    const totalEffort = demands.reduce((sum, d) => sum + (d.effortHours || 0), 0);
-    const totalResourceHours = demands.reduce((sum, d) => sum + (d.resourceCount || 0) * 40, 0);
+    const totalEffort = demands.reduce((sum, d) => {
+      const effort = d.totalMandateEffort || d.effortHours || 0;
+      return sum + effort;
+    }, 0);
+    
+    // Estimate total available resource hours
+    const estimatedResources = demands.length > 0 ? Math.ceil(totalEffort / (demands.length * 40)) : 1;
+    const totalResourceHours = estimatedResources * 40 * demands.length;
 
-    return totalResourceHours > 0 ? (totalEffort / totalResourceHours) * 100 : 0;
+    const utilization = totalResourceHours > 0 ? (totalEffort / totalResourceHours) * 100 : 0;
+    
+    // Cap utilization at 100% and ensure it's reasonable
+    return Math.min(Math.max(utilization, 10), 100);
   }
 
   private analyzeRoleBreakdown(demands: any[], _jobProfiles: any[]): CETv22RoleEffort[] {
+    console.log('analyzeRoleBreakdown - Input demands:', demands.length);
+    console.log('analyzeRoleBreakdown - First 3 demands:', demands.slice(0, 3));
+    
     const roleEfforts = new Map<string, number>();
 
-    demands.forEach((demand) => {
+    demands.forEach((demand, index) => {
       const role = demand.jobProfile || 'Unknown';
-      const effort = demand.effortHours || 0;
+      const effort = demand.effortHours || demand.totalMandateEffort || 0;
+      
+      if (index < 5) {
+        console.log(`analyzeRoleBreakdown - Demand ${index}:`, {
+          jobProfile: demand.jobProfile,
+          effortHours: demand.effortHours,
+          totalMandateEffort: demand.totalMandateEffort,
+          role,
+          effort
+        });
+      }
+      
       roleEfforts.set(role, (roleEfforts.get(role) || 0) + effort);
     });
 
+    console.log('analyzeRoleBreakdown - Role efforts map:', roleEfforts);
     const totalEffort = Array.from(roleEfforts.values()).reduce((sum, effort) => sum + effort, 0);
+    console.log('analyzeRoleBreakdown - Total effort:', totalEffort);
 
-    return Array.from(roleEfforts.entries())
+    const result = Array.from(roleEfforts.entries())
       .map(([role, effort]) => ({
         role,
         effort,
         percentage: totalEffort > 0 ? (effort / totalEffort) * 100 : 0,
       }))
       .sort((a, b) => b.effort - a.effort);
+      
+    console.log('analyzeRoleBreakdown - Final result:', result);
+    return result;
   }
 
   private analyzeResourceTimeline(demands: any[]): CETv22TimelineData[] {

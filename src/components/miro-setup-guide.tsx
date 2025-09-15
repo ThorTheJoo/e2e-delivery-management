@@ -67,13 +67,21 @@ export function MiroSetupGuide() {
                 <span>Redirect URI:</span>
                 <div className="flex items-center space-x-2">
                   <code className="rounded border bg-white px-2 py-1 text-xs">
-                    http://localhost:3000/api/auth/miro/callback
+                    {typeof window !== 'undefined' 
+                      ? `${window.location.protocol}//${window.location.host}/api/auth/miro/callback`
+                      : 'http://localhost:3002/api/auth/miro/callback'
+                    }
                   </code>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() =>
-                      copyToClipboard('http://localhost:3000/api/auth/miro/callback', 'redirect')
+                      copyToClipboard(
+                        typeof window !== 'undefined' 
+                          ? `${window.location.protocol}//${window.location.host}/api/auth/miro/callback`
+                          : 'http://localhost:3002/api/auth/miro/callback', 
+                        'redirect'
+                      )
                     }
                   >
                     <Copy className="h-4 w-4" />
@@ -383,7 +391,10 @@ export function MiroSetupGuide() {
                 <strong>Solution:</strong> Verify the redirect URI in your Miro app settings exactly
                 matches{' '}
                 <code className="rounded bg-white px-1 py-0.5 text-xs">
-                  http://localhost:3000/api/auth/miro/callback
+                  {typeof window !== 'undefined' 
+                    ? `${window.location.protocol}//${window.location.host}/api/auth/miro/callback`
+                    : 'http://localhost:3002/api/auth/miro/callback'
+                  }
                 </code>
               </p>
             </div>

@@ -192,7 +192,7 @@ export class CETv22ParserService {
         weekDate: this.getCellValue(row, headers, 'Week Date') || '',
         jobProfile:
           sheetName === 'Ph1Demand'
-            ? this.getCellValueByIndex(row, 0)
+            ? this.extractJobProfileFromPh1Demand(row, headers)
             : this.getCellValue(row, headers, 'Job Profile') || 'Unknown',
         effortHours,
         resourceCount,
@@ -221,12 +221,35 @@ export class CETv22ParserService {
   private extractJobProfiles(sheets: Record<string, any[][]>): CETv22JobProfile[] {
     const profiles: CETv22JobProfile[] = [];
 
-    if (!sheets['JobProfiles']) return profiles;
+    console.log('extractJobProfiles - Available sheets:', Object.keys(sheets));
+    
+    // Try different possible sheet names for job profiles
+    const possibleSheetNames = ['JobProfiles', 'Job Profiles', 'Profiles', 'Resources', 'Team'];
+    let jobProfileSheet = null;
+    let sheetName = '';
+    
+    for (const name of possibleSheetNames) {
+      if (sheets[name]) {
+        jobProfileSheet = sheets[name];
+        sheetName = name;
+        break;
+      }
+    }
+    
+    if (!jobProfileSheet) {
+      console.log('extractJobProfiles - No job profiles sheet found. Tried:', possibleSheetNames);
+      return profiles;
+    }
 
-    const sheetData = sheets['JobProfiles'];
-    if (sheetData.length < 2) return profiles;
+    console.log(`extractJobProfiles - Found job profiles in sheet: ${sheetName}`);
+    const sheetData = jobProfileSheet;
+    if (sheetData.length < 2) {
+      console.log('extractJobProfiles - Sheet has insufficient data');
+      return profiles;
+    }
 
     const headers = sheetData[0];
+    console.log('extractJobProfiles - Headers:', headers);
 
     for (let i = 1; i < sheetData.length; i++) {
       const row = sheetData[i];
@@ -236,6 +259,17 @@ export class CETv22ParserService {
       }
     }
 
+    console.log(`extractJobProfiles - Extracted ${profiles.length} job profiles`);
+    console.log('extractJobProfiles - First 3 profiles:', profiles.slice(0, 3));
+    
+    // If no job profiles found, create synthetic ones from Ph1Demand data
+    if (profiles.length === 0 && sheets['Ph1Demand']) {
+      console.log('extractJobProfiles - Creating synthetic job profiles from Ph1Demand');
+      const syntheticProfiles = this.createSyntheticJobProfiles(sheets['Ph1Demand']);
+      profiles.push(...syntheticProfiles);
+      console.log(`extractJobProfiles - Created ${syntheticProfiles.length} synthetic job profiles`);
+    }
+    
     return profiles;
   }
 
@@ -585,5 +619,137 @@ export class CETv22ParserService {
       ],
     };
     return deliverables[phaseNumber] || [`Phase ${phaseNumber} Deliverables`];
+  }
+
+  private createSyntheticJobProfiles(ph1DemandSheet: any[][]): CETv22JobProfile[] {
+    const profiles: CETv22JobProfile[] = [];
+    const uniqueRoles = new Set<string>();
+    const domainRoleMap = new Map<string, Set<string>>();
+    
+    if (ph1DemandSheet.length < 6) return profiles;
+    
+    const headers = ph1DemandSheet[2]; // Headers in row 3
+    const startRowIndex = 5; // Data starts from row 6
+    
+    // Collect unique roles and their domains
+    for (let i = startRowIndex; i < ph1DemandSheet.length; i++) {
+      const row = ph1DemandSheet[i];
+      if (this.isValidDemandRow(row, headers)) {
+        const role = this.extractJobProfileFromPh1Demand(row, headers);
+        const domain = this.getCellValueByIndex(row, 12) || 'General'; // Column M
+        
+        uniqueRoles.add(role);
+        
+        if (!domainRoleMap.has(domain)) {
+          domainRoleMap.set(domain, new Set());
+        }
+        domainRoleMap.get(domain)!.add(role);
+      }
+    }
+    
+    console.log('createSyntheticJobProfiles - Unique roles found:', Array.from(uniqueRoles));
+    console.log('createSyntheticJobProfiles - Domain-role mapping:', domainRoleMap);
+    
+    // Create synthetic job profiles for each unique role
+    Array.from(uniqueRoles).forEach((role, index) => {
+      // Find the primary domain for this role
+      let primaryDomain = 'General';
+      let maxCount = 0;
+      
+      for (const [domain, roles] of Array.from(domainRoleMap.entries())) {
+        if (roles.has(role) && roles.size > maxCount) {
+          primaryDomain = domain;
+          maxCount = roles.size;
+        }
+      }
+      
+      // Determine resource level based on role name
+      let resourceLevel = 'Mid';
+      const roleLower = role.toLowerCase();
+      if (roleLower.includes('senior') || roleLower.includes('lead') || roleLower.includes('architect')) {
+        resourceLevel = 'Senior';
+      } else if (roleLower.includes('junior') || roleLower.includes('associate')) {
+        resourceLevel = 'Junior';
+      }
+      
+      // Estimate hourly rate based on role and level
+      let hourlyRate = 100; // Default
+      if (resourceLevel === 'Senior') hourlyRate = 150;
+      else if (resourceLevel === 'Junior') hourlyRate = 75;
+      
+      if (roleLower.includes('architect')) hourlyRate += 25;
+      else if (roleLower.includes('manager')) hourlyRate += 20;
+      else if (roleLower.includes('specialist')) hourlyRate += 15;
+      
+      const profile: CETv22JobProfile = {
+        id: `synthetic_${index}_${Date.now()}`,
+        productService: primaryDomain,
+        projectTeam: `${primaryDomain} Team`,
+        projectRole: role,
+        salesRegion: 'Global',
+        salesTerritory: 'Global',
+        supervisoryOrganization: `${primaryDomain} Organization`,
+        workdayJobProfile: role,
+        resourceLevel,
+        resourceCostRegion: 'Global',
+        demandLocationCountryCode: 'US',
+        workerType: 'Full-Time',
+        hourlyRate,
+        availability: 40,
+      };
+      
+      profiles.push(profile);
+    });
+    
+    return profiles;
+  }
+
+  private extractJobProfileFromPh1Demand(row: any[], headers: string[]): string {
+    // Try to find meaningful role information from Ph1Demand sheet
+    // Common column patterns for roles/job profiles
+    const roleColumns = [
+      'Role', 'Job Profile', 'Resource Type', 'Position', 'Title',
+      'Team Role', 'Function', 'Skill', 'Resource Role'
+    ];
+    
+    // First try to find a role column
+    for (const roleCol of roleColumns) {
+      const value = this.getCellValue(row, headers, roleCol);
+      if (value && value.trim().length > 0) {
+        console.log(`extractJobProfileFromPh1Demand - Found role in ${roleCol}:`, value);
+        return value.trim();
+      }
+    }
+    
+    // If no specific role column, try the first few columns for meaningful data
+    for (let i = 0; i < Math.min(5, row.length); i++) {
+      const value = String(row[i] || '').trim();
+      if (value && value.length > 2 && !value.match(/^\d+$/)) {
+        // Skip pure numbers, look for text that could be a role
+        if (value.toLowerCase().includes('analyst') || 
+            value.toLowerCase().includes('architect') || 
+            value.toLowerCase().includes('developer') || 
+            value.toLowerCase().includes('engineer') || 
+            value.toLowerCase().includes('manager') || 
+            value.toLowerCase().includes('consultant') ||
+            value.toLowerCase().includes('specialist')) {
+          console.log(`extractJobProfileFromPh1Demand - Found role-like text in column ${i}:`, value);
+          return value;
+        }
+      }
+    }
+    
+    // Fallback: create a role based on domain if available
+    const domain = this.getCellValueByIndex(row, 12); // Column M
+    if (domain && domain.trim().length > 0) {
+      const domainRole = `${domain.trim()} Specialist`;
+      console.log(`extractJobProfileFromPh1Demand - Created domain-based role:`, domainRole);
+      return domainRole;
+    }
+    
+    // Final fallback
+    const fallbackRole = 'Project Resource';
+    console.log(`extractJobProfileFromPh1Demand - Using fallback role:`, fallbackRole);
+    return fallbackRole;
   }
 }

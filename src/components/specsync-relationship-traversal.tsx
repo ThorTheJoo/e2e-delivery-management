@@ -390,6 +390,153 @@ export function SpecSyncRelationshipTraversal({
   }
 
   /**
+   * Generate CSV data for full payload results with selected enhanced fields
+   */
+  const generateFullPayloadCSV = useCallback((result: TraversalResultWithPayloads) => {
+    const rows = [];
+
+    // Determine which mappings to use when computing SpecSync Requirement IDs
+    // - For Combined view: use ALL selected mappings (union across seeds)
+    // - For per-function view: only mappings for that Application Function ID
+    const isCombined = result.specSyncFunctionName === 'Combined';
+    const matchingMappings = isCombined
+      ? mappingResults
+      : mappingResults.filter(mapping => mapping.blueDolphinObject.ID === result.applicationFunction.ID);
+    
+    console.log(`🔍 [Traversal] Looking for mappings for Application Function ID: ${result.applicationFunction.ID}`);
+    console.log(`📊 [Traversal] Total mapping results available: ${mappingResults.length}`);
+    console.log(`🎯 [Traversal] Matching mappings found: ${matchingMappings.length} (combined=${isCombined})`);
+    console.log(`📋 [Traversal] Matching mappings:`, matchingMappings.map(m => ({
+      specSyncRequirementId: m.specSyncRequirementId,
+      specSyncFunctionName: m.specSyncFunctionName,
+      blueDolphinObjectId: m.blueDolphinObject.ID
+    })));
+    
+    // Compute label for Application Function column
+    const uniqueSeedFunctionTitles = Array.from(
+      new Map(matchingMappings.map(m => [m.blueDolphinObject.ID, m.blueDolphinObject.Title])).values()
+    ) as string[];
+    const applicationFunctionLabel = isCombined
+      ? uniqueSeedFunctionTitles.join(', ')
+      : result.applicationFunction.Title;
+
+    // Serialize all requirement IDs into a string (use aggregated ids when available)
+    const requirementIdSet = new Set<string>();
+    matchingMappings.forEach(m => {
+      if (Array.isArray((m as any).specSyncRequirementIds)) {
+        (m as any).specSyncRequirementIds!.forEach((id: string) => id && requirementIdSet.add(id));
+      } else if (m.specSyncRequirementId) {
+        requirementIdSet.add(m.specSyncRequirementId);
+      }
+    });
+    const requirementIds = Array.from(requirementIdSet);
+    const requirementIdString = requirementIds.length > 0 ? requirementIds.join(', ') : 'N/A';
+    
+    console.log(`🔍 [Traversal] Raw requirement IDs from mappings:`, requirementIds);
+    console.log(`✅ [Traversal] Final requirement ID string: "${requirementIdString}"`);
+
+    // Helper function to create a comprehensive row with selected enhanced fields
+    const createComprehensiveRow = (obj: any, objectType: string, objectLevel: string, relationshipType: string = 'N/A', relationshipPath: string = 'N/A') => {
+      const baseRow = {
+        'SpecSync Requirement ID': requirementIdString,
+        'SpecSync Function': result.specSyncFunctionName,
+        'Application Function': applicationFunctionLabel,
+        'Object Type': objectType,
+        'Object Title': obj.Title,
+        'Object Level': objectLevel,
+        'Workspace': obj.Workspace,
+        'Status': obj.Status,
+        'Description': obj.Description || '',
+        'Relationship Type': relationshipType,
+        'Relationship Path': relationshipPath,
+        'Enhanced Fields Count': Object.keys(obj).filter(key => 
+          key.startsWith('Object_Properties_') || 
+          key.startsWith('Deliverable_Object_Status_') || 
+          key.startsWith('Ameff_properties_')
+        ).length
+      };
+
+      // Add only the specific enhanced fields we want to keep
+      const selectedFields = [
+        'Ameff_properties_Function_Description_Link',
+        'Ameff_properties_Interface_Description_Link',
+        'Ameff_properties_Service_Description_Link',
+        'Ameff_properties_TMF_Function_ID'
+      ];
+
+      selectedFields.forEach(field => {
+        (baseRow as any)[field] = obj[field] || '';
+      });
+
+      return baseRow;
+    };
+
+    // Application Function with full payload
+    rows.push(createComprehensiveRow(
+      result.applicationFunction, 
+      'Application Function', 
+      'Root'
+    ));
+
+    // Business Processes with full payload
+    [...result.businessProcesses.topLevel, ...result.businessProcesses.childLevel, ...result.businessProcesses.grandchildLevel].forEach(obj => {
+      rows.push(createComprehensiveRow(
+        obj, 
+        'Business Process', 
+        obj.hierarchyLevel,
+        obj.relationshipType || 'N/A',
+        obj.relationshipPath?.join(' → ') || 'N/A'
+      ));
+    });
+
+    // Application Services with full payload
+    [...result.applicationServices.topLevel, ...result.applicationServices.childLevel, ...result.applicationServices.grandchildLevel].forEach(obj => {
+      rows.push(createComprehensiveRow(
+        obj, 
+        'Application Service', 
+        obj.hierarchyLevel,
+        obj.relationshipType || 'N/A',
+        obj.relationshipPath?.join(' → ') || 'N/A'
+      ));
+    });
+
+    // Application Interfaces with full payload
+    [...result.applicationInterfaces.topLevel, ...result.applicationInterfaces.childLevel, ...result.applicationInterfaces.grandchildLevel].forEach(obj => {
+      rows.push(createComprehensiveRow(
+        obj, 
+        'Application Interface', 
+        obj.hierarchyLevel,
+        obj.relationshipType || 'N/A',
+        obj.relationshipPath?.join(' → ') || 'N/A'
+      ));
+    });
+
+    // Deliverables with full payload
+    [...result.deliverables.topLevel, ...result.deliverables.childLevel, ...result.deliverables.grandchildLevel].forEach(obj => {
+      rows.push(createComprehensiveRow(
+        obj, 
+        'Deliverable', 
+        obj.hierarchyLevel,
+        obj.relationshipType || 'N/A',
+        obj.relationshipPath?.join(' → ') || 'N/A'
+      ));
+    });
+
+    // Related Application Functions with full payload
+    result.relatedApplicationFunctions.forEach(obj => {
+      rows.push(createComprehensiveRow(
+        obj, 
+        'Related Application Function', 
+        obj.hierarchyLevel,
+        obj.relationshipType || 'N/A',
+        obj.relationshipPath?.join(' → ') || 'N/A'
+      ));
+    });
+
+    return rows;
+  }, [mappingResults]);
+
+  /**
    * Extract full payloads with extended properties and download CSV
    */
   const extractFullPayloads = useCallback(async (traversalResult: TraversalResult) => {
@@ -655,152 +802,6 @@ export function SpecSyncRelationshipTraversal({
     downloadCSV(csv, `specsync-objects-only-${Date.now()}.csv`);
   }, [traversalResults, mappingResults]);
 
-  /**
-   * Generate CSV data for full payload results with selected enhanced fields
-   */
-  const generateFullPayloadCSV = useCallback((result: TraversalResultWithPayloads) => {
-    const rows = [];
-
-    // Determine which mappings to use when computing SpecSync Requirement IDs
-    // - For Combined view: use ALL selected mappings (union across seeds)
-    // - For per-function view: only mappings for that Application Function ID
-    const isCombined = result.specSyncFunctionName === 'Combined';
-    const matchingMappings = isCombined
-      ? mappingResults
-      : mappingResults.filter(mapping => mapping.blueDolphinObject.ID === result.applicationFunction.ID);
-    
-    console.log(`🔍 [Traversal] Looking for mappings for Application Function ID: ${result.applicationFunction.ID}`);
-    console.log(`📊 [Traversal] Total mapping results available: ${mappingResults.length}`);
-    console.log(`🎯 [Traversal] Matching mappings found: ${matchingMappings.length} (combined=${isCombined})`);
-    console.log(`📋 [Traversal] Matching mappings:`, matchingMappings.map(m => ({
-      specSyncRequirementId: m.specSyncRequirementId,
-      specSyncFunctionName: m.specSyncFunctionName,
-      blueDolphinObjectId: m.blueDolphinObject.ID
-    })));
-    
-    // Compute label for Application Function column
-    const uniqueSeedFunctionTitles = Array.from(
-      new Map(matchingMappings.map(m => [m.blueDolphinObject.ID, m.blueDolphinObject.Title])).values()
-    ) as string[];
-    const applicationFunctionLabel = isCombined
-      ? uniqueSeedFunctionTitles.join(', ')
-      : result.applicationFunction.Title;
-
-    // Serialize all requirement IDs into a string (use aggregated ids when available)
-    const requirementIdSet = new Set<string>();
-    matchingMappings.forEach(m => {
-      if (Array.isArray((m as any).specSyncRequirementIds)) {
-        (m as any).specSyncRequirementIds!.forEach((id: string) => id && requirementIdSet.add(id));
-      } else if (m.specSyncRequirementId) {
-        requirementIdSet.add(m.specSyncRequirementId);
-      }
-    });
-    const requirementIds = Array.from(requirementIdSet);
-    const requirementIdString = requirementIds.length > 0 ? requirementIds.join(', ') : 'N/A';
-    
-    console.log(`🔍 [Traversal] Raw requirement IDs from mappings:`, requirementIds);
-    console.log(`✅ [Traversal] Final requirement ID string: "${requirementIdString}"`);
-
-    // Helper function to create a comprehensive row with selected enhanced fields
-    const createComprehensiveRow = (obj: any, objectType: string, objectLevel: string, relationshipType: string = 'N/A', relationshipPath: string = 'N/A') => {
-      const baseRow = {
-        'SpecSync Requirement ID': requirementIdString,
-        'SpecSync Function': result.specSyncFunctionName,
-        'Application Function': applicationFunctionLabel,
-        'Object Type': objectType,
-        'Object Title': obj.Title,
-        'Object Level': objectLevel,
-        'Workspace': obj.Workspace,
-        'Status': obj.Status,
-        'Description': obj.Description || '',
-        'Relationship Type': relationshipType,
-        'Relationship Path': relationshipPath,
-        'Enhanced Fields Count': Object.keys(obj).filter(key => 
-          key.startsWith('Object_Properties_') || 
-          key.startsWith('Deliverable_Object_Status_') || 
-          key.startsWith('Ameff_properties_')
-        ).length
-      };
-
-      // Add only the specific enhanced fields we want to keep
-      const selectedFields = [
-        'Ameff_properties_Function_Description_Link',
-        'Ameff_properties_Interface_Description_Link',
-        'Ameff_properties_Service_Description_Link',
-        'Ameff_properties_TMF_Function_ID'
-      ];
-
-      selectedFields.forEach(field => {
-        (baseRow as any)[field] = obj[field] || '';
-      });
-
-      return baseRow;
-    };
-
-    // Application Function with full payload
-    rows.push(createComprehensiveRow(
-      result.applicationFunction, 
-      'Application Function', 
-      'Root'
-    ));
-
-    // Business Processes with full payload
-    [...result.businessProcesses.topLevel, ...result.businessProcesses.childLevel, ...result.businessProcesses.grandchildLevel].forEach(obj => {
-      rows.push(createComprehensiveRow(
-        obj, 
-        'Business Process', 
-        obj.hierarchyLevel,
-        obj.relationshipType || 'N/A',
-        obj.relationshipPath?.join(' → ') || 'N/A'
-      ));
-    });
-
-    // Application Services with full payload
-    [...result.applicationServices.topLevel, ...result.applicationServices.childLevel, ...result.applicationServices.grandchildLevel].forEach(obj => {
-      rows.push(createComprehensiveRow(
-        obj, 
-        'Application Service', 
-        obj.hierarchyLevel,
-        obj.relationshipType || 'N/A',
-        obj.relationshipPath?.join(' → ') || 'N/A'
-      ));
-    });
-
-    // Application Interfaces with full payload
-    [...result.applicationInterfaces.topLevel, ...result.applicationInterfaces.childLevel, ...result.applicationInterfaces.grandchildLevel].forEach(obj => {
-      rows.push(createComprehensiveRow(
-        obj, 
-        'Application Interface', 
-        obj.hierarchyLevel,
-        obj.relationshipType || 'N/A',
-        obj.relationshipPath?.join(' → ') || 'N/A'
-      ));
-    });
-
-    // Deliverables with full payload
-    [...result.deliverables.topLevel, ...result.deliverables.childLevel, ...result.deliverables.grandchildLevel].forEach(obj => {
-      rows.push(createComprehensiveRow(
-        obj, 
-        'Deliverable', 
-        obj.hierarchyLevel,
-        obj.relationshipType || 'N/A',
-        obj.relationshipPath?.join(' → ') || 'N/A'
-      ));
-    });
-
-    // Related Application Functions with full payload
-    result.relatedApplicationFunctions.forEach(obj => {
-      rows.push(createComprehensiveRow(
-        obj, 
-        'Related Application Function', 
-        obj.hierarchyLevel,
-        obj.relationshipType || 'N/A',
-        obj.relationshipPath?.join(' → ') || 'N/A'
-      ));
-    });
-
-    return rows;
-  }, [mappingResults]);
 
   /**
    * Clear all results

@@ -138,7 +138,7 @@ export function ADOIntegration({ project, tmfDomains, specSyncItems, blueDolphin
       applicationFunctions: allApplicationFunctionIds.length,
       applicationInterfaces: allApplicationInterfaceIds.length
     });
-  }, []); // eslint-disable-next-line react-hooks/exhaustive-deps -- Initialize only once on mount to prevent infinite loops
+  }, [blueDolphinObjects, specSyncItems, tmfDomains]); // Include all dependencies
 
   const generateWorkItems = async () => {
     setIsGenerating(true);
