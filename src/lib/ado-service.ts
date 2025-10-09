@@ -287,6 +287,48 @@ export class ADOService {
     };
   }
 
+  // Get valid area paths from ADO project
+  async getValidAreaPaths(): Promise<string[]> {
+    try {
+      const response = await this.makeApiCall(
+        `/${this.configuration?.project}/_apis/wit/classificationnodes/areas?api-version=7.1`,
+        { method: 'GET' },
+        true
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to get area paths: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const areaPaths = this.extractAreaPaths(data);
+      
+      this.log('info', 'Retrieved valid area paths', { count: areaPaths.length, paths: areaPaths });
+      return areaPaths;
+    } catch (error) {
+      this.log('error', 'Failed to get area paths', error);
+      // Return default area path if API call fails
+      return [this.configuration?.project || 'ADOSandBox'];
+    }
+  }
+
+  private extractAreaPaths(node: any, prefix: string = ''): string[] {
+    const paths: string[] = [];
+    const currentPath = prefix ? `${prefix}\\${node.name}` : node.name;
+    
+    // Add current node path
+    paths.push(currentPath);
+    
+    // Recursively add child paths
+    if (node.children && Array.isArray(node.children)) {
+      for (const child of node.children) {
+        paths.push(...this.extractAreaPaths(child, currentPath));
+      }
+    }
+    
+    return paths;
+  }
+
   // Work Item Generation
   generateWorkItemMappings(
     project: Project,
@@ -434,8 +476,8 @@ export class ADOService {
       targetFields: {
         'System.Title': `${project.name} - BSS Transformation`,
         'System.Description': `Comprehensive BSS transformation initiative for ${project.customer} covering ${domains.length} TMF domains`,
-        'System.AreaPath': this.configuration?.areaPath || 'ADOSandBox',
-        'System.IterationPath': this.configuration?.iterationPath || 'ADOSandBox',
+        'System.AreaPath': this.configuration?.project || 'ADOSandBox',
+        'System.IterationPath': this.configuration?.project || 'ADOSandBox',
         // Removed all optional fields to prevent creation failures
         // Only using required system fields that are guaranteed to exist
       },
@@ -460,8 +502,8 @@ export class ADOService {
         'System.Description': domain.description,
         'Microsoft.VSTS.Common.BusinessValue': 800,
         'Microsoft.VSTS.Common.AcceptanceCriteria': `${domain.name} domain capabilities fully implemented and integrated`,
-        'System.AreaPath': this.configuration?.areaPath || 'Project',
-        'System.IterationPath': this.configuration?.iterationPath || 'Current',
+        'System.AreaPath': this.configuration?.project || 'ADOSandBox',
+        'System.IterationPath': this.configuration?.project || 'ADOSandBox',
         'System.Tags': `TMF-Domain;${domain.name};Feature`,
         'Custom.DomainId': domain.id,
         'Custom.CapabilityCount': domain.capabilities.length,
@@ -491,8 +533,8 @@ export class ADOService {
         'System.Description': capability.description,
         'Microsoft.VSTS.Common.StoryPoints': this.calculateStoryPoints(1),
         'Microsoft.VSTS.Common.AcceptanceCriteria': `${capability.name} capability delivered and tested according to TMF specifications`,
-        'System.AreaPath': this.configuration?.areaPath || 'Project',
-        'System.IterationPath': this.configuration?.iterationPath || 'Current',
+        'System.AreaPath': this.configuration?.project || 'ADOSandBox',
+        'System.IterationPath': this.configuration?.project || 'ADOSandBox',
         'System.Tags': `TMF-Capability;${capability.name};UserStory`,
         'Custom.CapabilityId': capability.id,
         'Custom.DomainId': domain.id,
@@ -558,8 +600,8 @@ export class ADOService {
           item.usecase1 || item.description || `Implement ${item.functionName} functionality`,
         'Microsoft.VSTS.Scheduling.RemainingWork': this.calculateRemainingWork(item),
         'Microsoft.VSTS.Scheduling.Activity': this.determineActivity(item),
-        'System.AreaPath': this.configuration?.areaPath || 'Project',
-        'System.IterationPath': this.configuration?.iterationPath || 'Current',
+        'System.AreaPath': this.configuration?.project || 'ADOSandBox',
+        'System.IterationPath': this.configuration?.project || 'ADOSandBox',
         'System.Tags': `SpecSync;${item.domain};${item.functionName};Task`,
         'Custom.RequirementId': item.requirementId,
         'Custom.RephrasedRequirementId': item.rephrasedRequirementId,
@@ -627,8 +669,8 @@ export class ADOService {
       targetFields: {
         'System.Title': `Epic: ${deliverable.Title}`,
         'System.Description': deliverable.Description || `Deliverable: ${deliverable.Title}`,
-        'System.AreaPath': this.configuration?.areaPath || 'ADOSandBox',
-        'System.IterationPath': this.configuration?.iterationPath || 'ADOSandBox',
+        'System.AreaPath': this.configuration?.project || 'ADOSandBox',
+        'System.IterationPath': this.configuration?.project || 'ADOSandBox',
         // Removed all optional fields to prevent creation failures
         // Only using required system fields that are guaranteed to exist
       },
@@ -652,8 +694,8 @@ export class ADOService {
         'System.Title': `Feature: ${appFunction.Title}`,
         'System.Description': appFunction.Description || `Application Function: ${appFunction.Title}`,
         'Microsoft.VSTS.Common.ValueArea': 'Business',
-        'System.AreaPath': this.configuration?.areaPath || 'ADOSandBox',
-        'System.IterationPath': this.configuration?.iterationPath || 'ADOSandBox',
+        'System.AreaPath': this.configuration?.project || 'ADOSandBox',
+        'System.IterationPath': this.configuration?.project || 'ADOSandBox',
         // Only using minimal standard fields to prevent creation failures
       },
       relationships: [],
@@ -676,8 +718,8 @@ export class ADOService {
         'System.Title': `Feature: ${appInterface.Title}`,
         'System.Description': appInterface.Description || `Application Interface: ${appInterface.Title}`,
         'Microsoft.VSTS.Common.ValueArea': 'Architectural',
-        'System.AreaPath': this.configuration?.areaPath || 'ADOSandBox',
-        'System.IterationPath': this.configuration?.iterationPath || 'ADOSandBox',
+        'System.AreaPath': this.configuration?.project || 'ADOSandBox',
+        'System.IterationPath': this.configuration?.project || 'ADOSandBox',
         // Only using minimal standard fields to prevent creation failures
       },
       relationships: [],
@@ -1059,7 +1101,8 @@ export class ADOService {
       // Only using guaranteed standard fields to prevent creation failures
 
       // Add area path (required field)
-      const areaPath = this.configuration?.areaPath || this.configuration?.project || 'ADOSandBox';
+      // Use just the project name, not organization\project format
+      const areaPath = this.configuration?.project || 'ADOSandBox';
       operations.push({
         op: 'add',
         path: '/fields/System.AreaPath',
@@ -1067,8 +1110,8 @@ export class ADOService {
       });
 
       // Add iteration path (required field)
-      const iterationPath =
-        this.configuration?.iterationPath || this.configuration?.project || 'ADOSandBox';
+      // Use just the project name, not organization\project format
+      const iterationPath = this.configuration?.project || 'ADOSandBox';
       operations.push({
         op: 'add',
         path: '/fields/System.IterationPath',

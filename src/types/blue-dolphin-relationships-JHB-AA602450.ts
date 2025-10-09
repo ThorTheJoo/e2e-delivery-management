@@ -39,6 +39,11 @@ export interface TraversalResult {
     childLevel: HierarchicalObject[];
     grandchildLevel: HierarchicalObject[];
   };
+  deliverables: {
+    topLevel: HierarchicalObject[];
+    childLevel: HierarchicalObject[];
+    grandchildLevel: HierarchicalObject[];
+  };
   relatedApplicationFunctions: HierarchicalObject[];
   specSyncFunctionName: string;
   traversalMetadata: {
@@ -46,6 +51,16 @@ export interface TraversalResult {
     maxDepthReached: number;
     processingTimeMs: number;
     cacheHitRate: number;
+  };
+}
+
+export interface TraversalResultWithPayloads extends TraversalResult {
+  payloadMetadata: {
+    totalObjectsExtracted: number;
+    enhancedFieldsAvailable: number;
+    workspaceScoped: string;
+    extractionTimestamp: string;
+    extractionTimeMs: number;
   };
 }
 
