@@ -5,6 +5,66 @@ All notable changes to the E2E Delivery Management System will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.35.0] - 2025-01-15 - ADO Integration Fixes & Blue Dolphin Enhancements
+
+### 🔧 ADO Integration Fixes
+
+#### Critical ADO AreaPath Fix
+- **Fixed Work Item Creation Failures** - Resolved TF401347 error that was preventing ADO work item creation
+- **AreaPath Format Correction** - Changed from `organization\project` format to project name only
+- **IterationPath Fix** - Updated IterationPath to use project name only for consistency
+- **Work Item Type Validation** - Enhanced work item type validation with fallback mechanisms
+- **Error Handling Improvements** - Added comprehensive error handling with detailed error messages
+
+#### ADO Service Enhancements
+- **Enhanced Error Messages** - Improved error messages for better troubleshooting
+- **Work Item Type Validation** - Added validation for available work item types in ADO project
+- **Fallback Mechanisms** - Added fallback logic for work item type validation
+- **Connection Testing** - Improved connection testing with better error reporting
+- **Field Validation** - Enhanced field validation to prevent work item creation failures
+
+### 🔗 Blue Dolphin Integration Enhancements
+
+#### Relationship Type Definitions
+- **New Relationship Interfaces** - Added comprehensive Blue Dolphin relationship type definitions
+- **Hierarchical Object Support** - Enhanced support for hierarchical object relationships
+- **Traversal Result Types** - Added new traversal result types with payload metadata
+- **Mapping Result Interfaces** - Enhanced mapping result interfaces for better type safety
+- **Cache Entry Types** - Added cache entry types for improved performance
+
+#### API Route Improvements
+- **Confluence API Enhancements** - Improved Confluence API route with better error handling
+- **Timeout Management** - Added proper timeout handling for API requests
+- **Error Recovery** - Enhanced error recovery mechanisms for failed API calls
+- **Response Validation** - Added response validation for better reliability
+
+### 🐛 Bug Fixes
+
+- **ADO Work Item Creation** - Fixed critical issue preventing work item creation in Azure DevOps
+- **AreaPath Validation** - Resolved AreaPath validation errors in ADO integration
+- **Error Message Clarity** - Improved error messages for better user understanding
+- **Type Safety** - Enhanced type safety across Blue Dolphin integration components
+
+### 📁 Files Added
+
+- `ADO-AREA-PATH-FIX.md` - Comprehensive documentation for ADO AreaPath fix
+- `src/types/blue-dolphin-relationships-JHB-AA602450.ts` - Enhanced Blue Dolphin relationship types
+
+### 📁 Files Modified
+
+- `src/lib/ado-service.ts` - Fixed AreaPath format and enhanced error handling
+- `src/app/api/confluence/route.ts` - Improved error handling and timeout management
+- `src/types/blue-dolphin-relationships.ts` - Enhanced relationship type definitions
+
+### 🎯 Impact
+
+- **ADO Integration Reliability** - Work items can now be created successfully in Azure DevOps
+- **Better Error Handling** - Users receive clearer error messages and troubleshooting guidance
+- **Enhanced Type Safety** - Improved type safety across Blue Dolphin integration
+- **Documentation** - Comprehensive documentation for troubleshooting ADO issues
+
+---
+
 ## [1.34.0] - 2025-01-15 - Build System & Version Management
 
 ### 🔧 Build System Improvements
